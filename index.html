@@ -49,7 +49,6 @@
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-base);
             color: var(--text-main);
-            /* Uso de dvh para suportar o resize dinâmico do teclado mobile */
             height: 100dvh; 
             width: 100vw;
             overflow: hidden;
@@ -128,12 +127,10 @@
 
         main {
             flex: 1;
-            /* overflow-x: hidden impede scroll horizontal acidental */
             overflow-x: hidden;
             overflow-y: auto;
             padding: 1rem;
             padding-bottom: 90px;
-            /* Flex layout na main para que as filhas (como o chat) possam expandir */
             display: flex;
             flex-direction: column; 
             scrollbar-width: none;
@@ -171,7 +168,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            width: 25%;
+            flex: 1; /* Alterado para distribuir 5 abas igualmente */
         }
 
         .nav-item i { font-size: 1.3rem; transition: all 0.3s ease; }
@@ -182,7 +179,7 @@
             background: var(--cyan); border-radius: 50%; box-shadow: 0 0 8px var(--cyan);
         }
 
-        /* FAB - BOTÃO DE CRIAR POST (Reposicionado) */
+        /* FAB - BOTÃO DE CRIAR POST */
         .fab {
             position: absolute;
             bottom: calc(85px + env(safe-area-inset-bottom)); 
@@ -216,7 +213,7 @@
             animation: fadeIn 0.4s ease forwards;
         }
 
-        .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0.8rem; }
+        .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0.8rem; cursor: pointer;}
         .avatar {
             width: 44px; height: 44px; border-radius: 12px; object-fit: cover;
             border: 2px solid transparent;
@@ -232,7 +229,7 @@
         .badge-verified { color: var(--cyan); font-size: 0.8rem; }
 
         .post-content { font-size: 0.92rem; line-height: 1.5; margin-bottom: 0.8rem; color: #d8d8d8; word-break: break-word; user-select: text; }
-        .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); }
+        .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); cursor: pointer;}
 
         .post-actions { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.8rem; }
         .action-btn { background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: color 0.2s; }
@@ -241,17 +238,19 @@
         .action-btn:hover { color: var(--cyan); }
 
         /* PERFIL */
+        .profile-banner { width: 100%; height: 120px; border-radius: 16px 16px 0 0; object-fit: cover; background: #222; margin-bottom: -45px; border: 1px solid rgba(176, 38, 255, 0.25); border-bottom: none;}
         .profile-header {
             display: flex; flex-direction: column; align-items: center; padding: 1.8rem 1rem;
             background: var(--bg-glass); border-radius: 16px; margin-bottom: 1.2rem;
             border: 1px solid rgba(176, 38, 255, 0.25); box-shadow: 0 0 25px rgba(176, 38, 255, 0.12);
-            animation: fadeIn 0.4s ease forwards; text-align: center;
+            animation: fadeIn 0.4s ease forwards; text-align: center; position: relative;
         }
-        .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); margin-bottom: 0; }
-        .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; }
-        .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 1.2rem; }
+        .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); margin-bottom: 0; z-index: 2; background: var(--bg-base); }
+        .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; z-index: 2;}
+        .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.5rem; z-index: 2;}
+        .profile-bio { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; max-width: 90%; }
         
-        .stats-container { display: flex; width: 100%; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 0.9rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
+        .stats-container { display: flex; width: 100%; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 0.9rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 10px;}
         .stat-item { display: flex; flex-direction: column; align-items: center; }
         .stat-value { font-size: 1.15rem; font-weight: bold; font-family: 'Rajdhani', sans-serif; }
         .stat-value.neon-purple { color: var(--purple); text-shadow: 0 0 8px rgba(176,38,255,0.6); }
@@ -260,104 +259,43 @@
 
         /* CHAT / COMMS */
         .chat-container { 
-            display: flex; 
-            flex-direction: column; 
-            flex: 1; /* Ocupa 100% da main */
-            min-height: 0; /* Permite redução correta pelo flexbox quando o teclado abre */
+            display: flex; flex-direction: column; flex: 1; min-height: 0; 
         }
         
-        .chat-header-info {
-            font-size: 0.8rem; 
-            color: var(--text-muted); 
-            text-align: center; 
-            margin-bottom: 12px;
-            flex-shrink: 0;
-        }
+        .chat-header-info { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; flex-shrink: 0; }
+        
+        /* Lista de Chats Privados */
+        .chat-list-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; cursor: pointer; transition: background 0.2s; }
+        .chat-list-item:hover { background: rgba(255,255,255,0.08); }
 
         .chat-messages { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding-right: 5px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            min-height: 0; /* Impede transbordamento do layout flex */
-            margin-bottom: 15px; /* Espaço entre mensagens e barra */
-            scroll-behavior: smooth;
+            flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; min-height: 0; margin-bottom: 15px; scroll-behavior: smooth;
         }
         
         .message { display: flex; gap: 10px; max-width: 88%; animation: fadeIn 0.3s ease; }
         .message.mine { align-self: flex-end; flex-direction: row-reverse; }
-        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--purple); flex-shrink: 0; }
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--purple); flex-shrink: 0; cursor: pointer;}
         .msg-bubble { background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); position: relative; user-select: text; }
         .message.mine .msg-bubble { background: rgba(0, 243, 255, 0.12); border-color: rgba(0, 243, 255, 0.3); border-bottom-right-radius: 2px; }
         .message:not(.mine) .msg-bubble { border-bottom-left-radius: 2px; }
-        .msg-author { font-size: 0.72rem; color: var(--cyan); margin-bottom: 3px; font-family: 'Rajdhani', sans-serif; font-weight: bold; }
+        .msg-author { font-size: 0.72rem; color: var(--cyan); margin-bottom: 3px; font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer;}
         .msg-text { font-size: 0.88rem; line-height: 1.4; word-break: break-word; }
         .msg-time { font-size: 0.62rem; color: var(--text-muted); text-align: right; margin-top: 4px; display: block; }
 
-        /* Nova Barra de Chat */
         .chat-input-area { 
-            display: flex; 
-            gap: 10px; 
-            background: rgba(15, 15, 20, 0.9); 
-            padding: 10px 14px; 
-            border-radius: 24px; 
-            border: 1px solid rgba(0, 243, 255, 0.3); 
-            align-items: center;
-            flex-shrink: 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.05);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            width: 100%;
+            display: flex; gap: 10px; background: rgba(15, 15, 20, 0.9); padding: 10px 14px; border-radius: 24px; border: 1px solid rgba(0, 243, 255, 0.3); align-items: center; flex-shrink: 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); width: 100%;
         }
 
-        .chat-attach-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px;
-            transition: color 0.2s;
-            flex-shrink: 0;
-        }
+        .chat-attach-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 4px; transition: color 0.2s; flex-shrink: 0; }
         .chat-attach-btn:hover { color: var(--cyan); }
-
-        .chat-input { 
-            flex: 1; 
-            background: transparent; 
-            border: none; 
-            color: white; 
-            font-family: 'Inter', sans-serif; 
-            outline: none; 
-            padding: 6px 4px; 
-            font-size: 0.95rem;
-            min-width: 0; /* Previne que inputs grandes quebrem o flexbox lateralmente */
-        }
+        .chat-input { flex: 1; background: transparent; border: none; color: white; font-family: 'Inter', sans-serif; outline: none; padding: 6px 4px; font-size: 0.95rem; min-width: 0; }
         .chat-input::placeholder { color: rgba(255,255,255,0.4); }
-
-        .chat-send-btn { 
-            background: linear-gradient(135deg, var(--cyan), #0088ff);
-            color: #000; 
-            border: none; 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            transition: all 0.2s; 
-            flex-shrink: 0; 
-            box-shadow: 0 0 12px rgba(0, 243, 255, 0.5);
-        }
+        .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
-        .chat-send-btn i { font-size: 1rem; margin-left: -2px; }
 
         /* RANKING */
         .ranking-list { display: flex; flex-direction: column; gap: 10px; }
-        .rank-card { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s; }
+        .rank-card { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s; cursor: pointer;}
         .rank-card:hover { transform: translateX(4px); background: rgba(255,255,255,0.07); border-color: var(--cyan); }
         .rank-pos { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: bold; color: var(--text-muted); width: 28px; text-align: center; }
         .rank-card:nth-child(1) .rank-pos { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
@@ -368,17 +306,26 @@
         .rank-info span { font-size: 0.75rem; color: var(--text-muted); }
         .rank-score { font-family: 'Rajdhani', sans-serif; font-weight: bold; color: var(--cyan); font-size: 1.1rem; }
 
-        /* MODAIS & FORMULÁRIOS */
+        /* PESQUISA (Novo Template) */
+        .search-bar { width: 100%; padding: 12px 40px 12px 15px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: white; font-family: 'Inter'; outline: none; margin-bottom: 15px; }
+        .search-bar:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+        .search-container { position: relative; }
+        .search-icon { position: absolute; right: 15px; top: 12px; color: var(--text-muted); }
+
+        /* COMENTÁRIOS E MODAIS GERAIS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 100; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background: #0a0a0f; width: 90%; max-width: 480px; border-radius: 16px; border: 1px solid var(--purple); box-shadow: 0 0 30px rgba(176, 38, 255, 0.25); padding: 1.4rem; position: relative; transform: translateY(20px); transition: transform 0.3s; }
+        .modal-content { background: #0a0a0f; width: 90%; max-width: 480px; max-height: 90dvh; display: flex; flex-direction: column; border-radius: 16px; border: 1px solid var(--purple); box-shadow: 0 0 30px rgba(176, 38, 255, 0.25); padding: 1.4rem; position: relative; transform: translateY(20px); transition: transform 0.3s; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; flex-shrink: 0;}
         .modal-header h2 { font-size: 1.1rem; color: var(--cyan); }
         .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; }
         .close-modal:hover { color: var(--danger); }
+        .modal-body { overflow-y: auto; flex: 1; padding-right: 5px;}
+        .modal-footer { margin-top: 15px; flex-shrink: 0;}
 
+        /* Formulários Customizados */
         .form-group { margin-bottom: 1rem; }
         .form-control { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 12px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s; user-select: text; }
         .form-control:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,243,255,0.2); }
@@ -387,6 +334,8 @@
         .btn-primary { width: 100%; padding: 12px; background: linear-gradient(90deg, var(--cyan), var(--purple)); border: none; border-radius: 8px; color: white; font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: opacity 0.3s; }
         .btn-primary:hover { opacity: 0.9; box-shadow: 0 0 15px rgba(176,38,255,0.4); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
 
         .file-upload-wrapper { position: relative; margin-bottom: 1rem; }
         .file-upload-btn { display: inline-block; padding: 10px; background: rgba(255,255,255,0.05); border: 1px dashed var(--cyan); border-radius: 8px; color: var(--cyan); cursor: pointer; font-size: 0.85rem; text-align: center; width: 100%; transition: background 0.3s; }
@@ -404,12 +353,17 @@
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
-        /* TELA DE AUTENTICAÇÃO / LOGIN INICIAL */
+        /* TELA DE AUTENTICAÇÃO */
         #auth-setup { position: fixed; top:0; left:0; width: 100vw; height: 100dvh; background: var(--bg-base); z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem; text-align: center; }
         .glitch-logo { font-size: 2.8rem; font-family: 'Rajdhani', sans-serif; font-weight: bold; text-shadow: 0 0 20px var(--cyan); margin-bottom: 1.5rem; color: white; }
         .glitch-logo span { color: var(--cyan); }
 
-        /* ANIMAÇÕES & HELPERS */
+        /* LOADER COMPONENT */
+        .cyber-loader {
+            display: none; width: 40px; height: 40px; border: 3px solid rgba(0, 243, 255, 0.3); border-radius: 50%; border-top-color: var(--cyan); animation: spin 1s ease-in-out infinite; margin: 20px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; text-align: center; color: var(--text-muted); animation: fadeIn 0.4s ease; }
         .placeholder-view i { font-size: 2.8rem; color: var(--purple); margin-bottom: 1rem; text-shadow: 0 0 15px var(--purple); }
@@ -417,26 +371,29 @@
 </head>
 <body>
 
-    <!-- Canvas para Partículas Futuristas -->
     <canvas id="particles"></canvas>
-
-    <!-- Container de Mensagens Notificações (Toasts) -->
     <div id="toast-container"></div>
 
-    <!-- Tela Inicial: Criação de Identidade / Perfil Local -->
+    <!-- Tela Inicial: Criação de Identidade e Login Firebase -->
     <div id="auth-setup">
         <div class="glitch-logo">NEXUS<span>HUB</span></div>
         <p style="color: var(--text-muted); margin-bottom: 1.8rem; max-width: 320px; font-size: 0.9rem;">
-            Acesso ao Link Neural detectado. Identifique-se para entrar na rede.
+            Acesso ao Link Neural detectado. Identifique-se para entrar na rede global.
         </p>
         <div style="width: 100%; max-width: 380px; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 30px rgba(0,243,255,0.1);">
-            <div class="form-group">
-                <input type="text" id="setup-name" class="form-control" placeholder="Seu Nome / Apelido" maxlength="25">
+            <div id="auth-form-area">
+                <div class="form-group">
+                    <input type="text" id="setup-name" class="form-control" placeholder="Seu Nome / Apelido" maxlength="25">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="setup-handle" class="form-control" placeholder="Handle (Ex: @cyber_net)" maxlength="18">
+                </div>
+                <button class="btn-primary" id="btn-create-identity" onclick="app.setupIdentity()">Iniciar Conexão Global</button>
             </div>
-            <div class="form-group">
-                <input type="text" id="setup-handle" class="form-control" placeholder="Handle (Ex: @cyber_net)" maxlength="18">
+            <div id="auth-loading" style="display: none;">
+                <div class="cyber-loader" style="display: block;"></div>
+                <p style="color: var(--cyan); margin-top: 10px; font-family: 'Rajdhani';">Sincronizando com Firestore...</p>
             </div>
-            <button class="btn-primary" id="btn-create-identity" onclick="app.setupIdentity()">Iniciar Conexão</button>
         </div>
     </div>
 
@@ -446,97 +403,144 @@
         <header>
             <div class="logo" onclick="app.navigate('feed')">NEXUS<span>HUB</span></div>
             <div class="actions">
+                <i class="fa-solid fa-shield-halved" id="admin-icon" style="display:none; color: var(--danger);" onclick="app.openAdminModal()" title="Painel Admin"></i>
                 <i class="fa-solid fa-gear" onclick="app.openSettingsModal()" title="Configurações"></i>
-                <i class="fa-solid fa-right-from-bracket" onclick="app.logout()" title="Sair / Resetar"></i>
             </div>
         </header>
 
-        <!-- Container dinâmico das telas da SPA -->
+        <!-- Container dinâmico das telas -->
         <main id="app-content"></main>
 
-        <!-- Botão Flutuante (+) para novas postagens -->
+        <!-- Botão Flutuante (+) -->
         <div class="fab" id="fab-add-post" onclick="app.openPostModal()" style="display: none;">
             <i class="fa-solid fa-plus"></i>
         </div>
 
-        <!-- Barra de Navegação Inferior (Mobile First) -->
+        <!-- Barra de Navegação Inferior -->
         <nav class="bottom-nav">
             <div class="nav-item active" data-view="feed" onclick="app.navigate('feed', this)">
-                <i class="fa-solid fa-house"></i>
-                <span>Feed</span>
+                <i class="fa-solid fa-house"></i><span>Feed</span>
+            </div>
+            <div class="nav-item" data-view="search" onclick="app.navigate('search', this)">
+                <i class="fa-solid fa-magnifying-glass"></i><span>Busca</span>
             </div>
             <div class="nav-item" data-view="chat" onclick="app.navigate('chat', this)">
-                <i class="fa-solid fa-comment-dots"></i>
-                <span>Comms</span>
+                <i class="fa-solid fa-comment-dots"></i><span>Comms</span>
             </div>
             <div class="nav-item" data-view="ranking" onclick="app.navigate('ranking', this)">
-                <i class="fa-solid fa-trophy"></i>
-                <span>Ranking</span>
+                <i class="fa-solid fa-trophy"></i><span>Ranking</span>
             </div>
             <div class="nav-item" data-view="perfil" onclick="app.navigate('perfil', this)">
-                <i class="fa-regular fa-user"></i>
-                <span>Perfil</span>
+                <i class="fa-regular fa-user"></i><span>Perfil</span>
             </div>
         </nav>
     </div>
 
-    <!-- Modal: Nova Transmissão (Post) -->
+    <!-- Modais -->
+    
+    <!-- Modal: Nova Transmissão -->
     <div class="modal-overlay" id="modal-post">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Nova Transmissão</h2>
                 <button class="close-modal" onclick="app.closePostModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="form-group">
-                <textarea id="post-content" class="form-control" placeholder="Compartilhe algo na malha da cidade..."></textarea>
-            </div>
-            <div class="file-upload-wrapper">
-                <label class="file-upload-btn">
-                    <i class="fa-solid fa-image"></i> Anexar Imagem
-                    <input type="file" id="post-image-input" accept="image/*" onchange="app.handleImageUpload(event)">
-                </label>
-                <div id="image-preview-container">
-                    <img id="image-preview" src="" alt="Preview">
-                    <button class="remove-img-btn" onclick="app.removeImagePreview()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-body">
+                <div class="form-group">
+                    <textarea id="post-content" class="form-control" placeholder="Compartilhe algo na malha da rede..."></textarea>
+                </div>
+                <div class="file-upload-wrapper">
+                    <label class="file-upload-btn">
+                        <i class="fa-solid fa-image"></i> Anexar Imagem
+                        <input type="file" id="post-image-input" accept="image/*" onchange="app.handleImageUpload(event, 'post')">
+                    </label>
+                    <div id="image-preview-container">
+                        <img id="image-preview" src="" alt="Preview">
+                        <button class="remove-img-btn" onclick="app.removeImagePreview('post')"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
                 </div>
             </div>
-            <button class="btn-primary" id="btn-publish" onclick="app.publishPost()">Transmitir Dados</button>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btn-publish" onclick="app.publishPost()">Transmitir Dados</button>
+            </div>
         </div>
     </div>
 
-    <!-- Modal: Configurações de Armazenamento -->
+    <!-- Modal: Comentários -->
+    <div class="modal-overlay" id="modal-comments">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Comentários</h2>
+                <button class="close-modal" onclick="app.closeCommentsModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="comments-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Comentários injetados aqui -->
+            </div>
+            <div class="modal-footer">
+                <div class="chat-input-area" style="padding: 5px 10px; border-radius: 12px;">
+                    <input type="text" id="comment-input" class="chat-input" placeholder="Escrever comentário..." onkeypress="if(event.key === 'Enter') app.sendComment()">
+                    <button class="chat-send-btn" style="width:32px; height:32px;" onclick="app.sendComment()">
+                        <i class="fa-solid fa-paper-plane" style="font-size: 0.8rem;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Configurações / Edição de Perfil -->
     <div class="modal-overlay" id="modal-settings">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Configurações do Hub</h2>
                 <button class="close-modal" onclick="app.closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
-                Atualmente executando em modo <strong>Armazenamento Local Autônomo</strong>. Funciona perfeitamente offline ou direto do armazenamento do celular.
-            </p>
-            <div class="form-group">
-                <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">MODO DE OPERAÇÃO</label>
-                <input type="text" class="form-control" value="LocalStorage / Dispositivo Local" disabled style="opacity: 0.7;">
+            <div class="modal-body">
+                <p style="font-size: 0.82rem; color: var(--success); margin-bottom: 1rem;">
+                    <i class="fa-solid fa-cloud"></i> Conectado em tempo real ao Firebase Firestore.
+                </p>
+                <div class="form-group">
+                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label>
+                    <input type="text" id="edit-name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SUA BIO</label>
+                    <textarea id="edit-bio" class="form-control" placeholder="Fale sobre você..."></textarea>
+                </div>
+                <div class="file-upload-wrapper">
+                    <label class="file-upload-btn">
+                        <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
+                        <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">
+                    </label>
+                </div>
+                <button class="btn-primary" onclick="app.saveProfileSettings()" style="margin-bottom: 10px;">Salvar Perfil</button>
+                <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()">
+                    <i class="fa-solid fa-power-off"></i> Desconectar
+                </button>
             </div>
-            <button class="btn-primary" onclick="app.closeSettingsModal()">Confirmar e Fechar</button>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TEMPLATES DE CONTEÚDO DENTRO DA SPA       -->
-    <!-- ========================================== -->
-
+    <!-- Templates SPA -->
     <template id="tpl-chat">
         <div class="chat-container">
-            <div class="chat-header-info">
-                <i class="fa-solid fa-lock" style="color: var(--cyan);"></i> Canal de Frequência Criptografado
+            <!-- Tabs do Chat -->
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <button id="tab-global" class="btn-primary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('global')">Global</button>
+                <button id="tab-private" class="btn-primary btn-secondary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('private')">Privado</button>
             </div>
+            
+            <div class="chat-header-info" id="chat-status-info">
+                <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
+            </div>
+            
+            <!-- Area das Mensagens -->
             <div class="chat-messages" id="chat-messages-container"></div>
             
-            <div class="chat-input-area">
-                <button class="chat-attach-btn" onclick="app.showToast('Módulo de anexo em desenvolvimento.', 'info')">
-                    <i class="fa-solid fa-paperclip"></i>
-                </button>
+            <!-- Lista de Chats Privados (Escondida por padrão) -->
+            <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
+
+            <!-- Input do Chat -->
+            <div class="chat-input-area" id="chat-input-container">
                 <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
                 <button class="chat-send-btn" onclick="app.sendChatMessage()">
                     <i class="fa-solid fa-paper-plane"></i>
@@ -549,113 +553,104 @@
         <div style="margin-bottom: 15px; text-align: center;">
             <i class="fa-solid fa-ranking-star" style="font-size: 1.8rem; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 5px;"></i>
             <h2 style="color: white; margin-bottom: 3px;">Hall dos Netrunners</h2>
-            <p style="color: var(--text-muted); font-size: 0.8rem;">Maiores níveis e contribuições</p>
+            <p style="color: var(--text-muted); font-size: 0.8rem;">Maiores níveis (Atualizado em tempo real)</p>
         </div>
         <div class="ranking-list" id="ranking-list-container"></div>
     </template>
 
-    <!-- ========================================== -->
-    <!-- MOTOR EM JAVASCRIPT PURA (OFFLINE READY)   -->
-    <!-- ========================================== -->
-    <script>
-        // --- 1. GERENCIADOR DE BANCO DE DADOS LOCAL (STORAGE ENGINE) ---
-        const DB = {
-            PREFIX: 'NEXUS_HUB_v2_',
-            
-            get: (key, defaultValue = null) => {
-                try {
-                    const item = localStorage.getItem(DB.PREFIX + key);
-                    return item ? JSON.parse(item) : defaultValue;
-                } catch (e) {
-                    console.error("Erro na leitura local:", e);
-                    return defaultValue;
-                }
-            },
-            
-            set: (key, value) => {
-                try {
-                    localStorage.setItem(DB.PREFIX + key, JSON.stringify(value));
-                    return true;
-                } catch (e) {
-                    console.error("Erro no armazenamento local (Cota excedida?):", e);
-                    return false;
-                }
-            },
+    <template id="tpl-search">
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-bar" placeholder="Pesquisar por @handle ou Nome..." oninput="app.performSearch()">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        </div>
+        <div class="ranking-list" id="search-results-container">
+            <div class="placeholder-view" style="height: 40vh;">
+                <i class="fa-solid fa-satellite-dish" style="font-size: 2rem; color: var(--cyan);"></i>
+                <p>Buscando na malha de dados...</p>
+            </div>
+        </div>
+    </template>
 
-            // Inicializa dados fictícios iniciais para a rede não parecer vazia no primeiro uso
-            seedInitialData: () => {
-                if (!DB.get('seeded')) {
-                    const samplePosts = [
-                        {
-                            id: 'post_1',
-                            authorUid: 'bot_kira',
-                            authorName: 'Kira_99',
-                            authorHandle: '@kira_netrunner',
-                            authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80',
-                            content: 'Acabei de atualizar meu rig. A nova placa neural está processando dados em tempo recorde! Alguém mais testando o novo firmware? 🦾✨',
-                            image: 'https://images.unsplash.com/photo-1614729939124-03290b5609ce?auto=format&fit=crop&w=600&q=80',
-                            likes: ['bot_zero'],
-                            createdAt: new Date(Date.now() - 3600000 * 2).toISOString()
-                        },
-                        {
-                            id: 'post_2',
-                            authorUid: 'bot_zero',
-                            authorName: 'Zero',
-                            authorHandle: '@zero_cool',
-                            authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
-                            content: 'A estética de Neo-Tokyo à noite nunca decepciona. As luzes de neon refletindo na chuva criam o melhor cenário para codificar. 🌧️🌃',
-                            image: '',
-                            likes: ['bot_kira'],
-                            createdAt: new Date(Date.now() - 3600000 * 5).toISOString()
-                        }
-                    ];
+    <template id="tpl-public-profile">
+        <div id="public-profile-container"></div>
+    </template>
 
-                    const sampleChat = [
-                        { id: 'msg_1', authorUid: 'bot_kira', authorName: 'Kira_99', authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80', content: 'Sinal estabilizado no setor 7.', createdAt: new Date(Date.now() - 60000 * 10).toISOString() },
-                        { id: 'msg_2', authorUid: 'bot_zero', authorName: 'Zero', authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80', content: 'Copiado. Transmitindo os dados do pacote.', createdAt: new Date(Date.now() - 60000 * 5).toISOString() }
-                    ];
+    <!-- MOTOR JAVASCRIPT EM MÓDULOS (Firebase V11) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-                    const sampleBotUsers = [
-                        { uid: 'bot_kira', name: 'Kira_99', handle: '@kira_netrunner', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80', xp: 450, level: 7 },
-                        { uid: 'bot_zero', name: 'Zero', handle: '@zero_cool', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80', xp: 310, level: 6 }
-                    ];
+        // === FIREBASE SETUP (REGRAS OBRIGATÓRIAS) ===
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const firebaseApp = initializeApp(firebaseConfig);
+        const auth = getAuth(firebaseApp);
+        const db = getFirestore(firebaseApp);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nexus-hub-default';
 
-                    DB.set('posts', samplePosts);
-                    DB.set('messages', sampleChat);
-                    DB.set('bot_users', sampleBotUsers);
-                    DB.set('seeded', true);
-                }
-            }
-        };
+        // Paths do Firestore obrigatórios da infraestrutura
+        const colPosts = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+        const colUsers = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+        const colGlobalChat = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
+        const colPrivateChat = collection(db, 'artifacts', appId, 'public', 'data', 'private_chat');
 
-        // Estado da Aplicação
-        window.appState = {
-            currentUser: null,
+        // Estado Global da Aplicação em Memória
+        const appState = {
+            firebaseUser: null,
+            currentUserData: null, // Perfil completo
             currentView: 'feed',
-            tempBase64Image: null
+            tempBase64Post: null,
+            tempBase64Banner: null,
+            allPosts: [],
+            allUsers: [],
+            globalMessages: [],
+            privateMessages: [],
+            activeChatMode: 'global', // 'global' ou 'UID do usuário privado'
+            activeCommentPostId: null,
+            unsubscribePosts: null,
+            unsubscribeUsers: null,
+            unsubscribeGlobalChat: null,
+            unsubscribePrivateChat: null
         };
 
-        // --- 2. CONTROLADOR PRINCIPAL DO APP ---
         const app = {
-            init: () => {
-                DB.seedInitialData();
+            init: async () => {
                 app.initParticles();
-
-                // Verifica se já existe um usuário cadastrado neste dispositivo
-                const savedUser = DB.get('user_profile');
-                if (savedUser) {
-                    appState.currentUser = savedUser;
-                    document.getElementById('auth-setup').style.display = 'none';
-                    document.getElementById('app-container').style.display = 'flex';
-                    app.navigate('feed');
-                } else {
-                    document.getElementById('auth-setup').style.display = 'flex';
-                    document.getElementById('app-container').style.display = 'none';
+                
+                // Inicialização do Auth como exigido
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (e) {
+                    console.error("Auth init erro:", e);
+                    app.showToast("Falha ao inicializar o Link Neural.", "error");
                 }
+
+                // Observador de Autenticação
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        appState.firebaseUser = user;
+                        // Verifica se o usuário já criou o perfil no Firestore
+                        const userDocRef = doc(colUsers, user.uid);
+                        const userDoc = await getDoc(userDocRef);
+                        
+                        if (userDoc.exists()) {
+                            appState.currentUserData = userDoc.data();
+                            app.startGame();
+                        } else {
+                            // Mostrar tela de setup
+                            document.getElementById('auth-setup').style.display = 'flex';
+                            document.getElementById('app-container').style.display = 'none';
+                        }
+                    }
+                });
             },
 
-            // Configuração da Conta/Perfil Local
-            setupIdentity: () => {
+            // --- 1. SETUP DE IDENTIDADE ---
+            setupIdentity: async () => {
                 const nameInput = document.getElementById('setup-name').value.trim();
                 let handleInput = document.getElementById('setup-handle').value.trim();
 
@@ -663,45 +658,113 @@
                     app.showToast("Preencha nome e handle com no mínimo 2 caracteres.", "error");
                     return;
                 }
-
                 if (!handleInput.startsWith('@')) handleInput = '@' + handleInput;
 
-                const uid = 'user_' + Date.now();
+                const uid = appState.firebaseUser.uid;
+                
+                // Checa se o handle já existe
+                // Como não podemos usar query complexa, vamos buscar todos e checar na memória
+                const usersSnap = await getDoc(doc(colUsers, 'dummy')).catch(()=>null); // só para ignorar
+                
+                document.getElementById('auth-form-area').style.display = 'none';
+                document.getElementById('auth-loading').style.display = 'block';
+
                 const newUser = {
                     uid: uid,
                     name: nameInput,
                     handle: handleInput.toLowerCase().replace(/\s/g, ''),
                     avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`,
+                    banner: '',
+                    bio: 'Conectado à malha neural recentemente.',
                     xp: 50,
                     level: 1,
                     ncoins: 100,
+                    followers: [],
+                    following: [],
+                    role: 'user', // Pode ser 'admin' futuramente
                     createdAt: new Date().toISOString()
                 };
 
-                DB.set('user_profile', newUser);
-                appState.currentUser = newUser;
+                try {
+                    await setDoc(doc(colUsers, uid), newUser);
+                    appState.currentUserData = newUser;
+                    app.startGame();
+                } catch (e) {
+                    app.showToast("Erro ao gravar perfil: " + e.message, "error");
+                    document.getElementById('auth-form-area').style.display = 'block';
+                    document.getElementById('auth-loading').style.display = 'none';
+                }
+            },
 
-                app.showToast("Identidade Registrada no Dispositivo!", "success");
+            // Inicia listeners e o app principal
+            startGame: () => {
                 document.getElementById('auth-setup').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
+                
+                // Mostrar ícone Admin se for admin
+                if (appState.currentUserData.role === 'admin') {
+                    document.getElementById('admin-icon').style.display = 'inline-block';
+                }
+
+                // INICIAR LISTENERS FIRESTORE (TEMPO REAL E REGRAS RESPEITADAS)
+                if (appState.unsubscribePosts) appState.unsubscribePosts();
+                appState.unsubscribePosts = onSnapshot(colPosts, (snap) => {
+                    appState.allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if (appState.currentView === 'feed' || appState.currentView === 'public_profile') {
+                        app.renderCurrentView();
+                    }
+                    if (appState.activeCommentPostId) {
+                        app.renderComments(appState.activeCommentPostId);
+                    }
+                }, e => console.error(e));
+
+                if (appState.unsubscribeUsers) appState.unsubscribeUsers();
+                appState.unsubscribeUsers = onSnapshot(colUsers, (snap) => {
+                    appState.allUsers = snap.docs.map(d => d.data());
+                    
+                    // Mantem perfil atual atualizado se mudou
+                    const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
+                    if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
+
+                    if (appState.currentView === 'ranking' || appState.currentView === 'search' || appState.currentView === 'perfil') {
+                        app.renderCurrentView();
+                    }
+                }, e => console.error(e));
+
+                if (appState.unsubscribeGlobalChat) appState.unsubscribeGlobalChat();
+                appState.unsubscribeGlobalChat = onSnapshot(colGlobalChat, (snap) => {
+                    appState.globalMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if (appState.currentView === 'chat' && appState.activeChatMode === 'global') {
+                        app.renderChatMessages(appState.globalMessages);
+                    }
+                }, e => console.error(e));
+
+                if (appState.unsubscribePrivateChat) appState.unsubscribePrivateChat();
+                appState.unsubscribePrivateChat = onSnapshot(colPrivateChat, (snap) => {
+                    appState.privateMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if (appState.currentView === 'chat' && appState.activeChatMode !== 'global') {
+                        // Renderiza msg privada
+                        app.renderPrivateChatActive();
+                    } else if (appState.currentView === 'chat' && appState.activeChatMode === 'private_list') {
+                        app.renderPrivateChatList();
+                    }
+                }, e => console.error(e));
+
                 app.navigate('feed');
             },
 
             logout: () => {
-                if (confirm("Deseja desconectar e apagar sua sessão local neste aparelho?")) {
-                    localStorage.removeItem(DB.PREFIX + 'user_profile');
-                    location.reload();
+                if (confirm("Deseja desconectar e sair do Link Neural?")) {
+                    location.reload(); // Recarrega para limpar iframe e auth state
                 }
             },
 
-            // --- NAVEGAÇÃO SPA ---
-            navigate: (viewName, navElement = null) => {
+            // --- 2. SISTEMA DE NAVEGAÇÃO SPA ---
+            navigate: (viewName, navElement = null, additionalData = null) => {
                 appState.currentView = viewName;
-                const contentArea = document.getElementById('app-content');
-                const fab = document.getElementById('fab-add-post');
-
-                // Atualiza seleção na navegação
-                if (navElement) {
+                
+                // Updates na UI
+                if (navElement && typeof navElement.classList !== 'undefined') {
                     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                     navElement.classList.add('active');
                 } else {
@@ -711,356 +774,132 @@
                     });
                 }
 
+                const fab = document.getElementById('fab-add-post');
                 fab.style.display = viewName === 'feed' ? 'flex' : 'none';
-                contentArea.innerHTML = '';
-
-                if (viewName === 'feed') app.renderFeed();
-                else if (viewName === 'perfil') app.renderProfile();
-                else if (viewName === 'chat') app.renderChat();
-                else if (viewName === 'ranking') app.renderRanking();
+                
+                app.renderCurrentView(additionalData);
             },
 
-            // --- FEED DE POSTAGENS ---
+            renderCurrentView: (data = null) => {
+                const contentArea = document.getElementById('app-content');
+                
+                if (appState.currentView === 'feed') {
+                    contentArea.innerHTML = '';
+                    app.renderFeed();
+                } 
+                else if (appState.currentView === 'perfil') {
+                    app.renderProfile(appState.currentUserData);
+                } 
+                else if (appState.currentView === 'search') {
+                    contentArea.innerHTML = '';
+                    contentArea.appendChild(document.getElementById('tpl-search').content.cloneNode(true));
+                    app.performSearch(); // Executa busca vazia inicial
+                }
+                else if (appState.currentView === 'chat') {
+                    contentArea.innerHTML = '';
+                    contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
+                    appState.activeChatMode = 'global';
+                    app.renderChatMessages(appState.globalMessages);
+                }
+                else if (appState.currentView === 'ranking') {
+                    contentArea.innerHTML = '';
+                    contentArea.appendChild(document.getElementById('tpl-ranking').content.cloneNode(true));
+                    app.renderRanking();
+                }
+                else if (appState.currentView === 'public_profile') {
+                    // Ver perfil de outro usuário
+                    const user = appState.allUsers.find(u => u.uid === data);
+                    if (user) app.renderProfile(user, true);
+                }
+            },
+
+            // --- 3. FEED & POSTAGENS ---
             renderFeed: () => {
                 const contentArea = document.getElementById('app-content');
-                // Limpeza absoluta da área para evitar duplicação (BUG RESOLVIDO)
                 contentArea.innerHTML = ''; 
                 
-                const posts = DB.get('posts', []);
+                let posts = [...appState.allPosts];
+
+                // Filtro Local: Ordena do mais novo pro mais velho
+                posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
                 if (posts.length === 0) {
                     contentArea.innerHTML = `
                         <div class="placeholder-view">
                             <i class="fa-solid fa-satellite"></i>
                             <h3>Feed Vazio</h3>
-                            <p>Seja o primeiro a publicar uma transmissão!</p>
+                            <p>Seja o primeiro a transmitir algo na rede!</p>
                         </div>
                     `;
                     return;
                 }
 
-                // Ordena por data (mais recente primeiro)
-                posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
                 posts.forEach(post => {
-                    const isLiked = post.likes && post.likes.includes(appState.currentUser.uid);
-                    const likeCount = post.likes ? post.likes.length : 0;
-                    const dateObj = new Date(post.createdAt);
-                    const timeStr = dateObj.toLocaleDateString('pt-BR') + ' ' + String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
-                    
-                    const imgHtml = post.image ? `<img src="${post.image}" class="post-image" alt="Anexo">` : '';
-                    const isMyPost = post.authorUid === appState.currentUser.uid;
-
-                    const delBtn = isMyPost ? 
-                        `<button class="action-btn" onclick="app.deletePost('${post.id}')" style="margin-left: auto; color: var(--danger);"><i class="fa-solid fa-trash"></i></button>` : '';
-
-                    const article = document.createElement('article');
-                    article.className = 'post-card';
-                    article.innerHTML = `
-                        <div class="post-header">
-                            <img src="${post.authorAvatar}" alt="Avatar" class="avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                            <div class="user-info">
-                                <h3>${post.authorName}</h3>
-                                <span>${post.authorHandle} • ${timeStr}</span>
-                            </div>
-                        </div>
-                        <p class="post-content">${post.content.replace(/\n/g, '<br>')}</p>
-                        ${imgHtml}
-                        <div class="post-actions">
-                            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
-                                <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> ${likeCount}
-                            </button>
-                            <button class="action-btn" onclick="app.showToast('Comentários salvos localmente', 'info')">
-                                <i class="fa-regular fa-comment"></i>
-                            </button>
-                            ${delBtn}
-                        </div>
-                    `;
-                    contentArea.appendChild(article);
+                    app.createPostCard(post, contentArea);
                 });
             },
 
-            // Criar Novo Post
+            createPostCard: (post, container, isProfileView = false) => {
+                const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
+                const isSaved = post.saves && post.saves.includes(appState.firebaseUser.uid);
+                const likeCount = post.likes ? post.likes.length : 0;
+                const commentCount = post.comments ? post.comments.length : 0;
+                
+                const dateObj = new Date(post.createdAt);
+                const timeStr = dateObj.toLocaleDateString('pt-BR') + ' ' + String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
+                
+                const imgHtml = post.image ? `<img src="${post.image}" class="post-image" alt="Anexo">` : '';
+                
+                const isMyPost = post.authorUid === appState.firebaseUser.uid;
+                const isAdmin = appState.currentUserData.role === 'admin';
+
+                let extraActions = '';
+                if (isMyPost || isAdmin) {
+                    extraActions += `<button class="action-btn" onclick="app.deletePost('${post.id}')" style="margin-left: auto; color: var(--danger);"><i class="fa-solid fa-trash"></i></button>`;
+                }
+                
+                // Buscando dados atualizados do autor
+                const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
+
+                const article = document.createElement('article');
+                article.className = 'post-card';
+                article.innerHTML = `
+                    <div class="post-header" onclick="app.navigate('public_profile', null, '${authorData.uid}')">
+                        <img src="${authorData.avatar}" alt="Avatar" class="avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                        <div class="user-info">
+                            <h3>${authorData.name} ${authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h3>
+                            <span>${authorData.handle} • ${timeStr}</span>
+                        </div>
+                    </div>
+                    <p class="post-content">${post.content.replace(/\n/g, '<br>')}</p>
+                    ${imgHtml}
+                    <div class="post-actions">
+                        <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
+                            <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> ${likeCount}
+                        </button>
+                        <button class="action-btn" onclick="app.openComments('${post.id}')">
+                            <i class="fa-regular fa-comment"></i> ${commentCount}
+                        </button>
+                        <button class="action-btn" onclick="app.showToast('Link da postagem copiado!', 'success')">
+                            <i class="fa-solid fa-share-nodes"></i>
+                        </button>
+                        ${extraActions}
+                    </div>
+                `;
+                container.appendChild(article);
+            },
+
             openPostModal: () => document.getElementById('modal-post').classList.add('active'),
             closePostModal: () => {
                 document.getElementById('modal-post').classList.remove('active');
                 document.getElementById('post-content').value = '';
-                app.removeImagePreview();
+                app.removeImagePreview('post');
             },
 
-            handleImageUpload: (e) => {
+            // Lida com imagens via Canvas compress para Base64 (Otimizado para o limite do Firestore)
+            handleImageUpload: (e, type) => {
                 const file = e.target.files[0];
                 if (!file) return;
-
-                if (file.size > 3 * 1024 * 1024) {
-                    app.showToast("Escolha uma imagem menor que 3MB.", "error");
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    // Compressão rápida via Canvas para otimizar o LocalStorage
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const MAX = 700;
-
-                        if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
-                        else if (height > MAX) { width *= MAX / height; height = MAX; }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
-                        appState.tempBase64Image = dataUrl;
-                        document.getElementById('image-preview').src = dataUrl;
-                        document.getElementById('image-preview-container').style.display = 'block';
-                    };
-                    img.src = evt.target.result;
-                };
-                reader.readAsDataURL(file);
-            },
-
-            removeImagePreview: () => {
-                appState.tempBase64Image = null;
-                document.getElementById('image-preview').src = '';
-                document.getElementById('image-preview-container').style.display = 'none';
-                document.getElementById('post-image-input').value = '';
-            },
-
-            publishPost: () => {
-                const content = document.getElementById('post-content').value.trim();
-                if (!content && !appState.tempBase64Image) {
-                    app.showToast("Escreva algo ou insira uma imagem.", "error");
-                    return;
-                }
-
-                const posts = DB.get('posts', []);
-                const newPost = {
-                    id: 'post_' + Date.now(),
-                    authorUid: appState.currentUser.uid,
-                    authorName: appState.currentUser.name,
-                    authorHandle: appState.currentUser.handle,
-                    authorAvatar: appState.currentUser.avatar,
-                    content: content,
-                    image: appState.tempBase64Image || '',
-                    likes: [],
-                    createdAt: new Date().toISOString()
-                };
-
-                posts.unshift(newPost);
-                DB.set('posts', posts);
-
-                app.addXP(15);
-                app.closePostModal();
-                app.showToast("Transmissão publicada!", "success");
-                if (appState.currentView === 'feed') app.renderFeed();
-            },
-
-            deletePost: (postId) => {
-                if (confirm("Apagar esta transmissão?")) {
-                    let posts = DB.get('posts', []);
-                    posts = posts.filter(p => p.id !== postId);
-                    DB.set('posts', posts);
-                    app.showToast("Postagem removida.", "success");
-                    app.renderFeed();
-                }
-            },
-
-            toggleLike: (postId) => {
-                const posts = DB.get('posts', []);
-                const post = posts.find(p => p.id === postId);
-                if (post) {
-                    if (!post.likes) post.likes = [];
-                    const myUid = appState.currentUser.uid;
-                    const idx = post.likes.indexOf(myUid);
-
-                    if (idx > -1) {
-                        post.likes.splice(idx, 1);
-                    } else {
-                        post.likes.push(myUid);
-                        app.addXP(2);
-                    }
-
-                    DB.set('posts', posts);
-                    if (appState.currentView === 'feed') app.renderFeed();
-                }
-            },
-
-            // --- CHAT / COMMS ---
-            renderChat: () => {
-                const contentArea = document.getElementById('app-content');
-                contentArea.innerHTML = '';
-                contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
-
-                const container = document.getElementById('chat-messages-container');
-                const messages = DB.get('messages', []);
-
-                container.innerHTML = '';
-                messages.forEach(msg => {
-                    const isMine = msg.authorUid === appState.currentUser.uid;
-                    const dateObj = new Date(msg.createdAt);
-                    const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
-
-                    const div = document.createElement('div');
-                    div.className = `message ${isMine ? 'mine' : ''}`;
-                    div.innerHTML = `
-                        ${!isMine ? `<img src="${msg.authorAvatar}" class="msg-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">` : ''}
-                        <div class="msg-bubble">
-                            ${!isMine ? `<div class="msg-author">${msg.authorName}</div>` : ''}
-                            <div class="msg-text">${msg.content}</div>
-                            <span class="msg-time">${timeStr}</span>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-
-                // Rola para a base garantindo que o flexbox engatou
-                setTimeout(() => {
-                    container.scrollTop = container.scrollHeight;
-                }, 50);
-            },
-
-            handleChatKeyPress: (e) => {
-                if (e.key === 'Enter') app.sendChatMessage();
-            },
-
-            sendChatMessage: () => {
-                const input = document.getElementById('chat-input');
-                const content = input.value.trim();
-                if (!content) return;
-
-                const messages = DB.get('messages', []);
-                const newMsg = {
-                    id: 'msg_' + Date.now(),
-                    authorUid: appState.currentUser.uid,
-                    authorName: appState.currentUser.name,
-                    authorAvatar: appState.currentUser.avatar,
-                    content: content,
-                    createdAt: new Date().toISOString()
-                };
-
-                messages.push(newMsg);
-                DB.set('messages', messages);
-                input.value = '';
-
-                app.addXP(3);
-                
-                // Otimização do Chat: Insere diretamente na DOM para não refazer o layout e manter o foco fluído no mobile
-                const container = document.getElementById('chat-messages-container');
-                if (container) {
-                    const dateObj = new Date(newMsg.createdAt);
-                    const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
-
-                    const div = document.createElement('div');
-                    div.className = `message mine`;
-                    div.innerHTML = `
-                        <div class="msg-bubble">
-                            <div class="msg-text">${newMsg.content}</div>
-                            <span class="msg-time">${timeStr}</span>
-                        </div>
-                    `;
-                    container.appendChild(div);
-
-                    setTimeout(() => {
-                        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-                    }, 50);
-                }
-            },
-
-            // --- RANKING ---
-            renderRanking: () => {
-                const contentArea = document.getElementById('app-content');
-                contentArea.innerHTML = '';
-                contentArea.appendChild(document.getElementById('tpl-ranking').content.cloneNode(true));
-                const container = document.getElementById('ranking-list-container');
-
-                const botUsers = DB.get('bot_users', []);
-                const allUsers = [...botUsers, appState.currentUser];
-
-                // Ordena por XP
-                allUsers.sort((a, b) => (b.xp || 0) - (a.xp || 0));
-
-                container.innerHTML = '';
-                allUsers.forEach((u, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'rank-card';
-                    div.innerHTML = `
-                        <div class="rank-pos">#${idx + 1}</div>
-                        <img src="${u.avatar}" class="avatar" style="width: 38px; height: 38px;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                        <div class="rank-info">
-                            <h4>${u.name} ${u.uid === appState.currentUser.uid ? ' (Você)' : ''}</h4>
-                            <span>${u.handle} • Nível ${u.level || 1}</span>
-                        </div>
-                        <div class="rank-score">${u.xp || 0} XP</div>
-                    `;
-                    container.appendChild(div);
-                });
-            },
-
-            // --- PERFIL ---
-            renderProfile: () => {
-                const ud = appState.currentUser;
-                const contentArea = document.getElementById('app-content');
-
-                // Recalcula Nível baseado no XP (a cada 100 XP = +1 Level)
-                const computedLevel = Math.floor((ud.xp || 0) / 100) + 1;
-                if (computedLevel !== ud.level) {
-                    ud.level = computedLevel;
-                    DB.set('user_profile', ud);
-                }
-
-                contentArea.innerHTML = `
-                    <div class="profile-header">
-                        <div style="position: relative; display: inline-block; margin-bottom: 0.8rem;">
-                            <img src="${ud.avatar}" alt="Avatar" class="profile-avatar" style="margin-bottom: 0;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                            <div style="position: absolute; bottom: 0px; right: -5px; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto">
-                                <i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i>
-                            </div>
-                        </div>
-                        <input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleProfileImageUpload(event)">
-                        
-                        <h2 class="profile-name">${ud.name}</h2>
-                        <span class="profile-handle">${ud.handle}</span>
-                        
-                        <div class="stats-container">
-                            <div class="stat-item">
-                                <span class="stat-value neon-purple">LVL ${ud.level}</span>
-                                <span class="stat-label">Nível</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-value neon-cyan">${ud.xp || 0}</span>
-                                <span class="stat-label">Total XP</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-value">${ud.ncoins || 100}</span>
-                                <span class="stat-label">N-Coins</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">Ações do Sistema</h3>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <button class="form-control" style="text-align: left; background: rgba(255,255,255,0.05);" onclick="app.showToast('Você está operando diretamente da memória do celular.', 'info')">
-                            <i class="fa-solid fa-hard-drive" style="margin-right: 10px; color: var(--cyan);"></i> Armazenamento Local Ativo
-                        </button>
-                        <button class="form-control" style="text-align: left; background: rgba(255,42,42,0.1); color: var(--danger);" onclick="app.logout()">
-                            <i class="fa-solid fa-power-off" style="margin-right: 10px;"></i> Resetar Dados Locais
-                        </button>
-                    </div>
-                `;
-            },
-            
-            // Upload Foto de Perfil 
-            handleProfileImageUpload: (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
                 if (file.size > 4 * 1024 * 1024) {
                     app.showToast("Escolha uma imagem menor que 4MB.", "error");
                     return;
@@ -1073,50 +912,588 @@
                         const canvas = document.createElement('canvas');
                         let width = img.width;
                         let height = img.height;
-                        const MAX = 400; // Tamanho ideal para profile pic
-                        
-                        // Recorta em quadrado ou faz resize mantendo proporção
+                        const MAX = type === 'profile' ? 300 : (type === 'banner' ? 800 : 700);
+
                         if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
                         else if (height > MAX) { width *= MAX / height; height = MAX; }
 
-                        canvas.width = width;
-                        canvas.height = height;
+                        canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Alta compressão para respeitar limites do banco de dados documento
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
 
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                        
-                        // Atualiza usuário atual
-                        appState.currentUser.avatar = dataUrl;
-                        DB.set('user_profile', appState.currentUser);
-                        
-                        // Atualiza posts anteriores com a foto nova
-                        let posts = DB.get('posts', []);
-                        posts.forEach(p => {
-                            if (p.authorUid === appState.currentUser.uid) { p.authorAvatar = dataUrl; }
-                        });
-                        DB.set('posts', posts);
-                        
-                        app.renderProfile();
-                        app.showToast("Imagem de perfil atualizada!", "success");
+                        if (type === 'post') {
+                            appState.tempBase64Post = dataUrl;
+                            document.getElementById('image-preview').src = dataUrl;
+                            document.getElementById('image-preview-container').style.display = 'block';
+                        } else if (type === 'profile') {
+                            app.updateProfileImage(dataUrl);
+                        } else if (type === 'banner') {
+                            appState.tempBase64Banner = dataUrl;
+                            app.showToast("Banner pronto. Salve o perfil.", "info");
+                        }
                     };
                     img.src = evt.target.result;
                 };
                 reader.readAsDataURL(file);
             },
 
-            // Adiciona XP e salva
-            addXP: (val) => {
-                if (!appState.currentUser) return;
-                appState.currentUser.xp = (appState.currentUser.xp || 0) + val;
-                DB.set('user_profile', appState.currentUser);
+            removeImagePreview: (type) => {
+                if(type==='post') {
+                    appState.tempBase64Post = null;
+                    document.getElementById('image-preview').src = '';
+                    document.getElementById('image-preview-container').style.display = 'none';
+                    document.getElementById('post-image-input').value = '';
+                }
             },
 
-            // --- CONFIGURAÇÕES ---
-            openSettingsModal: () => document.getElementById('modal-settings').classList.add('active'),
-            closeSettingsModal: () => document.getElementById('modal-settings').classList.remove('active'),
+            publishPost: async () => {
+                if (!appState.firebaseUser) return;
+                const content = document.getElementById('post-content').value.trim();
+                
+                if (!content && !appState.tempBase64Post) {
+                    app.showToast("Escreva algo ou insira uma imagem.", "error");
+                    return;
+                }
 
-            // --- NOTIFICAÇÕES TOAST ---
+                const btn = document.getElementById('btn-publish');
+                btn.disabled = true;
+                btn.innerHTML = 'Transmitindo...';
+
+                const newPost = {
+                    authorUid: appState.firebaseUser.uid,
+                    content: content,
+                    image: appState.tempBase64Post || '',
+                    likes: [],
+                    comments: [],
+                    saves: [],
+                    createdAt: new Date().toISOString()
+                };
+
+                try {
+                    await addDoc(colPosts, newPost);
+                    app.addXP(15); // Recompensa Social
+                    app.closePostModal();
+                    app.showToast("Transmissão enviada a rede global!", "success");
+                } catch (e) {
+                    app.showToast("Erro ao transmitir: " + e.message, "error");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Transmitir Dados';
+                }
+            },
+
+            deletePost: async (postId) => {
+                if (confirm("Apagar permanentemente esta transmissão?")) {
+                    try {
+                        await deleteDoc(doc(colPosts, postId));
+                        app.showToast("Postagem removida.", "success");
+                    } catch (e) {
+                        app.showToast("Erro ao apagar.", "error");
+                    }
+                }
+            },
+
+            toggleLike: async (postId) => {
+                if (!appState.firebaseUser) return;
+                const post = appState.allPosts.find(p => p.id === postId);
+                if (!post) return;
+
+                const postRef = doc(colPosts, postId);
+                const uid = appState.firebaseUser.uid;
+
+                try {
+                    if (post.likes.includes(uid)) {
+                        await updateDoc(postRef, { likes: arrayRemove(uid) });
+                    } else {
+                        await updateDoc(postRef, { likes: arrayUnion(uid) });
+                        app.addXP(2);
+                    }
+                } catch (e) {
+                    console.error("Like error", e);
+                }
+            },
+
+            // --- COMENTÁRIOS ---
+            openComments: (postId) => {
+                appState.activeCommentPostId = postId;
+                document.getElementById('modal-comments').classList.add('active');
+                app.renderComments(postId);
+            },
+            closeCommentsModal: () => {
+                document.getElementById('modal-comments').classList.remove('active');
+                appState.activeCommentPostId = null;
+            },
+            renderComments: (postId) => {
+                const post = appState.allPosts.find(p => p.id === postId);
+                const list = document.getElementById('comments-list');
+                list.innerHTML = '';
+                
+                if (!post || !post.comments || post.comments.length === 0) {
+                    list.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding: 20px;">Nenhum comentário. Seja o primeiro!</p>';
+                    return;
+                }
+
+                post.comments.forEach(c => {
+                    const author = appState.allUsers.find(u => u.uid === c.authorUid) || {name: 'Netrunner Desconhecido', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
+                    
+                    const div = document.createElement('div');
+                    div.style = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-size: 0.85rem;";
+                    
+                    let delBtn = '';
+                    if (c.authorUid === appState.firebaseUser.uid || appState.currentUserData.role === 'admin') {
+                        delBtn = `<i class="fa-solid fa-trash" style="color:var(--danger); float:right; cursor:pointer;" onclick="app.deleteComment('${postId}', '${c.id}')"></i>`;
+                    }
+
+                    div.innerHTML = `
+                        ${delBtn}
+                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:5px;">
+                            <img src="${author.avatar}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+                            <span style="color:var(--cyan); font-weight:bold;">${author.name}</span>
+                        </div>
+                        <div style="padding-left:32px;">${c.text}</div>
+                    `;
+                    list.appendChild(div);
+                });
+                
+                // Rola para baixo
+                setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
+            },
+            sendComment: async () => {
+                if (!appState.firebaseUser || !appState.activeCommentPostId) return;
+                const input = document.getElementById('comment-input');
+                const text = input.value.trim();
+                if (!text) return;
+
+                const postRef = doc(colPosts, appState.activeCommentPostId);
+                const newComment = {
+                    id: 'c_' + Date.now(),
+                    authorUid: appState.firebaseUser.uid,
+                    text: text,
+                    createdAt: new Date().toISOString()
+                };
+
+                try {
+                    await updateDoc(postRef, { comments: arrayUnion(newComment) });
+                    input.value = '';
+                    app.addXP(5);
+                } catch(e) {
+                    app.showToast("Erro ao comentar", "error");
+                }
+            },
+            deleteComment: async (postId, commentId) => {
+                const post = appState.allPosts.find(p => p.id === postId);
+                if (!post) return;
+                const comment = post.comments.find(c => c.id === commentId);
+                if (!comment) return;
+
+                try {
+                    await updateDoc(doc(colPosts, postId), { comments: arrayRemove(comment) });
+                } catch(e) {}
+            },
+
+            // --- 4. PERFIL (Privado e Público) ---
+            renderProfile: (userData, isPublic = false) => {
+                const contentArea = document.getElementById('app-content');
+                if(!isPublic) contentArea.innerHTML = '';
+                
+                if (!userData) return;
+                
+                // Atualiza Nível via regra simples
+                const computedLevel = Math.floor((userData.xp || 0) / 100) + 1;
+                if (!isPublic && computedLevel !== userData.level) {
+                    updateDoc(doc(colUsers, userData.uid), { level: computedLevel });
+                }
+
+                const isMe = userData.uid === appState.firebaseUser.uid;
+                const iFollow = userData.followers && userData.followers.includes(appState.firebaseUser.uid);
+
+                const bannerImg = userData.banner || ''; // fallback handled via CSS background color
+
+                let actionButton = '';
+                if (isMe && !isPublic) {
+                    actionButton = `
+                        <div style="display: flex; gap: 10px; width: 100%;">
+                            <button class="btn-primary" style="flex: 1;" onclick="app.openSettingsModal()">Editar Perfil</button>
+                        </div>
+                    `;
+                } else if (!isMe) {
+                    actionButton = `
+                        <div style="display: flex; gap: 10px; width: 100%;">
+                            <button class="btn-primary ${iFollow ? 'btn-secondary' : ''}" style="flex: 1;" onclick="app.toggleFollow('${userData.uid}')">
+                                ${iFollow ? 'Deixar de Seguir' : 'Seguir'}
+                            </button>
+                            <button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.startPrivateChat('${userData.uid}')">
+                                Mensagem
+                            </button>
+                        </div>
+                    `;
+                }
+
+                const myPosts = appState.allPosts.filter(p => p.authorUid === userData.uid);
+
+                const html = `
+                    <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
+                    <div class="profile-header">
+                        <div style="position: relative; display: inline-block; margin-bottom: 0.8rem;">
+                            <img src="${userData.avatar}" alt="Avatar" class="profile-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                            ${isMe && !isPublic ? `
+                            <div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto">
+                                <i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i>
+                            </div>
+                            <input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">
+                            ` : ''}
+                        </div>
+                        
+                        <h2 class="profile-name">${userData.name} ${userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h2>
+                        <span class="profile-handle">${userData.handle}</span>
+                        <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
+                        
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <span class="stat-value neon-purple">LVL ${userData.level || 1}</span>
+                                <span class="stat-label">Nível</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value neon-cyan">${userData.followers ? userData.followers.length : 0}</span>
+                                <span class="stat-label">Seguidores</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${userData.following ? userData.following.length : 0}</span>
+                                <span class="stat-label">Seguindo</span>
+                            </div>
+                        </div>
+
+                        ${actionButton}
+                    </div>
+                    
+                    <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">
+                        Transmissões Recentes (${myPosts.length})
+                    </h3>
+                    <div id="user-posts-container"></div>
+                `;
+
+                if (isPublic) {
+                    contentArea.innerHTML = '';
+                    contentArea.appendChild(document.getElementById('tpl-public-profile').content.cloneNode(true));
+                    document.getElementById('public-profile-container').innerHTML = html;
+                } else {
+                    contentArea.innerHTML = html;
+                }
+
+                // Render posts
+                const postContainer = document.getElementById('user-posts-container');
+                myPosts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(post => {
+                    app.createPostCard(post, postContainer, true);
+                });
+            },
+
+            updateProfileImage: async (base64) => {
+                try {
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 });
+                    app.showToast("Foto atualizada!", "success");
+                } catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
+            },
+
+            toggleFollow: async (targetUid) => {
+                if (!appState.firebaseUser) return;
+                const myUid = appState.firebaseUser.uid;
+                
+                const me = appState.currentUserData;
+                const target = appState.allUsers.find(u => u.uid === targetUid);
+                if (!target) return;
+
+                const isFollowing = target.followers && target.followers.includes(myUid);
+
+                try {
+                    if (isFollowing) {
+                        await updateDoc(doc(colUsers, targetUid), { followers: arrayRemove(myUid) });
+                        await updateDoc(doc(colUsers, myUid), { following: arrayRemove(targetUid) });
+                    } else {
+                        await updateDoc(doc(colUsers, targetUid), { followers: arrayUnion(myUid) });
+                        await updateDoc(doc(colUsers, myUid), { following: arrayUnion(targetUid) });
+                        app.showToast(`Seguindo ${target.name}`, "success");
+                    }
+                } catch(e) { console.error(e); }
+            },
+
+            // --- CONFIGURAÇÕES DE PERFIL ---
+            openSettingsModal: () => {
+                document.getElementById('edit-name').value = appState.currentUserData.name;
+                document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
+                appState.tempBase64Banner = null;
+                document.getElementById('modal-settings').classList.add('active');
+            },
+            closeSettingsModal: () => document.getElementById('modal-settings').classList.remove('active'),
+            saveProfileSettings: async () => {
+                const name = document.getElementById('edit-name').value.trim();
+                const bio = document.getElementById('edit-bio').value.trim();
+                if(name.length < 2) return app.showToast("Nome muito curto", "error");
+
+                const updates = { name: name, bio: bio };
+                if (appState.tempBase64Banner) updates.banner = appState.tempBase64Banner;
+
+                try {
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
+                    app.closeSettingsModal();
+                    app.showToast("Perfil salvo!", "success");
+                } catch (e) {
+                    app.showToast("Erro ao salvar", "error");
+                }
+            },
+
+            // --- 5. PESQUISA DE USUÁRIOS ---
+            performSearch: () => {
+                const input = document.getElementById('search-input');
+                const query = input ? input.value.trim().toLowerCase() : '';
+                const container = document.getElementById('search-results-container');
+                
+                if(!container) return;
+                container.innerHTML = '';
+
+                // Filtro na memória conforme Rule 2
+                let results = appState.allUsers;
+                if (query) {
+                    results = results.filter(u => u.name.toLowerCase().includes(query) || u.handle.toLowerCase().includes(query));
+                }
+
+                if (results.length === 0) {
+                    container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum sinal detectado.</p>`;
+                    return;
+                }
+
+                results.forEach(u => {
+                    const div = document.createElement('div');
+                    div.className = 'rank-card';
+                    div.innerHTML = `
+                        <img src="${u.avatar}" class="avatar" style="width: 44px; height: 44px;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                        <div class="rank-info">
+                            <h4>${u.name}</h4>
+                            <span>${u.handle}</span>
+                        </div>
+                        <button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            // --- 6. CHAT (Global e Privado) ---
+            switchChatTab: (mode) => {
+                appState.activeChatMode = mode;
+                
+                const btnGlobal = document.getElementById('tab-global');
+                const btnPrivate = document.getElementById('tab-private');
+                const cGlobal = document.getElementById('chat-messages-container');
+                const cPrivate = document.getElementById('private-chats-list');
+                const inputArea = document.getElementById('chat-input-container');
+                const info = document.getElementById('chat-status-info');
+
+                if (mode === 'global') {
+                    btnGlobal.classList.remove('btn-secondary');
+                    btnPrivate.classList.add('btn-secondary');
+                    cGlobal.style.display = 'flex';
+                    cPrivate.style.display = 'none';
+                    inputArea.style.display = 'flex';
+                    info.innerHTML = `<i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado`;
+                    app.renderChatMessages(appState.globalMessages);
+                } else if (mode === 'private') {
+                    appState.activeChatMode = 'private_list'; // Mostra lista
+                    btnPrivate.classList.remove('btn-secondary');
+                    btnGlobal.classList.add('btn-secondary');
+                    cGlobal.style.display = 'none';
+                    cPrivate.style.display = 'flex';
+                    inputArea.style.display = 'none'; // Some input na lista
+                    info.innerHTML = `<i class="fa-solid fa-lock" style="color: var(--purple);"></i> Frequências Privadas`;
+                    app.renderPrivateChatList();
+                } else {
+                    // Modo dentro de um chat privado com alguém (mode = uid alvo)
+                    cGlobal.style.display = 'flex';
+                    cPrivate.style.display = 'none';
+                    inputArea.style.display = 'flex';
+                    app.renderPrivateChatActive();
+                }
+            },
+
+            renderChatMessages: (messagesArray) => {
+                const container = document.getElementById('chat-messages-container');
+                if(!container) return;
+                
+                container.innerHTML = '';
+                
+                // Ordena histórico
+                const sorted = [...messagesArray].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+                sorted.forEach(msg => {
+                    const isMine = msg.authorUid === appState.firebaseUser.uid;
+                    const dateObj = new Date(msg.createdAt);
+                    const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
+                    
+                    const author = appState.allUsers.find(u => u.uid === msg.authorUid) || {name: 'Netrunner', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
+
+                    const div = document.createElement('div');
+                    div.className = `message ${isMine ? 'mine' : ''}`;
+                    div.innerHTML = `
+                        ${!isMine ? `<img src="${author.avatar}" class="msg-avatar" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
+                        <div class="msg-bubble">
+                            ${!isMine ? `<div class="msg-author" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name}</div>` : ''}
+                            <div class="msg-text">${msg.content}</div>
+                            <span class="msg-time">${timeStr}</span>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+
+                setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+            },
+
+            startPrivateChat: (targetUid) => {
+                app.navigate('chat');
+                setTimeout(() => {
+                    const target = appState.allUsers.find(u => u.uid === targetUid);
+                    document.getElementById('chat-status-info').innerHTML = `
+                        <i class="fa-solid fa-lock" style="color: var(--purple);"></i> Criptografia 1x1 com <span style="color:white;">${target ? target.name : '...'}</span>
+                        <br><a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab('private')">← Voltar a Lista</a>
+                    `;
+                    app.switchChatTab(targetUid); // targetUid vira o modo ativo
+                }, 100);
+            },
+
+            renderPrivateChatList: () => {
+                const container = document.getElementById('private-chats-list');
+                container.innerHTML = '';
+                const myUid = appState.firebaseUser.uid;
+
+                // Extrair usuários que tem mensagens comigo
+                const myChats = appState.privateMessages.filter(m => m.participants.includes(myUid));
+                
+                // Agrupar por usuário
+                const chatMap = {};
+                myChats.forEach(m => {
+                    const otherUid = m.participants.find(p => p !== myUid);
+                    if(otherUid) {
+                        if(!chatMap[otherUid] || new Date(m.createdAt) > new Date(chatMap[otherUid].createdAt)) {
+                            chatMap[otherUid] = m; // Mantém a última
+                        }
+                    }
+                });
+
+                const uniqueUsers = Object.keys(chatMap);
+                
+                if (uniqueUsers.length === 0) {
+                    container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum link privado aberto. Encontre usuários na Busca.</p>`;
+                    return;
+                }
+
+                // Renderiza lista
+                uniqueUsers.forEach(uid => {
+                    const user = appState.allUsers.find(u => u.uid === uid) || {name: 'Unknown', handle: '@unknown', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
+                    const lastMsg = chatMap[uid].content;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'chat-list-item';
+                    div.onclick = () => app.startPrivateChat(uid);
+                    div.innerHTML = `
+                        <img src="${user.avatar}" class="avatar" style="width: 44px; height: 44px;">
+                        <div class="user-info">
+                            <h3>${user.name}</h3>
+                            <span style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:var(--border-glass);"></i>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            renderPrivateChatActive: () => {
+                const myUid = appState.firebaseUser.uid;
+                const targetUid = appState.activeChatMode; // No private, o mode é o UID do alvo
+                
+                // Filtra mensagens em memória (Rule 2 conformidade) onde ambos participam
+                const conversation = appState.privateMessages.filter(m => 
+                    m.participants.includes(myUid) && m.participants.includes(targetUid)
+                );
+                
+                app.renderChatMessages(conversation);
+            },
+
+            handleChatKeyPress: (e) => {
+                if (e.key === 'Enter') app.sendChatMessage();
+            },
+
+            sendChatMessage: async () => {
+                if (!appState.firebaseUser) return;
+                const input = document.getElementById('chat-input');
+                const content = input.value.trim();
+                if (!content) return;
+
+                input.value = '';
+
+                const baseMsg = {
+                    authorUid: appState.firebaseUser.uid,
+                    content: content,
+                    createdAt: new Date().toISOString()
+                };
+
+                try {
+                    if (appState.activeChatMode === 'global') {
+                        await addDoc(colGlobalChat, baseMsg);
+                        app.addXP(1);
+                    } else {
+                        // Mensagem Privada
+                        baseMsg.participants = [appState.firebaseUser.uid, appState.activeChatMode];
+                        await addDoc(colPrivateChat, baseMsg);
+                    }
+                } catch(e) {
+                    app.showToast("Falha de transmissão.", "error");
+                }
+            },
+
+            // --- 7. RANKING E XP ---
+            renderRanking: () => {
+                const container = document.getElementById('ranking-list-container');
+                if(!container) return;
+                
+                // Ordena todos os usuários por XP na memória (Regra 2 obedecida)
+                const sortedUsers = [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50); // Top 50
+
+                container.innerHTML = '';
+                sortedUsers.forEach((u, idx) => {
+                    const isMe = u.uid === appState.firebaseUser?.uid;
+                    const div = document.createElement('div');
+                    div.className = 'rank-card';
+                    div.onclick = () => app.navigate('public_profile', null, u.uid);
+                    div.innerHTML = `
+                        <div class="rank-pos">#${idx + 1}</div>
+                        <img src="${u.avatar}" class="avatar" style="width: 38px; height: 38px;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                        <div class="rank-info">
+                            <h4>${u.name} ${isMe ? ' (Você)' : ''} ${u.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h4>
+                            <span>${u.handle} • Nível ${u.level || 1}</span>
+                        </div>
+                        <div class="rank-score">${u.xp || 0} XP</div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            addXP: async (amount) => {
+                if (!appState.firebaseUser || !appState.currentUserData) return;
+                const newXp = (appState.currentUserData.xp || 0) + amount;
+                const newCoins = (appState.currentUserData.ncoins || 0) + Math.floor(amount / 2);
+                
+                try {
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { xp: newXp, ncoins: newCoins });
+                } catch(e) {}
+            },
+
+            // --- ADMIN PAINEL SIMPLES ---
+            openAdminModal: () => {
+                if (appState.currentUserData.role !== 'admin') return;
+                alert("Painel Admin Restrito.\nNível de Acesso Reconhecido.\nEm breve relatórios avançados, mas você já possui poderes de exclusão direta de qualquer postagem ou comentário no sistema!");
+            },
+
+            // --- UTILS ---
             showToast: (msg, type = 'info') => {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
@@ -1135,18 +1512,14 @@
                 }, 3000);
             },
 
-            // --- SISTEMA DE PARTICULAS CYBERPUNK 3D (ATUALIZADO) ---
             initParticles: () => {
                 const canvas = document.getElementById('particles');
                 const ctx = canvas.getContext('2d');
                 let particles = [];
                 let animationFrameId;
 
-                // Paleta Cyberpunk estrita
                 const colors = [
-                    { r: 0, g: 243, b: 255 },   // Cyan
-                    { r: 255, g: 0, b: 255 },   // Magenta
-                    { r: 176, g: 38, b: 255 }   // Purple
+                    { r: 0, g: 243, b: 255 }, { r: 255, g: 0, b: 255 }, { r: 176, g: 38, b: 255 }
                 ];
 
                 function resize() {
@@ -1154,60 +1527,36 @@
                     canvas.height = window.innerHeight;
                     initNodes();
                 }
-                
                 window.addEventListener('resize', resize);
 
                 class Particle {
                     constructor() {
                         this.x = Math.random() * canvas.width;
                         this.y = Math.random() * canvas.height;
-                        
-                        // Z-index virtual (profundidade Parallax): 0.2 (fundo) até 1.0 (frente)
                         this.z = Math.random() * 0.8 + 0.2; 
-                        
-                        // Tamanho baseado na profundidade
                         const baseSize = Math.random() * 2.5 + 1.2;
                         this.size = baseSize * this.z;
-                        
-                        // Velocidade baseada na profundidade (mais perto = mais rápido)
                         const speedFactor = (Math.random() * 0.5 + 0.15) * this.z;
                         this.speedX = (Math.random() - 0.5) * speedFactor;
                         this.speedY = (Math.random() - 0.5) * speedFactor;
-                        
-                        // Escolha de cor pura
                         this.color = colors[Math.floor(Math.random() * colors.length)];
-                        
-                        // Opacidade e pulsação muito mais visíveis 
-                        this.alpha = (Math.random() * 0.7 + 0.5) * this.z; // Bases de opacidade maiores
+                        this.alpha = (Math.random() * 0.7 + 0.5) * this.z; 
                         this.alphaChange = (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
                     }
-
                     update() {
-                        this.x += this.speedX;
-                        this.y += this.speedY;
-
-                        // Warp infinito nas bordas da tela
+                        this.x += this.speedX; this.y += this.speedY;
                         if (this.x > canvas.width + 10) this.x = -10;
                         else if (this.x < -10) this.x = canvas.width + 10;
-                        
                         if (this.y > canvas.height + 10) this.y = -10;
                         else if (this.y < -10) this.y = canvas.height + 10;
-
-                        // Pulsação suave da opacidade
                         this.alpha += this.alphaChange;
-                        if (this.alpha <= 0.25 || this.alpha >= (1.2 * this.z)) {
-                            this.alphaChange *= -1;
-                        }
+                        if (this.alpha <= 0.25 || this.alpha >= (1.2 * this.z)) { this.alphaChange *= -1; }
                     }
-
                     draw() {
-                        // Core da partícula (Cor mais concentrada)
                         ctx.beginPath();
                         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                         ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 1.5})`; 
                         ctx.fill();
-
-                        // Brilho intenso Neon sem usar shadowBlur (super leve para mobile, mas agora atinge mais partículas)
                         if (this.z > 0.3) {
                             ctx.beginPath();
                             ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
@@ -1216,83 +1565,51 @@
                         }
                     }
                 }
-
                 function initNodes() {
                     particles = [];
                     const area = canvas.width * canvas.height;
-                    // Mantida quantia otimizada pro mobile, mas o brilho aumentado da a sensacao de mais densidade
-                    let count = Math.floor(area / 6000); 
-                    count = Math.max(60, Math.min(count, 140)); 
-                    
-                    for (let i = 0; i < count; i++) {
-                        particles.push(new Particle());
-                    }
+                    let count = Math.max(60, Math.min(Math.floor(area / 6000), 140)); 
+                    for (let i = 0; i < count; i++) { particles.push(new Particle()); }
                 }
-
                 function drawConnections() {
                     const maxDistance = 110;
                     const maxDistSq = maxDistance * maxDistance; 
-
                     for (let i = 0; i < particles.length; i++) {
                         for (let j = i + 1; j < particles.length; j++) {
                             const p1 = particles[i];
                             const p2 = particles[j];
-
-                            // Somente conecta partículas em profundidades (Z) semelhantes para o efeito 3D
                             if (Math.abs(p1.z - p2.z) > 0.3) continue;
-
-                            const dx = p1.x - p2.x;
-                            const dy = p1.y - p2.y;
+                            const dx = p1.x - p2.x; const dy = p1.y - p2.y;
                             const distSq = dx * dx + dy * dy;
-
                             if (distSq < maxDistSq) {
                                 const dist = Math.sqrt(distSq);
-                                // Aumento drástico na opacidade das linhas de rede (Connections)
                                 const opacity = Math.min(1, (1 - (dist / maxDistance)) * ((p1.alpha + p2.alpha) / 1.2));
-                                
-                                ctx.beginPath();
-                                ctx.moveTo(p1.x, p1.y);
-                                ctx.lineTo(p2.x, p2.y);
-                                
-                                // Linhas na cor original do ponto
+                                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
                                 ctx.strokeStyle = `rgba(${p1.color.r}, ${p1.color.g}, ${p1.color.b}, ${opacity})`;
-                                ctx.lineWidth = 1.4 * ((p1.z + p2.z) / 2); // Levemente mais encorpado
+                                ctx.lineWidth = 1.4 * ((p1.z + p2.z) / 2);
                                 ctx.stroke();
                             }
                         }
                     }
                 }
-
                 function animate() {
-                    // Limpa o canvas padrão
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Blend mode SCREEN faz as cores somarem energia simulando Neon real sobrepondo na tela
                     ctx.globalCompositeOperation = 'screen';
-                    
                     drawConnections(); 
-                    
-                    particles.forEach(p => { 
-                        p.update(); 
-                        p.draw(); 
-                    });
-
-                    // Retorna modo normal
+                    particles.forEach(p => { p.update(); p.draw(); });
                     ctx.globalCompositeOperation = 'source-over'; 
-                    
                     animationFrameId = requestAnimationFrame(animate);
                 }
-
                 resize();
                 animate();
             }
         };
 
-        // Torna acessível aos eventos onclick no HTML
+        // Torna a classe app e o state expostos para o ambiente global e onClick functions do HTML
         window.app = app;
+        window.appState = appState;
 
-        // Inicializa assim que o DOM estiver pronto
         document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+</html>

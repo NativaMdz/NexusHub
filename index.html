@@ -10,16 +10,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Ícones -->
+    <!-- Ícones Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         /* === VARIÁVEIS GLOBAIS === */
         :root {
             --bg-base: #050507;
-            --bg-glass: rgba(15, 15, 20, 0.6);
-            --bg-glass-hover: rgba(25, 25, 35, 0.8);
-            --border-glass: rgba(0, 243, 255, 0.15);
+            --bg-glass: rgba(15, 15, 20, 0.75);
+            --bg-glass-hover: rgba(25, 25, 35, 0.85);
+            --border-glass: rgba(0, 243, 255, 0.2);
             
             /* Cores Neon */
             --cyan: #00f3ff;
@@ -27,6 +27,7 @@
             --magenta: #ff00ff;
             --magenta-glow: rgba(255, 0, 255, 0.5);
             --purple: #b026ff;
+            --purple-glow: rgba(176, 38, 255, 0.5);
             --danger: #ff2a2a;
             --success: #00ff88;
             
@@ -35,16 +36,17 @@
             --text-muted: #888899;
         }
 
-        /* === RESET & CONFIGURAÇÕES BÁSICAS === */
+        /* === RESET & ESTRUTURA === */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-base);
             color: var(--text-main);
             height: 100vh;
@@ -80,12 +82,12 @@
             max-width: 600px;
             margin: 0 auto;
             width: 100%;
-            background: radial-gradient(circle at 50% 0%, rgba(20, 10, 30, 0.8) 0%, transparent 70%);
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            background: radial-gradient(circle at 50% 0%, rgba(20, 10, 30, 0.85) 0%, rgba(5, 5, 7, 0.95) 70%);
+            box-shadow: 0 0 35px rgba(0,0,0,0.9);
         }
 
         header {
-            padding: 1.5rem 1rem 1rem;
+            padding: 1.2rem 1rem 0.9rem;
             background: var(--bg-glass);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -99,7 +101,7 @@
         }
 
         header .logo {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--text-main);
             letter-spacing: 2px;
@@ -109,10 +111,11 @@
 
         header .logo span { color: var(--cyan); }
 
+        header .actions { display: flex; gap: 15px; align-items: center; }
+
         header .actions i {
             font-size: 1.2rem;
             color: var(--text-main);
-            margin-left: 15px;
             cursor: pointer;
             transition: color 0.3s, text-shadow 0.3s;
         }
@@ -132,6 +135,7 @@
         }
         main::-webkit-scrollbar { display: none; }
 
+        /* NAV INFERIOR */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -139,7 +143,7 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 600px;
-            background: rgba(10, 10, 15, 0.85);
+            background: rgba(10, 10, 15, 0.9);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-top: 1px solid var(--border-glass);
@@ -164,7 +168,7 @@
             width: 25%;
         }
 
-        .nav-item i { font-size: 1.4rem; transition: all 0.3s ease; }
+        .nav-item i { font-size: 1.3rem; transition: all 0.3s ease; }
         .nav-item.active { color: var(--cyan); }
         .nav-item.active i { text-shadow: 0 0 15px var(--cyan-glow); transform: translateY(-3px); }
         .nav-item.active::after {
@@ -172,7 +176,7 @@
             background: var(--cyan); border-radius: 50%; box-shadow: 0 0 8px var(--cyan);
         }
 
-        /* === BOTÃO FLUTUANTE (FAB) === */
+        /* FAB - BOTÃO DE CRIAR POST */
         .fab {
             position: absolute;
             bottom: 20px;
@@ -185,7 +189,7 @@
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             box-shadow: 0 5px 20px rgba(0, 243, 255, 0.4);
             cursor: pointer;
             z-index: 5;
@@ -194,193 +198,184 @@
         .fab:hover { transform: scale(1.05); box-shadow: 0 5px 25px rgba(176, 38, 255, 0.6); }
         .fab:active { transform: scale(0.95); }
 
-        /* === FEED E POSTAGENS === */
+        /* POST CARDS */
         .post-card {
             background: var(--bg-glass);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
             backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             animation: fadeIn 0.4s ease forwards;
         }
 
-        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+        .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0.8rem; }
         .avatar {
-            width: 45px; height: 45px; border-radius: 12px; object-fit: cover;
+            width: 44px; height: 44px; border-radius: 12px; object-fit: cover;
             border: 2px solid transparent;
             background-image: linear-gradient(var(--bg-base), var(--bg-base)), linear-gradient(45deg, var(--cyan), var(--purple));
             background-origin: border-box; background-clip: content-box, border-box;
+            flex-shrink: 0;
         }
 
-        .user-info { flex: 1; }
-        .user-info h3 { font-size: 1rem; margin: 0; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
-        .user-info span { font-size: 0.8rem; color: var(--cyan); }
+        .user-info { flex: 1; min-width: 0; }
+        .user-info h3 { font-size: 0.95rem; margin: 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-info span { font-size: 0.78rem; color: var(--cyan); }
         
         .badge-verified { color: var(--cyan); font-size: 0.8rem; }
 
-        .post-content { font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; color: #d0d0d0; word-break: break-word; }
-        .post-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem; border: 1px solid rgba(0, 243, 255, 0.2); }
+        .post-content { font-size: 0.92rem; line-height: 1.5; margin-bottom: 0.8rem; color: #d8d8d8; word-break: break-word; user-select: text; }
+        .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); }
 
-        .post-actions { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem; }
-        .action-btn { background: transparent; border: none; color: var(--text-muted); font-size: 0.9rem; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: color 0.3s; }
-        .action-btn i { font-size: 1.1rem; }
+        .post-actions { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.8rem; }
+        .action-btn { background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: color 0.2s; }
+        .action-btn i { font-size: 1rem; }
         .action-btn.liked { color: var(--magenta); text-shadow: 0 0 10px var(--magenta-glow); }
         .action-btn:hover { color: var(--cyan); }
 
-        /* === PERFIL === */
+        /* PERFIL */
         .profile-header {
-            display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem;
-            background: var(--bg-glass); border-radius: 16px; margin-bottom: 1.5rem;
-            border: 1px solid rgba(176, 38, 255, 0.2); box-shadow: 0 0 20px rgba(176, 38, 255, 0.1);
+            display: flex; flex-direction: column; align-items: center; padding: 1.8rem 1rem;
+            background: var(--bg-glass); border-radius: 16px; margin-bottom: 1.2rem;
+            border: 1px solid rgba(176, 38, 255, 0.25); box-shadow: 0 0 25px rgba(176, 38, 255, 0.12);
             animation: fadeIn 0.4s ease forwards; text-align: center;
         }
-        .profile-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.5); margin-bottom: 1rem; }
-        .profile-name { font-size: 1.5rem; color: var(--text-main); margin-bottom: 5px; }
-        .profile-handle { color: var(--cyan); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); margin-bottom: 0.8rem; }
+        .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; }
+        .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 1.2rem; }
         
-        .stats-container { display: flex; width: 100%; justify-content: space-around; background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .stats-container { display: flex; width: 100%; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 0.9rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
         .stat-item { display: flex; flex-direction: column; align-items: center; }
-        .stat-value { font-size: 1.2rem; font-weight: bold; font-family: 'Rajdhani', sans-serif; }
+        .stat-value { font-size: 1.15rem; font-weight: bold; font-family: 'Rajdhani', sans-serif; }
         .stat-value.neon-purple { color: var(--purple); text-shadow: 0 0 8px rgba(176,38,255,0.6); }
         .stat-value.neon-cyan { color: var(--cyan); text-shadow: 0 0 8px rgba(0,243,255,0.6); }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
 
-        /* === CHAT / COMMS === */
-        .chat-container { display: flex; flex-direction: column; height: 100%; }
-        .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
-        .chat-messages::-webkit-scrollbar { width: 4px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 4px; }
+        /* CHAT / COMMS */
+        .chat-container { display: flex; flex-direction: column; height: 100%; min-height: 400px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; max-height: calc(100vh - 220px); }
         
-        .message { display: flex; gap: 10px; max-width: 85%; animation: fadeIn 0.3s ease; }
+        .message { display: flex; gap: 10px; max-width: 88%; animation: fadeIn 0.3s ease; }
         .message.mine { align-self: flex-end; flex-direction: row-reverse; }
-        .msg-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid var(--purple); }
-        .msg-bubble { background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .message.mine .msg-bubble { background: rgba(0, 243, 255, 0.1); border-color: var(--cyan); border-bottom-right-radius: 2px; }
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--purple); flex-shrink: 0; }
+        .msg-bubble { background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); position: relative; user-select: text; }
+        .message.mine .msg-bubble { background: rgba(0, 243, 255, 0.12); border-color: rgba(0, 243, 255, 0.3); border-bottom-right-radius: 2px; }
         .message:not(.mine) .msg-bubble { border-bottom-left-radius: 2px; }
-        .msg-author { font-size: 0.75rem; color: var(--cyan); margin-bottom: 4px; font-family: 'Rajdhani', sans-serif; font-weight: bold; }
-        .msg-text { font-size: 0.9rem; line-height: 1.4; word-break: break-word; }
-        .msg-time { font-size: 0.65rem; color: var(--text-muted); text-align: right; margin-top: 5px; display: block; }
+        .msg-author { font-size: 0.72rem; color: var(--cyan); margin-bottom: 3px; font-family: 'Rajdhani', sans-serif; font-weight: bold; }
+        .msg-text { font-size: 0.88rem; line-height: 1.4; word-break: break-word; }
+        .msg-time { font-size: 0.62rem; color: var(--text-muted); text-align: right; margin-top: 4px; display: block; }
 
-        .chat-input-area { display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 12px; border: 1px solid var(--border-glass); }
-        .chat-input { flex: 1; background: transparent; border: none; color: white; font-family: 'Inter', sans-serif; outline: none; }
-        .chat-send-btn { background: var(--cyan); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; }
+        .chat-input-area { display: flex; gap: 10px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 12px; border: 1px solid var(--border-glass); }
+        .chat-input { flex: 1; background: transparent; border: none; color: white; font-family: 'Inter', sans-serif; outline: none; padding: 5px; user-select: text; }
+        .chat-send-btn { background: var(--cyan); color: #000; border: none; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; }
         .chat-send-btn:hover { box-shadow: 0 0 15px var(--cyan-glow); transform: scale(1.05); }
 
-        /* === RANKING === */
+        /* RANKING */
         .ranking-list { display: flex; flex-direction: column; gap: 10px; }
-        .rank-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s; }
-        .rank-card:hover { transform: translateX(5px); background: rgba(255,255,255,0.08); border-color: var(--cyan); }
-        .rank-pos { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: bold; color: var(--text-muted); width: 30px; text-align: center; }
+        .rank-card { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s; }
+        .rank-card:hover { transform: translateX(4px); background: rgba(255,255,255,0.07); border-color: var(--cyan); }
+        .rank-pos { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: bold; color: var(--text-muted); width: 28px; text-align: center; }
         .rank-card:nth-child(1) .rank-pos { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
         .rank-card:nth-child(2) .rank-pos { color: #c0c0c0; text-shadow: 0 0 10px rgba(192,192,192,0.5); }
         .rank-card:nth-child(3) .rank-pos { color: #cd7f32; text-shadow: 0 0 10px rgba(205,127,50,0.5); }
-        .rank-info { flex: 1; }
-        .rank-info h4 { font-size: 1rem; margin: 0; }
-        .rank-info span { font-size: 0.8rem; color: var(--text-muted); }
-        .rank-score { font-family: 'Rajdhani', sans-serif; font-weight: bold; color: var(--cyan); font-size: 1.2rem; }
+        .rank-info { flex: 1; min-width: 0; }
+        .rank-info h4 { font-size: 0.95rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rank-info span { font-size: 0.75rem; color: var(--text-muted); }
+        .rank-score { font-family: 'Rajdhani', sans-serif; font-weight: bold; color: var(--cyan); font-size: 1.1rem; }
 
-        /* === MODAIS & FORMS === */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
+        /* MODAIS & FORMULÁRIOS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 100; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background: var(--bg-base); width: 90%; max-width: 500px; border-radius: 16px; border: 1px solid var(--purple); box-shadow: 0 0 30px rgba(176, 38, 255, 0.2); padding: 1.5rem; position: relative; transform: translateY(20px); transition: transform 0.3s; }
+        .modal-content { background: #0a0a0f; width: 90%; max-width: 480px; border-radius: 16px; border: 1px solid var(--purple); box-shadow: 0 0 30px rgba(176, 38, 255, 0.25); padding: 1.4rem; position: relative; transform: translateY(20px); transition: transform 0.3s; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
-        .modal-header h2 { font-size: 1.2rem; color: var(--cyan); }
-        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+        .modal-header h2 { font-size: 1.1rem; color: var(--cyan); }
+        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; }
         .close-modal:hover { color: var(--danger); }
 
         .form-group { margin-bottom: 1rem; }
-        .form-control { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s; }
+        .form-control { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 12px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s; user-select: text; }
         .form-control:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,243,255,0.2); }
-        textarea.form-control { resize: vertical; min-height: 100px; }
+        textarea.form-control { resize: vertical; min-height: 90px; }
         
-        .btn-primary { width: 100%; padding: 12px; background: linear-gradient(90deg, var(--cyan), var(--purple)); border: none; border-radius: 8px; color: white; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: opacity 0.3s; }
+        .btn-primary { width: 100%; padding: 12px; background: linear-gradient(90deg, var(--cyan), var(--purple)); border: none; border-radius: 8px; color: white; font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: opacity 0.3s; }
         .btn-primary:hover { opacity: 0.9; box-shadow: 0 0 15px rgba(176,38,255,0.4); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .file-upload-wrapper { position: relative; margin-bottom: 1rem; }
-        .file-upload-btn { display: inline-block; padding: 8px 15px; background: rgba(255,255,255,0.05); border: 1px dashed var(--cyan); border-radius: 8px; color: var(--cyan); cursor: pointer; font-size: 0.9rem; text-align: center; width: 100%; transition: background 0.3s; }
+        .file-upload-btn { display: inline-block; padding: 10px; background: rgba(255,255,255,0.05); border: 1px dashed var(--cyan); border-radius: 8px; color: var(--cyan); cursor: pointer; font-size: 0.85rem; text-align: center; width: 100%; transition: background 0.3s; }
         .file-upload-btn:hover { background: rgba(0,243,255,0.1); }
         .file-upload-wrapper input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
         #image-preview-container { margin-top: 10px; display: none; position: relative; }
-        #image-preview { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-glass); }
-        .remove-img-btn { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+        #image-preview { width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-glass); }
+        .remove-img-btn { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
 
-        /* === TOASTS === */
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-left: 4px solid var(--cyan); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 0.9rem; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease forwards; }
+        /* TOAST NOTIFICAÇÕES */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; width: 90%; max-width: 400px; }
+        .toast { background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-left: 4px solid var(--cyan); color: white; padding: 10px 16px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease forwards; }
         .toast.error { border-left-color: var(--danger); }
         .toast.success { border-left-color: var(--success); }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
-        /* === SKELETON LOADER === */
-        .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
-        .skeleton-avatar { width: 45px; height: 45px; border-radius: 12px; }
-        .skeleton-text { height: 10px; margin-bottom: 8px; width: 100%; }
-        .skeleton-text.short { width: 60%; }
-        .skeleton-img { height: 200px; width: 100%; border-radius: 8px; margin-top: 10px; }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-        /* === AUTH SETUP VIEW === */
-        #auth-setup { position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center; }
-        .glitch-logo { font-size: 3rem; font-family: 'Rajdhani', sans-serif; font-weight: bold; text-shadow: 0 0 20px var(--cyan); margin-bottom: 2rem; color: white; }
+        /* TELA DE AUTENTICAÇÃO / LOGIN INICIAL */
+        #auth-setup { position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem; text-align: center; }
+        .glitch-logo { font-size: 2.8rem; font-family: 'Rajdhani', sans-serif; font-weight: bold; text-shadow: 0 0 20px var(--cyan); margin-bottom: 1.5rem; color: white; }
         .glitch-logo span { color: var(--cyan); }
 
-        /* === ANIMAÇÕES === */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; text-align: center; color: var(--text-muted); animation: fadeIn 0.4s ease; }
-        .placeholder-view i { font-size: 3rem; color: var(--purple); margin-bottom: 1rem; text-shadow: 0 0 15px var(--purple); }
+        /* ANIMAÇÕES & HELPERS */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; text-align: center; color: var(--text-muted); animation: fadeIn 0.4s ease; }
+        .placeholder-view i { font-size: 2.8rem; color: var(--purple); margin-bottom: 1rem; text-shadow: 0 0 15px var(--purple); }
     </style>
 </head>
 <body>
 
-    <!-- Fundo de Partículas Estilo Cyberpunk -->
+    <!-- Canvas para Partículas Futuristas -->
     <canvas id="particles"></canvas>
 
-    <!-- Container de Notificações -->
+    <!-- Container de Mensagens Notificações (Toasts) -->
     <div id="toast-container"></div>
 
-    <!-- View de Criação de Identidade (Primeiro Login) -->
-    <div id="auth-setup" style="display: none;">
+    <!-- Tela Inicial: Criação de Identidade / Perfil Local -->
+    <div id="auth-setup">
         <div class="glitch-logo">NEXUS<span>HUB</span></div>
-        <p style="color: var(--text-muted); margin-bottom: 2rem;">Inicializando interface neural... Requer identificação.</p>
-        <div style="width: 100%; max-width: 400px; background: rgba(255,255,255,0.03); padding: 2rem; border-radius: 16px; border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 30px rgba(0,243,255,0.1);">
+        <p style="color: var(--text-muted); margin-bottom: 1.8rem; max-width: 320px; font-size: 0.9rem;">
+            Acesso ao Link Neural detectado. Identifique-se para entrar na rede.
+        </p>
+        <div style="width: 100%; max-width: 380px; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 30px rgba(0,243,255,0.1);">
             <div class="form-group">
-                <input type="text" id="setup-name" class="form-control" placeholder="Nome (Ex: Alex Cipher)" maxlength="25">
+                <input type="text" id="setup-name" class="form-control" placeholder="Seu Nome / Apelido" maxlength="25">
             </div>
             <div class="form-group">
-                <input type="text" id="setup-handle" class="form-control" placeholder="Handle (Ex: @cipher_x)" maxlength="15">
+                <input type="text" id="setup-handle" class="form-control" placeholder="Handle (Ex: @cyber_net)" maxlength="18">
             </div>
-            <button class="btn-primary" id="btn-create-identity" onclick="app.setupIdentity()">Conectar à Rede</button>
+            <button class="btn-primary" id="btn-create-identity" onclick="app.setupIdentity()">Iniciar Conexão</button>
         </div>
     </div>
 
-    <!-- App Principal -->
+    <!-- Shell do Aplicativo Principal -->
     <div id="app-container" style="display: none;">
-        <!-- Cabeçalho -->
+        <!-- Cabeçalho Superior -->
         <header>
             <div class="logo" onclick="app.navigate('feed')">NEXUS<span>HUB</span></div>
             <div class="actions">
-                <i class="fa-solid fa-bell" onclick="app.showToast('Sem novas transmissões', 'info')"></i>
-                <i class="fa-solid fa-right-from-bracket" onclick="app.logout()" title="Desconectar"></i>
+                <i class="fa-solid fa-gear" onclick="app.openSettingsModal()" title="Configurações"></i>
+                <i class="fa-solid fa-right-from-bracket" onclick="app.logout()" title="Sair / Resetar"></i>
             </div>
         </header>
 
-        <!-- Área Principal -->
-        <main id="app-content">
-            <!-- Conteúdo injetado via JS -->
-        </main>
+        <!-- Container dinâmico das telas da SPA -->
+        <main id="app-content"></main>
 
-        <!-- Botão Flutuante (Visível apenas no feed) -->
+        <!-- Botão Flutuante (+) para novas postagens -->
         <div class="fab" id="fab-add-post" onclick="app.openPostModal()" style="display: none;">
             <i class="fa-solid fa-plus"></i>
         </div>
 
-        <!-- Navegação Inferior -->
+        <!-- Barra de Navegação Inferior (Mobile First) -->
         <nav class="bottom-nav">
             <div class="nav-item active" data-view="feed" onclick="app.navigate('feed', this)">
                 <i class="fa-solid fa-house"></i>
@@ -401,7 +396,7 @@
         </nav>
     </div>
 
-    <!-- Modal Nova Postagem -->
+    <!-- Modal: Nova Transmissão (Post) -->
     <div class="modal-overlay" id="modal-post">
         <div class="modal-content">
             <div class="modal-header">
@@ -409,11 +404,11 @@
                 <button class="close-modal" onclick="app.closePostModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="form-group">
-                <textarea id="post-content" class="form-control" placeholder="O que está acontecendo no submundo?"></textarea>
+                <textarea id="post-content" class="form-control" placeholder="Compartilhe algo na malha da cidade..."></textarea>
             </div>
             <div class="file-upload-wrapper">
                 <label class="file-upload-btn">
-                    <i class="fa-solid fa-image"></i> Anexar Arquivo Visual
+                    <i class="fa-solid fa-image"></i> Anexar Imagem
                     <input type="file" id="post-image-input" accept="image/*" onchange="app.handleImageUpload(event)">
                 </label>
                 <div id="image-preview-container">
@@ -425,33 +420,36 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TEMPLATES DAS VIEWS                        -->
-    <!-- ========================================== -->
-
-    <template id="tpl-skeleton-feed">
-        <div class="post-card skeleton-card">
-            <div class="post-header">
-                <div class="skeleton skeleton-avatar"></div>
-                <div class="user-info">
-                    <div class="skeleton skeleton-text short"></div>
-                    <div class="skeleton skeleton-text" style="width: 40%"></div>
-                </div>
+    <!-- Modal: Configurações de Armazenamento -->
+    <div class="modal-overlay" id="modal-settings">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configurações do Hub</h2>
+                <button class="close-modal" onclick="app.closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="skeleton skeleton-text"></div>
-            <div class="skeleton skeleton-text"></div>
-            <div class="skeleton skeleton-text short"></div>
-            <div class="skeleton skeleton-img"></div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Atualmente executando em modo <strong>Armazenamento Local Autônomo</strong>. Funciona perfeitamente offline ou direto do armazenamento do celular.
+            </p>
+            <div class="form-group">
+                <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">MODO DE OPERAÇÃO</label>
+                <input type="text" class="form-control" value="LocalStorage / Dispositivo Local" disabled style="opacity: 0.7;">
+            </div>
+            <button class="btn-primary" onclick="app.closeSettingsModal()">Confirmar e Fechar</button>
         </div>
-    </template>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TEMPLATES DE CONTEÚDO DENTRO DA SPA       -->
+    <!-- ========================================== -->
 
     <template id="tpl-chat">
         <div class="chat-container">
-            <div class="chat-messages" id="chat-messages-container">
-                <!-- Mensagens renderizadas via JS -->
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 10px;">
+                <i class="fa-solid fa-lock" style="color: var(--cyan);"></i> Canal de Frequência Criptografado
             </div>
+            <div class="chat-messages" id="chat-messages-container"></div>
             <div class="chat-input-area">
-                <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir na frequência global..." onkeypress="app.handleChatKeyPress(event)">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Enviar mensagem para o canal..." onkeypress="app.handleChatKeyPress(event)">
                 <button class="chat-send-btn" onclick="app.sendChatMessage()">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
@@ -460,149 +458,152 @@
     </template>
 
     <template id="tpl-ranking">
-        <div style="margin-bottom: 20px; text-align: center;">
-            <i class="fa-solid fa-ranking-star" style="font-size: 2rem; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 10px;"></i>
-            <h2 style="color: white; margin-bottom: 5px;">Hall of Fame</h2>
-            <p style="color: var(--text-muted); font-size: 0.85rem;">Top Netrunners por XP</p>
+        <div style="margin-bottom: 15px; text-align: center;">
+            <i class="fa-solid fa-ranking-star" style="font-size: 1.8rem; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 5px;"></i>
+            <h2 style="color: white; margin-bottom: 3px;">Hall dos Netrunners</h2>
+            <p style="color: var(--text-muted); font-size: 0.8rem;">Maiores níveis e contribuições</p>
         </div>
-        <div class="ranking-list" id="ranking-list-container">
-            <!-- Renderizado via JS -->
-        </div>
+        <div class="ranking-list" id="ranking-list-container"></div>
     </template>
 
     <!-- ========================================== -->
-    <!-- JAVASCRIPT: Firebase, Lógica e SPA         -->
+    <!-- MOTOR EM JAVASCRIPT PURA (OFFLINE READY)   -->
     <!-- ========================================== -->
-    <script type="module">
-        // Importações Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithCustomToken, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, updateDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // --- 1. GERENCIADOR DE BANCO DE DADOS LOCAL (STORAGE ENGINE) ---
+        const DB = {
+            PREFIX: 'NEXUS_HUB_v2_',
+            
+            get: (key, defaultValue = null) => {
+                try {
+                    const item = localStorage.getItem(DB.PREFIX + key);
+                    return item ? JSON.parse(item) : defaultValue;
+                } catch (e) {
+                    console.error("Erro na leitura local:", e);
+                    return defaultValue;
+                }
+            },
+            
+            set: (key, value) => {
+                try {
+                    localStorage.setItem(DB.PREFIX + key, JSON.stringify(value));
+                    return true;
+                } catch (e) {
+                    console.error("Erro no armazenamento local (Cota excedida?):", e);
+                    return false;
+                }
+            },
 
-        // Configuração Firebase do Ambiente (Variáveis globais injetadas)
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nexus-hub-default';
-        const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            // Inicializa dados fictícios iniciais para a rede não parecer vazia no primeiro uso
+            seedInitialData: () => {
+                if (!DB.get('seeded')) {
+                    const samplePosts = [
+                        {
+                            id: 'post_1',
+                            authorUid: 'bot_kira',
+                            authorName: 'Kira_99',
+                            authorHandle: '@kira_netrunner',
+                            authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80',
+                            content: 'Acabei de atualizar meu rig. A nova placa neural está processando dados em tempo recorde! Alguém mais testando o novo firmware? 🦾✨',
+                            image: 'https://images.unsplash.com/photo-1614729939124-03290b5609ce?auto=format&fit=crop&w=600&q=80',
+                            likes: ['bot_zero'],
+                            createdAt: new Date(Date.now() - 3600000 * 2).toISOString()
+                        },
+                        {
+                            id: 'post_2',
+                            authorUid: 'bot_zero',
+                            authorName: 'Zero',
+                            authorHandle: '@zero_cool',
+                            authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
+                            content: 'A estética de Neo-Tokyo à noite nunca decepciona. As luzes de neon refletindo na chuva criam o melhor cenário para codificar. 🌧️🌃',
+                            image: '',
+                            likes: ['bot_kira'],
+                            createdAt: new Date(Date.now() - 3600000 * 5).toISOString()
+                        }
+                    ];
 
-        const fbApp = initializeApp(firebaseConfig);
-        const auth = getAuth(fbApp);
-        const db = getFirestore(fbApp);
+                    const sampleChat = [
+                        { id: 'msg_1', authorUid: 'bot_kira', authorName: 'Kira_99', authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80', content: 'Sinal estabilizado no setor 7.', createdAt: new Date(Date.now() - 60000 * 10).toISOString() },
+                        { id: 'msg_2', authorUid: 'bot_zero', authorName: 'Zero', authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80', content: 'Copiado. Transmitindo os dados do pacote.', createdAt: new Date(Date.now() - 60000 * 5).toISOString() }
+                    ];
 
-        // Caminhos das coleções seguindo as regras do ambiente
-        const PUBLIC_PATH = `artifacts/${appId}/public/data`;
-        const POSTS_REF = collection(db, PUBLIC_PATH, 'posts');
-        const USERS_REF = collection(db, PUBLIC_PATH, 'users'); // Usuários públicos para ranking/perfil
-        const CHAT_REF = collection(db, PUBLIC_PATH, 'messages');
+                    const sampleBotUsers = [
+                        { uid: 'bot_kira', name: 'Kira_99', handle: '@kira_netrunner', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80', xp: 450, level: 7 },
+                        { uid: 'bot_zero', name: 'Zero', handle: '@zero_cool', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80', xp: 310, level: 6 }
+                    ];
 
-        // Estado Global da Aplicação
+                    DB.set('posts', samplePosts);
+                    DB.set('messages', sampleChat);
+                    DB.set('bot_users', sampleBotUsers);
+                    DB.set('seeded', true);
+                }
+            }
+        };
+
+        // Estado da Aplicação
         window.appState = {
-            user: null,
-            userData: null,
+            currentUser: null,
             currentView: 'feed',
-            posts: [],
-            unsubPosts: null,
-            unsubChat: null,
-            unsubRanking: null,
             tempBase64Image: null
         };
 
-        // Objeto Principal de Controle
+        // --- 2. CONTROLADOR PRINCIPAL DO APP ---
         const app = {
-            // Inicialização
-            init: async () => {
+            init: () => {
+                DB.seedInitialData();
                 app.initParticles();
-                
-                // Autenticação Obrigatória antes de queries
-                try {
-                    if (initialToken) {
-                        await signInWithCustomToken(auth, initialToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Erro de Auth:", error);
-                    app.showToast("Erro de conexão neural", "error");
-                }
 
-                // Observador de Autenticação
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        appState.user = user;
-                        await app.checkUserIdentity(user.uid);
-                    } else {
-                        // Se deslogou
-                        document.getElementById('app-container').style.display = 'none';
-                        document.getElementById('auth-setup').style.display = 'flex';
-                    }
-                });
-            },
-
-            // Verifica se o usuário já tem um perfil salvo
-            checkUserIdentity: async (uid) => {
-                try {
-                    const userDocRef = doc(db, PUBLIC_PATH, 'users', uid);
-                    const docSnap = await getDoc(userDocRef);
-
-                    if (docSnap.exists()) {
-                        appState.userData = docSnap.data();
-                        document.getElementById('auth-setup').style.display = 'none';
-                        document.getElementById('app-container').style.display = 'flex';
-                        app.navigate('feed');
-                    } else {
-                        // Novo usuário, precisa configurar
-                        document.getElementById('app-container').style.display = 'none';
-                        document.getElementById('auth-setup').style.display = 'flex';
-                    }
-                } catch (error) {
-                    console.error("Erro ao checar identidade:", error);
+                // Verifica se já existe um usuário cadastrado neste dispositivo
+                const savedUser = DB.get('user_profile');
+                if (savedUser) {
+                    appState.currentUser = savedUser;
+                    document.getElementById('auth-setup').style.display = 'none';
+                    document.getElementById('app-container').style.display = 'flex';
+                    app.navigate('feed');
+                } else {
+                    document.getElementById('auth-setup').style.display = 'flex';
+                    document.getElementById('app-container').style.display = 'none';
                 }
             },
 
-            // Cria o perfil do usuário
-            setupIdentity: async () => {
+            // Configuração da Conta/Perfil Local
+            setupIdentity: () => {
                 const nameInput = document.getElementById('setup-name').value.trim();
                 let handleInput = document.getElementById('setup-handle').value.trim();
-                const btn = document.getElementById('btn-create-identity');
 
-                if (nameInput.length < 3 || handleInput.length < 3) {
-                    app.showToast("Dados insuficientes. Mínimo 3 caracteres.", "error");
+                if (nameInput.length < 2 || handleInput.length < 2) {
+                    app.showToast("Preencha nome e handle com no mínimo 2 caracteres.", "error");
                     return;
                 }
 
                 if (!handleInput.startsWith('@')) handleInput = '@' + handleInput;
 
-                btn.disabled = true;
-                btn.innerText = "Processando...";
+                const uid = 'user_' + Date.now();
+                const newUser = {
+                    uid: uid,
+                    name: nameInput,
+                    handle: handleInput.toLowerCase().replace(/\s/g, ''),
+                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`,
+                    xp: 50,
+                    level: 1,
+                    ncoins: 100,
+                    createdAt: new Date().toISOString()
+                };
 
-                try {
-                    const uid = appState.user.uid;
-                    const newUser = {
-                        uid: uid,
-                        name: nameInput,
-                        handle: handleInput.toLowerCase().replace(/\s/g, ''),
-                        avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, // Avatar procedual Cyberpunk
-                        xp: 0,
-                        level: 1,
-                        ncoins: 100,
-                        joinedAt: new Date().toISOString()
-                    };
+                DB.set('user_profile', newUser);
+                appState.currentUser = newUser;
 
-                    await setDoc(doc(db, PUBLIC_PATH, 'users', uid), newUser);
-                    appState.userData = newUser;
-                    
-                    app.showToast("Identidade Neural Estabelecida!", "success");
-                    document.getElementById('auth-setup').style.display = 'none';
-                    document.getElementById('app-container').style.display = 'flex';
-                    app.navigate('feed');
-                } catch (error) {
-                    app.showToast("Erro ao criar registro", "error");
-                    btn.disabled = false;
-                    btn.innerText = "Tentar Novamente";
-                }
+                app.showToast("Identidade Registrada no Dispositivo!", "success");
+                document.getElementById('auth-setup').style.display = 'none';
+                document.getElementById('app-container').style.display = 'flex';
+                app.navigate('feed');
             },
 
             logout: () => {
-                signOut(auth);
+                if (confirm("Deseja desconectar e apagar sua sessão local neste aparelho?")) {
+                    localStorage.removeItem(DB.PREFIX + 'user_profile');
+                    location.reload();
+                }
             },
 
             // --- NAVEGAÇÃO SPA ---
@@ -610,377 +611,302 @@
                 appState.currentView = viewName;
                 const contentArea = document.getElementById('app-content');
                 const fab = document.getElementById('fab-add-post');
-                
-                // Atualiza UI da barra
+
+                // Atualiza seleção na navegação
                 if (navElement) {
                     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                     navElement.classList.add('active');
                 } else {
                     document.querySelectorAll('.nav-item').forEach(el => {
-                        if(el.dataset.view === viewName) el.classList.add('active');
+                        if (el.dataset.view === viewName) el.classList.add('active');
                         else el.classList.remove('active');
                     });
                 }
 
-                // Limpa listeners antigos
-                if (appState.unsubPosts) appState.unsubPosts();
-                if (appState.unsubChat) appState.unsubChat();
-                if (appState.unsubRanking) appState.unsubRanking();
-
-                // FAB visível apenas no feed
                 fab.style.display = viewName === 'feed' ? 'flex' : 'none';
+                contentArea.innerHTML = '';
 
-                // Renderização baseada na View
-                contentArea.innerHTML = ''; 
-
-                if (viewName === 'feed') {
-                    // Adiciona Skeletons
-                    const skelTpl = document.getElementById('tpl-skeleton-feed').content.cloneNode(true);
-                    contentArea.appendChild(skelTpl);
-                    contentArea.appendChild(document.getElementById('tpl-skeleton-feed').content.cloneNode(true));
-                    app.loadFeed();
-                } 
-                else if (viewName === 'perfil') {
-                    app.renderProfile();
-                }
-                else if (viewName === 'chat') {
-                    contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
-                    app.loadChat();
-                }
-                else if (viewName === 'ranking') {
-                    contentArea.appendChild(document.getElementById('tpl-ranking').content.cloneNode(true));
-                    app.loadRanking();
-                }
+                if (viewName === 'feed') app.renderFeed();
+                else if (viewName === 'perfil') app.renderProfile();
+                else if (viewName === 'chat') app.renderChat();
+                else if (viewName === 'ranking') app.renderRanking();
             },
 
-            // --- LÓGICA DO FEED ---
-            loadFeed: () => {
-                // Como não podemos usar compound queries complexas garantidas pelo ambiente, 
-                // vamos buscar a collection inteira (ou query simples sem índices) e ordenar em JS.
-                appState.unsubPosts = onSnapshot(POSTS_REF, (snapshot) => {
-                    if (appState.currentView !== 'feed') return;
-                    
-                    const posts = [];
-                    snapshot.forEach(doc => {
-                        posts.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    // Ordenação JS (Mais recente primeiro)
-                    posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    
-                    const contentArea = document.getElementById('app-content');
-                    contentArea.innerHTML = '';
-                    
-                    if (posts.length === 0) {
-                        contentArea.innerHTML = `
-                            <div class="placeholder-view">
-                                <i class="fa-solid fa-satellite"></i>
-                                <h3>Silêncio no Setor</h3>
-                                <p>Nenhuma transmissão interceptada.</p>
-                            </div>
-                        `;
-                        return;
-                    }
+            // --- FEED DE POSTAGENS ---
+            renderFeed: () => {
+                const contentArea = document.getElementById('app-content');
+                const posts = DB.get('posts', []);
 
-                    posts.forEach(post => {
-                        const isLiked = post.likes && post.likes.includes(appState.user.uid);
-                        const likeCount = post.likes ? post.likes.length : 0;
-                        const dateObj = new Date(post.createdAt);
-                        const timeStr = dateObj.toLocaleDateString('pt-BR') + ' ' + dateObj.getHours() + ':' + String(dateObj.getMinutes()).padStart(2, '0');
-                        
-                        const imgHtml = post.image ? `<img src="${post.image}" class="post-image" alt="Anexo">` : '';
-                        
-                        // Badge para Admin/Dev se for o criador original
-                        const badge = post.authorHandle === '@cipher_x' ? '<i class="fa-solid fa-certificate badge-verified" title="Verificado"></i>' : '';
+                if (posts.length === 0) {
+                    contentArea.innerHTML = `
+                        <div class="placeholder-view">
+                            <i class="fa-solid fa-satellite"></i>
+                            <h3>Feed Vazio</h3>
+                            <p>Seja o primeiro a publicar uma transmissão!</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-                        // Botão deletar (só para o autor)
-                        const delBtn = post.authorUid === appState.user.uid ? 
-                            `<button class="action-btn" onclick="app.deletePost('${post.id}')" style="margin-left: auto; color: var(--danger);"><i class="fa-solid fa-trash"></i></button>` : '';
+                // Ordena por data (mais recente primeiro)
+                posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-                        const article = document.createElement('article');
-                        article.className = 'post-card';
-                        article.innerHTML = `
-                            <div class="post-header">
-                                <img src="${post.authorAvatar}" alt="Avatar" class="avatar">
-                                <div class="user-info">
-                                    <h3>${post.authorName} ${badge}</h3>
-                                    <span>${post.authorHandle} • ${timeStr}</span>
-                                </div>
+                posts.forEach(post => {
+                    const isLiked = post.likes && post.likes.includes(appState.currentUser.uid);
+                    const likeCount = post.likes ? post.likes.length : 0;
+                    const dateObj = new Date(post.createdAt);
+                    const timeStr = dateObj.toLocaleDateString('pt-BR') + ' ' + String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
+                    
+                    const imgHtml = post.image ? `<img src="${post.image}" class="post-image" alt="Anexo">` : '';
+                    const isMyPost = post.authorUid === appState.currentUser.uid;
+
+                    const delBtn = isMyPost ? 
+                        `<button class="action-btn" onclick="app.deletePost('${post.id}')" style="margin-left: auto; color: var(--danger);"><i class="fa-solid fa-trash"></i></button>` : '';
+
+                    const article = document.createElement('article');
+                    article.className = 'post-card';
+                    article.innerHTML = `
+                        <div class="post-header">
+                            <img src="${post.authorAvatar}" alt="Avatar" class="avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                            <div class="user-info">
+                                <h3>${post.authorName}</h3>
+                                <span>${post.authorHandle} • ${timeStr}</span>
                             </div>
-                            <p class="post-content">${post.content.replace(/\n/g, '<br>')}</p>
-                            ${imgHtml}
-                            <div class="post-actions">
-                                <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
-                                    <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> ${likeCount}
-                                </button>
-                                <button class="action-btn" onclick="app.showToast('Módulo de comentários em construção', 'info')">
-                                    <i class="fa-regular fa-comment"></i>
-                                </button>
-                                ${delBtn}
-                            </div>
-                        `;
-                        contentArea.appendChild(article);
-                    });
-                }, (error) => {
-                    console.error("Erro Feed:", error);
-                    app.showToast("Falha na sincronização", "error");
+                        </div>
+                        <p class="post-content">${post.content.replace(/\n/g, '<br>')}</p>
+                        ${imgHtml}
+                        <div class="post-actions">
+                            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
+                                <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> ${likeCount}
+                            </button>
+                            <button class="action-btn" onclick="app.showToast('Comentários salvos localmente', 'info')">
+                                <i class="fa-regular fa-comment"></i>
+                            </button>
+                            ${delBtn}
+                        </div>
+                    `;
+                    contentArea.appendChild(article);
                 });
             },
 
-            // --- LÓGICA DE POSTAGEM ---
-            openPostModal: () => {
-                document.getElementById('modal-post').classList.add('active');
-                document.getElementById('post-content').focus();
-            },
+            // Criar Novo Post
+            openPostModal: () => document.getElementById('modal-post').classList.add('active'),
             closePostModal: () => {
                 document.getElementById('modal-post').classList.remove('active');
                 document.getElementById('post-content').value = '';
                 app.removeImagePreview();
             },
-            handleImageUpload: (event) => {
-                const file = event.target.files[0];
+
+            handleImageUpload: (e) => {
+                const file = e.target.files[0];
                 if (!file) return;
 
-                // Validação de tamanho basica (> 2MB recusa antes de processar)
-                if (file.size > 2 * 1024 * 1024) {
-                    app.showToast("Arquivo muito grande. Limite: 2MB", "error");
+                if (file.size > 3 * 1024 * 1024) {
+                    app.showToast("Escolha uma imagem menor que 3MB.", "error");
                     return;
                 }
 
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    // Comprimir a imagem usando Canvas para garantir que caiba no Firestore (limite de 1MB por doc)
+                reader.onload = function(evt) {
+                    // Compressão rápida via Canvas para otimizar o LocalStorage
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 800;
-                        const MAX_HEIGHT = 800;
                         let width = img.width;
                         let height = img.height;
+                        const MAX = 700;
 
-                        if (width > height) {
-                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                        } else {
-                            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                        }
-                        
+                        if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
+                        else if (height > MAX) { width *= MAX / height; height = MAX; }
+
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // Qualidade 0.7 para WebP/JPEG
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
                         appState.tempBase64Image = dataUrl;
-                        
                         document.getElementById('image-preview').src = dataUrl;
                         document.getElementById('image-preview-container').style.display = 'block';
-                    }
-                    img.src = e.target.result;
-                }
+                    };
+                    img.src = evt.target.result;
+                };
                 reader.readAsDataURL(file);
             },
+
             removeImagePreview: () => {
                 appState.tempBase64Image = null;
                 document.getElementById('image-preview').src = '';
                 document.getElementById('image-preview-container').style.display = 'none';
                 document.getElementById('post-image-input').value = '';
             },
-            publishPost: async () => {
+
+            publishPost: () => {
                 const content = document.getElementById('post-content').value.trim();
                 if (!content && !appState.tempBase64Image) {
-                    app.showToast("Dados vazios. Criptografia falhou.", "error");
+                    app.showToast("Escreva algo ou insira uma imagem.", "error");
                     return;
                 }
 
-                const btn = document.getElementById('btn-publish');
-                btn.disabled = true;
-                btn.innerText = "Enviando...";
+                const posts = DB.get('posts', []);
+                const newPost = {
+                    id: 'post_' + Date.now(),
+                    authorUid: appState.currentUser.uid,
+                    authorName: appState.currentUser.name,
+                    authorHandle: appState.currentUser.handle,
+                    authorAvatar: appState.currentUser.avatar,
+                    content: content,
+                    image: appState.tempBase64Image || '',
+                    likes: [],
+                    createdAt: new Date().toISOString()
+                };
 
-                try {
-                    const newPost = {
-                        authorUid: appState.user.uid,
-                        authorName: appState.userData.name,
-                        authorHandle: appState.userData.handle,
-                        authorAvatar: appState.userData.avatar,
-                        content: content,
-                        image: appState.tempBase64Image,
-                        likes: [],
-                        createdAt: new Date().toISOString()
-                    };
+                posts.unshift(newPost);
+                DB.set('posts', posts);
 
-                    await addDoc(POSTS_REF, newPost);
-                    
-                    // Gamificação: Ganha XP por postar
-                    app.addXP(10);
-                    
-                    app.closePostModal();
-                    app.showToast("Transmissão enviada com sucesso", "success");
-                } catch (error) {
-                    console.error(error);
-                    app.showToast("Erro ao transmitir dados", "error");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerText = "Transmitir Dados";
+                app.addXP(15);
+                app.closePostModal();
+                app.showToast("Transmissão publicada!", "success");
+                if (appState.currentView === 'feed') app.renderFeed();
+            },
+
+            deletePost: (postId) => {
+                if (confirm("Apagar esta transmissão?")) {
+                    let posts = DB.get('posts', []);
+                    posts = posts.filter(p => p.id !== postId);
+                    DB.set('posts', posts);
+                    app.showToast("Postagem removida.", "success");
+                    app.renderFeed();
                 }
             },
-            deletePost: async (postId) => {
-                if(confirm("Tem certeza que deseja apagar este registro do banco de dados?")) {
-                    try {
-                        await deleteDoc(doc(db, PUBLIC_PATH, 'posts', postId));
-                        app.showToast("Registro apagado", "success");
-                    } catch (e) {
-                        app.showToast("Erro ao apagar", "error");
+
+            toggleLike: (postId) => {
+                const posts = DB.get('posts', []);
+                const post = posts.find(p => p.id === postId);
+                if (post) {
+                    if (!post.likes) post.likes = [];
+                    const myUid = appState.currentUser.uid;
+                    const idx = post.likes.indexOf(myUid);
+
+                    if (idx > -1) {
+                        post.likes.splice(idx, 1);
+                    } else {
+                        post.likes.push(myUid);
+                        app.addXP(2);
                     }
-                }
-            },
-            toggleLike: async (postId) => {
-                try {
-                    const postRef = doc(db, PUBLIC_PATH, 'posts', postId);
-                    const docSnap = await getDoc(postRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const likes = data.likes || [];
-                        const uid = appState.user.uid;
-                        
-                        if (likes.includes(uid)) {
-                            // Unlike
-                            await updateDoc(postRef, { likes: arrayRemove(uid) });
-                        } else {
-                            // Like
-                            await updateDoc(postRef, { likes: arrayUnion(uid) });
-                            app.addXP(1); // Ganha 1 XP por curtir
-                        }
-                    }
-                } catch (e) {
-                    console.error("Erro no like:", e);
+
+                    DB.set('posts', posts);
+                    if (appState.currentView === 'feed') app.renderFeed();
                 }
             },
 
-            // --- LÓGICA DO CHAT ---
-            loadChat: () => {
+            // --- CHAT / COMMS ---
+            renderChat: () => {
+                const contentArea = document.getElementById('app-content');
+                contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
+
                 const container = document.getElementById('chat-messages-container');
-                
-                appState.unsubChat = onSnapshot(CHAT_REF, (snapshot) => {
-                    if (appState.currentView !== 'chat') return;
-                    
-                    const messages = [];
-                    snapshot.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
-                    
-                    // Ordena crescente
-                    messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    
-                    // Limita na view para não explodir a DOM (últimas 50)
-                    const lastMessages = messages.slice(-50);
-                    
-                    container.innerHTML = '';
-                    
-                    if(lastMessages.length === 0) {
-                        container.innerHTML = '<div style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum sinal detectado neste canal.</div>';
-                    }
+                const messages = DB.get('messages', []);
 
-                    lastMessages.forEach(msg => {
-                        const isMine = msg.authorUid === appState.user.uid;
-                        const dateObj = new Date(msg.createdAt);
-                        const timeStr = dateObj.getHours() + ':' + String(dateObj.getMinutes()).padStart(2, '0');
-                        
-                        const div = document.createElement('div');
-                        div.className = `message ${isMine ? 'mine' : ''}`;
-                        div.innerHTML = `
-                            ${!isMine ? `<img src="${msg.authorAvatar}" class="msg-avatar">` : ''}
-                            <div class="msg-bubble">
-                                ${!isMine ? `<div class="msg-author">${msg.authorName}</div>` : ''}
-                                <div class="msg-text">${msg.content}</div>
-                                <span class="msg-time">${timeStr}</span>
-                            </div>
-                        `;
-                        container.appendChild(div);
-                    });
+                container.innerHTML = '';
+                messages.forEach(msg => {
+                    const isMine = msg.authorUid === appState.currentUser.uid;
+                    const dateObj = new Date(msg.createdAt);
+                    const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
 
-                    // Scroll para baixo
-                    setTimeout(() => container.scrollTop = container.scrollHeight, 50);
-                }, (error) => console.error(error));
+                    const div = document.createElement('div');
+                    div.className = `message ${isMine ? 'mine' : ''}`;
+                    div.innerHTML = `
+                        ${!isMine ? `<img src="${msg.authorAvatar}" class="msg-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">` : ''}
+                        <div class="msg-bubble">
+                            ${!isMine ? `<div class="msg-author">${msg.authorName}</div>` : ''}
+                            <div class="msg-text">${msg.content}</div>
+                            <span class="msg-time">${timeStr}</span>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+
+                setTimeout(() => container.scrollTop = container.scrollHeight, 50);
             },
+
             handleChatKeyPress: (e) => {
                 if (e.key === 'Enter') app.sendChatMessage();
             },
-            sendChatMessage: async () => {
+
+            sendChatMessage: () => {
                 const input = document.getElementById('chat-input');
                 const content = input.value.trim();
                 if (!content) return;
-                
+
+                const messages = DB.get('messages', []);
+                const newMsg = {
+                    id: 'msg_' + Date.now(),
+                    authorUid: appState.currentUser.uid,
+                    authorName: appState.currentUser.name,
+                    authorAvatar: appState.currentUser.avatar,
+                    content: content,
+                    createdAt: new Date().toISOString()
+                };
+
+                messages.push(newMsg);
+                DB.set('messages', messages);
                 input.value = '';
-                try {
-                    await addDoc(CHAT_REF, {
-                        authorUid: appState.user.uid,
-                        authorName: appState.userData.name,
-                        authorAvatar: appState.userData.avatar,
-                        content: content,
-                        createdAt: new Date().toISOString()
-                    });
-                    app.addXP(2); // XP por interagir no chat
-                } catch (e) {
-                    app.showToast("Falha na rede", "error");
-                }
+
+                app.addXP(3);
+                app.renderChat();
             },
 
-            // --- LÓGICA DO RANKING ---
-            loadRanking: () => {
+            // --- RANKING ---
+            renderRanking: () => {
+                const contentArea = document.getElementById('app-content');
+                contentArea.appendChild(document.getElementById('tpl-ranking').content.cloneNode(true));
                 const container = document.getElementById('ranking-list-container');
-                
-                appState.unsubRanking = onSnapshot(USERS_REF, (snapshot) => {
-                    if (appState.currentView !== 'ranking') return;
-                    
-                    const users = [];
-                    snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-                    
-                    // Ordena por XP decrescente
-                    users.sort((a, b) => (b.xp || 0) - (a.xp || 0));
-                    
-                    container.innerHTML = '';
-                    
-                    users.slice(0, 10).forEach((u, index) => {
-                        const div = document.createElement('div');
-                        div.className = 'rank-card';
-                        div.innerHTML = `
-                            <div class="rank-pos">#${index + 1}</div>
-                            <img src="${u.avatar}" class="avatar" style="width: 40px; height: 40px;">
-                            <div class="rank-info">
-                                <h4>${u.name}</h4>
-                                <span>${u.handle} • Nível ${u.level || 1}</span>
-                            </div>
-                            <div class="rank-score">${u.xp || 0} XP</div>
-                        `;
-                        container.appendChild(div);
-                    });
+
+                const botUsers = DB.get('bot_users', []);
+                const allUsers = [...botUsers, appState.currentUser];
+
+                // Ordena por XP
+                allUsers.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+
+                container.innerHTML = '';
+                allUsers.forEach((u, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'rank-card';
+                    div.innerHTML = `
+                        <div class="rank-pos">#${idx + 1}</div>
+                        <img src="${u.avatar}" class="avatar" style="width: 38px; height: 38px;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                        <div class="rank-info">
+                            <h4>${u.name} ${u.uid === appState.currentUser.uid ? ' (Você)' : ''}</h4>
+                            <span>${u.handle} • Nível ${u.level || 1}</span>
+                        </div>
+                        <div class="rank-score">${u.xp || 0} XP</div>
+                    `;
+                    container.appendChild(div);
                 });
             },
 
-            // --- LÓGICA DO PERFIL ---
+            // --- PERFIL ---
             renderProfile: () => {
-                const ud = appState.userData;
+                const ud = appState.currentUser;
                 const contentArea = document.getElementById('app-content');
-                
-                // Nível Baseado em XP (Ex: Lv 1 = 0 XP, Lv 2 = 100XP, Lv 3 = 300XP)
-                // Usando formula simples: nivel = floor(sqrt(xp / 10)) + 1
-                const calculatedLvl = Math.floor(Math.sqrt((ud.xp || 0) / 10)) + 1;
-                
-                // Se subiu de nível, atualiza no banco em background
-                if (calculatedLvl > (ud.level || 1)) {
-                    updateDoc(doc(db, PUBLIC_PATH, 'users', appState.user.uid), { level: calculatedLvl });
-                    ud.level = calculatedLvl;
-                    app.showToast(`Subiu para o Nível ${calculatedLvl}!`, "success");
+
+                // Recalcula Nível baseado no XP (a cada 100 XP = +1 Level)
+                const computedLevel = Math.floor((ud.xp || 0) / 100) + 1;
+                if (computedLevel !== ud.level) {
+                    ud.level = computedLevel;
+                    DB.set('user_profile', ud);
                 }
 
                 contentArea.innerHTML = `
                     <div class="profile-header">
-                        <img src="${ud.avatar}" alt="Avatar" class="profile-avatar">
+                        <img src="${ud.avatar}" alt="Avatar" class="profile-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                         <h2 class="profile-name">${ud.name}</h2>
                         <span class="profile-handle">${ud.handle}</span>
                         
                         <div class="stats-container">
                             <div class="stat-item">
-                                <span class="stat-value neon-purple">LVL ${ud.level || 1}</span>
+                                <span class="stat-value neon-purple">LVL ${ud.level}</span>
                                 <span class="stat-label">Nível</span>
                             </div>
                             <div class="stat-item">
@@ -988,51 +914,47 @@
                                 <span class="stat-label">Total XP</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-value">${ud.ncoins || 0}</span>
+                                <span class="stat-value">${ud.ncoins || 100}</span>
                                 <span class="stat-label">N-Coins</span>
                             </div>
                         </div>
                     </div>
                     
-                    <h3 style="margin-bottom: 15px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">Opções de Sistema</h3>
+                    <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">Ações do Sistema</h3>
                     
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <button class="form-control" style="text-align: left; background: rgba(255,255,255,0.05);" onclick="app.showToast('Módulo em desenvolvimento', 'info')">
-                            <i class="fa-solid fa-pen-to-square" style="margin-right: 10px; color: var(--cyan);"></i> Editar Identidade
-                        </button>
-                        <button class="form-control" style="text-align: left; background: rgba(255,255,255,0.05);" onclick="app.showToast('Inventário Neural vazio', 'info')">
-                            <i class="fa-solid fa-box" style="margin-right: 10px; color: var(--purple);"></i> Inventário Neural
+                        <button class="form-control" style="text-align: left; background: rgba(255,255,255,0.05);" onclick="app.showToast('Você está operando diretamente da memória do celular.', 'info')">
+                            <i class="fa-solid fa-hard-drive" style="margin-right: 10px; color: var(--cyan);"></i> Armazenamento Local Ativo
                         </button>
                         <button class="form-control" style="text-align: left; background: rgba(255,42,42,0.1); color: var(--danger);" onclick="app.logout()">
-                            <i class="fa-solid fa-power-off" style="margin-right: 10px;"></i> Desconectar da Rede
+                            <i class="fa-solid fa-power-off" style="margin-right: 10px;"></i> Resetar Dados Locais
                         </button>
                     </div>
                 `;
             },
 
-            // --- SISTEMA GAMIFICAÇÃO ---
-            addXP: async (amount) => {
-                try {
-                    const currentXP = appState.userData.xp || 0;
-                    const newXP = currentXP + amount;
-                    appState.userData.xp = newXP; // Atualiza local para UI responsiva
-                    await updateDoc(doc(db, PUBLIC_PATH, 'users', appState.user.uid), { xp: newXP });
-                } catch(e) {
-                    console.error("Erro ao adicionar XP", e);
-                }
+            // Adiciona XP e salva
+            addXP: (val) => {
+                if (!appState.currentUser) return;
+                appState.currentUser.xp = (appState.currentUser.xp || 0) + val;
+                DB.set('user_profile', appState.currentUser);
             },
 
-            // --- UTILITÁRIOS ---
-            showToast: (message, type = 'info') => {
+            // --- CONFIGURAÇÕES ---
+            openSettingsModal: () => document.getElementById('modal-settings').classList.add('active'),
+            closeSettingsModal: () => document.getElementById('modal-settings').classList.remove('active'),
+
+            // --- NOTIFICAÇÕES TOAST ---
+            showToast: (msg, type = 'info') => {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-                
-                let icon = 'fa-circle-info';
-                if(type === 'error') icon = 'fa-circle-xmark';
-                if(type === 'success') icon = 'fa-circle-check';
 
-                toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+                let icon = 'fa-circle-info';
+                if (type === 'error') icon = 'fa-circle-xmark';
+                if (type === 'success') icon = 'fa-circle-check';
+
+                toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
                 container.appendChild(toast);
 
                 setTimeout(() => {
@@ -1041,27 +963,27 @@
                 }, 3000);
             },
 
-            // --- PARTÍCULAS CANVAS (Preservado e Otimizado) ---
+            // --- EFEITO DE PARTICULAS (CANVAS) ---
             initParticles: () => {
                 const canvas = document.getElementById('particles');
                 const ctx = canvas.getContext('2d');
-                let particlesArray = [];
+                let particles = [];
 
-                function resizeCanvas() {
+                function resize() {
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
                 }
-                window.addEventListener('resize', resizeCanvas);
-                resizeCanvas();
+                window.addEventListener('resize', resize);
+                resize();
 
                 class Particle {
                     constructor() {
                         this.x = Math.random() * canvas.width;
                         this.y = Math.random() * canvas.height;
                         this.size = Math.random() * 2 + 0.5;
-                        this.speedX = Math.random() * 1 - 0.5;
-                        this.speedY = Math.random() * 1 - 0.5;
-                        this.color = Math.random() > 0.5 ? 'rgba(0, 243, 255, 0.4)' : 'rgba(255, 0, 255, 0.4)';
+                        this.speedX = Math.random() * 0.8 - 0.4;
+                        this.speedY = Math.random() * 0.8 - 0.4;
+                        this.color = Math.random() > 0.5 ? 'rgba(0, 243, 255, 0.35)' : 'rgba(255, 0, 255, 0.35)';
                     }
                     update() {
                         this.x += this.speedX;
@@ -1077,32 +999,23 @@
                     }
                 }
 
-                function createParticles() {
-                    particlesArray = [];
-                    // Otimização: menos partículas no mobile para performance
-                    const numberOfParticles = window.innerWidth < 600 ? 40 : 80;
-                    for (let i = 0; i < numberOfParticles; i++) particlesArray.push(new Particle());
-                }
-                createParticles();
+                const count = Math.min(window.innerWidth / 12, 50);
+                for (let i = 0; i < count; i++) particles.push(new Particle());
 
-                function animateParticles() {
+                function animate() {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    for (let i = 0; i < particlesArray.length; i++) {
-                        particlesArray[i].update();
-                        particlesArray[i].draw();
-                    }
-                    requestAnimationFrame(animateParticles);
+                    particles.forEach(p => { p.update(); p.draw(); });
+                    requestAnimationFrame(animate);
                 }
-                animateParticles();
+                animate();
             }
         };
 
-        // Exportar para o escopo global para o HTML (onclick etc) poder acessar
+        // Torna acessível aos eventos onclick no HTML
         window.app = app;
 
-        // Inicializar aplicação ao carregar
+        // Inicializa assim que o DOM estiver pronto
         document.addEventListener('DOMContentLoaded', app.init);
-
     </script>
 </body>
 </html>

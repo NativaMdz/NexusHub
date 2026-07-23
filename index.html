@@ -168,7 +168,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            flex: 1; /* Alterado para distribuir 5 abas igualmente */
+            flex: 1; 
         }
 
         .nav-item i { font-size: 1.3rem; transition: all 0.3s ease; }
@@ -258,20 +258,12 @@
         .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
 
         /* CHAT / COMMS */
-        .chat-container { 
-            display: flex; flex-direction: column; flex: 1; min-height: 0; 
-        }
-        
+        .chat-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
         .chat-header-info { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; flex-shrink: 0; }
-        
-        /* Lista de Chats Privados */
         .chat-list-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; cursor: pointer; transition: background 0.2s; }
         .chat-list-item:hover { background: rgba(255,255,255,0.08); }
 
-        .chat-messages { 
-            flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; min-height: 0; margin-bottom: 15px; scroll-behavior: smooth;
-        }
-        
+        .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; min-height: 0; margin-bottom: 15px; scroll-behavior: smooth; }
         .message { display: flex; gap: 10px; max-width: 88%; animation: fadeIn 0.3s ease; }
         .message.mine { align-self: flex-end; flex-direction: row-reverse; }
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--purple); flex-shrink: 0; cursor: pointer;}
@@ -282,10 +274,7 @@
         .msg-text { font-size: 0.88rem; line-height: 1.4; word-break: break-word; }
         .msg-time { font-size: 0.62rem; color: var(--text-muted); text-align: right; margin-top: 4px; display: block; }
 
-        .chat-input-area { 
-            display: flex; gap: 10px; background: rgba(15, 15, 20, 0.9); padding: 10px 14px; border-radius: 24px; border: 1px solid rgba(0, 243, 255, 0.3); align-items: center; flex-shrink: 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); width: 100%;
-        }
-
+        .chat-input-area { display: flex; gap: 10px; background: rgba(15, 15, 20, 0.9); padding: 10px 14px; border-radius: 24px; border: 1px solid rgba(0, 243, 255, 0.3); align-items: center; flex-shrink: 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); width: 100%; }
         .chat-attach-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 4px; transition: color 0.2s; flex-shrink: 0; }
         .chat-attach-btn:hover { color: var(--cyan); }
         .chat-input { flex: 1; background: transparent; border: none; color: white; font-family: 'Inter', sans-serif; outline: none; padding: 6px 4px; font-size: 0.95rem; min-width: 0; }
@@ -306,7 +295,7 @@
         .rank-info span { font-size: 0.75rem; color: var(--text-muted); }
         .rank-score { font-family: 'Rajdhani', sans-serif; font-weight: bold; color: var(--cyan); font-size: 1.1rem; }
 
-        /* PESQUISA (Novo Template) */
+        /* PESQUISA */
         .search-bar { width: 100%; padding: 12px 40px 12px 15px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: white; font-family: 'Inter'; outline: none; margin-bottom: 15px; }
         .search-bar:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
         .search-container { position: relative; }
@@ -359,9 +348,7 @@
         .glitch-logo span { color: var(--cyan); }
 
         /* LOADER COMPONENT */
-        .cyber-loader {
-            display: none; width: 40px; height: 40px; border: 3px solid rgba(0, 243, 255, 0.3); border-radius: 50%; border-top-color: var(--cyan); animation: spin 1s ease-in-out infinite; margin: 20px auto;
-        }
+        .cyber-loader { display: none; width: 40px; height: 40px; border: 3px solid rgba(0, 243, 255, 0.3); border-radius: 50%; border-top-color: var(--cyan); animation: spin 1s ease-in-out infinite; margin: 20px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -374,14 +361,35 @@
     <canvas id="particles"></canvas>
     <div id="toast-container"></div>
 
-    <!-- Tela Inicial: Criação de Identidade e Login Firebase -->
+    <!-- Tela Inicial: Autenticação -->
     <div id="auth-setup">
         <div class="glitch-logo">NEXUS<span>HUB</span></div>
         <p style="color: var(--text-muted); margin-bottom: 1.8rem; max-width: 320px; font-size: 0.9rem;">
             Acesso ao Link Neural detectado. Identifique-se para entrar na rede global.
         </p>
+        
         <div style="width: 100%; max-width: 380px; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 30px rgba(0,243,255,0.1);">
-            <div id="auth-form-area">
+            
+            <!-- Etapa 1: Login / Cadastro via Firebase Auth -->
+            <div id="auth-login-area">
+                <div class="form-group">
+                    <input type="email" id="auth-email" class="form-control" placeholder="E-mail">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="auth-password" class="form-control" placeholder="Senha">
+                </div>
+                <button class="btn-primary" onclick="app.loginEmail()">Conectar Link</button>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.registerEmail()">Registrar</button>
+                    <button class="btn-primary btn-secondary" style="flex: 1; border-color: rgba(255, 255, 255, 0.3);" onclick="app.loginGoogle()">
+                        <i class="fa-brands fa-google"></i> Google
+                    </button>
+                </div>
+            </div>
+
+            <!-- Etapa 2: Criação de Identidade no Firestore (Apenas p/ novos) -->
+            <div id="auth-form-area" style="display: none;">
+                <p style="color: var(--cyan); margin-bottom: 1rem; font-size: 0.85rem;">Defina sua identidade na rede:</p>
                 <div class="form-group">
                     <input type="text" id="setup-name" class="form-control" placeholder="Seu Nome / Apelido" maxlength="25">
                 </div>
@@ -390,9 +398,10 @@
                 </div>
                 <button class="btn-primary" id="btn-create-identity" onclick="app.setupIdentity()">Iniciar Conexão Global</button>
             </div>
+
             <div id="auth-loading" style="display: none;">
                 <div class="cyber-loader" style="display: block;"></div>
-                <p style="color: var(--cyan); margin-top: 10px; font-family: 'Rajdhani';">Sincronizando com Firestore...</p>
+                <p style="color: var(--cyan); margin-top: 10px; font-family: 'Rajdhani';">Sincronizando com Servidor Central...</p>
             </div>
         </div>
     </div>
@@ -496,7 +505,7 @@
             </div>
             <div class="modal-body">
                 <p style="font-size: 0.82rem; color: var(--success); margin-bottom: 1rem;">
-                    <i class="fa-solid fa-cloud"></i> Conectado em tempo real ao Firebase Firestore.
+                    <i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.
                 </p>
                 <div class="form-group">
                     <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label>
@@ -507,12 +516,12 @@
                     <textarea id="edit-bio" class="form-control" placeholder="Fale sobre você..."></textarea>
                 </div>
                 <div class="file-upload-wrapper">
-                    <label class="file-upload-btn">
+                    <label class="file-upload-btn" id="lbl-banner-upload">
                         <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
                         <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">
                     </label>
                 </div>
-                <button class="btn-primary" onclick="app.saveProfileSettings()" style="margin-bottom: 10px;">Salvar Perfil</button>
+                <button class="btn-primary" id="btn-save-settings" onclick="app.saveProfileSettings()" style="margin-bottom: 10px;">Salvar Perfil</button>
                 <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()">
                     <i class="fa-solid fa-power-off"></i> Desconectar
                 </button>
@@ -523,7 +532,6 @@
     <!-- Templates SPA -->
     <template id="tpl-chat">
         <div class="chat-container">
-            <!-- Tabs do Chat -->
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <button id="tab-global" class="btn-primary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('global')">Global</button>
                 <button id="tab-private" class="btn-primary btn-secondary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('private')">Privado</button>
@@ -533,13 +541,9 @@
                 <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
             </div>
             
-            <!-- Area das Mensagens -->
             <div class="chat-messages" id="chat-messages-container"></div>
-            
-            <!-- Lista de Chats Privados (Escondida por padrão) -->
             <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
 
-            <!-- Input do Chat -->
             <div class="chat-input-area" id="chat-input-container">
                 <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
                 <button class="chat-send-btn" onclick="app.sendChatMessage()">
@@ -575,29 +579,39 @@
         <div id="public-profile-container"></div>
     </template>
 
-    <!-- MOTOR JAVASCRIPT EM MÓDULOS (Firebase V11) -->
+    <!-- MOTOR JAVASCRIPT EM MÓDULOS (Firebase V11 Oficial - Sem dependências Gemini) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // === FIREBASE SETUP (REGRAS OBRIGATÓRIAS) ===
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // === CONFIGURAÇÃO FIREBASE OFICIAL (SUBSTITUA POR SUAS CREDENCIAIS) ===
+        const firebaseConfig = {
+  apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
+  authDomain: "nexushub-50e4a.firebaseapp.com",
+  projectId: "nexushub-50e4a",
+  storageBucket: "nexushub-50e4a.firebasestorage.app",
+  messagingSenderId: "326940228133",
+  appId: "1:326940228133:web:4d5c7b1f2bc750a254ddcc",
+  measurementId: "G-L3ZCYEGF0F"
+};
+
         const firebaseApp = initializeApp(firebaseConfig);
         const auth = getAuth(firebaseApp);
         const db = getFirestore(firebaseApp);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nexus-hub-default';
+        const storage = getStorage(firebaseApp);
 
-        // Paths do Firestore obrigatórios da infraestrutura
-        const colPosts = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
-        const colUsers = collection(db, 'artifacts', appId, 'public', 'data', 'users');
-        const colGlobalChat = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
-        const colPrivateChat = collection(db, 'artifacts', appId, 'public', 'data', 'private_chat');
+        // Caminhos Firestore Standard (Coleções na Raiz)
+        const colPosts = collection(db, 'posts');
+        const colUsers = collection(db, 'users');
+        const colGlobalChat = collection(db, 'global_chat');
+        const colPrivateChat = collection(db, 'private_chat');
 
-        // Estado Global da Aplicação em Memória
+        // Estado Global da Aplicação
         const appState = {
             firebaseUser: null,
-            currentUserData: null, // Perfil completo
+            currentUserData: null,
             currentView: 'feed',
             tempBase64Post: null,
             tempBase64Banner: null,
@@ -605,7 +619,7 @@
             allUsers: [],
             globalMessages: [],
             privateMessages: [],
-            activeChatMode: 'global', // 'global' ou 'UID do usuário privado'
+            activeChatMode: 'global', 
             activeCommentPostId: null,
             unsubscribePosts: null,
             unsubscribeUsers: null,
@@ -617,39 +631,80 @@
             init: async () => {
                 app.initParticles();
                 
-                // Inicialização do Auth como exigido
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (e) {
-                    console.error("Auth init erro:", e);
-                    app.showToast("Falha ao inicializar o Link Neural.", "error");
-                }
-
-                // Observador de Autenticação
+                // Observador de Autenticação Oficial
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         appState.firebaseUser = user;
+                        
+                        document.getElementById('auth-login-area').style.display = 'none';
+                        document.getElementById('auth-form-area').style.display = 'none';
+                        document.getElementById('auth-loading').style.display = 'block';
+
                         // Verifica se o usuário já criou o perfil no Firestore
                         const userDocRef = doc(colUsers, user.uid);
-                        const userDoc = await getDoc(userDocRef);
-                        
-                        if (userDoc.exists()) {
-                            appState.currentUserData = userDoc.data();
-                            app.startGame();
-                        } else {
-                            // Mostrar tela de setup
-                            document.getElementById('auth-setup').style.display = 'flex';
-                            document.getElementById('app-container').style.display = 'none';
+                        try {
+                            const userDoc = await getDoc(userDocRef);
+                            
+                            if (userDoc.exists()) {
+                                appState.currentUserData = userDoc.data();
+                                app.startGame();
+                            } else {
+                                // Usuário Autenticado mas sem documento criado: Mostrar Setup
+                                document.getElementById('auth-setup').style.display = 'flex';
+                                document.getElementById('app-container').style.display = 'none';
+                                document.getElementById('auth-loading').style.display = 'none';
+                                document.getElementById('auth-form-area').style.display = 'block';
+                            }
+                        } catch (e) {
+                            console.error("Erro ao ler usuário:", e);
+                            app.showToast("Erro de leitura no servidor central.", "error");
                         }
+                    } else {
+                        // Deslogado: Mostrar tela inicial de Login
+                        appState.firebaseUser = null;
+                        document.getElementById('auth-setup').style.display = 'flex';
+                        document.getElementById('app-container').style.display = 'none';
+                        document.getElementById('auth-loading').style.display = 'none';
+                        document.getElementById('auth-form-area').style.display = 'none';
+                        document.getElementById('auth-login-area').style.display = 'block';
                     }
                 });
             },
 
-            // --- 1. SETUP DE IDENTIDADE ---
+            // --- 1. AUTENTICAÇÃO OFICIAL ---
+            loginEmail: async () => {
+                const email = document.getElementById('auth-email').value;
+                const pass = document.getElementById('auth-password').value;
+                if(!email || !pass) return app.showToast("Insira email e senha.", "error");
+                try {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } catch(e) { app.showToast("Falha no login: " + e.message, "error"); }
+            },
+
+            registerEmail: async () => {
+                const email = document.getElementById('auth-email').value;
+                const pass = document.getElementById('auth-password').value;
+                if(!email || !pass) return app.showToast("Insira email e senha.", "error");
+                try {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                } catch(e) { app.showToast("Falha no registro: " + e.message, "error"); }
+            },
+
+            loginGoogle: async () => {
+                const provider = new GoogleAuthProvider();
+                try {
+                    await signInWithPopup(auth, provider);
+                } catch(e) { app.showToast("Erro Google Auth: " + e.message, "error"); }
+            },
+
+            logout: async () => {
+                if (confirm("Deseja desconectar e sair do Link Neural?")) {
+                    await signOut(auth);
+                    location.reload(); 
+                }
+            },
+
+            // --- 2. SETUP DE IDENTIDADE ---
             setupIdentity: async () => {
                 const nameInput = document.getElementById('setup-name').value.trim();
                 let handleInput = document.getElementById('setup-handle').value.trim();
@@ -661,10 +716,6 @@
                 if (!handleInput.startsWith('@')) handleInput = '@' + handleInput;
 
                 const uid = appState.firebaseUser.uid;
-                
-                // Checa se o handle já existe
-                // Como não podemos usar query complexa, vamos buscar todos e checar na memória
-                const usersSnap = await getDoc(doc(colUsers, 'dummy')).catch(()=>null); // só para ignorar
                 
                 document.getElementById('auth-form-area').style.display = 'none';
                 document.getElementById('auth-loading').style.display = 'block';
@@ -681,7 +732,7 @@
                     ncoins: 100,
                     followers: [],
                     following: [],
-                    role: 'user', // Pode ser 'admin' futuramente
+                    role: 'user', 
                     createdAt: new Date().toISOString()
                 };
 
@@ -701,12 +752,11 @@
                 document.getElementById('auth-setup').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
                 
-                // Mostrar ícone Admin se for admin
                 if (appState.currentUserData.role === 'admin') {
                     document.getElementById('admin-icon').style.display = 'inline-block';
                 }
 
-                // INICIAR LISTENERS FIRESTORE (TEMPO REAL E REGRAS RESPEITADAS)
+                // INICIAR LISTENERS FIRESTORE
                 if (appState.unsubscribePosts) appState.unsubscribePosts();
                 appState.unsubscribePosts = onSnapshot(colPosts, (snap) => {
                     appState.allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -722,7 +772,6 @@
                 appState.unsubscribeUsers = onSnapshot(colUsers, (snap) => {
                     appState.allUsers = snap.docs.map(d => d.data());
                     
-                    // Mantem perfil atual atualizado se mudou
                     const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
                     if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
 
@@ -743,7 +792,6 @@
                 appState.unsubscribePrivateChat = onSnapshot(colPrivateChat, (snap) => {
                     appState.privateMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     if (appState.currentView === 'chat' && appState.activeChatMode !== 'global') {
-                        // Renderiza msg privada
                         app.renderPrivateChatActive();
                     } else if (appState.currentView === 'chat' && appState.activeChatMode === 'private_list') {
                         app.renderPrivateChatList();
@@ -753,17 +801,24 @@
                 app.navigate('feed');
             },
 
-            logout: () => {
-                if (confirm("Deseja desconectar e sair do Link Neural?")) {
-                    location.reload(); // Recarrega para limpar iframe e auth state
+            // --- 3. STORAGE UPLOAD HELPER ---
+            uploadImageToStorage: async (base64Str, folder) => {
+                if (!base64Str) return '';
+                try {
+                    const fileName = `${folder}/${appState.firebaseUser.uid}_${Date.now()}.jpg`;
+                    const storageReference = ref(storage, fileName);
+                    await uploadString(storageReference, base64Str, 'data_url');
+                    return await getDownloadURL(storageReference);
+                } catch(e) {
+                    console.error("Storage upload error:", e);
+                    return '';
                 }
             },
 
-            // --- 2. SISTEMA DE NAVEGAÇÃO SPA ---
+            // --- 4. SISTEMA DE NAVEGAÇÃO SPA ---
             navigate: (viewName, navElement = null, additionalData = null) => {
                 appState.currentView = viewName;
                 
-                // Updates na UI
                 if (navElement && typeof navElement.classList !== 'undefined') {
                     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                     navElement.classList.add('active');
@@ -793,7 +848,7 @@
                 else if (appState.currentView === 'search') {
                     contentArea.innerHTML = '';
                     contentArea.appendChild(document.getElementById('tpl-search').content.cloneNode(true));
-                    app.performSearch(); // Executa busca vazia inicial
+                    app.performSearch();
                 }
                 else if (appState.currentView === 'chat') {
                     contentArea.innerHTML = '';
@@ -807,20 +862,17 @@
                     app.renderRanking();
                 }
                 else if (appState.currentView === 'public_profile') {
-                    // Ver perfil de outro usuário
                     const user = appState.allUsers.find(u => u.uid === data);
                     if (user) app.renderProfile(user, true);
                 }
             },
 
-            // --- 3. FEED & POSTAGENS ---
+            // --- 5. FEED & POSTAGENS ---
             renderFeed: () => {
                 const contentArea = document.getElementById('app-content');
                 contentArea.innerHTML = ''; 
                 
                 let posts = [...appState.allPosts];
-
-                // Filtro Local: Ordena do mais novo pro mais velho
                 posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
                 if (posts.length === 0) {
@@ -833,15 +885,11 @@
                     `;
                     return;
                 }
-
-                posts.forEach(post => {
-                    app.createPostCard(post, contentArea);
-                });
+                posts.forEach(post => { app.createPostCard(post, contentArea); });
             },
 
             createPostCard: (post, container, isProfileView = false) => {
                 const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
-                const isSaved = post.saves && post.saves.includes(appState.firebaseUser.uid);
                 const likeCount = post.likes ? post.likes.length : 0;
                 const commentCount = post.comments ? post.comments.length : 0;
                 
@@ -858,7 +906,6 @@
                     extraActions += `<button class="action-btn" onclick="app.deletePost('${post.id}')" style="margin-left: auto; color: var(--danger);"><i class="fa-solid fa-trash"></i></button>`;
                 }
                 
-                // Buscando dados atualizados do autor
                 const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
 
                 const article = document.createElement('article');
@@ -896,12 +943,12 @@
                 app.removeImagePreview('post');
             },
 
-            // Lida com imagens via Canvas compress para Base64 (Otimizado para o limite do Firestore)
+            // Preparação local da Imagem em Base64 para Preview antes de subir p/ Storage
             handleImageUpload: (e, type) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                if (file.size > 4 * 1024 * 1024) {
-                    app.showToast("Escolha uma imagem menor que 4MB.", "error");
+                if (file.size > 5 * 1024 * 1024) {
+                    app.showToast("Escolha uma imagem menor que 5MB.", "error");
                     return;
                 }
 
@@ -921,18 +968,18 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Alta compressão para respeitar limites do banco de dados documento
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
 
                         if (type === 'post') {
                             appState.tempBase64Post = dataUrl;
                             document.getElementById('image-preview').src = dataUrl;
                             document.getElementById('image-preview-container').style.display = 'block';
                         } else if (type === 'profile') {
-                            app.updateProfileImage(dataUrl);
+                            app.updateProfileImage(dataUrl); // Dispara upload para storage
                         } else if (type === 'banner') {
                             appState.tempBase64Banner = dataUrl;
                             app.showToast("Banner pronto. Salve o perfil.", "info");
+                            document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-check"></i> Imagem Selecionada`;
                         }
                     };
                     img.src = evt.target.result;
@@ -962,19 +1009,24 @@
                 btn.disabled = true;
                 btn.innerHTML = 'Transmitindo...';
 
-                const newPost = {
-                    authorUid: appState.firebaseUser.uid,
-                    content: content,
-                    image: appState.tempBase64Post || '',
-                    likes: [],
-                    comments: [],
-                    saves: [],
-                    createdAt: new Date().toISOString()
-                };
-
                 try {
+                    let imageUrl = '';
+                    if (appState.tempBase64Post) {
+                        imageUrl = await app.uploadImageToStorage(appState.tempBase64Post, 'posts');
+                    }
+
+                    const newPost = {
+                        authorUid: appState.firebaseUser.uid,
+                        content: content,
+                        image: imageUrl,
+                        likes: [],
+                        comments: [],
+                        saves: [],
+                        createdAt: new Date().toISOString()
+                    };
+
                     await addDoc(colPosts, newPost);
-                    app.addXP(15); // Recompensa Social
+                    app.addXP(15);
                     app.closePostModal();
                     app.showToast("Transmissão enviada a rede global!", "success");
                 } catch (e) {
@@ -1011,9 +1063,7 @@
                         await updateDoc(postRef, { likes: arrayUnion(uid) });
                         app.addXP(2);
                     }
-                } catch (e) {
-                    console.error("Like error", e);
-                }
+                } catch (e) { console.error("Like error", e); }
             },
 
             // --- COMENTÁRIOS ---
@@ -1058,7 +1108,6 @@
                     list.appendChild(div);
                 });
                 
-                // Rola para baixo
                 setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
             },
             sendComment: async () => {
@@ -1079,9 +1128,7 @@
                     await updateDoc(postRef, { comments: arrayUnion(newComment) });
                     input.value = '';
                     app.addXP(5);
-                } catch(e) {
-                    app.showToast("Erro ao comentar", "error");
-                }
+                } catch(e) { app.showToast("Erro ao comentar", "error"); }
             },
             deleteComment: async (postId, commentId) => {
                 const post = appState.allPosts.find(p => p.id === postId);
@@ -1089,19 +1136,16 @@
                 const comment = post.comments.find(c => c.id === commentId);
                 if (!comment) return;
 
-                try {
-                    await updateDoc(doc(colPosts, postId), { comments: arrayRemove(comment) });
-                } catch(e) {}
+                try { await updateDoc(doc(colPosts, postId), { comments: arrayRemove(comment) }); } catch(e) {}
             },
 
-            // --- 4. PERFIL (Privado e Público) ---
+            // --- 6. PERFIL (Privado e Público) ---
             renderProfile: (userData, isPublic = false) => {
                 const contentArea = document.getElementById('app-content');
                 if(!isPublic) contentArea.innerHTML = '';
                 
                 if (!userData) return;
                 
-                // Atualiza Nível via regra simples
                 const computedLevel = Math.floor((userData.xp || 0) / 100) + 1;
                 if (!isPublic && computedLevel !== userData.level) {
                     updateDoc(doc(colUsers, userData.uid), { level: computedLevel });
@@ -1109,8 +1153,7 @@
 
                 const isMe = userData.uid === appState.firebaseUser.uid;
                 const iFollow = userData.followers && userData.followers.includes(appState.firebaseUser.uid);
-
-                const bannerImg = userData.banner || ''; // fallback handled via CSS background color
+                const bannerImg = userData.banner || ''; 
 
                 let actionButton = '';
                 if (isMe && !isPublic) {
@@ -1183,7 +1226,6 @@
                     contentArea.innerHTML = html;
                 }
 
-                // Render posts
                 const postContainer = document.getElementById('user-posts-container');
                 myPosts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(post => {
                     app.createPostCard(post, postContainer, true);
@@ -1191,8 +1233,10 @@
             },
 
             updateProfileImage: async (base64) => {
+                app.showToast("Enviando foto...", "info");
                 try {
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 });
+                    const url = await app.uploadImageToStorage(base64, 'avatars');
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: url });
                     app.showToast("Foto atualizada!", "success");
                 } catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
             },
@@ -1200,8 +1244,6 @@
             toggleFollow: async (targetUid) => {
                 if (!appState.firebaseUser) return;
                 const myUid = appState.firebaseUser.uid;
-                
-                const me = appState.currentUserData;
                 const target = appState.allUsers.find(u => u.uid === targetUid);
                 if (!target) return;
 
@@ -1224,6 +1266,7 @@
                 document.getElementById('edit-name').value = appState.currentUserData.name;
                 document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
                 appState.tempBase64Banner = null;
+                document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-image"></i> Alterar Banner de Fundo <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">`;
                 document.getElementById('modal-settings').classList.add('active');
             },
             closeSettingsModal: () => document.getElementById('modal-settings').classList.remove('active'),
@@ -1232,19 +1275,30 @@
                 const bio = document.getElementById('edit-bio').value.trim();
                 if(name.length < 2) return app.showToast("Nome muito curto", "error");
 
-                const updates = { name: name, bio: bio };
-                if (appState.tempBase64Banner) updates.banner = appState.tempBase64Banner;
+                const btn = document.getElementById('btn-save-settings');
+                btn.disabled = true;
+                btn.innerHTML = "Salvando...";
 
                 try {
+                    const updates = { name: name, bio: bio };
+                    
+                    if (appState.tempBase64Banner) {
+                        const bannerUrl = await app.uploadImageToStorage(appState.tempBase64Banner, 'banners');
+                        updates.banner = bannerUrl;
+                    }
+
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
                     app.closeSettingsModal();
                     app.showToast("Perfil salvo!", "success");
                 } catch (e) {
                     app.showToast("Erro ao salvar", "error");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = "Salvar Perfil";
                 }
             },
 
-            // --- 5. PESQUISA DE USUÁRIOS ---
+            // --- 7. PESQUISA DE USUÁRIOS ---
             performSearch: () => {
                 const input = document.getElementById('search-input');
                 const query = input ? input.value.trim().toLowerCase() : '';
@@ -1253,7 +1307,6 @@
                 if(!container) return;
                 container.innerHTML = '';
 
-                // Filtro na memória conforme Rule 2
                 let results = appState.allUsers;
                 if (query) {
                     results = results.filter(u => u.name.toLowerCase().includes(query) || u.handle.toLowerCase().includes(query));
@@ -1279,7 +1332,7 @@
                 });
             },
 
-            // --- 6. CHAT (Global e Privado) ---
+            // --- 8. CHAT (Global e Privado) ---
             switchChatTab: (mode) => {
                 appState.activeChatMode = mode;
                 
@@ -1299,16 +1352,15 @@
                     info.innerHTML = `<i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado`;
                     app.renderChatMessages(appState.globalMessages);
                 } else if (mode === 'private') {
-                    appState.activeChatMode = 'private_list'; // Mostra lista
+                    appState.activeChatMode = 'private_list'; 
                     btnPrivate.classList.remove('btn-secondary');
                     btnGlobal.classList.add('btn-secondary');
                     cGlobal.style.display = 'none';
                     cPrivate.style.display = 'flex';
-                    inputArea.style.display = 'none'; // Some input na lista
+                    inputArea.style.display = 'none'; 
                     info.innerHTML = `<i class="fa-solid fa-lock" style="color: var(--purple);"></i> Frequências Privadas`;
                     app.renderPrivateChatList();
                 } else {
-                    // Modo dentro de um chat privado com alguém (mode = uid alvo)
                     cGlobal.style.display = 'flex';
                     cPrivate.style.display = 'none';
                     inputArea.style.display = 'flex';
@@ -1321,8 +1373,6 @@
                 if(!container) return;
                 
                 container.innerHTML = '';
-                
-                // Ordena histórico
                 const sorted = [...messagesArray].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
 
                 sorted.forEach(msg => {
@@ -1356,7 +1406,7 @@
                         <i class="fa-solid fa-lock" style="color: var(--purple);"></i> Criptografia 1x1 com <span style="color:white;">${target ? target.name : '...'}</span>
                         <br><a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab('private')">← Voltar a Lista</a>
                     `;
-                    app.switchChatTab(targetUid); // targetUid vira o modo ativo
+                    app.switchChatTab(targetUid); 
                 }, 100);
             },
 
@@ -1365,16 +1415,14 @@
                 container.innerHTML = '';
                 const myUid = appState.firebaseUser.uid;
 
-                // Extrair usuários que tem mensagens comigo
                 const myChats = appState.privateMessages.filter(m => m.participants.includes(myUid));
-                
-                // Agrupar por usuário
                 const chatMap = {};
+                
                 myChats.forEach(m => {
                     const otherUid = m.participants.find(p => p !== myUid);
                     if(otherUid) {
                         if(!chatMap[otherUid] || new Date(m.createdAt) > new Date(chatMap[otherUid].createdAt)) {
-                            chatMap[otherUid] = m; // Mantém a última
+                            chatMap[otherUid] = m;
                         }
                     }
                 });
@@ -1386,7 +1434,6 @@
                     return;
                 }
 
-                // Renderiza lista
                 uniqueUsers.forEach(uid => {
                     const user = appState.allUsers.find(u => u.uid === uid) || {name: 'Unknown', handle: '@unknown', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
                     const lastMsg = chatMap[uid].content;
@@ -1408,13 +1455,10 @@
 
             renderPrivateChatActive: () => {
                 const myUid = appState.firebaseUser.uid;
-                const targetUid = appState.activeChatMode; // No private, o mode é o UID do alvo
-                
-                // Filtra mensagens em memória (Rule 2 conformidade) onde ambos participam
+                const targetUid = appState.activeChatMode; 
                 const conversation = appState.privateMessages.filter(m => 
                     m.participants.includes(myUid) && m.participants.includes(targetUid)
                 );
-                
                 app.renderChatMessages(conversation);
             },
 
@@ -1429,7 +1473,6 @@
                 if (!content) return;
 
                 input.value = '';
-
                 const baseMsg = {
                     authorUid: appState.firebaseUser.uid,
                     content: content,
@@ -1441,24 +1484,20 @@
                         await addDoc(colGlobalChat, baseMsg);
                         app.addXP(1);
                     } else {
-                        // Mensagem Privada
                         baseMsg.participants = [appState.firebaseUser.uid, appState.activeChatMode];
                         await addDoc(colPrivateChat, baseMsg);
                     }
-                } catch(e) {
-                    app.showToast("Falha de transmissão.", "error");
-                }
+                } catch(e) { app.showToast("Falha de transmissão.", "error"); }
             },
 
-            // --- 7. RANKING E XP ---
+            // --- 9. RANKING E XP ---
             renderRanking: () => {
                 const container = document.getElementById('ranking-list-container');
                 if(!container) return;
                 
-                // Ordena todos os usuários por XP na memória (Regra 2 obedecida)
-                const sortedUsers = [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50); // Top 50
-
+                const sortedUsers = [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50); 
                 container.innerHTML = '';
+                
                 sortedUsers.forEach((u, idx) => {
                     const isMe = u.uid === appState.firebaseUser?.uid;
                     const div = document.createElement('div');
@@ -1481,16 +1520,14 @@
                 if (!appState.firebaseUser || !appState.currentUserData) return;
                 const newXp = (appState.currentUserData.xp || 0) + amount;
                 const newCoins = (appState.currentUserData.ncoins || 0) + Math.floor(amount / 2);
-                
                 try {
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), { xp: newXp, ncoins: newCoins });
                 } catch(e) {}
             },
 
-            // --- ADMIN PAINEL SIMPLES ---
             openAdminModal: () => {
                 if (appState.currentUserData.role !== 'admin') return;
-                alert("Painel Admin Restrito.\nNível de Acesso Reconhecido.\nEm breve relatórios avançados, mas você já possui poderes de exclusão direta de qualquer postagem ou comentário no sistema!");
+                alert("Painel Admin Restrito.\nNível de Acesso Reconhecido.\nVocê já possui poderes de exclusão direta de qualquer postagem ou comentário no sistema!");
             },
 
             // --- UTILS ---
@@ -1605,11 +1642,9 @@
             }
         };
 
-        // Torna a classe app e o state expostos para o ambiente global e onClick functions do HTML
         window.app = app;
         window.appState = appState;
-
         document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-</html>
+    </html>

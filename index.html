@@ -387,7 +387,7 @@
                 </div>
             </div>
 
-            <!-- Etapa 2: Criação de Identidade no Firestore (Apenas p/ novos) -->
+            <!-- Etapa 2: Criação de Identidade no Firestore (Apenas p/ novos e não-Google) -->
             <div id="auth-form-area" style="display: none;">
                 <p style="color: var(--cyan); margin-bottom: 1rem; font-size: 0.85rem;">Defina sua identidade na rede:</p>
                 <div class="form-group">
@@ -505,7 +505,7 @@
             </div>
             <div class="modal-body">
                 <p style="font-size: 0.82rem; color: var(--success); margin-bottom: 1rem;">
-                    <i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.
+                    <i class="fa-solid fa-cloud"></i> Link estabelecido com Servidor Central.
                 </p>
                 <div class="form-group">
                     <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label>
@@ -579,28 +579,26 @@
         <div id="public-profile-container"></div>
     </template>
 
-    <!-- MOTOR JAVASCRIPT EM MÓDULOS (Firebase V11 Oficial - Sem dependências Gemini) -->
+    <!-- MOTOR JAVASCRIPT EM MÓDULOS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // === CONFIGURAÇÃO FIREBASE OFICIAL (SUBSTITUA POR SUAS CREDENCIAIS) ===
         const firebaseConfig = {
-  apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
-  authDomain: "nexushub-50e4a.firebaseapp.com",
-  projectId: "nexushub-50e4a",
-  storageBucket: "nexushub-50e4a.firebasestorage.app",
-  messagingSenderId: "326940228133",
-  appId: "1:326940228133:web:4d5c7b1f2bc750a254ddcc",
-  measurementId: "G-L3ZCYEGF0F"
-};
+            apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
+            authDomain: "nexushub-50e4a.firebaseapp.com",
+            projectId: "nexushub-50e4a",
+            storageBucket: "nexushub-50e4a.firebasestorage.app",
+            messagingSenderId: "326940228133",
+            appId: "1:326940228133:web:4d5c7b1f2bc750a254ddcc",
+            measurementId: "G-L3ZCYEGF0F"
+        };
 
         const firebaseApp = initializeApp(firebaseConfig);
         const auth = getAuth(firebaseApp);
         const db = getFirestore(firebaseApp);
-        const storage = getStorage(firebaseApp);
 
         // Caminhos Firestore Standard (Coleções na Raiz)
         const colPosts = collection(db, 'posts');
@@ -613,6 +611,7 @@
             firebaseUser: null,
             currentUserData: null,
             currentView: 'feed',
+            viewingUserId: null, 
             tempBase64Post: null,
             tempBase64Banner: null,
             allPosts: [],
@@ -640,7 +639,6 @@
                         document.getElementById('auth-form-area').style.display = 'none';
                         document.getElementById('auth-loading').style.display = 'block';
 
-                        // Verifica se o usuário já criou o perfil no Firestore
                         const userDocRef = doc(colUsers, user.uid);
                         try {
                             const userDoc = await getDoc(userDocRef);
@@ -649,11 +647,37 @@
                                 appState.currentUserData = userDoc.data();
                                 app.startGame();
                             } else {
-                                // Usuário Autenticado mas sem documento criado: Mostrar Setup
-                                document.getElementById('auth-setup').style.display = 'flex';
-                                document.getElementById('app-container').style.display = 'none';
-                                document.getElementById('auth-loading').style.display = 'none';
-                                document.getElementById('auth-form-area').style.display = 'block';
+                                // Verifica se o login foi via Google para criação automática
+                                const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
+                                
+                                if (isGoogle) {
+                                    const baseHandle = (user.email ? user.email.split('@')[0] : 'runner' + Date.now());
+                                    const newUser = {
+                                        uid: user.uid,
+                                        name: user.displayName || 'Netrunner',
+                                        handle: '@' + baseHandle.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                                        avatar: user.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`,
+                                        banner: '',
+                                        bio: 'Conectado à malha neural via Google.',
+                                        xp: 50,
+                                        level: 1,
+                                        ncoins: 100,
+                                        followers: [],
+                                        following: [],
+                                        role: 'user', 
+                                        createdAt: new Date().toISOString()
+                                    };
+                                    
+                                    await setDoc(doc(colUsers, user.uid), newUser);
+                                    appState.currentUserData = newUser;
+                                    app.startGame();
+                                } else {
+                                    // Usuário Autenticado mas sem documento (Email): Mostrar Setup
+                                    document.getElementById('auth-setup').style.display = 'flex';
+                                    document.getElementById('app-container').style.display = 'none';
+                                    document.getElementById('auth-loading').style.display = 'none';
+                                    document.getElementById('auth-form-area').style.display = 'block';
+                                }
                             }
                         } catch (e) {
                             console.error("Erro ao ler usuário:", e);
@@ -704,7 +728,7 @@
                 }
             },
 
-            // --- 2. SETUP DE IDENTIDADE ---
+            // --- 2. SETUP DE IDENTIDADE MANUAL (Somente para E-mail) ---
             setupIdentity: async () => {
                 const nameInput = document.getElementById('setup-name').value.trim();
                 let handleInput = document.getElementById('setup-handle').value.trim();
@@ -747,7 +771,7 @@
                 }
             },
 
-            // Inicia listeners e o app principal
+            // Inicia listeners TEMPO REAL
             startGame: () => {
                 document.getElementById('auth-setup').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
@@ -756,13 +780,19 @@
                     document.getElementById('admin-icon').style.display = 'inline-block';
                 }
 
-                // INICIAR LISTENERS FIRESTORE
+                // INICIAR LISTENERS FIRESTORE (Real-time sem reload)
                 if (appState.unsubscribePosts) appState.unsubscribePosts();
                 appState.unsubscribePosts = onSnapshot(colPosts, (snap) => {
                     appState.allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if (appState.currentView === 'feed' || appState.currentView === 'public_profile') {
-                        app.renderCurrentView();
+                    
+                    if (appState.currentView === 'feed') {
+                        app.renderFeed();
+                    } else if (appState.currentView === 'public_profile' && appState.viewingUserId) {
+                        app.renderProfile(appState.allUsers.find(u => u.uid === appState.viewingUserId), true);
+                    } else if (appState.currentView === 'perfil') {
+                        app.renderProfile(appState.currentUserData);
                     }
+                    
                     if (appState.activeCommentPostId) {
                         app.renderComments(appState.activeCommentPostId);
                     }
@@ -772,12 +802,16 @@
                 appState.unsubscribeUsers = onSnapshot(colUsers, (snap) => {
                     appState.allUsers = snap.docs.map(d => d.data());
                     
-                    const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
-                    if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
-
-                    if (appState.currentView === 'ranking' || appState.currentView === 'search' || appState.currentView === 'perfil') {
-                        app.renderCurrentView();
+                    if (appState.firebaseUser) {
+                        const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
+                        if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
                     }
+
+                    if (appState.currentView === 'ranking') app.renderRanking();
+                    else if (appState.currentView === 'search') app.performSearch();
+                    else if (appState.currentView === 'perfil') app.renderProfile(appState.currentUserData);
+                    else if (appState.currentView === 'public_profile' && appState.viewingUserId) app.renderProfile(appState.allUsers.find(u => u.uid === appState.viewingUserId), true);
+                    else if (appState.currentView === 'feed') app.renderFeed();
                 }, e => console.error(e));
 
                 if (appState.unsubscribeGlobalChat) appState.unsubscribeGlobalChat();
@@ -792,32 +826,18 @@
                 appState.unsubscribePrivateChat = onSnapshot(colPrivateChat, (snap) => {
                     appState.privateMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     if (appState.currentView === 'chat' && appState.activeChatMode !== 'global') {
-                        app.renderPrivateChatActive();
-                    } else if (appState.currentView === 'chat' && appState.activeChatMode === 'private_list') {
-                        app.renderPrivateChatList();
+                        if (appState.activeChatMode === 'private_list') app.renderPrivateChatList();
+                        else app.renderPrivateChatActive();
                     }
                 }, e => console.error(e));
 
                 app.navigate('feed');
             },
 
-            // --- 3. STORAGE UPLOAD HELPER ---
-            uploadImageToStorage: async (base64Str, folder) => {
-                if (!base64Str) return '';
-                try {
-                    const fileName = `${folder}/${appState.firebaseUser.uid}_${Date.now()}.jpg`;
-                    const storageReference = ref(storage, fileName);
-                    await uploadString(storageReference, base64Str, 'data_url');
-                    return await getDownloadURL(storageReference);
-                } catch(e) {
-                    console.error("Storage upload error:", e);
-                    return '';
-                }
-            },
-
-            // --- 4. SISTEMA DE NAVEGAÇÃO SPA ---
+            // --- 3. SISTEMA DE NAVEGAÇÃO SPA ---
             navigate: (viewName, navElement = null, additionalData = null) => {
                 appState.currentView = viewName;
+                appState.viewingUserId = (viewName === 'public_profile') ? additionalData : null;
                 
                 if (navElement && typeof navElement.classList !== 'undefined') {
                     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -839,7 +859,6 @@
                 const contentArea = document.getElementById('app-content');
                 
                 if (appState.currentView === 'feed') {
-                    contentArea.innerHTML = '';
                     app.renderFeed();
                 } 
                 else if (appState.currentView === 'perfil') {
@@ -862,14 +881,16 @@
                     app.renderRanking();
                 }
                 else if (appState.currentView === 'public_profile') {
-                    const user = appState.allUsers.find(u => u.uid === data);
+                    const user = appState.allUsers.find(u => u.uid === (data || appState.viewingUserId));
                     if (user) app.renderProfile(user, true);
                 }
             },
 
-            // --- 5. FEED & POSTAGENS ---
+            // --- 4. FEED & POSTAGENS (Atualização Reativa Mantendo Scroll) ---
             renderFeed: () => {
                 const contentArea = document.getElementById('app-content');
+                const scrollPos = contentArea.scrollTop; // Salva rolagem
+
                 contentArea.innerHTML = ''; 
                 
                 let posts = [...appState.allPosts];
@@ -886,6 +907,8 @@
                     return;
                 }
                 posts.forEach(post => { app.createPostCard(post, contentArea); });
+                
+                contentArea.scrollTop = scrollPos; // Restaura rolagem
             },
 
             createPostCard: (post, container, isProfileView = false) => {
@@ -943,15 +966,11 @@
                 app.removeImagePreview('post');
             },
 
-            // Preparação local da Imagem em Base64 para Preview antes de subir p/ Storage
+            // Preparação e Compactação da Imagem em Base64 (Sem uso de Firebase Storage)
             handleImageUpload: (e, type) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                if (file.size > 5 * 1024 * 1024) {
-                    app.showToast("Escolha uma imagem menor que 5MB.", "error");
-                    return;
-                }
-
+                
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
@@ -968,6 +987,7 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
+                        // Formato de saída seguro e leve para banco de dados via Base64
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
 
                         if (type === 'post') {
@@ -975,7 +995,7 @@
                             document.getElementById('image-preview').src = dataUrl;
                             document.getElementById('image-preview-container').style.display = 'block';
                         } else if (type === 'profile') {
-                            app.updateProfileImage(dataUrl); // Dispara upload para storage
+                            app.updateProfileImage(dataUrl);
                         } else if (type === 'banner') {
                             appState.tempBase64Banner = dataUrl;
                             app.showToast("Banner pronto. Salve o perfil.", "info");
@@ -1012,7 +1032,7 @@
                 try {
                     let imageUrl = '';
                     if (appState.tempBase64Post) {
-                        imageUrl = await app.uploadImageToStorage(appState.tempBase64Post, 'posts');
+                        imageUrl = appState.tempBase64Post; // Gravação direta base64
                     }
 
                     const newPost = {
@@ -1066,7 +1086,7 @@
                 } catch (e) { console.error("Like error", e); }
             },
 
-            // --- COMENTÁRIOS ---
+            // --- 5. COMENTÁRIOS ---
             openComments: (postId) => {
                 appState.activeCommentPostId = postId;
                 document.getElementById('modal-comments').classList.add('active');
@@ -1079,6 +1099,10 @@
             renderComments: (postId) => {
                 const post = appState.allPosts.find(p => p.id === postId);
                 const list = document.getElementById('comments-list');
+                
+                // Mantém autoscroll inteligente (não força se já estiver rolando pra cima)
+                const isAtBottom = list.scrollHeight - list.scrollTop <= list.clientHeight + 30;
+
                 list.innerHTML = '';
                 
                 if (!post || !post.comments || post.comments.length === 0) {
@@ -1108,7 +1132,7 @@
                     list.appendChild(div);
                 });
                 
-                setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
+                if (isAtBottom) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
             },
             sendComment: async () => {
                 if (!appState.firebaseUser || !appState.activeCommentPostId) return;
@@ -1142,6 +1166,8 @@
             // --- 6. PERFIL (Privado e Público) ---
             renderProfile: (userData, isPublic = false) => {
                 const contentArea = document.getElementById('app-content');
+                const scrollPos = contentArea.scrollTop; // Salva estado do scroll
+
                 if(!isPublic) contentArea.innerHTML = '';
                 
                 if (!userData) return;
@@ -1230,13 +1256,14 @@
                 myPosts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(post => {
                     app.createPostCard(post, postContainer, true);
                 });
+
+                contentArea.scrollTop = scrollPos; // Restaura estado do scroll
             },
 
             updateProfileImage: async (base64) => {
                 app.showToast("Enviando foto...", "info");
                 try {
-                    const url = await app.uploadImageToStorage(base64, 'avatars');
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: url });
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 });
                     app.showToast("Foto atualizada!", "success");
                 } catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
             },
@@ -1283,8 +1310,7 @@
                     const updates = { name: name, bio: bio };
                     
                     if (appState.tempBase64Banner) {
-                        const bannerUrl = await app.uploadImageToStorage(appState.tempBase64Banner, 'banners');
-                        updates.banner = bannerUrl;
+                        updates.banner = appState.tempBase64Banner; // Gravado direto na Base64
                     }
 
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
@@ -1372,6 +1398,9 @@
                 const container = document.getElementById('chat-messages-container');
                 if(!container) return;
                 
+                // Mantém autoscroll
+                const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 40;
+                
                 container.innerHTML = '';
                 const sorted = [...messagesArray].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
 
@@ -1395,7 +1424,9 @@
                     container.appendChild(div);
                 });
 
-                setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+                if (isAtBottom || container.children.length <= 12) {
+                    setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+                }
             },
 
             startPrivateChat: (targetUid) => {
@@ -1647,4 +1678,4 @@
         document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+</html>

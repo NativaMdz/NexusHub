@@ -237,22 +237,48 @@
         .action-btn.liked { color: var(--magenta); text-shadow: 0 0 10px var(--magenta-glow); }
         .action-btn:hover { color: var(--cyan); }
 
-        /* PERFIL */
-        .profile-banner { width: 100%; height: 120px; border-radius: 16px 16px 0 0; object-fit: cover; background: #222; margin-bottom: -45px; border: 1px solid rgba(176, 38, 255, 0.25); border-bottom: none;}
+        /* PERFIL (LAYOUT CORRIGIDO) */
+        .profile-banner { 
+            width: 100%; 
+            height: 120px; 
+            border-radius: 16px 16px 0 0; 
+            background-size: cover; 
+            background-position: center; 
+            background-color: #222; 
+            margin-bottom: 0; 
+            border: 1px solid rgba(176, 38, 255, 0.25); 
+            border-bottom: none;
+        }
+        
         .profile-header {
-            display: flex; flex-direction: column; align-items: center; padding: 1.8rem 1rem;
-            background: var(--bg-glass); border-radius: 16px; margin-bottom: 1.2rem;
-            border: 1px solid rgba(176, 38, 255, 0.25); box-shadow: 0 0 25px rgba(176, 38, 255, 0.12);
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 3.5rem 1rem 1.8rem; /* Espaçamento extra no topo para a foto não cobrir textos */
+            background: var(--bg-glass); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem;
+            border: 1px solid rgba(176, 38, 255, 0.25); border-top: none; box-shadow: 0 0 25px rgba(176, 38, 255, 0.12);
             animation: fadeIn 0.4s ease forwards; text-align: center; position: relative;
         }
-        .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); margin-bottom: 0; z-index: 2; background: var(--bg-base); }
+        
+        .profile-avatar-container { 
+            position: absolute; 
+            top: -42px; /* Posicionamento fixo sobre o limite entre banner e header */
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 5; 
+        }
+        
+        .profile-avatar { 
+            width: 85px; height: 85px; border-radius: 50%; object-fit: cover; 
+            border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); 
+            background: var(--bg-base); 
+        }
+        
         .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; z-index: 2;}
         .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.5rem; z-index: 2;}
         .profile-bio { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; max-width: 90%; }
         
         .stats-container { display: flex; width: 100%; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 0.9rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 10px;}
         .stat-item { display: flex; flex-direction: column; align-items: center; }
-        .stat-value { font-size: 1.15rem; font-weight: bold; font-family: 'Rajdhani', sans-serif; }
+        .stat-value { font-size: 1.15rem; font-weight: bold; font-family: 'Rajdhani', sans-serif; transition: color 0.3s; }
         .stat-value.neon-purple { color: var(--purple); text-shadow: 0 0 8px rgba(176,38,255,0.6); }
         .stat-value.neon-cyan { color: var(--cyan); text-shadow: 0 0 8px rgba(0,243,255,0.6); }
         .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
@@ -387,7 +413,7 @@
                 </div>
             </div>
 
-            <!-- Etapa 2: Criação de Identidade no Firestore (Apenas p/ novos e não-Google) -->
+            <!-- Etapa 2: Criação de Identidade no Firestore (Apenas p/ novos) -->
             <div id="auth-form-area" style="display: none;">
                 <p style="color: var(--cyan); margin-bottom: 1rem; font-size: 0.85rem;">Defina sua identidade na rede:</p>
                 <div class="form-group">
@@ -505,7 +531,7 @@
             </div>
             <div class="modal-body">
                 <p style="font-size: 0.82rem; color: var(--success); margin-bottom: 1rem;">
-                    <i class="fa-solid fa-cloud"></i> Link estabelecido com Servidor Central.
+                    <i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.
                 </p>
                 <div class="form-group">
                     <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label>
@@ -579,11 +605,12 @@
         <div id="public-profile-container"></div>
     </template>
 
-    <!-- MOTOR JAVASCRIPT EM MÓDULOS -->
+    <!-- MOTOR JAVASCRIPT EM MÓDULOS (Firebase V11 Oficial - Sem dependências Gemini) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // === CONFIGURAÇÃO FIREBASE OFICIAL (SUBSTITUA POR SUAS CREDENCIAIS) ===
         const firebaseConfig = {
@@ -599,6 +626,7 @@
         const firebaseApp = initializeApp(firebaseConfig);
         const auth = getAuth(firebaseApp);
         const db = getFirestore(firebaseApp);
+        const storage = getStorage(firebaseApp);
 
         // Caminhos Firestore Standard (Coleções na Raiz)
         const colPosts = collection(db, 'posts');
@@ -611,7 +639,7 @@
             firebaseUser: null,
             currentUserData: null,
             currentView: 'feed',
-            viewingUserId: null, 
+            currentPublicProfileUid: null, // Guardar quem estamos visualizando
             tempBase64Post: null,
             tempBase64Banner: null,
             allPosts: [],
@@ -639,6 +667,7 @@
                         document.getElementById('auth-form-area').style.display = 'none';
                         document.getElementById('auth-loading').style.display = 'block';
 
+                        // Verifica se o usuário já criou o perfil no Firestore
                         const userDocRef = doc(colUsers, user.uid);
                         try {
                             const userDoc = await getDoc(userDocRef);
@@ -647,37 +676,11 @@
                                 appState.currentUserData = userDoc.data();
                                 app.startGame();
                             } else {
-                                // Verifica se o login foi via Google para criação automática
-                                const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
-                                
-                                if (isGoogle) {
-                                    const baseHandle = (user.email ? user.email.split('@')[0] : 'runner' + Date.now());
-                                    const newUser = {
-                                        uid: user.uid,
-                                        name: user.displayName || 'Netrunner',
-                                        handle: '@' + baseHandle.toLowerCase().replace(/[^a-z0-9]/g, ''),
-                                        avatar: user.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`,
-                                        banner: '',
-                                        bio: 'Conectado à malha neural via Google.',
-                                        xp: 50,
-                                        level: 1,
-                                        ncoins: 100,
-                                        followers: [],
-                                        following: [],
-                                        role: 'user', 
-                                        createdAt: new Date().toISOString()
-                                    };
-                                    
-                                    await setDoc(doc(colUsers, user.uid), newUser);
-                                    appState.currentUserData = newUser;
-                                    app.startGame();
-                                } else {
-                                    // Usuário Autenticado mas sem documento (Email): Mostrar Setup
-                                    document.getElementById('auth-setup').style.display = 'flex';
-                                    document.getElementById('app-container').style.display = 'none';
-                                    document.getElementById('auth-loading').style.display = 'none';
-                                    document.getElementById('auth-form-area').style.display = 'block';
-                                }
+                                // Usuário Autenticado mas sem documento criado: Mostrar Setup
+                                document.getElementById('auth-setup').style.display = 'flex';
+                                document.getElementById('app-container').style.display = 'none';
+                                document.getElementById('auth-loading').style.display = 'none';
+                                document.getElementById('auth-form-area').style.display = 'block';
                             }
                         } catch (e) {
                             console.error("Erro ao ler usuário:", e);
@@ -728,7 +731,7 @@
                 }
             },
 
-            // --- 2. SETUP DE IDENTIDADE MANUAL (Somente para E-mail) ---
+            // --- 2. SETUP DE IDENTIDADE ---
             setupIdentity: async () => {
                 const nameInput = document.getElementById('setup-name').value.trim();
                 let handleInput = document.getElementById('setup-handle').value.trim();
@@ -771,7 +774,7 @@
                 }
             },
 
-            // Inicia listeners TEMPO REAL
+            // Inicia listeners e o app principal
             startGame: () => {
                 document.getElementById('auth-setup').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
@@ -780,21 +783,15 @@
                     document.getElementById('admin-icon').style.display = 'inline-block';
                 }
 
-                // INICIAR LISTENERS FIRESTORE (Real-time sem reload)
+                // LISTENERS FIRESTORE (COM ATUALIZAÇÃO DOM OTIMIZADA)
                 if (appState.unsubscribePosts) appState.unsubscribePosts();
                 appState.unsubscribePosts = onSnapshot(colPosts, (snap) => {
                     appState.allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    
-                    if (appState.currentView === 'feed') {
-                        app.renderFeed();
-                    } else if (appState.currentView === 'public_profile' && appState.viewingUserId) {
-                        app.renderProfile(appState.allUsers.find(u => u.uid === appState.viewingUserId), true);
-                    } else if (appState.currentView === 'perfil') {
-                        app.renderProfile(appState.currentUserData);
+                    if (appState.currentView === 'feed' || appState.currentView === 'perfil' || appState.currentView === 'public_profile') {
+                        app.updatePostsInDOM(); 
                     }
-                    
                     if (appState.activeCommentPostId) {
-                        app.renderComments(appState.activeCommentPostId);
+                        app.updateCommentsInDOM(appState.activeCommentPostId);
                     }
                 }, e => console.error(e));
 
@@ -802,42 +799,60 @@
                 appState.unsubscribeUsers = onSnapshot(colUsers, (snap) => {
                     appState.allUsers = snap.docs.map(d => d.data());
                     
-                    if (appState.firebaseUser) {
-                        const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
-                        if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
-                    }
+                    const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
+                    if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
 
-                    if (appState.currentView === 'ranking') app.renderRanking();
-                    else if (appState.currentView === 'search') app.performSearch();
-                    else if (appState.currentView === 'perfil') app.renderProfile(appState.currentUserData);
-                    else if (appState.currentView === 'public_profile' && appState.viewingUserId) app.renderProfile(appState.allUsers.find(u => u.uid === appState.viewingUserId), true);
-                    else if (appState.currentView === 'feed') app.renderFeed();
+                    if (appState.currentView === 'perfil' || appState.currentView === 'public_profile') {
+                        app.updateProfileInDOM();
+                    } else if (appState.currentView === 'ranking') {
+                        app.renderRanking();
+                    } else if (appState.currentView === 'search') {
+                        app.performSearch();
+                    }
                 }, e => console.error(e));
 
                 if (appState.unsubscribeGlobalChat) appState.unsubscribeGlobalChat();
                 appState.unsubscribeGlobalChat = onSnapshot(colGlobalChat, (snap) => {
                     appState.globalMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     if (appState.currentView === 'chat' && appState.activeChatMode === 'global') {
-                        app.renderChatMessages(appState.globalMessages);
+                        app.updateChatInDOM(appState.globalMessages);
                     }
                 }, e => console.error(e));
 
                 if (appState.unsubscribePrivateChat) appState.unsubscribePrivateChat();
                 appState.unsubscribePrivateChat = onSnapshot(colPrivateChat, (snap) => {
                     appState.privateMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if (appState.currentView === 'chat' && appState.activeChatMode !== 'global') {
-                        if (appState.activeChatMode === 'private_list') app.renderPrivateChatList();
-                        else app.renderPrivateChatActive();
+                    if (appState.currentView === 'chat' && appState.activeChatMode !== 'global' && appState.activeChatMode !== 'private_list') {
+                        const conversation = appState.privateMessages.filter(m => 
+                            m.participants.includes(appState.firebaseUser.uid) && m.participants.includes(appState.activeChatMode)
+                        );
+                        app.updateChatInDOM(conversation);
+                    } else if (appState.currentView === 'chat' && appState.activeChatMode === 'private_list') {
+                        app.renderPrivateChatList();
                     }
                 }, e => console.error(e));
 
                 app.navigate('feed');
             },
 
-            // --- 3. SISTEMA DE NAVEGAÇÃO SPA ---
+            // --- 3. STORAGE UPLOAD HELPER ---
+            uploadImageToStorage: async (base64Str, folder) => {
+                if (!base64Str) return '';
+                try {
+                    const fileName = `${folder}/${appState.firebaseUser.uid}_${Date.now()}.jpg`;
+                    const storageReference = ref(storage, fileName);
+                    await uploadString(storageReference, base64Str, 'data_url');
+                    return await getDownloadURL(storageReference);
+                } catch(e) {
+                    console.error("Storage upload error:", e);
+                    return '';
+                }
+            },
+
+            // --- 4. SISTEMA DE NAVEGAÇÃO SPA ---
             navigate: (viewName, navElement = null, additionalData = null) => {
                 appState.currentView = viewName;
-                appState.viewingUserId = (viewName === 'public_profile') ? additionalData : null;
+                if (viewName === 'public_profile') appState.currentPublicProfileUid = additionalData;
                 
                 if (navElement && typeof navElement.classList !== 'undefined') {
                     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -852,13 +867,14 @@
                 const fab = document.getElementById('fab-add-post');
                 fab.style.display = viewName === 'feed' ? 'flex' : 'none';
                 
-                app.renderCurrentView(additionalData);
+                app.renderCurrentView();
             },
 
-            renderCurrentView: (data = null) => {
+            renderCurrentView: () => {
                 const contentArea = document.getElementById('app-content');
                 
                 if (appState.currentView === 'feed') {
+                    contentArea.innerHTML = '';
                     app.renderFeed();
                 } 
                 else if (appState.currentView === 'perfil') {
@@ -873,7 +889,7 @@
                     contentArea.innerHTML = '';
                     contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
                     appState.activeChatMode = 'global';
-                    app.renderChatMessages(appState.globalMessages);
+                    app.updateChatInDOM(appState.globalMessages); // Usa DOM diffing inicial para garantir integridade
                 }
                 else if (appState.currentView === 'ranking') {
                     contentArea.innerHTML = '';
@@ -881,37 +897,89 @@
                     app.renderRanking();
                 }
                 else if (appState.currentView === 'public_profile') {
-                    const user = appState.allUsers.find(u => u.uid === (data || appState.viewingUserId));
+                    const user = appState.allUsers.find(u => u.uid === appState.currentPublicProfileUid);
                     if (user) app.renderProfile(user, true);
                 }
             },
 
-            // --- 4. FEED & POSTAGENS (Atualização Reativa Mantendo Scroll) ---
+            // --- 5. FEED E UPDATES INTELIGENTES DE POSTAGENS ---
             renderFeed: () => {
                 const contentArea = document.getElementById('app-content');
-                const scrollPos = contentArea.scrollTop; // Salva rolagem
-
                 contentArea.innerHTML = ''; 
-                
-                let posts = [...appState.allPosts];
-                posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                app.updatePostsInDOM(); 
+            },
+            
+            // Otimização: Atualiza posts dinamicamente em vez de recarregar tudo
+            updatePostsInDOM: () => {
+                const container = appState.currentView === 'feed' ? document.getElementById('app-content') : document.getElementById('user-posts-container');
+                if (!container) return;
 
-                if (posts.length === 0) {
-                    contentArea.innerHTML = `
-                        <div class="placeholder-view">
-                            <i class="fa-solid fa-satellite"></i>
-                            <h3>Feed Vazio</h3>
-                            <p>Seja o primeiro a transmitir algo na rede!</p>
-                        </div>
-                    `;
+                let expectedPosts = [...appState.allPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                if (appState.currentView === 'perfil') {
+                    expectedPosts = expectedPosts.filter(p => p.authorUid === appState.firebaseUser.uid);
+                } else if (appState.currentView === 'public_profile') {
+                    expectedPosts = expectedPosts.filter(p => p.authorUid === appState.currentPublicProfileUid);
+                }
+
+                if (expectedPosts.length === 0) {
+                    if (!container.querySelector('.placeholder-view') && appState.currentView === 'feed') {
+                        container.innerHTML = `
+                            <div class="placeholder-view">
+                                <i class="fa-solid fa-satellite"></i>
+                                <h3>Feed Vazio</h3>
+                                <p>Seja o primeiro a transmitir algo na rede!</p>
+                            </div>
+                        `;
+                    }
                     return;
                 }
-                posts.forEach(post => { app.createPostCard(post, contentArea); });
-                
-                contentArea.scrollTop = scrollPos; // Restaura rolagem
+
+                const placeholder = container.querySelector('.placeholder-view');
+                if (placeholder) placeholder.remove();
+
+                // 1. Remove os que foram excluídos
+                const currentCards = Array.from(container.querySelectorAll('.post-card'));
+                currentCards.forEach(card => {
+                    const id = card.dataset.id;
+                    if (!expectedPosts.find(p => p.id === id)) {
+                        card.remove();
+                    }
+                });
+
+                // 2. Atualiza os existentes e insere novos
+                expectedPosts.forEach((post, index) => {
+                    const existingEl = container.querySelector(`.post-card[data-id="${post.id}"]`);
+                    if (existingEl) {
+                        const likeBtn = existingEl.querySelector('.btn-like');
+                        if (likeBtn) {
+                            const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
+                            if (isLiked) {
+                                likeBtn.classList.add('liked');
+                                likeBtn.innerHTML = `<i class="fa-solid fa-heart"></i> <span class="like-count">${post.likes.length}</span>`;
+                            } else {
+                                likeBtn.classList.remove('liked');
+                                likeBtn.innerHTML = `<i class="fa-regular fa-heart"></i> <span class="like-count">${post.likes ? post.likes.length : 0}</span>`;
+                            }
+                        }
+                        const commentBtn = existingEl.querySelector('.btn-comment');
+                        if (commentBtn) {
+                            commentBtn.innerHTML = `<i class="fa-regular fa-comment"></i> <span class="comment-count">${post.comments ? post.comments.length : 0}</span>`;
+                        }
+                        
+                        // Garante a ordem correta caso algo venha com timestamp alterado
+                        if (container.children[index] !== existingEl) {
+                            container.insertBefore(existingEl, container.children[index]);
+                        }
+                    } else {
+                        // Novo post, insere na posição correspondente
+                        const refNode = container.children[index] || null;
+                        app.createPostCard(post, container, appState.currentView !== 'feed', refNode);
+                    }
+                });
             },
 
-            createPostCard: (post, container, isProfileView = false) => {
+            createPostCard: (post, container, isProfileView = false, refNode = null) => {
                 const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
                 const likeCount = post.likes ? post.likes.length : 0;
                 const commentCount = post.comments ? post.comments.length : 0;
@@ -933,6 +1001,7 @@
 
                 const article = document.createElement('article');
                 article.className = 'post-card';
+                article.dataset.id = post.id;
                 article.innerHTML = `
                     <div class="post-header" onclick="app.navigate('public_profile', null, '${authorData.uid}')">
                         <img src="${authorData.avatar}" alt="Avatar" class="avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
@@ -944,11 +1013,11 @@
                     <p class="post-content">${post.content.replace(/\n/g, '<br>')}</p>
                     ${imgHtml}
                     <div class="post-actions">
-                        <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
-                            <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> ${likeCount}
+                        <button class="action-btn btn-like ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
+                            <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> <span class="like-count">${likeCount}</span>
                         </button>
-                        <button class="action-btn" onclick="app.openComments('${post.id}')">
-                            <i class="fa-regular fa-comment"></i> ${commentCount}
+                        <button class="action-btn btn-comment" onclick="app.openComments('${post.id}')">
+                            <i class="fa-regular fa-comment"></i> <span class="comment-count">${commentCount}</span>
                         </button>
                         <button class="action-btn" onclick="app.showToast('Link da postagem copiado!', 'success')">
                             <i class="fa-solid fa-share-nodes"></i>
@@ -956,7 +1025,12 @@
                         ${extraActions}
                     </div>
                 `;
-                container.appendChild(article);
+                
+                if (refNode) {
+                    container.insertBefore(article, refNode);
+                } else {
+                    container.appendChild(article);
+                }
             },
 
             openPostModal: () => document.getElementById('modal-post').classList.add('active'),
@@ -966,11 +1040,14 @@
                 app.removeImagePreview('post');
             },
 
-            // Preparação e Compactação da Imagem em Base64 (Sem uso de Firebase Storage)
             handleImageUpload: (e, type) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                
+                if (file.size > 5 * 1024 * 1024) {
+                    app.showToast("Escolha uma imagem menor que 5MB.", "error");
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
@@ -987,7 +1064,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Formato de saída seguro e leve para banco de dados via Base64
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
 
                         if (type === 'post') {
@@ -1032,7 +1108,7 @@
                 try {
                     let imageUrl = '';
                     if (appState.tempBase64Post) {
-                        imageUrl = appState.tempBase64Post; // Gravação direta base64
+                        imageUrl = await app.uploadImageToStorage(appState.tempBase64Post, 'posts');
                     }
 
                     const newPost = {
@@ -1076,6 +1152,7 @@
                 const postRef = doc(colPosts, postId);
                 const uid = appState.firebaseUser.uid;
 
+                // Fire and forget, UI vai atualizar via DOM diffing
                 try {
                     if (post.likes.includes(uid)) {
                         await updateDoc(postRef, { likes: arrayRemove(uid) });
@@ -1086,7 +1163,7 @@
                 } catch (e) { console.error("Like error", e); }
             },
 
-            // --- 5. COMENTÁRIOS ---
+            // --- COMENTÁRIOS COM DOM DIFFING ---
             openComments: (postId) => {
                 appState.activeCommentPostId = postId;
                 document.getElementById('modal-comments').classList.add('active');
@@ -1096,25 +1173,40 @@
                 document.getElementById('modal-comments').classList.remove('active');
                 appState.activeCommentPostId = null;
             },
+            
             renderComments: (postId) => {
+                const list = document.getElementById('comments-list');
+                list.innerHTML = '';
+                app.updateCommentsInDOM(postId);
+            },
+
+            updateCommentsInDOM: (postId) => {
                 const post = appState.allPosts.find(p => p.id === postId);
                 const list = document.getElementById('comments-list');
+                if (!list) return;
                 
-                // Mantém autoscroll inteligente (não força se já estiver rolando pra cima)
-                const isAtBottom = list.scrollHeight - list.scrollTop <= list.clientHeight + 30;
-
-                list.innerHTML = '';
-                
+                const currentComments = list.querySelectorAll('.comment-item').length;
                 if (!post || !post.comments || post.comments.length === 0) {
-                    list.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding: 20px;">Nenhum comentário. Seja o primeiro!</p>';
+                    list.innerHTML = '<p class="no-comments-msg" style="color:var(--text-muted); text-align:center; padding: 20px;">Nenhum comentário. Seja o primeiro!</p>';
                     return;
                 }
 
-                post.comments.forEach(c => {
+                const msg = list.querySelector('.no-comments-msg');
+                if (msg) msg.remove();
+
+                if (currentComments > post.comments.length) {
+                    list.innerHTML = ''; // Algum foi deletado, limpa para rebuild
+                }
+
+                const startingIndex = list.querySelectorAll('.comment-item').length;
+                const newComments = post.comments.slice(startingIndex);
+
+                newComments.forEach(c => {
                     const author = appState.allUsers.find(u => u.uid === c.authorUid) || {name: 'Netrunner Desconhecido', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
                     
                     const div = document.createElement('div');
-                    div.style = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-size: 0.85rem;";
+                    div.className = 'comment-item';
+                    div.style = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-size: 0.85rem; animation: fadeIn 0.3s ease;";
                     
                     let delBtn = '';
                     if (c.authorUid === appState.firebaseUser.uid || appState.currentUserData.role === 'admin') {
@@ -1132,8 +1224,11 @@
                     list.appendChild(div);
                 });
                 
-                if (isAtBottom) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
+                if (newComments.length > 0) {
+                    setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
+                }
             },
+
             sendComment: async () => {
                 if (!appState.firebaseUser || !appState.activeCommentPostId) return;
                 const input = document.getElementById('comment-input');
@@ -1163,11 +1258,9 @@
                 try { await updateDoc(doc(colPosts, postId), { comments: arrayRemove(comment) }); } catch(e) {}
             },
 
-            // --- 6. PERFIL (Privado e Público) ---
+            // --- 6. PERFIL (Privado e Público) E UPDATES EM TEMPO REAL ---
             renderProfile: (userData, isPublic = false) => {
                 const contentArea = document.getElementById('app-content');
-                const scrollPos = contentArea.scrollTop; // Salva estado do scroll
-
                 if(!isPublic) contentArea.innerHTML = '';
                 
                 if (!userData) return;
@@ -1191,8 +1284,8 @@
                 } else if (!isMe) {
                     actionButton = `
                         <div style="display: flex; gap: 10px; width: 100%;">
-                            <button class="btn-primary ${iFollow ? 'btn-secondary' : ''}" style="flex: 1;" onclick="app.toggleFollow('${userData.uid}')">
-                                ${iFollow ? 'Deixar de Seguir' : 'Seguir'}
+                            <button id="btn-follow" class="btn-primary ${iFollow ? 'btn-secondary' : ''}" style="flex: 1;" onclick="app.toggleFollow('${userData.uid}')">
+                                ${iFollow ? 'Seguindo' : 'Seguir'}
                             </button>
                             <button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.startPrivateChat('${userData.uid}')">
                                 Mensagem
@@ -1206,7 +1299,7 @@
                 const html = `
                     <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
                     <div class="profile-header">
-                        <div style="position: relative; display: inline-block; margin-bottom: 0.8rem;">
+                        <div class="profile-avatar-container">
                             <img src="${userData.avatar}" alt="Avatar" class="profile-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                             ${isMe && !isPublic ? `
                             <div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto">
@@ -1222,15 +1315,15 @@
                         
                         <div class="stats-container">
                             <div class="stat-item">
-                                <span class="stat-value neon-purple">LVL ${userData.level || 1}</span>
+                                <span class="stat-value neon-purple" id="stat-level">LVL ${userData.level || 1}</span>
                                 <span class="stat-label">Nível</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-value neon-cyan">${userData.followers ? userData.followers.length : 0}</span>
+                                <span class="stat-value neon-cyan" id="stat-followers">${userData.followers ? userData.followers.length : 0}</span>
                                 <span class="stat-label">Seguidores</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-value">${userData.following ? userData.following.length : 0}</span>
+                                <span class="stat-value" id="stat-following">${userData.following ? userData.following.length : 0}</span>
                                 <span class="stat-label">Seguindo</span>
                             </div>
                         </div>
@@ -1239,7 +1332,7 @@
                     </div>
                     
                     <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">
-                        Transmissões Recentes (${myPosts.length})
+                        Transmissões Recentes (<span id="stat-post-count">${myPosts.length}</span>)
                     </h3>
                     <div id="user-posts-container"></div>
                 `;
@@ -1251,19 +1344,58 @@
                 } else {
                     contentArea.innerHTML = html;
                 }
+                
+                app.updatePostsInDOM(); 
+            },
 
-                const postContainer = document.getElementById('user-posts-container');
-                myPosts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(post => {
-                    app.createPostCard(post, postContainer, true);
-                });
+            // Atualização Direta de Informações do Perfil sem Reload de Layout Inteiro
+            updateProfileInDOM: () => {
+                const viewUid = appState.currentView === 'perfil' ? appState.firebaseUser.uid : appState.currentPublicProfileUid;
+                const viewUser = appState.allUsers.find(u => u.uid === viewUid);
+                if (!viewUser) return;
 
-                contentArea.scrollTop = scrollPos; // Restaura estado do scroll
+                // Updates nos valores numéricos (Seguidores, Nível, etc)
+                const elLevel = document.getElementById('stat-level');
+                const elFollowers = document.getElementById('stat-followers');
+                const elFollowing = document.getElementById('stat-following');
+                const elPostCount = document.getElementById('stat-post-count');
+                const btnFollow = document.getElementById('btn-follow');
+
+                if (elLevel) elLevel.innerText = `LVL ${viewUser.level || 1}`;
+                if (elFollowers) elFollowers.innerText = viewUser.followers ? viewUser.followers.length : 0;
+                if (elFollowing) elFollowing.innerText = viewUser.following ? viewUser.following.length : 0;
+                
+                const myPosts = appState.allPosts.filter(p => p.authorUid === viewUid);
+                if (elPostCount) elPostCount.innerText = myPosts.length;
+
+                if (btnFollow && appState.currentView === 'public_profile') {
+                    const iFollow = viewUser.followers && viewUser.followers.includes(appState.firebaseUser.uid);
+                    if (iFollow) {
+                        btnFollow.classList.add('btn-secondary');
+                        btnFollow.innerText = 'Seguindo';
+                    } else {
+                        btnFollow.classList.remove('btn-secondary');
+                        btnFollow.innerText = 'Seguir';
+                    }
+                }
+                
+                // Updates na imagem e nomes
+                const elName = document.querySelector('.profile-name');
+                const elBio = document.querySelector('.profile-bio');
+                const elAvatar = document.querySelector('.profile-avatar');
+                const elBanner = document.querySelector('.profile-banner');
+
+                if (elName) elName.innerHTML = `${viewUser.name} ${viewUser.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`;
+                if (elBio) elBio.innerText = viewUser.bio || 'Sem biografia...';
+                if (elAvatar && elAvatar.src !== viewUser.avatar) elAvatar.src = viewUser.avatar;
+                if (elBanner && viewUser.banner) elBanner.style.backgroundImage = `url('${viewUser.banner}')`;
             },
 
             updateProfileImage: async (base64) => {
                 app.showToast("Enviando foto...", "info");
                 try {
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 });
+                    const url = await app.uploadImageToStorage(base64, 'avatars');
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: url });
                     app.showToast("Foto atualizada!", "success");
                 } catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
             },
@@ -1276,6 +1408,20 @@
 
                 const isFollowing = target.followers && target.followers.includes(myUid);
 
+                // Update de Interface Otimista (Muda o Botão Instantaneamente)
+                const btn = document.getElementById('btn-follow');
+                if (btn && appState.currentPublicProfileUid === targetUid) {
+                    const btnStateSeguindo = btn.innerText.includes('Seguindo');
+                    if (btnStateSeguindo) {
+                        btn.innerText = 'Seguir';
+                        btn.classList.remove('btn-secondary');
+                    } else {
+                        btn.innerText = 'Seguindo';
+                        btn.classList.add('btn-secondary');
+                    }
+                }
+
+                // Dispara Lógica Firestore em Background - Retorno garantido por Snapshot
                 try {
                     if (isFollowing) {
                         await updateDoc(doc(colUsers, targetUid), { followers: arrayRemove(myUid) });
@@ -1310,7 +1456,8 @@
                     const updates = { name: name, bio: bio };
                     
                     if (appState.tempBase64Banner) {
-                        updates.banner = appState.tempBase64Banner; // Gravado direto na Base64
+                        const bannerUrl = await app.uploadImageToStorage(appState.tempBase64Banner, 'banners');
+                        updates.banner = bannerUrl;
                     }
 
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
@@ -1358,7 +1505,7 @@
                 });
             },
 
-            // --- 8. CHAT (Global e Privado) ---
+            // --- 8. CHAT (Global e Privado) COM ATUALIZAÇÃO DOM PROGRESSIVA ---
             switchChatTab: (mode) => {
                 appState.activeChatMode = mode;
                 
@@ -1376,7 +1523,8 @@
                     cPrivate.style.display = 'none';
                     inputArea.style.display = 'flex';
                     info.innerHTML = `<i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado`;
-                    app.renderChatMessages(appState.globalMessages);
+                    cGlobal.innerHTML = '';
+                    app.updateChatInDOM(appState.globalMessages);
                 } else if (mode === 'private') {
                     appState.activeChatMode = 'private_list'; 
                     btnPrivate.classList.remove('btn-secondary');
@@ -1390,21 +1538,30 @@
                     cGlobal.style.display = 'flex';
                     cPrivate.style.display = 'none';
                     inputArea.style.display = 'flex';
-                    app.renderPrivateChatActive();
+                    cGlobal.innerHTML = '';
+                    const myUid = appState.firebaseUser.uid;
+                    const conversation = appState.privateMessages.filter(m => 
+                        m.participants.includes(myUid) && m.participants.includes(mode)
+                    );
+                    app.updateChatInDOM(conversation);
                 }
             },
 
-            renderChatMessages: (messagesArray) => {
+            updateChatInDOM: (messagesArray) => {
                 const container = document.getElementById('chat-messages-container');
                 if(!container) return;
                 
-                // Mantém autoscroll
-                const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 40;
-                
-                container.innerHTML = '';
                 const sorted = [...messagesArray].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+                const currentElements = container.querySelectorAll('.message');
 
-                sorted.forEach(msg => {
+                if (currentElements.length === 0 || currentElements.length > sorted.length) {
+                    container.innerHTML = '';
+                }
+
+                const startIndex = container.querySelectorAll('.message').length;
+                const newMessages = sorted.slice(startIndex);
+
+                newMessages.forEach(msg => {
                     const isMine = msg.authorUid === appState.firebaseUser.uid;
                     const dateObj = new Date(msg.createdAt);
                     const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
@@ -1424,7 +1581,7 @@
                     container.appendChild(div);
                 });
 
-                if (isAtBottom || container.children.length <= 12) {
+                if (newMessages.length > 0) {
                     setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
                 }
             },
@@ -1443,6 +1600,7 @@
 
             renderPrivateChatList: () => {
                 const container = document.getElementById('private-chats-list');
+                if(!container) return;
                 container.innerHTML = '';
                 const myUid = appState.firebaseUser.uid;
 
@@ -1482,15 +1640,6 @@
                     `;
                     container.appendChild(div);
                 });
-            },
-
-            renderPrivateChatActive: () => {
-                const myUid = appState.firebaseUser.uid;
-                const targetUid = appState.activeChatMode; 
-                const conversation = appState.privateMessages.filter(m => 
-                    m.participants.includes(myUid) && m.participants.includes(targetUid)
-                );
-                app.renderChatMessages(conversation);
             },
 
             handleChatKeyPress: (e) => {

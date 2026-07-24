@@ -612,14 +612,13 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // === CONFIGURAÇÃO FIREBASE OFICIAL (SUBSTITUA POR SUAS CREDENCIAIS) ===
         const firebaseConfig = {
             apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
             authDomain: "nexushub-50e4a.firebaseapp.com",
             projectId: "nexushub-50e4a",
-            storageBucket: "nexushub-50e4a.appspot.com",
+            storageBucket: "nexushub-50e4a.firebasestorage.app",
             messagingSenderId: "326940228133",
             appId: "1:326940228133:web:4d5c7b1f2bc750a254ddcc",
             measurementId: "G-L3ZCYEGF0F"
@@ -628,7 +627,6 @@
         const firebaseApp = initializeApp(firebaseConfig);
         const auth = getAuth(firebaseApp);
         const db = getFirestore(firebaseApp);
-        const storage = getStorage(firebaseApp);
 
         // Caminhos Firestore Standard (Coleções na Raiz)
         const colPosts = collection(db, 'posts');
@@ -868,20 +866,6 @@
                 }, e => console.error(e));
 
                 app.navigate('feed');
-            },
-
-            // --- 3. STORAGE UPLOAD HELPER ---
-            uploadImageToStorage: async (base64Str, folder) => {
-                if (!base64Str) return '';
-                try {
-                    const fileName = `${folder}/${appState.firebaseUser.uid}_${Date.now()}.jpg`;
-                    const storageReference = ref(storage, fileName);
-                    await uploadString(storageReference, base64Str, 'data_url');
-                    return await getDownloadURL(storageReference);
-                } catch(e) {
-                    console.error("Storage upload error:", e);
-                    throw e; // O erro agora sobe para alertar o front-end
-                }
             },
 
             // --- 4. SISTEMA DE NAVEGAÇÃO SPA ---
@@ -1158,7 +1142,7 @@
                 try {
                     let imageUrl = '';
                     if (appState.tempBase64Post) {
-                        imageUrl = await app.uploadImageToStorage(appState.tempBase64Post, 'posts');
+                        imageUrl = appState.tempBase64Post;
                     }
 
                     const newPost = {
@@ -1176,7 +1160,7 @@
                     app.closePostModal(); // Modal e imagem resetados somente ao sucesso
                     app.showToast("Transmissão enviada a rede global!", "success");
                 } catch (e) {
-                    // Retorna falha específica gerada pelo storage para o front
+                    // Retorna falha específica gerada pelo firestore para o front
                     app.showToast("Erro ao transmitir: " + e.message, "error");
                 } finally {
                     btn.disabled = false;
@@ -1445,9 +1429,7 @@
             updateProfileImage: async (base64) => {
                 app.showToast("Enviando foto...", "info");
                 try {
-                    const url = await app.uploadImageToStorage(base64, 'avatars');
-                    if (!url) throw new Error("Falha na geração do Link Seguro.");
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: url });
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 });
                     app.showToast("Foto atualizada!", "success");
                 } catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
             },
@@ -1508,8 +1490,7 @@
                     const updates = { name: name, bio: bio };
                     
                     if (appState.tempBase64Banner) {
-                        const bannerUrl = await app.uploadImageToStorage(appState.tempBase64Banner, 'banners');
-                        updates.banner = bannerUrl;
+                        updates.banner = appState.tempBase64Banner;
                     }
 
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);

@@ -211,7 +211,10 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             animation: fadeIn 0.4s ease forwards;
+            cursor: pointer; /* Indicar clicável */
+            transition: border-color 0.3s;
         }
+        .post-card:active { border-color: rgba(0,243,255,0.3); }
 
         .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0.8rem; cursor: pointer;}
         .avatar {
@@ -228,65 +231,23 @@
         
         .badge-verified { color: var(--cyan); font-size: 0.8rem; }
 
-        .post-content { font-size: 0.92rem; line-height: 1.5; margin-bottom: 0.8rem; color: #d8d8d8; word-break: break-word; user-select: text; }
+        .post-content { font-size: 0.92rem; line-height: 1.5; margin-bottom: 0.8rem; color: #d8d8d8; word-break: break-word; user-select: text; pointer-events: none;}
         .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); cursor: pointer;}
 
-        .post-actions { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.8rem; }
+        .post-actions { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.8rem; cursor: default;}
         .action-btn { background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: color 0.2s; }
         .action-btn i { font-size: 1rem; }
         .action-btn.liked { color: var(--magenta); text-shadow: 0 0 10px var(--magenta-glow); }
         .action-btn:hover { color: var(--cyan); }
 
         /* PERFIL (ESTRUTURAS ISOLADAS) */
-        .profile-top-section {
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0; /* Previne que o flexbox deforme o topo */
-            width: 100%;
-        }
+        .profile-top-section { display: flex; flex-direction: column; flex-shrink: 0; width: 100%; }
+        .profile-posts-section { display: flex; flex-direction: column; width: 100%; }
 
-        .profile-posts-section {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .profile-banner { 
-            width: 100%; 
-            height: 120px; 
-            border-radius: 16px 16px 0 0; 
-            background-size: cover; 
-            background-position: center; 
-            background-color: #222; 
-            margin-bottom: 0; 
-            border: 1px solid rgba(176, 38, 255, 0.25); 
-            border-bottom: none;
-            flex-shrink: 0;
-        }
-        
-        .profile-header {
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 3.5rem 1rem 1.8rem;
-            background: var(--bg-glass); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem;
-            border: 1px solid rgba(176, 38, 255, 0.25); border-top: none; box-shadow: 0 0 25px rgba(176, 38, 255, 0.12);
-            animation: fadeIn 0.4s ease forwards; text-align: center; position: relative;
-            flex-shrink: 0;
-        }
-        
-        .profile-avatar-container { 
-            position: absolute; 
-            top: -42px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            z-index: 5; 
-        }
-        
-        .profile-avatar { 
-            width: 85px; height: 85px; border-radius: 50%; object-fit: cover; 
-            border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); 
-            background: var(--bg-base); 
-        }
-        
+        .profile-banner { width: 100%; height: 120px; border-radius: 16px 16px 0 0; background-size: cover; background-position: center; background-color: #222; margin-bottom: 0; border: 1px solid rgba(176, 38, 255, 0.25); border-bottom: none; flex-shrink: 0; }
+        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 3.5rem 1rem 1.8rem; background: var(--bg-glass); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem; border: 1px solid rgba(176, 38, 255, 0.25); border-top: none; box-shadow: 0 0 25px rgba(176, 38, 255, 0.12); animation: fadeIn 0.4s ease forwards; text-align: center; position: relative; flex-shrink: 0; }
+        .profile-avatar-container { position: absolute; top: -42px; left: 50%; transform: translateX(-50%); z-index: 5; }
+        .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); background: var(--bg-base); }
         .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; z-index: 2;}
         .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.5rem; z-index: 2;}
         .profile-bio { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; max-width: 90%; }
@@ -308,23 +269,22 @@
         .message { display: flex; gap: 10px; max-width: 88%; animation: fadeIn 0.3s ease; }
         .message.mine { align-self: flex-end; flex-direction: row-reverse; }
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--purple); flex-shrink: 0; cursor: pointer;}
-        .msg-bubble { background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); position: relative; user-select: text; }
+        .msg-bubble { background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); position: relative; user-select: text; cursor: pointer; transition: background 0.2s; }
+        .msg-bubble:active { background: rgba(255,255,255,0.1); }
         .message.mine .msg-bubble { background: rgba(0, 243, 255, 0.12); border-color: rgba(0, 243, 255, 0.3); border-bottom-right-radius: 2px; }
+        .message.mine .msg-bubble:active { background: rgba(0, 243, 255, 0.18); }
         .message:not(.mine) .msg-bubble { border-bottom-left-radius: 2px; }
         .msg-author { font-size: 0.72rem; color: var(--cyan); margin-bottom: 3px; font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer;}
-        .msg-text { font-size: 0.88rem; line-height: 1.4; word-break: break-word; }
+        .msg-text { font-size: 0.88rem; line-height: 1.4; word-break: break-word; pointer-events: none;}
         .msg-time { font-size: 0.62rem; color: var(--text-muted); text-align: right; margin-top: 4px; display: block; }
 
-        .chat-input-wrapper { display: flex; flex-direction: column; width: 100%; }
         .chat-input-area { display: flex; gap: 10px; background: rgba(15, 15, 20, 0.9); padding: 10px 14px; border-radius: 24px; border: 1px solid rgba(0, 243, 255, 0.3); align-items: center; flex-shrink: 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); width: 100%; }
-        .chat-attach-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 4px; transition: color 0.2s; flex-shrink: 0; }
-        .chat-attach-btn:hover { color: var(--cyan); }
         .chat-input { flex: 1; background: transparent; border: none; color: white; font-family: 'Inter', sans-serif; outline: none; padding: 6px 4px; font-size: 0.95rem; min-width: 0; }
         .chat-input::placeholder { color: rgba(255,255,255,0.4); }
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
-        /* RANKING */
+        /* RANKING & PESQUISA */
         .ranking-list { display: flex; flex-direction: column; gap: 10px; }
         .rank-card { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s; cursor: pointer;}
         .rank-card:hover { transform: translateX(4px); background: rgba(255,255,255,0.07); border-color: var(--cyan); }
@@ -337,13 +297,12 @@
         .rank-info span { font-size: 0.75rem; color: var(--text-muted); }
         .rank-score { font-family: 'Rajdhani', sans-serif; font-weight: bold; color: var(--cyan); font-size: 1.1rem; }
 
-        /* PESQUISA */
         .search-bar { width: 100%; padding: 12px 40px 12px 15px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: white; font-family: 'Inter'; outline: none; margin-bottom: 15px; }
         .search-bar:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
         .search-container { position: relative; }
         .search-icon { position: absolute; right: 15px; top: 12px; color: var(--text-muted); }
 
-        /* COMENTÁRIOS E MODAIS GERAIS */
+        /* MODAIS GERAIS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 100; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-content { background: #0a0a0f; width: 90%; max-width: 480px; max-height: 90dvh; display: flex; flex-direction: column; border-radius: 16px; border: 1px solid var(--purple); box-shadow: 0 0 30px rgba(176, 38, 255, 0.25); padding: 1.4rem; position: relative; transform: translateY(20px); transition: transform 0.3s; }
@@ -356,7 +315,7 @@
         .modal-body { overflow-y: auto; flex: 1; padding-right: 5px;}
         .modal-footer { margin-top: 15px; flex-shrink: 0;}
 
-        /* Formulários Customizados */
+        /* Formulários */
         .form-group { margin-bottom: 1rem; }
         .form-control { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 12px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s; user-select: text; }
         .form-control:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,243,255,0.2); }
@@ -381,60 +340,55 @@
         .toast { background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-left: 4px solid var(--cyan); color: white; padding: 10px 16px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease forwards; }
         .toast.error { border-left-color: var(--danger); }
         .toast.success { border-left-color: var(--success); }
-        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
-        /* TELA DE AUTENTICAÇÃO */
+        /* TELA DE AUTENTICAÇÃO E LOADER */
         #auth-setup { position: fixed; top:0; left:0; width: 100vw; height: 100dvh; background: var(--bg-base); z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem; text-align: center; }
         .glitch-logo { font-size: 2.8rem; font-family: 'Rajdhani', sans-serif; font-weight: bold; text-shadow: 0 0 20px var(--cyan); margin-bottom: 1.5rem; color: white; }
         .glitch-logo span { color: var(--cyan); }
-
-        /* LOADER COMPONENT */
         .cyber-loader { display: none; width: 40px; height: 40px; border: 3px solid rgba(0, 243, 255, 0.3); border-radius: 50%; border-top-color: var(--cyan); animation: spin 1s ease-in-out infinite; margin: 20px auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        
         .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; text-align: center; color: var(--text-muted); animation: fadeIn 0.4s ease; }
         .placeholder-view i { font-size: 2.8rem; color: var(--purple); margin-bottom: 1rem; text-shadow: 0 0 15px var(--purple); }
 
-        /* === NOVAS FUNCIONALIDADES: CONTEXT MENU & MENSAGENS === */
+        /* === NOVAS FUNCIONALIDADES: INTERAÇÕES, RESPONDER E EDIÇÃO === */
         
-        /* Bottom Sheet Context Menu */
-        .context-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); z-index: 300; display: none; opacity: 0; transition: opacity 0.3s; }
-        .context-overlay.active { display: block; opacity: 1; }
-        .context-menu-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--bg-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--purple); border-radius: 20px 20px 0 0; padding: 1.5rem 1rem calc(1.5rem + env(safe-area-inset-bottom)); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); }
-        .context-overlay.active .context-menu-sheet { bottom: 0; }
-        .context-btn { width: 100%; text-align: left; background: none; border: none; padding: 14px 10px; color: var(--text-main); font-size: 1rem; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .context-btn:last-child { border-bottom: none; }
-        .context-btn i { font-size: 1.2rem; width: 24px; text-align: center; color: var(--cyan); }
-        .context-btn.danger { color: var(--danger); }
-        .context-btn.danger i { color: var(--danger); }
+        /* Menu Contextual (Bottom Sheet) */
+        .bottom-sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 600px; background: rgba(10, 10, 15, 0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--purple); border-radius: 20px 20px 0 0; z-index: 101; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding-bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,0.8); }
+        .modal-overlay.active .bottom-sheet { transform: translateX(-50%) translateY(0); }
+        .context-menu-item { width: 100%; padding: 18px 24px; text-align: left; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: background 0.2s; font-family: 'Inter', sans-serif;}
+        .context-menu-item:hover { background: rgba(255,255,255,0.08); }
+        .context-menu-item:last-child { border-bottom: none; }
+        .context-menu-item i { font-size: 1.2rem; color: var(--cyan); width: 24px; text-align: center;}
+        .context-menu-item.danger { color: var(--danger); }
+        .context-menu-item.danger i { color: var(--danger); }
 
-        /* Edit Flag */
-        .edited-flag { font-size: 0.65rem; color: var(--text-muted); font-style: italic; margin-left: 5px; font-weight: normal; }
+        /* UI de Responder (Preview Acima do Input) */
+        #reply-preview-container { display: none; width: 100%; padding: 10px 14px; background: rgba(0, 243, 255, 0.08); border-left: 3px solid var(--cyan); margin-bottom: 10px; border-radius: 12px; justify-content: space-between; align-items: center; box-sizing: border-box; backdrop-filter: blur(10px); }
+        .reply-preview-content { display: flex; flex-direction: column; overflow: hidden; flex: 1; padding-right: 10px;}
+        .reply-preview-author { font-size: 0.75rem; color: var(--cyan); font-weight: bold; margin-bottom: 2px;}
+        .reply-preview-text { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .reply-cancel-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; font-size: 1.1rem; }
+        .reply-cancel-btn:hover { color: var(--danger); }
 
-        /* Reply preview block above chat input */
-        .reply-preview-container { display: none; background: rgba(0,0,0,0.5); border-left: 3px solid var(--cyan); padding: 8px 12px; margin-bottom: 8px; border-radius: 8px; position: relative; width: 100%; box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.05);}
-        .reply-preview-header { font-size: 0.75rem; color: var(--cyan); font-weight: bold; margin-bottom: 4px; display:flex; justify-content: space-between; align-items: center;}
-        .reply-preview-text { font-size: 0.85rem; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .close-reply-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 6px; font-size: 1rem;}
-        
-        /* Reply reference block inside a chat bubble */
-        .msg-reply-ref { background: rgba(0,0,0,0.3); border-left: 3px solid var(--cyan); padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 0.8rem; cursor: pointer; opacity: 0.85; transition: opacity 0.2s; }
-        .msg-reply-ref:hover { opacity: 1; }
-        .msg-reply-author { color: var(--cyan); font-weight: bold; margin-bottom: 2px; display: block; font-size: 0.75rem;}
-        .msg-reply-text { color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-        
-        /* Highlight animation for navigated messages */
-        @keyframes highlight-pulse {
-            0% { background-color: rgba(0, 243, 255, 0.4); transform: scale(1); }
-            50% { background-color: rgba(0, 243, 255, 0.6); transform: scale(1.02); }
-            100% { background-color: transparent; transform: scale(1); }
-        }
-        .highlighted { animation: highlight-pulse 2s ease; border-radius: 8px;}
-        .highlighted .msg-bubble { border-color: var(--cyan) !important; box-shadow: 0 0 15px var(--cyan) !important;}
+        /* UI da Mensagem Respondida (Dentro do Balão) */
+        .msg-replied-block { background: rgba(0,0,0,0.3); border-left: 3px solid var(--cyan); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; cursor: pointer; transition: background 0.2s; }
+        .msg-replied-block:hover { background: rgba(0,243,255,0.1); }
+        .msg-replied-author { font-size: 0.72rem; color: var(--cyan); font-weight: bold; margin-bottom: 3px; display:flex; align-items: center; gap: 4px;}
+        .msg-replied-text { font-size: 0.8rem; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;}
 
-        .post-body { cursor: pointer; }
+        /* Tag de Edição Discreta */
+        .edited-tag { font-size: 0.65rem; color: var(--text-muted); font-style: italic; opacity: 0.8; margin-left: 6px; font-weight: normal; }
+
+        /* Animação de Destaque (Highlight) ao clicar numa resposta */
+        @keyframes flashHighlight { 0% { background-color: rgba(0, 243, 255, 0.4); box-shadow: 0 0 15px var(--cyan); } 100% { background-color: rgba(255,255,255,0.06); box-shadow: none; } }
+        @keyframes flashHighlightMine { 0% { background-color: rgba(0, 243, 255, 0.5); box-shadow: 0 0 15px var(--cyan); } 100% { background-color: rgba(0, 243, 255, 0.12); box-shadow: none; } }
+        .highlighted-msg { animation: flashHighlight 2s ease-out forwards !important; }
+        .message.mine .highlighted-msg { animation: flashHighlightMine 2s ease-out forwards !important; }
+
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -450,14 +404,9 @@
         </p>
         
         <div style="width: 100%; max-width: 380px; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 30px rgba(0,243,255,0.1);">
-            
             <div id="auth-login-area">
-                <div class="form-group">
-                    <input type="email" id="auth-email" class="form-control" placeholder="E-mail">
-                </div>
-                <div class="form-group">
-                    <input type="password" id="auth-password" class="form-control" placeholder="Senha">
-                </div>
+                <div class="form-group"><input type="email" id="auth-email" class="form-control" placeholder="E-mail"></div>
+                <div class="form-group"><input type="password" id="auth-password" class="form-control" placeholder="Senha"></div>
                 <button class="btn-primary" onclick="app.loginEmail()">Conectar Link</button>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.registerEmail()">Registrar</button>
@@ -469,12 +418,8 @@
 
             <div id="auth-form-area" style="display: none;">
                 <p style="color: var(--cyan); margin-bottom: 1rem; font-size: 0.85rem;">Defina sua identidade na rede:</p>
-                <div class="form-group">
-                    <input type="text" id="setup-name" class="form-control" placeholder="Seu Nome / Apelido" maxlength="25">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="setup-handle" class="form-control" placeholder="Handle (Ex: @cyber_net)" maxlength="18">
-                </div>
+                <div class="form-group"><input type="text" id="setup-name" class="form-control" placeholder="Seu Nome / Apelido" maxlength="25"></div>
+                <div class="form-group"><input type="text" id="setup-handle" class="form-control" placeholder="Handle (Ex: @cyber_net)" maxlength="18"></div>
                 <button class="btn-primary" id="btn-create-identity" onclick="app.setupIdentity()">Iniciar Conexão Global</button>
             </div>
 
@@ -502,66 +447,42 @@
         </div>
 
         <nav class="bottom-nav">
-            <div class="nav-item active" data-view="feed" onclick="app.navigate('feed', this)">
-                <i class="fa-solid fa-house"></i><span>Feed</span>
-            </div>
-            <div class="nav-item" data-view="search" onclick="app.navigate('search', this)">
-                <i class="fa-solid fa-magnifying-glass"></i><span>Busca</span>
-            </div>
-            <div class="nav-item" data-view="chat" onclick="app.navigate('chat', this)">
-                <i class="fa-solid fa-comment-dots"></i><span>Comms</span>
-            </div>
-            <div class="nav-item" data-view="ranking" onclick="app.navigate('ranking', this)">
-                <i class="fa-solid fa-trophy"></i><span>Ranking</span>
-            </div>
-            <div class="nav-item" data-view="perfil" onclick="app.navigate('perfil', this)">
-                <i class="fa-regular fa-user"></i><span>Perfil</span>
-            </div>
+            <div class="nav-item active" data-view="feed" onclick="app.navigate('feed', this)"><i class="fa-solid fa-house"></i><span>Feed</span></div>
+            <div class="nav-item" data-view="search" onclick="app.navigate('search', this)"><i class="fa-solid fa-magnifying-glass"></i><span>Busca</span></div>
+            <div class="nav-item" data-view="chat" onclick="app.navigate('chat', this)"><i class="fa-solid fa-comment-dots"></i><span>Comms</span></div>
+            <div class="nav-item" data-view="ranking" onclick="app.navigate('ranking', this)"><i class="fa-solid fa-trophy"></i><span>Ranking</span></div>
+            <div class="nav-item" data-view="perfil" onclick="app.navigate('perfil', this)"><i class="fa-regular fa-user"></i><span>Perfil</span></div>
         </nav>
     </div>
 
-    <!-- Modais Originais -->
+    <!-- Modais do Sistema Original -->
     <div class="modal-overlay" id="modal-post">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Nova Transmissão</h2>
-                <button class="close-modal" onclick="app.closePostModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
+            <div class="modal-header"><h2>Nova Transmissão</h2><button class="close-modal" onclick="app.closePostModal()"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="modal-body">
-                <div class="form-group">
-                    <textarea id="post-content" class="form-control" placeholder="Compartilhe algo na malha da rede..."></textarea>
-                </div>
+                <div class="form-group"><textarea id="post-content" class="form-control" placeholder="Compartilhe algo na malha da rede..."></textarea></div>
                 <div class="file-upload-wrapper">
                     <label class="file-upload-btn">
                         <i class="fa-solid fa-image"></i> Anexar Imagem
                         <input type="file" id="post-image-input" accept="image/*" onchange="app.handleImageUpload(event, 'post')">
                     </label>
                     <div id="image-preview-container">
-                        <img id="image-preview" src="" alt="Preview">
-                        <button class="remove-img-btn" onclick="app.removeImagePreview('post')"><i class="fa-solid fa-xmark"></i></button>
+                        <img id="image-preview" src="" alt="Preview"><button class="remove-img-btn" onclick="app.removeImagePreview('post')"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-primary" id="btn-publish" onclick="app.publishPost()">Transmitir Dados</button>
-            </div>
+            <div class="modal-footer"><button class="btn-primary" id="btn-publish" onclick="app.publishPost()">Transmitir Dados</button></div>
         </div>
     </div>
 
     <div class="modal-overlay" id="modal-comments">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Comentários</h2>
-                <button class="close-modal" onclick="app.closeCommentsModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body" id="comments-list" style="display: flex; flex-direction: column; gap: 10px;">
-            </div>
+            <div class="modal-header"><h2>Comentários</h2><button class="close-modal" onclick="app.closeCommentsModal()"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="modal-body" id="comments-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
             <div class="modal-footer">
                 <div class="chat-input-area" style="padding: 5px 10px; border-radius: 12px;">
                     <input type="text" id="comment-input" class="chat-input" placeholder="Escrever comentário..." onkeypress="if(event.key === 'Enter') app.sendComment()">
-                    <button class="chat-send-btn" style="width:32px; height:32px;" onclick="app.sendComment()">
-                        <i class="fa-solid fa-paper-plane" style="font-size: 0.8rem;"></i>
-                    </button>
+                    <button class="chat-send-btn" style="width:32px; height:32px;" onclick="app.sendComment()"><i class="fa-solid fa-paper-plane" style="font-size: 0.8rem;"></i></button>
                 </div>
             </div>
         </div>
@@ -569,22 +490,11 @@
 
     <div class="modal-overlay" id="modal-settings">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Configurações do Hub</h2>
-                <button class="close-modal" onclick="app.closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
+            <div class="modal-header"><h2>Configurações do Hub</h2><button class="close-modal" onclick="app.closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="modal-body">
-                <p style="font-size: 0.82rem; color: var(--success); margin-bottom: 1rem;">
-                    <i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.
-                </p>
-                <div class="form-group">
-                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label>
-                    <input type="text" id="edit-name" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SUA BIO</label>
-                    <textarea id="edit-bio" class="form-control" placeholder="Fale sobre você..."></textarea>
-                </div>
+                <p style="font-size: 0.82rem; color: var(--success); margin-bottom: 1rem;"><i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.</p>
+                <div class="form-group"><label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label><input type="text" id="edit-name" class="form-control"></div>
+                <div class="form-group"><label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SUA BIO</label><textarea id="edit-bio" class="form-control" placeholder="Fale sobre você..."></textarea></div>
                 <div class="file-upload-wrapper">
                     <label class="file-upload-btn" id="lbl-banner-upload">
                         <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
@@ -592,31 +502,37 @@
                     </label>
                 </div>
                 <button class="btn-primary" id="btn-save-settings" onclick="app.saveProfileSettings()" style="margin-bottom: 10px;">Salvar Perfil</button>
-                <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()">
-                    <i class="fa-solid fa-power-off"></i> Desconectar
-                </button>
+                <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()"><i class="fa-solid fa-power-off"></i> Desconectar</button>
             </div>
         </div>
     </div>
 
-    <!-- NOVOS MODAIS: Menu Contextual e Edição -->
-    <div class="context-overlay" id="context-menu-overlay" onclick="app.closeContextMenu(event)">
-        <div class="context-menu-sheet" id="context-menu-content" onclick="event.stopPropagation()">
-            <!-- Dinâmico -->
+    <!-- Modais de Interação Novos -->
+    
+    <!-- Modal: Menu de Contexto (Bottom Sheet) -->
+    <div class="modal-overlay" id="modal-context-menu" onclick="if(event.target===this) app.closeContextMenu()">
+        <div class="bottom-sheet">
+            <div style="width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 10px auto 15px;"></div>
+            <div id="context-menu-content">
+                <!-- Injetado dinamicamente via JS -->
+            </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-edit-item">
+    <!-- Modal: Editar Texto -->
+    <div class="modal-overlay" id="modal-edit-text">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Editar Texto</h2>
                 <button class="close-modal" onclick="app.closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
-                <textarea id="edit-content-input" class="form-control" style="min-height: 120px;" placeholder="Insira seu texto aqui..."></textarea>
+                <div class="form-group">
+                    <textarea id="edit-text-input" class="form-control" style="min-height: 120px;"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-primary" onclick="app.saveEdit()">Salvar Alteração</button>
+                <button class="btn-primary" onclick="app.saveEdit()">Salvar Alterações</button>
             </div>
         </div>
     </div>
@@ -637,15 +553,16 @@
             <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
             <div class="chat-messages" id="chat-private-container" style="display:none;"></div>
 
-            <!-- Área de input agora encapsulada para o Reply Preview -->
-            <div class="chat-input-wrapper" style="margin-top:auto; flex-shrink: 0; padding-top: 5px;">
-                <div class="reply-preview-container" id="reply-preview-box">
-                    <div class="reply-preview-header">
-                        <span id="reply-preview-author">Respondendo @Usuario</span>
-                        <button class="close-reply-btn" onclick="app.cancelReply()"><i class="fa-solid fa-xmark"></i></button>
+            <!-- Área unificada de Input com Preview de Resposta -->
+            <div style="flex-shrink: 0; width: 100%;">
+                <div id="reply-preview-container">
+                    <div class="reply-preview-content">
+                        <span class="reply-preview-author" id="reply-preview-author"></span>
+                        <span class="reply-preview-text" id="reply-preview-text"></span>
                     </div>
-                    <div class="reply-preview-text" id="reply-preview-text">Trecho...</div>
+                    <button class="reply-cancel-btn" onclick="app.cancelReply()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
+                
                 <div class="chat-input-area" id="chat-input-container">
                     <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
                     <button class="chat-send-btn" onclick="app.sendChatMessage()">
@@ -682,7 +599,6 @@
         <div id="public-profile-container"></div>
     </template>
 
-    <!-- MOTOR JAVASCRIPT EM MÓDULOS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -711,7 +627,7 @@
             firebaseUser: null,
             currentUserData: null,
             currentView: 'feed',
-            currentPublicProfileUid: null, 
+            currentPublicProfileUid: null,
             tempBase64Post: null,
             tempBase64Banner: null,
             allPosts: [],
@@ -720,12 +636,16 @@
             privateMessages: [],
             activeChatMode: 'global', 
             activeCommentPostId: null,
-            activeContextItem: null, // Armazena contexto do click na publicação/mensagem
-            activeReply: null, // Armazena contexto de reply
             unsubscribePosts: null,
             unsubscribeUsers: null,
             unsubscribeGlobalChat: null,
-            unsubscribePrivateChat: null
+            unsubscribePrivateChat: null,
+            
+            // --- Variáveis de Interação com Mensagens ---
+            activeContextItem: null,
+            activeContextType: null,
+            activeContextCollection: null,
+            replyingTo: null
         };
 
         const app = {
@@ -751,7 +671,9 @@
                                 document.getElementById('auth-loading').style.display = 'none';
                                 document.getElementById('auth-form-area').style.display = 'block';
                             }
-                        } catch (e) { app.showToast("Erro de leitura.", "error"); }
+                        } catch (e) {
+                            app.showToast("Erro de leitura no servidor central.", "error");
+                        }
                     } else {
                         appState.firebaseUser = null;
                         document.getElementById('auth-setup').style.display = 'flex';
@@ -778,33 +700,29 @@
             },
 
             loginGoogle: async () => {
-                const provider = new GoogleAuthProvider();
-                try { await signInWithPopup(auth, provider); } catch(e) { app.showToast("Erro Google: " + e.message, "error"); }
+                try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch(e) { app.showToast("Erro: " + e.message, "error"); }
             },
 
             logout: async () => {
-                if (confirm("Deseja desconectar e sair do Link Neural?")) {
-                    await signOut(auth);
-                    location.reload(); 
-                }
+                if (confirm("Deseja desconectar e sair do Link Neural?")) { await signOut(auth); location.reload(); }
             },
 
             setupIdentity: async () => {
                 const nameInput = document.getElementById('setup-name').value.trim();
                 let handleInput = document.getElementById('setup-handle').value.trim();
 
-                if (nameInput.length < 2 || handleInput.length < 2) return app.showToast("Min. 2 caracteres.", "error");
+                if (nameInput.length < 2 || handleInput.length < 2) return app.showToast("Nome/handle muito curto.", "error");
                 if (!handleInput.startsWith('@')) handleInput = '@' + handleInput;
 
                 const uid = appState.firebaseUser.uid;
+                
                 document.getElementById('auth-form-area').style.display = 'none';
                 document.getElementById('auth-loading').style.display = 'block';
 
                 const newUser = {
                     uid: uid, name: nameInput, handle: handleInput.toLowerCase().replace(/\s/g, ''),
-                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, banner: '',
-                    bio: 'Conectado à malha neural recentemente.', xp: 50, level: 1, ncoins: 100, followers: [], following: [],
-                    role: 'user', createdAt: new Date().toISOString()
+                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, banner: '', bio: 'Conectado à malha neural recentemente.',
+                    xp: 50, level: 1, ncoins: 100, followers: [], following: [], role: 'user', createdAt: new Date().toISOString()
                 };
 
                 try {
@@ -812,7 +730,6 @@
                     appState.currentUserData = newUser;
                     app.startGame();
                 } catch (e) {
-                    app.showToast("Erro ao gravar: " + e.message, "error");
                     document.getElementById('auth-form-area').style.display = 'block';
                     document.getElementById('auth-loading').style.display = 'none';
                 }
@@ -821,7 +738,6 @@
             startGame: () => {
                 document.getElementById('auth-setup').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
-                
                 if (appState.currentUserData.role === 'admin') document.getElementById('admin-icon').style.display = 'inline-block';
 
                 if (appState.unsubscribePosts) appState.unsubscribePosts();
@@ -840,25 +756,19 @@
                     if (['perfil', 'public_profile'].includes(appState.currentView)) app.updateProfileInDOM();
                     else if (appState.currentView === 'ranking') app.renderRanking();
                     else if (appState.currentView === 'search') app.performSearch();
-
+                    
                     if (appState.currentView === 'feed') app.updatePostsInDOM();
                     if (appState.currentView === 'chat') {
                         ['chat-global-container', 'chat-private-container'].forEach(cid => {
                             const c = document.getElementById(cid);
                             if (c) {
                                 c.querySelectorAll('.msg-avatar').forEach(img => {
-                                    const uid = img.getAttribute('data-uid');
-                                    if (uid) {
-                                        const u = appState.allUsers.find(user => user.uid === uid);
-                                        if (u && img.src !== u.avatar) img.src = u.avatar;
-                                    }
+                                    const u = appState.allUsers.find(user => user.uid === img.getAttribute('data-uid'));
+                                    if (u && img.src !== u.avatar) img.src = u.avatar;
                                 });
                                 c.querySelectorAll('.msg-author').forEach(div => {
-                                    const uid = div.getAttribute('data-uid');
-                                    if (uid) {
-                                        const u = appState.allUsers.find(user => user.uid === uid);
-                                        if (u && div.innerText !== u.name) div.innerText = u.name;
-                                    }
+                                    const u = appState.allUsers.find(user => user.uid === div.getAttribute('data-uid'));
+                                    if (u && div.innerText !== u.name) div.innerText = u.name;
                                 });
                             }
                         });
@@ -877,13 +787,10 @@
                 appState.unsubscribePrivateChat = onSnapshot(colPrivateChat, (snap) => {
                     appState.privateMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     if (appState.currentView === 'chat') {
-                        if (appState.activeChatMode === 'private_list') {
-                            app.renderPrivateChatList();
-                        } else if (appState.activeChatMode !== 'global') {
+                        if (appState.activeChatMode === 'private_list') app.renderPrivateChatList();
+                        else if (appState.activeChatMode !== 'global') {
                             const myUid = appState.firebaseUser.uid;
-                            const conversation = appState.privateMessages.filter(m => 
-                                m.participants.includes(myUid) && m.participants.includes(appState.activeChatMode)
-                            );
+                            const conversation = appState.privateMessages.filter(m => m.participants.includes(myUid) && m.participants.includes(appState.activeChatMode));
                             app.updateChatInDOM(conversation, 'chat-private-container');
                         }
                     }
@@ -893,6 +800,8 @@
             },
 
             navigate: (viewName, navElement = null, additionalData = null) => {
+                app.cancelReply(); // Limpa estado de resposta ao navegar
+                
                 appState.currentView = viewName;
                 if (viewName === 'public_profile') appState.currentPublicProfileUid = additionalData;
                 
@@ -912,10 +821,12 @@
 
             renderCurrentView: () => {
                 const contentArea = document.getElementById('app-content');
+                
                 if (appState.currentView === 'feed') { contentArea.innerHTML = ''; app.renderFeed(); } 
                 else if (appState.currentView === 'perfil') app.renderProfile(appState.currentUserData);
                 else if (appState.currentView === 'search') {
-                    contentArea.innerHTML = ''; contentArea.appendChild(document.getElementById('tpl-search').content.cloneNode(true)); app.performSearch();
+                    contentArea.innerHTML = ''; contentArea.appendChild(document.getElementById('tpl-search').content.cloneNode(true));
+                    app.performSearch();
                 }
                 else if (appState.currentView === 'chat') {
                     contentArea.innerHTML = ''; contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
@@ -923,7 +834,8 @@
                     app.switchChatTab(appState.activeChatMode); 
                 }
                 else if (appState.currentView === 'ranking') {
-                    contentArea.innerHTML = ''; contentArea.appendChild(document.getElementById('tpl-ranking').content.cloneNode(true)); app.renderRanking();
+                    contentArea.innerHTML = ''; contentArea.appendChild(document.getElementById('tpl-ranking').content.cloneNode(true));
+                    app.renderRanking();
                 }
                 else if (appState.currentView === 'public_profile') {
                     const user = appState.allUsers.find(u => u.uid === appState.currentPublicProfileUid);
@@ -931,23 +843,174 @@
                 }
             },
 
-            renderFeed: () => { document.getElementById('app-content').innerHTML = ''; app.updatePostsInDOM(); },
+            // --- FUNÇÕES DE INTERAÇÃO (CONTEXTO, EDIÇÃO, RESPOSTA, APAGAR) ---
+
+            openContextMenu: (itemId, type) => {
+                let item = null;
+                let contextCollection = null;
+                
+                if (type === 'post') {
+                    item = appState.allPosts.find(p => p.id === itemId);
+                    contextCollection = 'posts';
+                } else {
+                    if (appState.activeChatMode === 'global') {
+                        item = appState.globalMessages.find(m => m.id === itemId);
+                        contextCollection = 'global_chat';
+                    } else {
+                        item = appState.privateMessages.find(m => m.id === itemId);
+                        contextCollection = 'private_chat';
+                    }
+                }
+                
+                if (!item) return;
+
+                appState.activeContextItem = item;
+                appState.activeContextType = type;
+                appState.activeContextCollection = contextCollection;
+                
+                const isMine = item.authorUid === appState.firebaseUser.uid;
+                const menu = document.getElementById('context-menu-content');
+                menu.innerHTML = '';
+                
+                if (type === 'post') {
+                    if (isMine) menu.innerHTML += `<button class="context-menu-item" onclick="app.openEditModal()"><i class="fa-solid fa-pen"></i> Editar publicação</button>`;
+                    menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar texto</button>`;
+                } else if (type === 'message') {
+                    menu.innerHTML += `<button class="context-menu-item" onclick="app.startReply()"><i class="fa-solid fa-reply"></i> Responder mensagem</button>`;
+                    if (isMine) menu.innerHTML += `<button class="context-menu-item" onclick="app.openEditModal()"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
+                    menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar mensagem</button>`;
+                    menu.innerHTML += `<button class="context-menu-item" onclick="app.deleteForMe()"><i class="fa-solid fa-eye-slash"></i> Apagar para mim</button>`;
+                    if (isMine) menu.innerHTML += `<button class="context-menu-item danger" onclick="app.deleteForEveryone()"><i class="fa-solid fa-trash"></i> Apagar para todos</button>`;
+                }
+                
+                document.getElementById('modal-context-menu').classList.add('active');
+            },
+
+            closeContextMenu: () => document.getElementById('modal-context-menu').classList.remove('active'),
+            
+            handleCopyText: () => {
+                const text = appState.activeContextItem.content;
+                if (!text || text.trim() === '') {
+                    app.showToast("Nenhum texto para copiar.", "info");
+                } else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try { document.execCommand('copy'); app.showToast("Texto copiado!", "success"); } 
+                    catch (err) { app.showToast("Erro ao copiar.", "error"); }
+                    document.body.removeChild(textArea);
+                }
+                app.closeContextMenu();
+            },
+
+            openEditModal: () => {
+                app.closeContextMenu();
+                document.getElementById('edit-text-input').value = appState.activeContextItem.content || '';
+                document.getElementById('modal-edit-text').classList.add('active');
+            },
+            
+            closeEditModal: () => document.getElementById('modal-edit-text').classList.remove('active'),
+            
+            saveEdit: async () => {
+                const newText = document.getElementById('edit-text-input').value.trim();
+                const item = appState.activeContextItem;
+                
+                if (!newText && !item.image) {
+                    return app.showToast("O texto não pode ficar vazio.", "error");
+                }
+                
+                let collectionRef;
+                if (appState.activeContextCollection === 'posts') collectionRef = colPosts;
+                else if (appState.activeContextCollection === 'global_chat') collectionRef = colGlobalChat;
+                else collectionRef = colPrivateChat;
+                
+                const btn = document.querySelector('#modal-edit-text .btn-primary');
+                btn.innerHTML = "Salvando..."; btn.disabled = true;
+
+                try {
+                    await updateDoc(doc(collectionRef, item.id), { content: newText, edited: true });
+                    app.closeEditModal();
+                    app.showToast("Alteração propagada com sucesso.", "success");
+                } catch (e) {
+                    app.showToast("Erro na edição.", "error");
+                } finally {
+                    btn.innerHTML = "Salvar Alterações"; btn.disabled = false;
+                }
+            },
+
+            startReply: () => {
+                app.closeContextMenu();
+                const item = appState.activeContextItem;
+                appState.replyingTo = item;
+                
+                const author = appState.allUsers.find(u => u.uid === item.authorUid);
+                
+                let previewText = item.content || '';
+                if (previewText.length > 70) previewText = previewText.substring(0, 70) + '...';
+                if (!previewText && item.image) previewText = '📷 Foto';
+                
+                document.getElementById('reply-preview-author').innerText = `Respondendo ${author ? author.handle : '@usuario'}`;
+                document.getElementById('reply-preview-text').innerText = previewText;
+                document.getElementById('reply-preview-container').style.display = 'flex';
+                document.getElementById('chat-input').focus();
+            },
+
+            cancelReply: () => {
+                appState.replyingTo = null;
+                const container = document.getElementById('reply-preview-container');
+                if(container) container.style.display = 'none';
+            },
+
+            deleteForMe: async () => {
+                app.closeContextMenu();
+                const item = appState.activeContextItem;
+                const collectionRef = appState.activeContextCollection === 'global_chat' ? colGlobalChat : colPrivateChat;
+                try { await updateDoc(doc(collectionRef, item.id), { deletedFor: arrayUnion(appState.firebaseUser.uid) }); } 
+                catch(e) { app.showToast("Erro ao ocultar.", "error"); }
+            },
+
+            deleteForEveryone: async () => {
+                if(confirm("Apagar esta mensagem para todos da rede?")) {
+                    app.closeContextMenu();
+                    const item = appState.activeContextItem;
+                    const collectionRef = appState.activeContextCollection === 'global_chat' ? colGlobalChat : colPrivateChat;
+                    try { await deleteDoc(doc(collectionRef, item.id)); } 
+                    catch(e) { app.showToast("Erro ao apagar.", "error"); }
+                }
+            },
+
+            scrollToMessage: (msgId, event) => {
+                if(event) event.stopPropagation(); // Previne abertura do menu contexto
+                const el = document.getElementById(`msg-${msgId}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const bubble = el.querySelector('.msg-bubble');
+                    bubble.classList.add('highlighted-msg');
+                    setTimeout(() => { bubble.classList.remove('highlighted-msg'); }, 2000);
+                } else {
+                    app.showToast("Mensagem original não disponível na malha local.", "info");
+                }
+            },
+
+            // --- SISTEMA DE FEED E POSTS ---
+
+            renderFeed: () => {
+                const contentArea = document.getElementById('app-content');
+                contentArea.innerHTML = ''; app.updatePostsInDOM(); 
+            },
             
             updatePostsInDOM: () => {
                 const container = appState.currentView === 'feed' ? document.getElementById('app-content') : document.getElementById('user-posts-container');
                 if (!container) return;
 
                 let expectedPosts = [...appState.allPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
                 if (appState.currentView === 'perfil') expectedPosts = expectedPosts.filter(p => p.authorUid === appState.firebaseUser.uid);
                 else if (appState.currentView === 'public_profile') expectedPosts = expectedPosts.filter(p => p.authorUid === appState.currentPublicProfileUid);
 
                 if (expectedPosts.length === 0) {
                     if (!container.querySelector('.placeholder-view') && appState.currentView === 'feed') {
-                        container.innerHTML = `
-                            <div class="placeholder-view">
-                                <i class="fa-solid fa-satellite"></i> <h3>Feed Vazio</h3> <p>Seja o primeiro a transmitir algo na rede!</p>
-                            </div>`;
+                        container.innerHTML = `<div class="placeholder-view"><i class="fa-solid fa-satellite"></i><h3>Feed Vazio</h3><p>Seja o primeiro a transmitir algo na rede!</p></div>`;
                     }
                     return;
                 }
@@ -966,85 +1029,86 @@
                         const likeBtn = existingEl.querySelector('.btn-like');
                         if (likeBtn) {
                             const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
-                            likeBtn.classList.toggle('liked', isLiked);
+                            likeBtn.className = `action-btn btn-like ${isLiked ? 'liked' : ''}`;
                             likeBtn.innerHTML = `<i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> <span class="like-count">${post.likes ? post.likes.length : 0}</span>`;
                         }
                         const commentBtn = existingEl.querySelector('.btn-comment');
                         if (commentBtn) commentBtn.innerHTML = `<i class="fa-regular fa-comment"></i> <span class="comment-count">${post.comments ? post.comments.length : 0}</span>`;
 
+                        // Diffing de conteúdo e TAG de editado
+                        const contentEl = existingEl.querySelector('.post-content');
+                        if (contentEl && contentEl.innerHTML !== post.content.replace(/\n/g, '<br>')) {
+                            contentEl.innerHTML = post.content.replace(/\n/g, '<br>');
+                        }
+                        
                         const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
+                        const userInfoSpan = existingEl.querySelector('.user-info span');
+                        if (userInfoSpan) {
+                            const dateObj = new Date(post.createdAt);
+                            const timeStr = dateObj.toLocaleDateString('pt-BR') + ' ' + String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
+                            const editedHtml = post.edited ? `<span class="edited-tag">(editado)</span>` : '';
+                            const newHTML = `${authorData.handle} • ${timeStr}${editedHtml}`;
+                            if (userInfoSpan.innerHTML !== newHTML) userInfoSpan.innerHTML = newHTML;
+                        }
+
                         const avatarImg = existingEl.querySelector('.avatar');
                         if (avatarImg && avatarImg.src !== authorData.avatar) avatarImg.src = authorData.avatar;
                         
-                        const userNameEl = existingEl.querySelector('.user-info h3');
-                        if (userNameEl) {
-                            const expectedHtml = `${authorData.name} ${authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`.trim();
-                            if (userNameEl.innerHTML.trim() !== expectedHtml) userNameEl.innerHTML = expectedHtml;
-                        }
-
-                        const contentEl = existingEl.querySelector('.post-content');
-                        if(contentEl) {
-                            let contentHtml = post.content.replace(/\n/g, '<br>');
-                            if (post.edited) contentHtml += ' <span class="edited-flag">(editado)</span>';
-                            if(contentEl.innerHTML !== contentHtml) contentEl.innerHTML = contentHtml;
-                        }
-                        
                         if (container.children[index] !== existingEl) container.insertBefore(existingEl, container.children[index]);
                     } else {
-                        const refNode = container.children[index] || null;
-                        app.createPostCard(post, container, appState.currentView !== 'feed', refNode);
+                        app.createPostCard(post, container, appState.currentView !== 'feed', container.children[index] || null);
                     }
                 });
             },
 
             createPostCard: (post, container, isProfileView = false, refNode = null) => {
                 const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
-                const likeCount = post.likes ? post.likes.length : 0;
-                const commentCount = post.comments ? post.comments.length : 0;
                 const dateObj = new Date(post.createdAt);
                 const timeStr = dateObj.toLocaleDateString('pt-BR') + ' ' + String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
+                const editedHtml = post.edited ? `<span class="edited-tag">(editado)</span>` : '';
                 
-                const imgHtml = post.image ? `<img src="${post.image}" class="post-image" alt="Anexo">` : '';
                 const isMyPost = post.authorUid === appState.firebaseUser.uid;
                 const isAdmin = appState.currentUserData.role === 'admin';
-                const editedHtml = post.edited ? ` <span class="edited-flag">(editado)</span>` : '';
+                const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
 
                 let extraActions = '';
                 if (isMyPost || isAdmin) {
-                    extraActions += `<button class="action-btn" onclick="app.deletePost('${post.id}')" style="margin-left: auto; color: var(--danger);"><i class="fa-solid fa-trash"></i></button>`;
+                    extraActions = `<button class="action-btn" onclick="app.deletePost('${post.id}')" style="margin-left: auto; color: var(--danger);"><i class="fa-solid fa-trash"></i></button>`;
                 }
-                
-                const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
+
                 const article = document.createElement('article');
                 article.className = 'post-card';
                 article.dataset.id = post.id;
+                
+                // Dispara o menu contextual apenas se clicar fora de áreas interativas (header, ações, imagem)
+                article.onclick = (e) => {
+                    if (e.target.closest('.post-header') || e.target.closest('.post-actions') || e.target.closest('.post-image') || e.target.tagName.toLowerCase() === 'img') return;
+                    app.openContextMenu(post.id, 'post');
+                };
+
                 article.innerHTML = `
                     <div class="post-header" onclick="app.navigate('public_profile', null, '${authorData.uid}')">
                         <img src="${authorData.avatar}" alt="Avatar" class="avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                         <div class="user-info">
                             <h3>${authorData.name} ${authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h3>
-                            <span>${authorData.handle} • ${timeStr}</span>
+                            <span>${authorData.handle} • ${timeStr}${editedHtml}</span>
                         </div>
                     </div>
-                    <div class="post-body" onclick="app.openContextMenu(event, 'post', '${post.id}')">
-                        <p class="post-content">${post.content.replace(/\n/g, '<br>')}${editedHtml}</p>
-                        ${imgHtml}
-                    </div>
+                    <p class="post-content">${post.content.replace(/\n/g, '<br>')}</p>
+                    ${post.image ? `<img src="${post.image}" class="post-image" alt="Anexo">` : ''}
                     <div class="post-actions">
                         <button class="action-btn btn-like ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
-                            <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> <span class="like-count">${likeCount}</span>
+                            <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> <span class="like-count">${post.likes ? post.likes.length : 0}</span>
                         </button>
                         <button class="action-btn btn-comment" onclick="app.openComments('${post.id}')">
-                            <i class="fa-regular fa-comment"></i> <span class="comment-count">${commentCount}</span>
+                            <i class="fa-regular fa-comment"></i> <span class="comment-count">${post.comments ? post.comments.length : 0}</span>
                         </button>
-                        <button class="action-btn" onclick="app.showToast('Link da postagem copiado!', 'success')">
-                            <i class="fa-solid fa-share-nodes"></i>
-                        </button>
+                        <button class="action-btn" onclick="app.showToast('Link da postagem copiado!', 'success')"><i class="fa-solid fa-share-nodes"></i></button>
                         ${extraActions}
                     </div>
                 `;
-                if (refNode) container.insertBefore(article, refNode);
-                else container.appendChild(article);
+                
+                refNode ? container.insertBefore(article, refNode) : container.appendChild(article);
             },
 
             openPostModal: () => document.getElementById('modal-post').classList.add('active'),
@@ -1057,22 +1121,17 @@
             handleImageUpload: (e, type) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        let width = img.width; let height = img.height;
+                        let width = img.width, height = img.height;
                         const MAX = type === 'profile' ? 300 : (type === 'banner' ? 800 : 700);
-
                         if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
                         else if (height > MAX) { width *= MAX / height; height = MAX; }
-
                         canvas.width = width; canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
 
                         if (type === 'post') {
@@ -1098,59 +1157,47 @@
             },
 
             publishPost: async () => {
-                if (!appState.firebaseUser) return;
                 const content = document.getElementById('post-content').value.trim();
-                
-                if (!content && !appState.tempBase64Post) return app.showToast("Escreva algo ou insira uma imagem.", "error");
+                if (!content && !appState.tempBase64Post) return app.showToast("Escreva algo ou insira imagem.", "error");
 
                 const btn = document.getElementById('btn-publish');
                 btn.disabled = true; btn.innerHTML = 'Transmitindo...';
 
                 try {
-                    const newPost = {
+                    await addDoc(colPosts, {
                         authorUid: appState.firebaseUser.uid, content: content, image: appState.tempBase64Post || '',
                         likes: [], comments: [], saves: [], createdAt: new Date().toISOString()
-                    };
-                    await addDoc(colPosts, newPost);
-                    app.addXP(15);
-                    app.closePostModal();
-                    app.showToast("Transmissão enviada a rede global!", "success");
-                } catch (e) { app.showToast("Erro ao transmitir: " + e.message, "error"); } 
+                    });
+                    app.addXP(15); app.closePostModal(); app.showToast("Transmissão enviada!", "success");
+                } catch (e) { app.showToast("Erro: " + e.message, "error"); } 
                 finally { btn.disabled = false; btn.innerHTML = 'Transmitir Dados'; }
             },
 
             deletePost: async (postId) => {
                 if (confirm("Apagar permanentemente esta transmissão?")) {
-                    try { await deleteDoc(doc(colPosts, postId)); app.showToast("Postagem removida.", "success"); } 
-                    catch (e) { app.showToast("Erro ao apagar.", "error"); }
+                    try { await deleteDoc(doc(colPosts, postId)); app.showToast("Removido.", "success"); } 
+                    catch (e) {}
                 }
             },
 
             toggleLike: async (postId) => {
-                if (!appState.firebaseUser) return;
                 const post = appState.allPosts.find(p => p.id === postId);
                 if (!post) return;
-                const postRef = doc(colPosts, postId);
                 const uid = appState.firebaseUser.uid;
                 try {
-                    if (post.likes.includes(uid)) await updateDoc(postRef, { likes: arrayRemove(uid) });
-                    else { await updateDoc(postRef, { likes: arrayUnion(uid) }); app.addXP(2); }
-                } catch (e) { }
+                    if (post.likes.includes(uid)) await updateDoc(doc(colPosts, postId), { likes: arrayRemove(uid) });
+                    else { await updateDoc(doc(colPosts, postId), { likes: arrayUnion(uid) }); app.addXP(2); }
+                } catch (e) {}
             },
 
+            // --- COMENTÁRIOS ---
             openComments: (postId) => {
                 appState.activeCommentPostId = postId;
                 document.getElementById('modal-comments').classList.add('active');
-                app.renderComments(postId);
+                app.updateCommentsInDOM(postId);
             },
-            closeCommentsModal: () => {
-                document.getElementById('modal-comments').classList.remove('active');
-                appState.activeCommentPostId = null;
-            },
+            closeCommentsModal: () => { document.getElementById('modal-comments').classList.remove('active'); appState.activeCommentPostId = null; },
             
-            renderComments: (postId) => {
-                document.getElementById('comments-list').innerHTML = ''; app.updateCommentsInDOM(postId);
-            },
             updateCommentsInDOM: (postId) => {
                 const post = appState.allPosts.find(p => p.id === postId);
                 const list = document.getElementById('comments-list');
@@ -1163,51 +1210,201 @@
                 }
                 const msg = list.querySelector('.no-comments-msg');
                 if (msg) msg.remove();
-
                 if (currentComments > post.comments.length) list.innerHTML = ''; 
 
                 const startingIndex = list.querySelectorAll('.comment-item').length;
-                const newComments = post.comments.slice(startingIndex);
-
-                newComments.forEach(c => {
+                post.comments.slice(startingIndex).forEach(c => {
                     const author = appState.allUsers.find(u => u.uid === c.authorUid) || {name: 'Desconhecido', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
                     const div = document.createElement('div');
                     div.className = 'comment-item';
                     div.style = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-size: 0.85rem; animation: fadeIn 0.3s ease;";
                     
-                    let delBtn = '';
-                    if (c.authorUid === appState.firebaseUser.uid || appState.currentUserData.role === 'admin') {
-                        delBtn = `<i class="fa-solid fa-trash" style="color:var(--danger); float:right; cursor:pointer;" onclick="app.deleteComment('${postId}', '${c.id}')"></i>`;
-                    }
-                    div.innerHTML = `
-                        ${delBtn}
-                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:5px;">
-                            <img src="${author.avatar}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
-                            <span style="color:var(--cyan); font-weight:bold;">${author.name}</span>
-                        </div>
-                        <div style="padding-left:32px;">${c.text}</div>
-                    `;
+                    let delBtn = (c.authorUid === appState.firebaseUser.uid || appState.currentUserData.role === 'admin') ? `<i class="fa-solid fa-trash" style="color:var(--danger); float:right; cursor:pointer;" onclick="app.deleteComment('${postId}', '${c.id}')"></i>` : '';
+                    div.innerHTML = `${delBtn}<div style="display:flex; gap:8px; align-items:center; margin-bottom:5px;"><img src="${author.avatar}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="color:var(--cyan); font-weight:bold;">${author.name}</span></div><div style="padding-left:32px;">${c.text}</div>`;
                     list.appendChild(div);
                 });
-                if (newComments.length > 0) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
+                if (post.comments.slice(startingIndex).length > 0) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
             },
             sendComment: async () => {
-                if (!appState.firebaseUser || !appState.activeCommentPostId) return;
-                const input = document.getElementById('comment-input');
-                const text = input.value.trim();
+                const text = document.getElementById('comment-input').value.trim();
                 if (!text) return;
-                const postRef = doc(colPosts, appState.activeCommentPostId);
-                const newComment = { id: 'c_' + Date.now(), authorUid: appState.firebaseUser.uid, text: text, createdAt: new Date().toISOString() };
-                try { await updateDoc(postRef, { comments: arrayUnion(newComment) }); input.value = ''; app.addXP(5); } catch(e) {}
+                try {
+                    await updateDoc(doc(colPosts, appState.activeCommentPostId), { 
+                        comments: arrayUnion({ id: 'c_' + Date.now(), authorUid: appState.firebaseUser.uid, text: text, createdAt: new Date().toISOString() }) 
+                    });
+                    document.getElementById('comment-input').value = ''; app.addXP(5);
+                } catch(e) {}
             },
             deleteComment: async (postId, commentId) => {
                 const post = appState.allPosts.find(p => p.id === postId);
-                if (!post) return;
-                const comment = post.comments.find(c => c.id === commentId);
-                if (!comment) return;
-                try { await updateDoc(doc(colPosts, postId), { comments: arrayRemove(comment) }); } catch(e) {}
+                const comment = post?.comments.find(c => c.id === commentId);
+                if (comment) try { await updateDoc(doc(colPosts, postId), { comments: arrayRemove(comment) }); } catch(e) {}
             },
 
+            // --- SISTEMA DE CHAT E ATUALIZAÇÃO DOM PROGRESSIVA (Com Suporte a Resposta/Edição/Ocultar) ---
+            switchChatTab: (mode) => {
+                app.cancelReply(); // Reseta modo de resposta
+                appState.activeChatMode = mode;
+                
+                const btnG = document.getElementById('tab-global'), btnP = document.getElementById('tab-private');
+                const cG = document.getElementById('chat-global-container'), cPL = document.getElementById('private-chats-list'), cPC = document.getElementById('chat-private-container');
+                const input = document.getElementById('chat-input-container'), info = document.getElementById('chat-status-info');
+
+                if (mode === 'global') {
+                    btnG.classList.remove('btn-secondary'); btnP.classList.add('btn-secondary');
+                    cG.style.display = 'flex'; cPL.style.display = 'none'; cPC.style.display = 'none';
+                    input.style.display = 'flex'; info.innerHTML = `<i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado`;
+                    app.updateChatInDOM(appState.globalMessages, 'chat-global-container');
+                } else if (mode === 'private_list') {
+                    appState.activeChatMode = 'private_list'; 
+                    btnP.classList.remove('btn-secondary'); btnG.classList.add('btn-secondary');
+                    cG.style.display = 'none'; cPC.style.display = 'none'; cPL.style.display = 'flex';
+                    input.style.display = 'none'; info.innerHTML = `<i class="fa-solid fa-lock" style="color: var(--purple);"></i> Frequências Privadas`;
+                    app.renderPrivateChatList();
+                } else {
+                    btnP.classList.remove('btn-secondary'); btnG.classList.add('btn-secondary');
+                    cG.style.display = 'none'; cPL.style.display = 'none'; cPC.style.display = 'flex';
+                    if (cPC.dataset.targetUid !== mode) { cPC.innerHTML = ''; cPC.dataset.targetUid = mode; }
+                    input.style.display = 'flex';
+                    
+                    const target = appState.allUsers.find(u => u.uid === mode);
+                    info.innerHTML = `<i class="fa-solid fa-lock" style="color: var(--purple);"></i> Criptografia 1x1 com <span style="color:white;">${target ? target.name : '...'}</span><br><a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab('private_list')">← Voltar a Lista</a>`;
+
+                    const myUid = appState.firebaseUser.uid;
+                    const conv = appState.privateMessages.filter(m => m.participants.includes(myUid) && m.participants.includes(mode));
+                    app.updateChatInDOM(conv, 'chat-private-container');
+                }
+            },
+
+            updateChatInDOM: (messagesArray, containerId) => {
+                const container = document.getElementById(containerId);
+                if(!container) return;
+                
+                const sorted = [...messagesArray].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+                const validMessages = sorted.filter(m => !(m.deletedFor && m.deletedFor.includes(appState.firebaseUser.uid)));
+
+                // Remove da UI os apagados
+                const currentElements = Array.from(container.querySelectorAll('.message'));
+                currentElements.forEach(el => {
+                    if (!validMessages.find(m => m.id === el.id.replace('msg-', ''))) el.remove();
+                });
+
+                validMessages.forEach((msg) => {
+                    const existingEl = document.getElementById(`msg-${msg.id}`);
+                    const dateObj = new Date(msg.createdAt);
+                    const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
+                    const editedHtml = msg.edited ? `<span class="edited-tag">(editado)</span>` : '';
+
+                    if (existingEl) {
+                        const textEl = existingEl.querySelector('.msg-text');
+                        if (textEl && textEl.innerText !== msg.content) {
+                            textEl.innerText = msg.content;
+                            const timeEl = existingEl.querySelector('.msg-time');
+                            if (timeEl) timeEl.innerHTML = `${timeStr}${editedHtml}`;
+                        }
+                    } else {
+                        const isMine = msg.authorUid === appState.firebaseUser.uid;
+                        const author = appState.allUsers.find(u => u.uid === msg.authorUid) || {name: 'Netrunner', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
+
+                        let replyHtml = '';
+                        if (msg.replyTo) {
+                            replyHtml = `
+                                <div class="msg-replied-block" onclick="app.scrollToMessage('${msg.replyTo}', event)">
+                                    <div class="msg-replied-author"><i class="fa-solid fa-reply" style="font-size:0.6rem;"></i> Respondendo ${msg.replyAuthor || ''}</div>
+                                    <div class="msg-replied-text">${msg.replyPreview || ''}</div>
+                                </div>
+                            `;
+                        }
+
+                        const div = document.createElement('div');
+                        div.className = `message ${isMine ? 'mine' : ''}`;
+                        div.id = `msg-${msg.id}`;
+                        div.innerHTML = `
+                            ${!isMine ? `<img src="${author.avatar}" class="msg-avatar" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
+                            <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
+                                ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name}</div>` : ''}
+                                ${replyHtml}
+                                <div class="msg-text">${msg.content}</div>
+                                <span class="msg-time">${timeStr}${editedHtml}</span>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                        setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+                    }
+                });
+            },
+
+            startPrivateChat: (targetUid) => { app.navigate('chat'); setTimeout(() => { app.switchChatTab(targetUid); }, 100); },
+
+            renderPrivateChatList: () => {
+                const container = document.getElementById('private-chats-list');
+                if(!container) return;
+                container.innerHTML = '';
+                const myUid = appState.firebaseUser.uid;
+
+                const myChats = appState.privateMessages.filter(m => m.participants.includes(myUid));
+                const chatMap = {};
+                myChats.forEach(m => {
+                    const otherUid = m.participants.find(p => p !== myUid);
+                    if(otherUid) {
+                        if(!chatMap[otherUid] || new Date(m.createdAt) > new Date(chatMap[otherUid].createdAt)) chatMap[otherUid] = m;
+                    }
+                });
+
+                if (Object.keys(chatMap).length === 0) {
+                    return container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum link privado aberto. Encontre usuários na Busca.</p>`;
+                }
+
+                Object.keys(chatMap).forEach(uid => {
+                    const user = appState.allUsers.find(u => u.uid === uid) || {name: 'Unknown', handle: '@unknown', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
+                    const lastMsg = chatMap[uid].content || '';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'chat-list-item';
+                    div.onclick = () => app.startPrivateChat(uid);
+                    div.innerHTML = `
+                        <img src="${user.avatar}" class="avatar" style="width: 44px; height: 44px;">
+                        <div class="user-info">
+                            <h3>${user.name}</h3>
+                            <span style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:var(--border-glass);"></i>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            handleChatKeyPress: (e) => { if (e.key === 'Enter') app.sendChatMessage(); },
+
+            sendChatMessage: async () => {
+                const input = document.getElementById('chat-input');
+                const content = input.value.trim();
+                if (!content) return;
+
+                input.value = '';
+                const baseMsg = { authorUid: appState.firebaseUser.uid, content: content, createdAt: new Date().toISOString() };
+
+                // Adicionar referências de Resposta no envio do BD
+                if (appState.replyingTo) {
+                    baseMsg.replyTo = appState.replyingTo.id;
+                    const author = appState.allUsers.find(u => u.uid === appState.replyingTo.authorUid);
+                    baseMsg.replyAuthor = author ? author.handle : '@usuario';
+                    
+                    let preview = appState.replyingTo.content || '';
+                    if (preview.length > 70) preview = preview.substring(0, 70) + '...';
+                    if (!preview && appState.replyingTo.image) preview = '📷 Foto';
+                    baseMsg.replyPreview = preview;
+                    
+                    app.cancelReply();
+                }
+
+                try {
+                    if (appState.activeChatMode === 'global') { await addDoc(colGlobalChat, baseMsg); app.addXP(1); } 
+                    else { baseMsg.participants = [appState.firebaseUser.uid, appState.activeChatMode]; await addDoc(colPrivateChat, baseMsg); }
+                } catch(e) { app.showToast("Falha de transmissão.", "error"); }
+            },
+
+            // --- PERFIL E CONFIGURAÇÕES ---
             renderProfile: (userData, isPublic = false) => {
                 const contentArea = document.getElementById('app-content');
                 if(!isPublic) contentArea.innerHTML = '';
@@ -1224,28 +1421,21 @@
                 if (isMe && !isPublic) {
                     actionButton = `<div style="display: flex; gap: 10px; width: 100%;"><button class="btn-primary" style="flex: 1;" onclick="app.openSettingsModal()">Editar Perfil</button></div>`;
                 } else if (!isMe) {
-                    actionButton = `
-                        <div style="display: flex; gap: 10px; width: 100%;">
-                            <button id="btn-follow" class="btn-primary ${iFollow ? 'btn-secondary' : ''}" style="flex: 1;" onclick="app.toggleFollow('${userData.uid}')">${iFollow ? 'Seguindo' : 'Seguir'}</button>
-                            <button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.startPrivateChat('${userData.uid}')">Mensagem</button>
-                        </div>`;
+                    actionButton = `<div style="display: flex; gap: 10px; width: 100%;"><button id="btn-follow" class="btn-primary ${iFollow ? 'btn-secondary' : ''}" style="flex: 1;" onclick="app.toggleFollow('${userData.uid}')">${iFollow ? 'Seguindo' : 'Seguir'}</button><button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.startPrivateChat('${userData.uid}')">Mensagem</button></div>`;
                 }
-                const myPosts = appState.allPosts.filter(p => p.authorUid === userData.uid);
+
                 const html = `
                     <section class="profile-top-section">
                         <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
                         <div class="profile-header">
                             <div class="profile-avatar-container">
                                 <img src="${userData.avatar}" alt="Avatar" class="profile-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                                ${isMe && !isPublic ? `
-                                <div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto">
-                                    <i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i>
-                                </div>
-                                <input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">` : ''}
+                                ${isMe && !isPublic ? `<div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto"><i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i></div><input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">` : ''}
                             </div>
                             <h2 class="profile-name">${userData.name} ${userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h2>
                             <span class="profile-handle">${userData.handle}</span>
                             <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
+                            
                             <div class="stats-container">
                                 <div class="stat-item"><span class="stat-value neon-purple" id="stat-level">LVL ${userData.level || 1}</span><span class="stat-label">Nível</span></div>
                                 <div class="stat-item"><span class="stat-value neon-cyan" id="stat-followers">${userData.followers ? userData.followers.length : 0}</span><span class="stat-label">Seguidores</span></div>
@@ -1255,9 +1445,7 @@
                         </div>
                     </section>
                     <section class="profile-posts-section">
-                        <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">
-                            Transmissões Recentes (<span id="stat-post-count">${myPosts.length}</span>)
-                        </h3>
+                        <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">Transmissões (<span id="stat-post-count">${appState.allPosts.filter(p => p.authorUid === userData.uid).length}</span>)</h3>
                         <div id="user-posts-container"></div>
                     </section>
                 `;
@@ -1272,49 +1460,31 @@
             },
 
             updateProfileInDOM: () => {
-                const viewUid = appState.currentView === 'perfil' ? appState.firebaseUser.uid : appState.currentPublicProfileUid;
-                const viewUser = appState.allUsers.find(u => u.uid === viewUid);
+                const viewUser = appState.allUsers.find(u => u.uid === (appState.currentView === 'perfil' ? appState.firebaseUser.uid : appState.currentPublicProfileUid));
                 if (!viewUser) return;
 
-                const els = {
-                    level: document.getElementById('stat-level'), followers: document.getElementById('stat-followers'), following: document.getElementById('stat-following'),
-                    postCount: document.getElementById('stat-post-count'), btnFollow: document.getElementById('btn-follow'),
-                    name: document.querySelector('.profile-name'), bio: document.querySelector('.profile-bio'),
-                    avatar: document.querySelector('.profile-avatar'), banner: document.querySelector('.profile-banner')
-                };
+                if (document.getElementById('stat-level')) document.getElementById('stat-level').innerText = `LVL ${viewUser.level || 1}`;
+                if (document.getElementById('stat-followers')) document.getElementById('stat-followers').innerText = viewUser.followers ? viewUser.followers.length : 0;
+                if (document.getElementById('stat-following')) document.getElementById('stat-following').innerText = viewUser.following ? viewUser.following.length : 0;
+                if (document.getElementById('stat-post-count')) document.getElementById('stat-post-count').innerText = appState.allPosts.filter(p => p.authorUid === viewUser.uid).length;
 
-                if (els.level) els.level.innerText = `LVL ${viewUser.level || 1}`;
-                if (els.followers) els.followers.innerText = viewUser.followers ? viewUser.followers.length : 0;
-                if (els.following) els.following.innerText = viewUser.following ? viewUser.following.length : 0;
-                
-                const myPosts = appState.allPosts.filter(p => p.authorUid === viewUid);
-                if (els.postCount) els.postCount.innerText = myPosts.length;
-
-                if (els.btnFollow && appState.currentView === 'public_profile') {
-                    const iFollow = viewUser.followers && viewUser.followers.includes(appState.firebaseUser.uid);
-                    els.btnFollow.classList.toggle('btn-secondary', iFollow);
-                    els.btnFollow.innerText = iFollow ? 'Seguindo' : 'Seguir';
+                const btnFollow = document.getElementById('btn-follow');
+                if (btnFollow && appState.currentView === 'public_profile') {
+                    if (viewUser.followers && viewUser.followers.includes(appState.firebaseUser.uid)) { btnFollow.classList.add('btn-secondary'); btnFollow.innerText = 'Seguindo'; } 
+                    else { btnFollow.classList.remove('btn-secondary'); btnFollow.innerText = 'Seguir'; }
                 }
                 
-                if (els.name) els.name.innerHTML = `${viewUser.name} ${viewUser.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`;
-                if (els.bio) els.bio.innerText = viewUser.bio || 'Sem biografia...';
-                if (els.avatar && els.avatar.src !== viewUser.avatar) els.avatar.src = viewUser.avatar;
-                if (els.banner && viewUser.banner) els.banner.style.backgroundImage = `url('${viewUser.banner}')`;
+                if (document.querySelector('.profile-name')) document.querySelector('.profile-name').innerHTML = `${viewUser.name} ${viewUser.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`;
+                if (document.querySelector('.profile-bio')) document.querySelector('.profile-bio').innerText = viewUser.bio || 'Sem biografia...';
+                if (document.querySelector('.profile-avatar') && document.querySelector('.profile-avatar').src !== viewUser.avatar) document.querySelector('.profile-avatar').src = viewUser.avatar;
+                if (document.querySelector('.profile-banner') && viewUser.banner) document.querySelector('.profile-banner').style.backgroundImage = `url('${viewUser.banner}')`;
             },
-
-            updateProfileImage: async (base64) => {
-                app.showToast("Enviando foto...", "info");
-                try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 }); app.showToast("Foto atualizada!", "success"); } 
-                catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
-            },
-
+            updateProfileImage: async (base64) => { try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 }); app.showToast("Foto atualizada!", "success"); } catch(e) {} },
             toggleFollow: async (targetUid) => {
-                if (!appState.firebaseUser) return;
-                const myUid = appState.firebaseUser.uid;
                 const target = appState.allUsers.find(u => u.uid === targetUid);
                 if (!target) return;
-
-                const isFollowing = target.followers && target.followers.includes(myUid);
+                const isFollowing = target.followers && target.followers.includes(appState.firebaseUser.uid);
+                
                 const btn = document.getElementById('btn-follow');
                 if (btn && appState.currentPublicProfileUid === targetUid) {
                     if (btn.innerText.includes('Seguindo')) { btn.innerText = 'Seguir'; btn.classList.remove('btn-secondary'); } 
@@ -1322,489 +1492,91 @@
                 }
 
                 try {
-                    if (isFollowing) {
-                        await updateDoc(doc(colUsers, targetUid), { followers: arrayRemove(myUid) });
-                        await updateDoc(doc(colUsers, myUid), { following: arrayRemove(targetUid) });
-                    } else {
-                        await updateDoc(doc(colUsers, targetUid), { followers: arrayUnion(myUid) });
-                        await updateDoc(doc(colUsers, myUid), { following: arrayUnion(targetUid) });
-                        app.showToast(`Seguindo ${target.name}`, "success");
-                    }
+                    if (isFollowing) { await updateDoc(doc(colUsers, targetUid), { followers: arrayRemove(appState.firebaseUser.uid) }); await updateDoc(doc(colUsers, appState.firebaseUser.uid), { following: arrayRemove(targetUid) }); } 
+                    else { await updateDoc(doc(colUsers, targetUid), { followers: arrayUnion(appState.firebaseUser.uid) }); await updateDoc(doc(colUsers, appState.firebaseUser.uid), { following: arrayUnion(targetUid) }); app.showToast(`Seguindo ${target.name}`, "success"); }
                 } catch(e) {}
             },
 
             openSettingsModal: () => {
-                document.getElementById('edit-name').value = appState.currentUserData.name;
-                document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
-                appState.tempBase64Banner = null;
-                document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-image"></i> Alterar Banner de Fundo <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">`;
+                document.getElementById('edit-name').value = appState.currentUserData.name; document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
+                appState.tempBase64Banner = null; document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-image"></i> Alterar Banner de Fundo <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">`;
                 document.getElementById('modal-settings').classList.add('active');
             },
             closeSettingsModal: () => document.getElementById('modal-settings').classList.remove('active'),
-            
             saveProfileSettings: async () => {
                 const name = document.getElementById('edit-name').value.trim();
-                const bio = document.getElementById('edit-bio').value.trim();
                 if(name.length < 2) return app.showToast("Nome muito curto", "error");
 
-                const btn = document.getElementById('btn-save-settings');
-                btn.disabled = true; btn.innerHTML = "Salvando...";
-
+                const btn = document.getElementById('btn-save-settings'); btn.disabled = true; btn.innerHTML = "Salvando...";
                 try {
-                    const updates = { name: name, bio: bio };
+                    const updates = { name: name, bio: document.getElementById('edit-bio').value.trim() };
                     if (appState.tempBase64Banner) updates.banner = appState.tempBase64Banner;
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
                     app.closeSettingsModal(); app.showToast("Perfil salvo!", "success");
-                } catch (e) { app.showToast("Erro ao salvar", "error"); } 
-                finally { btn.disabled = false; btn.innerHTML = "Salvar Perfil"; }
+                } catch (e) { app.showToast("Erro", "error"); } finally { btn.disabled = false; btn.innerHTML = "Salvar Perfil"; }
             },
 
+            // --- PESQUISA, RANKING E UTILIDADES ---
             performSearch: () => {
                 const input = document.getElementById('search-input');
                 const query = input ? input.value.trim().toLowerCase() : '';
                 const container = document.getElementById('search-results-container');
                 if(!container) return;
-                
                 container.innerHTML = '';
+                
                 let results = appState.allUsers;
                 if (query) results = results.filter(u => u.name.toLowerCase().includes(query) || u.handle.toLowerCase().includes(query));
 
-                if (results.length === 0) {
-                    container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum sinal detectado.</p>`;
-                    return;
-                }
+                if (results.length === 0) return container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum sinal detectado.</p>`;
 
                 results.forEach(u => {
                     const div = document.createElement('div');
                     div.className = 'rank-card';
-                    div.innerHTML = `
-                        <img src="${u.avatar}" class="avatar" style="width: 44px; height: 44px;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                        <div class="rank-info"><h4>${u.name}</h4><span>${u.handle}</span></div>
-                        <button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>
-                    `;
+                    div.innerHTML = `<img src="${u.avatar}" class="avatar" style="width: 44px; height: 44px;"><div class="rank-info"><h4>${u.name}</h4><span>${u.handle}</span></div><button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>`;
                     container.appendChild(div);
                 });
             },
-
-            switchChatTab: (mode) => {
-                appState.activeChatMode = mode;
-                
-                const btnGlobal = document.getElementById('tab-global');
-                const btnPrivate = document.getElementById('tab-private');
-                const cGlobal = document.getElementById('chat-global-container');
-                const cPrivateList = document.getElementById('private-chats-list');
-                const cPrivateChat = document.getElementById('chat-private-container');
-                const inputArea = document.querySelector('.chat-input-wrapper');
-                const info = document.getElementById('chat-status-info');
-
-                if (mode === 'global') {
-                    if(btnGlobal) btnGlobal.classList.remove('btn-secondary');
-                    if(btnPrivate) btnPrivate.classList.add('btn-secondary');
-                    if(cGlobal) cGlobal.style.display = 'flex';
-                    if(cPrivateList) cPrivateList.style.display = 'none';
-                    if(cPrivateChat) cPrivateChat.style.display = 'none';
-                    if(inputArea) inputArea.style.display = 'flex';
-                    if(info) info.innerHTML = `<i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado`;
-                    
-                    app.updateChatInDOM(appState.globalMessages, 'chat-global-container');
-                } else if (mode === 'private_list' || mode === 'private') {
-                    appState.activeChatMode = 'private_list'; 
-                    if(btnPrivate) btnPrivate.classList.remove('btn-secondary');
-                    if(btnGlobal) btnGlobal.classList.add('btn-secondary');
-                    if(cGlobal) cGlobal.style.display = 'none';
-                    if(cPrivateChat) cPrivateChat.style.display = 'none';
-                    if(cPrivateList) cPrivateList.style.display = 'flex';
-                    if(inputArea) inputArea.style.display = 'none'; 
-                    if(info) info.innerHTML = `<i class="fa-solid fa-lock" style="color: var(--purple);"></i> Frequências Privadas`;
-                    
-                    app.renderPrivateChatList();
-                } else {
-                    if(btnPrivate) btnPrivate.classList.remove('btn-secondary');
-                    if(btnGlobal) btnGlobal.classList.add('btn-secondary');
-                    if(cGlobal) cGlobal.style.display = 'none';
-                    if(cPrivateList) cPrivateList.style.display = 'none';
-                    if(cPrivateChat) {
-                        cPrivateChat.style.display = 'flex';
-                        if (cPrivateChat.dataset.targetUid !== mode) { cPrivateChat.innerHTML = ''; cPrivateChat.dataset.targetUid = mode; }
-                    }
-                    if(inputArea) inputArea.style.display = 'flex';
-                    
-                    const target = appState.allUsers.find(u => u.uid === mode);
-                    if(info) info.innerHTML = `
-                        <i class="fa-solid fa-lock" style="color: var(--purple);"></i> Criptografia 1x1 com <span style="color:white;">${target ? target.name : '...'}</span>
-                        <br><a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab('private_list')">← Voltar a Lista</a>
-                    `;
-
-                    const myUid = appState.firebaseUser.uid;
-                    const conversation = appState.privateMessages.filter(m => m.participants.includes(myUid) && m.participants.includes(mode));
-                    app.updateChatInDOM(conversation, 'chat-private-container');
-                }
-            },
-
-            updateChatInDOM: (messagesArray, containerId) => {
-                const container = document.getElementById(containerId);
-                if(!container) return;
-                
-                const visibleMessages = messagesArray
-                    .filter(m => !m.deletedFor || !m.deletedFor.includes(appState.firebaseUser.uid))
-                    .sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    
-                const currentElements = container.querySelectorAll('.message');
-
-                if (currentElements.length === 0 || currentElements.length > visibleMessages.length) {
-                    container.innerHTML = '';
-                }
-
-                // Diffing para mensagens editadas que já estão no DOM
-                currentElements.forEach((el, index) => {
-                    const msg = visibleMessages[index];
-                    if (!msg) return;
-                    const textEl = el.querySelector('.msg-text');
-                    if (textEl) {
-                        let expectedText = msg.content;
-                        if (msg.edited) expectedText += ' <span class="edited-flag">(editado)</span>';
-                        if (textEl.innerHTML !== expectedText) textEl.innerHTML = expectedText;
-                    }
-                });
-
-                const startIndex = container.querySelectorAll('.message').length;
-                const newMessages = visibleMessages.slice(startIndex);
-
-                newMessages.forEach(msg => {
-                    const isMine = msg.authorUid === appState.firebaseUser.uid;
-                    const dateObj = new Date(msg.createdAt);
-                    const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
-                    const author = appState.allUsers.find(u => u.uid === msg.authorUid) || {name: 'Netrunner', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
-
-                    let replyHtml = '';
-                    if (msg.replyTo) {
-                        let preview = msg.replyPreview || '';
-                        if (preview.length > 70) preview = preview.substring(0, 70) + '...';
-                        replyHtml = `
-                            <div class="msg-reply-ref" onclick="app.scrollToMessage('${msg.replyTo}')">
-                                <span class="msg-reply-author">↩ Respondendo ${msg.replyAuthor || 'Alguém'}</span>
-                                <span class="msg-reply-text">${preview}</span>
-                            </div>
-                        `;
-                    }
-
-                    const editedHtml = msg.edited ? ` <span class="edited-flag">(editado)</span>` : '';
-
-                    const div = document.createElement('div');
-                    div.className = `message ${isMine ? 'mine' : ''}`;
-                    div.dataset.id = msg.id; 
-                    
-                    div.innerHTML = `
-                        ${!isMine ? `<img src="${author.avatar}" class="msg-avatar" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
-                        <div class="msg-bubble" style="cursor: pointer;" onclick="app.openContextMenu(event, 'chat', '${msg.id}', '${appState.activeChatMode}')">
-                            ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name}</div>` : ''}
-                            ${replyHtml}
-                            <div class="msg-text">${msg.content}${editedHtml}</div>
-                            <span class="msg-time">${timeStr}</span>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-
-                if (newMessages.length > 0) setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
-            },
-
-            startPrivateChat: (targetUid) => {
-                app.navigate('chat');
-                setTimeout(() => { app.switchChatTab(targetUid); }, 100);
-            },
-
-            renderPrivateChatList: () => {
-                const container = document.getElementById('private-chats-list');
-                if(!container) return;
-                container.innerHTML = '';
-                const myUid = appState.firebaseUser.uid;
-
-                const myChats = appState.privateMessages.filter(m => m.participants.includes(myUid));
-                const chatMap = {};
-                
-                myChats.forEach(m => {
-                    const otherUid = m.participants.find(p => p !== myUid);
-                    if(otherUid) {
-                        if(!chatMap[otherUid] || new Date(m.createdAt) > new Date(chatMap[otherUid].createdAt)) { chatMap[otherUid] = m; }
-                    }
-                });
-
-                const uniqueUsers = Object.keys(chatMap);
-                if (uniqueUsers.length === 0) return container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum link privado aberto. Encontre usuários na Busca.</p>`;
-
-                uniqueUsers.forEach(uid => {
-                    const user = appState.allUsers.find(u => u.uid === uid) || {name: 'Unknown', handle: '@unknown', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
-                    const lastMsg = chatMap[uid].content;
-                    
-                    const div = document.createElement('div');
-                    div.className = 'chat-list-item'; div.onclick = () => app.startPrivateChat(uid);
-                    div.innerHTML = `
-                        <img src="${user.avatar}" class="avatar" style="width: 44px; height: 44px;">
-                        <div class="user-info"><h3>${user.name}</h3><span style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span></div>
-                        <i class="fa-solid fa-chevron-right" style="color:var(--border-glass);"></i>
-                    `;
-                    container.appendChild(div);
-                });
-            },
-
-            handleChatKeyPress: (e) => { if (e.key === 'Enter') app.sendChatMessage(); },
-
-            sendChatMessage: async () => {
-                if (!appState.firebaseUser) return;
-                const input = document.getElementById('chat-input');
-                const content = input.value.trim();
-                if (!content) return;
-
-                input.value = '';
-                const baseMsg = {
-                    authorUid: appState.firebaseUser.uid,
-                    content: content,
-                    createdAt: new Date().toISOString()
-                };
-
-                if (appState.activeReply) {
-                    baseMsg.replyTo = appState.activeReply.id;
-                    baseMsg.replyAuthor = appState.activeReply.authorName;
-                    baseMsg.replyPreview = appState.activeReply.content;
-                    app.cancelReply();
-                }
-
-                try {
-                    if (appState.activeChatMode === 'global') {
-                        await addDoc(colGlobalChat, baseMsg); app.addXP(1);
-                    } else {
-                        baseMsg.participants = [appState.firebaseUser.uid, appState.activeChatMode];
-                        await addDoc(colPrivateChat, baseMsg);
-                    }
-                } catch(e) { app.showToast("Falha de transmissão.", "error"); }
-            },
-
-            // --- FUNÇÕES DE CONTEXTO E MENSAGENS AVANÇADAS ---
-            openContextMenu: (e, type, id, chatMode = null) => {
-                e.stopPropagation();
-                appState.activeContextItem = { type, id, chatMode };
-                const myUid = appState.firebaseUser.uid;
-                let item, authorUid;
-
-                if (type === 'post') {
-                    item = appState.allPosts.find(p => p.id === id);
-                    if(!item) return; authorUid = item.authorUid;
-                } else if (type === 'chat') {
-                    const arr = chatMode === 'global' ? appState.globalMessages : appState.privateMessages;
-                    item = arr.find(m => m.id === id);
-                    if(!item) return; authorUid = item.authorUid;
-                }
-
-                const isMine = authorUid === myUid;
-                let html = '';
-
-                if (type === 'post') {
-                    if (isMine) html += `<button class="context-btn" onclick="app.contextMenuAction('edit')"><i class="fa-solid fa-pen"></i> Editar publicação</button>`;
-                    html += `<button class="context-btn" onclick="app.contextMenuAction('copy')"><i class="fa-regular fa-copy"></i> Copiar texto</button>`;
-                } else if (type === 'chat') {
-                    if (isMine) html += `<button class="context-btn" onclick="app.contextMenuAction('edit')"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
-                    html += `<button class="context-btn" onclick="app.contextMenuAction('reply')"><i class="fa-solid fa-reply"></i> Responder mensagem</button>`;
-                    html += `<button class="context-btn" onclick="app.contextMenuAction('copy')"><i class="fa-regular fa-copy"></i> Copiar mensagem</button>`;
-                    html += `<button class="context-btn danger" onclick="app.contextMenuAction('deleteForMe')"><i class="fa-solid fa-eye-slash"></i> Apagar para mim</button>`;
-                    if (isMine) html += `<button class="context-btn danger" onclick="app.contextMenuAction('deleteForEveryone')"><i class="fa-solid fa-trash"></i> Apagar para todos</button>`;
-                }
-
-                document.getElementById('context-menu-content').innerHTML = html;
-                document.getElementById('context-menu-overlay').classList.add('active');
-            },
-
-            closeContextMenu: (e) => {
-                if(e) e.stopPropagation();
-                document.getElementById('context-menu-overlay').classList.remove('active');
-                appState.activeContextItem = null;
-            },
-
-            contextMenuAction: (action) => {
-                const { type, id, chatMode } = appState.activeContextItem;
-                app.closeContextMenu();
-
-                let item, colRef;
-                if (type === 'post') {
-                    item = appState.allPosts.find(p => p.id === id); colRef = colPosts;
-                } else if (type === 'chat') {
-                    const arr = chatMode === 'global' ? appState.globalMessages : appState.privateMessages;
-                    item = arr.find(m => m.id === id);
-                    colRef = chatMode === 'global' ? colGlobalChat : colPrivateChat;
-                }
-                if (!item) return;
-
-                if (action === 'copy') {
-                    if (!item.content || !item.content.trim()) return app.showToast("Nenhum texto para copiar.", "error");
-                    const ta = document.createElement("textarea"); ta.value = item.content; document.body.appendChild(ta); ta.select();
-                    try { document.execCommand('copy'); app.showToast("Texto copiado!", "success"); } 
-                    catch(err) { app.showToast("Erro ao copiar.", "error"); }
-                    document.body.removeChild(ta);
-                } 
-                else if (action === 'edit') {
-                    document.getElementById('edit-content-input').value = item.content;
-                    document.getElementById('modal-edit-item').classList.add('active');
-                }
-                else if (action === 'reply') {
-                    const author = appState.allUsers.find(u => u.uid === item.authorUid) || {name: 'Usuário', handle: '@user'};
-                    const authorName = type === 'chat' ? (author.handle || author.name) : author.name;
-                    let preview = item.content || (item.image ? '📷 Foto' : '');
-                    
-                    appState.activeReply = { id: item.id, authorName: authorName, content: preview };
-                    const prevBox = document.getElementById('reply-preview-box');
-                    if(prevBox) {
-                        document.getElementById('reply-preview-author').innerText = `Respondendo ${authorName}`;
-                        document.getElementById('reply-preview-text').innerText = preview;
-                        prevBox.style.display = 'block';
-                        document.getElementById('chat-input').focus();
-                    }
-                }
-                else if (action === 'deleteForMe') updateDoc(doc(colRef, id), { deletedFor: arrayUnion(appState.firebaseUser.uid) }).catch(e => console.error(e));
-                else if (action === 'deleteForEveryone') deleteDoc(doc(colRef, id)).catch(e => console.error(e));
-            },
-
-            closeEditModal: () => { document.getElementById('modal-edit-item').classList.remove('active'); document.getElementById('edit-content-input').value = ''; },
-            
-            saveEdit: async () => {
-                const newText = document.getElementById('edit-content-input').value.trim();
-                const { type, id, chatMode } = appState.activeContextItem;
-
-                if(!newText) return app.showToast("O texto não pode ser vazio.", "error");
-                const btn = document.querySelector('#modal-edit-item .btn-primary');
-                btn.disabled = true; btn.innerHTML = 'Salvando...';
-
-                let colRef = type === 'post' ? colPosts : (chatMode === 'global' ? colGlobalChat : colPrivateChat);
-                try { await updateDoc(doc(colRef, id), { content: newText, edited: true }); app.closeEditModal(); } 
-                catch (e) { app.showToast("Erro ao editar", "error"); } 
-                finally { btn.disabled = false; btn.innerHTML = 'Salvar Alteração'; }
-            },
-
-            cancelReply: () => {
-                appState.activeReply = null;
-                const box = document.getElementById('reply-preview-box');
-                if(box) box.style.display = 'none';
-            },
-
-            scrollToMessage: (id) => {
-                const el = document.querySelector(`.message[data-id="${id}"]`);
-                if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    el.classList.add('highlighted');
-                    setTimeout(() => el.classList.remove('highlighted'), 2000);
-                } else { app.showToast("Mensagem original não disponível.", "error"); }
-            },
-
             renderRanking: () => {
                 const container = document.getElementById('ranking-list-container');
                 if(!container) return;
-                const sortedUsers = [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50); 
                 container.innerHTML = '';
-                
-                sortedUsers.forEach((u, idx) => {
-                    const isMe = u.uid === appState.firebaseUser?.uid;
+                [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50).forEach((u, idx) => {
                     const div = document.createElement('div');
                     div.className = 'rank-card'; div.onclick = () => app.navigate('public_profile', null, u.uid);
-                    div.innerHTML = `
-                        <div class="rank-pos">#${idx + 1}</div>
-                        <img src="${u.avatar}" class="avatar" style="width: 38px; height: 38px;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                        <div class="rank-info"><h4>${u.name} ${isMe ? ' (Você)' : ''} ${u.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h4><span>${u.handle} • Nível ${u.level || 1}</span></div>
-                        <div class="rank-score">${u.xp || 0} XP</div>
-                    `;
+                    div.innerHTML = `<div class="rank-pos">#${idx + 1}</div><img src="${u.avatar}" class="avatar" style="width: 38px; height: 38px;"><div class="rank-info"><h4>${u.name} ${u.uid === appState.firebaseUser?.uid ? ' (Você)' : ''}</h4><span>${u.handle} • Nível ${u.level || 1}</span></div><div class="rank-score">${u.xp || 0} XP</div>`;
                     container.appendChild(div);
                 });
             },
-
-            addXP: async (amount) => {
-                if (!appState.firebaseUser || !appState.currentUserData) return;
-                const newXp = (appState.currentUserData.xp || 0) + amount;
-                const newCoins = (appState.currentUserData.ncoins || 0) + Math.floor(amount / 2);
-                try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { xp: newXp, ncoins: newCoins }); } catch(e) {}
-            },
-
+            addXP: async (amount) => { try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { xp: (appState.currentUserData.xp || 0) + amount, ncoins: (appState.currentUserData.ncoins || 0) + Math.floor(amount / 2) }); } catch(e) {} },
             openAdminModal: () => { if (appState.currentUserData.role === 'admin') alert("Painel Admin Restrito.\nNível de Acesso Reconhecido."); },
-
             showToast: (msg, type = 'info') => {
-                const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-                let icon = 'fa-circle-info';
-                if (type === 'error') icon = 'fa-circle-xmark'; if (type === 'success') icon = 'fa-circle-check';
-
-                toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
-                container.appendChild(toast);
+                toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-xmark' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i> <span>${msg}</span>`;
+                document.getElementById('toast-container').appendChild(toast);
                 setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
             },
-
             initParticles: () => {
-                const canvas = document.getElementById('particles'); const ctx = canvas.getContext('2d');
-                let particles = []; let animationFrameId;
-                const colors = [{ r: 0, g: 243, b: 255 }, { r: 255, g: 0, b: 255 }, { r: 176, g: 38, b: 255 }];
-
-                function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initNodes(); }
+                const canvas = document.getElementById('particles'), ctx = canvas.getContext('2d');
+                let particles = [];
+                function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; const count = Math.max(60, Math.min(Math.floor((canvas.width * canvas.height) / 6000), 140)); for (let i = 0; i < count; i++) particles.push(new Particle()); }
                 window.addEventListener('resize', resize);
-
+                const colors = [{ r: 0, g: 243, b: 255 }, { r: 255, g: 0, b: 255 }, { r: 176, g: 38, b: 255 }];
                 class Particle {
-                    constructor() {
-                        this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.z = Math.random() * 0.8 + 0.2; 
-                        this.size = (Math.random() * 2.5 + 1.2) * this.z;
-                        const speedFactor = (Math.random() * 0.5 + 0.15) * this.z;
-                        this.speedX = (Math.random() - 0.5) * speedFactor; this.speedY = (Math.random() - 0.5) * speedFactor;
-                        this.color = colors[Math.floor(Math.random() * colors.length)];
-                        this.alpha = (Math.random() * 0.7 + 0.5) * this.z; 
-                        this.alphaChange = (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
-                    }
-                    update() {
-                        this.x += this.speedX; this.y += this.speedY;
-                        if (this.x > canvas.width + 10) this.x = -10; else if (this.x < -10) this.x = canvas.width + 10;
-                        if (this.y > canvas.height + 10) this.y = -10; else if (this.y < -10) this.y = canvas.height + 10;
-                        this.alpha += this.alphaChange;
-                        if (this.alpha <= 0.25 || this.alpha >= (1.2 * this.z)) { this.alphaChange *= -1; }
-                    }
-                    draw() {
-                        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 1.5})`; ctx.fill();
-                        if (this.z > 0.3) {
-                            ctx.beginPath(); ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 0.4})`; ctx.fill();
-                        }
-                    }
-                }
-                function initNodes() {
-                    particles = []; const area = canvas.width * canvas.height;
-                    let count = Math.max(60, Math.min(Math.floor(area / 6000), 140)); 
-                    for (let i = 0; i < count; i++) { particles.push(new Particle()); }
-                }
-                function drawConnections() {
-                    const maxDistance = 110; const maxDistSq = maxDistance * maxDistance; 
-                    for (let i = 0; i < particles.length; i++) {
-                        for (let j = i + 1; j < particles.length; j++) {
-                            const p1 = particles[i]; const p2 = particles[j];
-                            if (Math.abs(p1.z - p2.z) > 0.3) continue;
-                            const dx = p1.x - p2.x; const dy = p1.y - p2.y;
-                            const distSq = dx * dx + dy * dy;
-                            if (distSq < maxDistSq) {
-                                const dist = Math.sqrt(distSq);
-                                const opacity = Math.min(1, (1 - (dist / maxDistance)) * ((p1.alpha + p2.alpha) / 1.2));
-                                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
-                                ctx.strokeStyle = `rgba(${p1.color.r}, ${p1.color.g}, ${p1.color.b}, ${opacity})`;
-                                ctx.lineWidth = 1.4 * ((p1.z + p2.z) / 2); ctx.stroke();
-                            }
-                        }
-                    }
+                    constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.z = Math.random() * 0.8 + 0.2; this.size = (Math.random() * 2.5 + 1.2) * this.z; const sf = (Math.random() * 0.5 + 0.15) * this.z; this.speedX = (Math.random() - 0.5) * sf; this.speedY = (Math.random() - 0.5) * sf; this.color = colors[Math.floor(Math.random() * colors.length)]; this.alpha = (Math.random() * 0.7 + 0.5) * this.z; this.alphaChange = (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1); }
+                    update() { this.x += this.speedX; this.y += this.speedY; if (this.x > canvas.width + 10) this.x = -10; else if (this.x < -10) this.x = canvas.width + 10; if (this.y > canvas.height + 10) this.y = -10; else if (this.y < -10) this.y = canvas.height + 10; this.alpha += this.alphaChange; if (this.alpha <= 0.25 || this.alpha >= (1.2 * this.z)) this.alphaChange *= -1; }
+                    draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 1.5})`; ctx.fill(); }
                 }
                 function animate() {
                     ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.globalCompositeOperation = 'screen';
-                    drawConnections(); particles.forEach(p => { p.update(); p.draw(); });
-                    ctx.globalCompositeOperation = 'source-over'; 
-                    animationFrameId = requestAnimationFrame(animate);
+                    for (let i = 0; i < particles.length; i++) { for (let j = i + 1; j < particles.length; j++) { if (Math.abs(particles[i].z - particles[j].z) > 0.3) continue; const distSq = Math.pow(particles[i].x - particles[j].x, 2) + Math.pow(particles[i].y - particles[j].y, 2); if (distSq < 12100) { ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.strokeStyle = `rgba(${particles[i].color.r}, ${particles[i].color.g}, ${particles[i].color.b}, ${Math.min(1, (1 - (Math.sqrt(distSq) / 110)) * ((particles[i].alpha + particles[j].alpha) / 1.2))})`; ctx.lineWidth = 1.4 * ((particles[i].z + particles[j].z) / 2); ctx.stroke(); } } }
+                    particles.forEach(p => { p.update(); p.draw(); }); ctx.globalCompositeOperation = 'source-over'; requestAnimationFrame(animate);
                 }
                 resize(); animate();
             }
         };
 
-        window.app = app;
-        window.appState = appState;
-        document.addEventListener('DOMContentLoaded', app.init);
+        window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
 </html>

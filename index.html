@@ -252,24 +252,35 @@
 z-index: 1;
         }
         
-        .profile-header {
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 55px 1rem 1.8rem;
-margin-top: 42px;
-overflow: visible; /* Espaçamento extra no topo para a foto não cobrir textos */
-            background: var(--bg-glass); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem;
-            border: 1px solid rgba(176, 38, 255, 0.25); border-top: none; box-shadow: 0 0 25px rgba(176, 38, 255, 0.12);
-            animation: fadeIn 0.4s ease forwards; text-align: center; position: relative;
-            position: relative;
-z-index: 2;
-        }
+        ..profile-header {
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    padding:55px 1rem 1.8rem;
+
+    margin-top:0;
+    margin-bottom:20px;
+
+    overflow:visible;
+
+    background:var(--bg-glass);
+    border-radius:0 0 16px 16px;
+    border:1px solid rgba(176,38,255,.25);
+    border-top:none;
+
+    z-index:5;
+}
         
-        .profile-avatar-container{
+.profile-avatar-container{
     position:absolute;
-    top:-42px;
     left:50%;
+    bottom:calc(100% - 78px);
+
     transform:translateX(-50%);
-    z-index:20;
+
+    z-index:50;
 }
         
         .profile-avatar { 
@@ -277,6 +288,28 @@ z-index: 2;
             border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); 
             background: var(--bg-base); 
         }
+        
+        .profile-profile-info{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+    padding-top:55px;
+}
+
+#user-posts-container{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    margin-top:15px;
+    position:relative;
+    z-index:1;
+}
+
+.post-card{
+    position:relative;
+    z-index:1;
+}
         
         .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; z-index: 2;}
         .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.5rem; z-index: 2;}

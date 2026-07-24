@@ -237,7 +237,20 @@
         .action-btn.liked { color: var(--magenta); text-shadow: 0 0 10px var(--magenta-glow); }
         .action-btn:hover { color: var(--cyan); }
 
-        /* PERFIL (LAYOUT CORRIGIDO) */
+        /* PERFIL (ESTRUTURAS ISOLADAS) */
+        .profile-top-section {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0; /* Previne que o flexbox deforme o topo */
+            width: 100%;
+        }
+
+        .profile-posts-section {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
         .profile-banner { 
             width: 100%; 
             height: 120px; 
@@ -248,19 +261,21 @@
             margin-bottom: 0; 
             border: 1px solid rgba(176, 38, 255, 0.25); 
             border-bottom: none;
+            flex-shrink: 0;
         }
         
         .profile-header {
             display: flex; flex-direction: column; align-items: center; 
-            padding: 3.5rem 1rem 1.8rem; /* Espaçamento extra no topo para a foto não cobrir textos */
+            padding: 3.5rem 1rem 1.8rem;
             background: var(--bg-glass); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem;
             border: 1px solid rgba(176, 38, 255, 0.25); border-top: none; box-shadow: 0 0 25px rgba(176, 38, 255, 0.12);
             animation: fadeIn 0.4s ease forwards; text-align: center; position: relative;
+            flex-shrink: 0;
         }
         
         .profile-avatar-container { 
             position: absolute; 
-            top: -42px; /* Posicionamento fixo sobre o limite entre banner e header */
+            top: -42px; 
             left: 50%; 
             transform: translateX(-50%); 
             z-index: 5; 
@@ -1078,10 +1093,6 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 
-                // A restrição prévia de tamanho foi removida.
-                // O fluxo delega à compactação interna do Canvas para reduzir tamanhos de foto mobile,
-                // eliminando bloqueios arbitrários e prevenindo problemas de upload.
-
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
@@ -1160,7 +1171,6 @@
                     app.closePostModal(); // Modal e imagem resetados somente ao sucesso
                     app.showToast("Transmissão enviada a rede global!", "success");
                 } catch (e) {
-                    // Retorna falha específica gerada pelo firestore para o front
                     app.showToast("Erro ao transmitir: " + e.message, "error");
                 } finally {
                     btn.disabled = false;
@@ -1332,44 +1342,48 @@
                 const myPosts = appState.allPosts.filter(p => p.authorUid === userData.uid);
 
                 const html = `
-                    <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
-                    <div class="profile-header">
-                        <div class="profile-avatar-container">
-                            <img src="${userData.avatar}" alt="Avatar" class="profile-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                            ${isMe && !isPublic ? `
-                            <div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto">
-                                <i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i>
+                    <section class="profile-top-section">
+                        <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
+                        <div class="profile-header">
+                            <div class="profile-avatar-container">
+                                <img src="${userData.avatar}" alt="Avatar" class="profile-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                                ${isMe && !isPublic ? `
+                                <div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto">
+                                    <i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i>
+                                </div>
+                                <input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">
+                                ` : ''}
                             </div>
-                            <input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">
-                            ` : ''}
-                        </div>
-                        
-                        <h2 class="profile-name">${userData.name} ${userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h2>
-                        <span class="profile-handle">${userData.handle}</span>
-                        <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
-                        
-                        <div class="stats-container">
-                            <div class="stat-item">
-                                <span class="stat-value neon-purple" id="stat-level">LVL ${userData.level || 1}</span>
-                                <span class="stat-label">Nível</span>
+                            
+                            <h2 class="profile-name">${userData.name} ${userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h2>
+                            <span class="profile-handle">${userData.handle}</span>
+                            <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
+                            
+                            <div class="stats-container">
+                                <div class="stat-item">
+                                    <span class="stat-value neon-purple" id="stat-level">LVL ${userData.level || 1}</span>
+                                    <span class="stat-label">Nível</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value neon-cyan" id="stat-followers">${userData.followers ? userData.followers.length : 0}</span>
+                                    <span class="stat-label">Seguidores</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="stat-following">${userData.following ? userData.following.length : 0}</span>
+                                    <span class="stat-label">Seguindo</span>
+                                </div>
                             </div>
-                            <div class="stat-item">
-                                <span class="stat-value neon-cyan" id="stat-followers">${userData.followers ? userData.followers.length : 0}</span>
-                                <span class="stat-label">Seguidores</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-value" id="stat-following">${userData.following ? userData.following.length : 0}</span>
-                                <span class="stat-label">Seguindo</span>
-                            </div>
-                        </div>
 
-                        ${actionButton}
-                    </div>
+                            ${actionButton}
+                        </div>
+                    </section>
                     
-                    <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">
-                        Transmissões Recentes (<span id="stat-post-count">${myPosts.length}</span>)
-                    </h3>
-                    <div id="user-posts-container"></div>
+                    <section class="profile-posts-section">
+                        <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">
+                            Transmissões Recentes (<span id="stat-post-count">${myPosts.length}</span>)
+                        </h3>
+                        <div id="user-posts-container"></div>
+                    </section>
                 `;
 
                 if (isPublic) {

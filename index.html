@@ -560,15 +560,17 @@
         <div class="chat-container">
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <button id="tab-global" class="btn-primary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('global')">Global</button>
-                <button id="tab-private" class="btn-primary btn-secondary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('private')">Privado</button>
+                <button id="tab-private" class="btn-primary btn-secondary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('private_list')">Privado</button>
             </div>
             
             <div class="chat-header-info" id="chat-status-info">
                 <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
             </div>
             
-            <div class="chat-messages" id="chat-messages-container"></div>
+            <!-- Containers Isolados -->
+            <div class="chat-messages" id="chat-global-container"></div>
             <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
+            <div class="chat-messages" id="chat-private-container" style="display:none;"></div>
 
             <div class="chat-input-area" id="chat-input-container">
                 <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
@@ -809,26 +811,59 @@
                     } else if (appState.currentView === 'search') {
                         app.performSearch();
                     }
+
+                    // Força atualização dos avatares no feed e chats dinamicamente, sem precisar recarregar
+                    if (appState.currentView === 'feed') {
+                        app.updatePostsInDOM();
+                    }
+                    if (appState.currentView === 'chat') {
+                        const containers = ['chat-global-container', 'chat-private-container'];
+                        containers.forEach(cid => {
+                            const c = document.getElementById(cid);
+                            if (c) {
+                                // Atualiza foto e nome nos balões do chat logados
+                                const avatars = c.querySelectorAll('.msg-avatar');
+                                avatars.forEach(img => {
+                                    const uid = img.getAttribute('data-uid');
+                                    if (uid) {
+                                        const u = appState.allUsers.find(user => user.uid === uid);
+                                        if (u && img.src !== u.avatar) img.src = u.avatar;
+                                    }
+                                });
+                                const names = c.querySelectorAll('.msg-author');
+                                names.forEach(div => {
+                                    const uid = div.getAttribute('data-uid');
+                                    if (uid) {
+                                        const u = appState.allUsers.find(user => user.uid === uid);
+                                        if (u && div.innerText !== u.name) div.innerText = u.name;
+                                    }
+                                });
+                            }
+                        });
+                    }
                 }, e => console.error(e));
 
                 if (appState.unsubscribeGlobalChat) appState.unsubscribeGlobalChat();
                 appState.unsubscribeGlobalChat = onSnapshot(colGlobalChat, (snap) => {
                     appState.globalMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
                     if (appState.currentView === 'chat' && appState.activeChatMode === 'global') {
-                        app.updateChatInDOM(appState.globalMessages);
+                        app.updateChatInDOM(appState.globalMessages, 'chat-global-container');
                     }
                 }, e => console.error(e));
 
                 if (appState.unsubscribePrivateChat) appState.unsubscribePrivateChat();
                 appState.unsubscribePrivateChat = onSnapshot(colPrivateChat, (snap) => {
                     appState.privateMessages = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if (appState.currentView === 'chat' && appState.activeChatMode !== 'global' && appState.activeChatMode !== 'private_list') {
-                        const conversation = appState.privateMessages.filter(m => 
-                            m.participants.includes(appState.firebaseUser.uid) && m.participants.includes(appState.activeChatMode)
-                        );
-                        app.updateChatInDOM(conversation);
-                    } else if (appState.currentView === 'chat' && appState.activeChatMode === 'private_list') {
-                        app.renderPrivateChatList();
+                    if (appState.currentView === 'chat') {
+                        if (appState.activeChatMode === 'private_list') {
+                            app.renderPrivateChatList();
+                        } else if (appState.activeChatMode !== 'global') {
+                            const myUid = appState.firebaseUser.uid;
+                            const conversation = appState.privateMessages.filter(m => 
+                                m.participants.includes(myUid) && m.participants.includes(appState.activeChatMode)
+                            );
+                            app.updateChatInDOM(conversation, 'chat-private-container');
+                        }
                     }
                 }, e => console.error(e));
 
@@ -845,7 +880,7 @@
                     return await getDownloadURL(storageReference);
                 } catch(e) {
                     console.error("Storage upload error:", e);
-                    return '';
+                    throw e; // O erro agora sobe para alertar o front-end
                 }
             },
 
@@ -888,8 +923,9 @@
                 else if (appState.currentView === 'chat') {
                     contentArea.innerHTML = '';
                     contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
-                    appState.activeChatMode = 'global';
-                    app.updateChatInDOM(appState.globalMessages); // Usa DOM diffing inicial para garantir integridade
+                    // Recupera o modo de navegação anterior de forma isolada e inteligente, mantendo estado
+                    if (!appState.activeChatMode) appState.activeChatMode = 'global';
+                    app.switchChatTab(appState.activeChatMode); 
                 }
                 else if (appState.currentView === 'ranking') {
                     contentArea.innerHTML = '';
@@ -965,6 +1001,20 @@
                         const commentBtn = existingEl.querySelector('.btn-comment');
                         if (commentBtn) {
                             commentBtn.innerHTML = `<i class="fa-regular fa-comment"></i> <span class="comment-count">${post.comments ? post.comments.length : 0}</span>`;
+                        }
+
+                        // Atualiza as fotos dinamicamente caso o Perfil do usuário tenha mudado a foto 
+                        const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
+                        const avatarImg = existingEl.querySelector('.avatar');
+                        if (avatarImg && avatarImg.src !== authorData.avatar) {
+                            avatarImg.src = authorData.avatar;
+                        }
+                        const userNameEl = existingEl.querySelector('.user-info h3');
+                        if (userNameEl) {
+                            const expectedHtml = `${authorData.name} ${authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`.trim();
+                            if (userNameEl.innerHTML.trim() !== expectedHtml) {
+                                userNameEl.innerHTML = expectedHtml;
+                            }
                         }
                         
                         // Garante a ordem correta caso algo venha com timestamp alterado
@@ -1043,10 +1093,10 @@
             handleImageUpload: (e, type) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                if (file.size > 5 * 1024 * 1024) {
-                    app.showToast("Escolha uma imagem menor que 5MB.", "error");
-                    return;
-                }
+                
+                // A restrição prévia de tamanho foi removida.
+                // O fluxo delega à compactação interna do Canvas para reduzir tamanhos de foto mobile,
+                // eliminando bloqueios arbitrários e prevenindo problemas de upload.
 
                 const reader = new FileReader();
                 reader.onload = function(evt) {
@@ -1123,9 +1173,10 @@
 
                     await addDoc(colPosts, newPost);
                     app.addXP(15);
-                    app.closePostModal();
+                    app.closePostModal(); // Modal e imagem resetados somente ao sucesso
                     app.showToast("Transmissão enviada a rede global!", "success");
                 } catch (e) {
+                    // Retorna falha específica gerada pelo storage para o front
                     app.showToast("Erro ao transmitir: " + e.message, "error");
                 } finally {
                     btn.disabled = false;
@@ -1395,6 +1446,7 @@
                 app.showToast("Enviando foto...", "info");
                 try {
                     const url = await app.uploadImageToStorage(base64, 'avatars');
+                    if (!url) throw new Error("Falha na geração do Link Seguro.");
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: url });
                     app.showToast("Foto atualizada!", "success");
                 } catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
@@ -1505,50 +1557,73 @@
                 });
             },
 
-            // --- 8. CHAT (Global e Privado) COM ATUALIZAÇÃO DOM PROGRESSIVA ---
+            // --- 8. CHAT (Global e Privado) COM ATUALIZAÇÃO DOM PROGRESSIVA E ISOLADA ---
             switchChatTab: (mode) => {
+                // Guarda o contexto do estado da aba internamente
                 appState.activeChatMode = mode;
                 
                 const btnGlobal = document.getElementById('tab-global');
                 const btnPrivate = document.getElementById('tab-private');
-                const cGlobal = document.getElementById('chat-messages-container');
-                const cPrivate = document.getElementById('private-chats-list');
+                const cGlobal = document.getElementById('chat-global-container');
+                const cPrivateList = document.getElementById('private-chats-list');
+                const cPrivateChat = document.getElementById('chat-private-container');
                 const inputArea = document.getElementById('chat-input-container');
                 const info = document.getElementById('chat-status-info');
 
+                // Lógica de isolamento de estado (Evita reutilização de containers)
                 if (mode === 'global') {
-                    btnGlobal.classList.remove('btn-secondary');
-                    btnPrivate.classList.add('btn-secondary');
-                    cGlobal.style.display = 'flex';
-                    cPrivate.style.display = 'none';
-                    inputArea.style.display = 'flex';
-                    info.innerHTML = `<i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado`;
-                    cGlobal.innerHTML = '';
-                    app.updateChatInDOM(appState.globalMessages);
-                } else if (mode === 'private') {
+                    if(btnGlobal) btnGlobal.classList.remove('btn-secondary');
+                    if(btnPrivate) btnPrivate.classList.add('btn-secondary');
+                    if(cGlobal) cGlobal.style.display = 'flex';
+                    if(cPrivateList) cPrivateList.style.display = 'none';
+                    if(cPrivateChat) cPrivateChat.style.display = 'none';
+                    if(inputArea) inputArea.style.display = 'flex';
+                    if(info) info.innerHTML = `<i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado`;
+                    
+                    app.updateChatInDOM(appState.globalMessages, 'chat-global-container');
+                } else if (mode === 'private_list' || mode === 'private') {
                     appState.activeChatMode = 'private_list'; 
-                    btnPrivate.classList.remove('btn-secondary');
-                    btnGlobal.classList.add('btn-secondary');
-                    cGlobal.style.display = 'none';
-                    cPrivate.style.display = 'flex';
-                    inputArea.style.display = 'none'; 
-                    info.innerHTML = `<i class="fa-solid fa-lock" style="color: var(--purple);"></i> Frequências Privadas`;
+                    if(btnPrivate) btnPrivate.classList.remove('btn-secondary');
+                    if(btnGlobal) btnGlobal.classList.add('btn-secondary');
+                    if(cGlobal) cGlobal.style.display = 'none';
+                    if(cPrivateChat) cPrivateChat.style.display = 'none';
+                    if(cPrivateList) cPrivateList.style.display = 'flex';
+                    if(inputArea) inputArea.style.display = 'none'; 
+                    if(info) info.innerHTML = `<i class="fa-solid fa-lock" style="color: var(--purple);"></i> Frequências Privadas`;
+                    
                     app.renderPrivateChatList();
                 } else {
-                    cGlobal.style.display = 'flex';
-                    cPrivate.style.display = 'none';
-                    inputArea.style.display = 'flex';
-                    cGlobal.innerHTML = '';
+                    // Chat individual (Private Link com Alguém específico)
+                    if(btnPrivate) btnPrivate.classList.remove('btn-secondary');
+                    if(btnGlobal) btnGlobal.classList.add('btn-secondary');
+                    if(cGlobal) cGlobal.style.display = 'none';
+                    if(cPrivateList) cPrivateList.style.display = 'none';
+                    if(cPrivateChat) {
+                        cPrivateChat.style.display = 'flex';
+                        // Só limpa o DOM deste container se o usuário do chat privado tiver mudado, para evitar flicker
+                        if (cPrivateChat.dataset.targetUid !== mode) {
+                            cPrivateChat.innerHTML = '';
+                            cPrivateChat.dataset.targetUid = mode;
+                        }
+                    }
+                    if(inputArea) inputArea.style.display = 'flex';
+                    
+                    const target = appState.allUsers.find(u => u.uid === mode);
+                    if(info) info.innerHTML = `
+                        <i class="fa-solid fa-lock" style="color: var(--purple);"></i> Criptografia 1x1 com <span style="color:white;">${target ? target.name : '...'}</span>
+                        <br><a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab('private_list')">← Voltar a Lista</a>
+                    `;
+
                     const myUid = appState.firebaseUser.uid;
                     const conversation = appState.privateMessages.filter(m => 
                         m.participants.includes(myUid) && m.participants.includes(mode)
                     );
-                    app.updateChatInDOM(conversation);
+                    app.updateChatInDOM(conversation, 'chat-private-container');
                 }
             },
 
-            updateChatInDOM: (messagesArray) => {
-                const container = document.getElementById('chat-messages-container');
+            updateChatInDOM: (messagesArray, containerId) => {
+                const container = document.getElementById(containerId);
                 if(!container) return;
                 
                 const sorted = [...messagesArray].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -1570,10 +1645,11 @@
 
                     const div = document.createElement('div');
                     div.className = `message ${isMine ? 'mine' : ''}`;
+                    // Injeta a propriedade data-uid para atualização dinâmica do avatar sem renderizar tudo novamente
                     div.innerHTML = `
-                        ${!isMine ? `<img src="${author.avatar}" class="msg-avatar" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
+                        ${!isMine ? `<img src="${author.avatar}" class="msg-avatar" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
                         <div class="msg-bubble">
-                            ${!isMine ? `<div class="msg-author" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name}</div>` : ''}
+                            ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name}</div>` : ''}
                             <div class="msg-text">${msg.content}</div>
                             <span class="msg-time">${timeStr}</span>
                         </div>
@@ -1589,11 +1665,6 @@
             startPrivateChat: (targetUid) => {
                 app.navigate('chat');
                 setTimeout(() => {
-                    const target = appState.allUsers.find(u => u.uid === targetUid);
-                    document.getElementById('chat-status-info').innerHTML = `
-                        <i class="fa-solid fa-lock" style="color: var(--purple);"></i> Criptografia 1x1 com <span style="color:white;">${target ? target.name : '...'}</span>
-                        <br><a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab('private')">← Voltar a Lista</a>
-                    `;
                     app.switchChatTab(targetUid); 
                 }, 100);
             },

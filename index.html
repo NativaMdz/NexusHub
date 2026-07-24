@@ -315,6 +315,7 @@
         .msg-text { font-size: 0.88rem; line-height: 1.4; word-break: break-word; }
         .msg-time { font-size: 0.62rem; color: var(--text-muted); text-align: right; margin-top: 4px; display: block; }
 
+        .chat-input-wrapper { display: flex; flex-direction: column; width: 100%; }
         .chat-input-area { display: flex; gap: 10px; background: rgba(15, 15, 20, 0.9); padding: 10px 14px; border-radius: 24px; border: 1px solid rgba(0, 243, 255, 0.3); align-items: center; flex-shrink: 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); width: 100%; }
         .chat-attach-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 4px; transition: color 0.2s; flex-shrink: 0; }
         .chat-attach-btn:hover { color: var(--cyan); }
@@ -395,6 +396,45 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; text-align: center; color: var(--text-muted); animation: fadeIn 0.4s ease; }
         .placeholder-view i { font-size: 2.8rem; color: var(--purple); margin-bottom: 1rem; text-shadow: 0 0 15px var(--purple); }
+
+        /* === NOVAS FUNCIONALIDADES: CONTEXT MENU & MENSAGENS === */
+        
+        /* Bottom Sheet Context Menu */
+        .context-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); z-index: 300; display: none; opacity: 0; transition: opacity 0.3s; }
+        .context-overlay.active { display: block; opacity: 1; }
+        .context-menu-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--bg-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--purple); border-radius: 20px 20px 0 0; padding: 1.5rem 1rem calc(1.5rem + env(safe-area-inset-bottom)); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); }
+        .context-overlay.active .context-menu-sheet { bottom: 0; }
+        .context-btn { width: 100%; text-align: left; background: none; border: none; padding: 14px 10px; color: var(--text-main); font-size: 1rem; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .context-btn:last-child { border-bottom: none; }
+        .context-btn i { font-size: 1.2rem; width: 24px; text-align: center; color: var(--cyan); }
+        .context-btn.danger { color: var(--danger); }
+        .context-btn.danger i { color: var(--danger); }
+
+        /* Edit Flag */
+        .edited-flag { font-size: 0.65rem; color: var(--text-muted); font-style: italic; margin-left: 5px; font-weight: normal; }
+
+        /* Reply preview block above chat input */
+        .reply-preview-container { display: none; background: rgba(0,0,0,0.5); border-left: 3px solid var(--cyan); padding: 8px 12px; margin-bottom: 8px; border-radius: 8px; position: relative; width: 100%; box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.05);}
+        .reply-preview-header { font-size: 0.75rem; color: var(--cyan); font-weight: bold; margin-bottom: 4px; display:flex; justify-content: space-between; align-items: center;}
+        .reply-preview-text { font-size: 0.85rem; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .close-reply-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 6px; font-size: 1rem;}
+        
+        /* Reply reference block inside a chat bubble */
+        .msg-reply-ref { background: rgba(0,0,0,0.3); border-left: 3px solid var(--cyan); padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 0.8rem; cursor: pointer; opacity: 0.85; transition: opacity 0.2s; }
+        .msg-reply-ref:hover { opacity: 1; }
+        .msg-reply-author { color: var(--cyan); font-weight: bold; margin-bottom: 2px; display: block; font-size: 0.75rem;}
+        .msg-reply-text { color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        
+        /* Highlight animation for navigated messages */
+        @keyframes highlight-pulse {
+            0% { background-color: rgba(0, 243, 255, 0.4); transform: scale(1); }
+            50% { background-color: rgba(0, 243, 255, 0.6); transform: scale(1.02); }
+            100% { background-color: transparent; transform: scale(1); }
+        }
+        .highlighted { animation: highlight-pulse 2s ease; border-radius: 8px;}
+        .highlighted .msg-bubble { border-color: var(--cyan) !important; box-shadow: 0 0 15px var(--cyan) !important;}
+
+        .post-body { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -411,7 +451,6 @@
         
         <div style="width: 100%; max-width: 380px; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 30px rgba(0,243,255,0.1);">
             
-            <!-- Etapa 1: Login / Cadastro via Firebase Auth -->
             <div id="auth-login-area">
                 <div class="form-group">
                     <input type="email" id="auth-email" class="form-control" placeholder="E-mail">
@@ -428,7 +467,6 @@
                 </div>
             </div>
 
-            <!-- Etapa 2: Criação de Identidade no Firestore (Apenas p/ novos) -->
             <div id="auth-form-area" style="display: none;">
                 <p style="color: var(--cyan); margin-bottom: 1rem; font-size: 0.85rem;">Defina sua identidade na rede:</p>
                 <div class="form-group">
@@ -449,7 +487,6 @@
 
     <!-- Shell do Aplicativo Principal -->
     <div id="app-container" style="display: none;">
-        <!-- Cabeçalho Superior -->
         <header>
             <div class="logo" onclick="app.navigate('feed')">NEXUS<span>HUB</span></div>
             <div class="actions">
@@ -458,15 +495,12 @@
             </div>
         </header>
 
-        <!-- Container dinâmico das telas -->
         <main id="app-content"></main>
 
-        <!-- Botão Flutuante (+) -->
         <div class="fab" id="fab-add-post" onclick="app.openPostModal()" style="display: none;">
             <i class="fa-solid fa-plus"></i>
         </div>
 
-        <!-- Barra de Navegação Inferior -->
         <nav class="bottom-nav">
             <div class="nav-item active" data-view="feed" onclick="app.navigate('feed', this)">
                 <i class="fa-solid fa-house"></i><span>Feed</span>
@@ -486,9 +520,7 @@
         </nav>
     </div>
 
-    <!-- Modais -->
-    
-    <!-- Modal: Nova Transmissão -->
+    <!-- Modais Originais -->
     <div class="modal-overlay" id="modal-post">
         <div class="modal-content">
             <div class="modal-header">
@@ -516,7 +548,6 @@
         </div>
     </div>
 
-    <!-- Modal: Comentários -->
     <div class="modal-overlay" id="modal-comments">
         <div class="modal-content">
             <div class="modal-header">
@@ -524,7 +555,6 @@
                 <button class="close-modal" onclick="app.closeCommentsModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body" id="comments-list" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- Comentários injetados aqui -->
             </div>
             <div class="modal-footer">
                 <div class="chat-input-area" style="padding: 5px 10px; border-radius: 12px;">
@@ -537,7 +567,6 @@
         </div>
     </div>
 
-    <!-- Modal: Configurações / Edição de Perfil -->
     <div class="modal-overlay" id="modal-settings">
         <div class="modal-content">
             <div class="modal-header">
@@ -570,6 +599,28 @@
         </div>
     </div>
 
+    <!-- NOVOS MODAIS: Menu Contextual e Edição -->
+    <div class="context-overlay" id="context-menu-overlay" onclick="app.closeContextMenu(event)">
+        <div class="context-menu-sheet" id="context-menu-content" onclick="event.stopPropagation()">
+            <!-- Dinâmico -->
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-edit-item">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Texto</h2>
+                <button class="close-modal" onclick="app.closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="edit-content-input" class="form-control" style="min-height: 120px;" placeholder="Insira seu texto aqui..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="app.saveEdit()">Salvar Alteração</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Templates SPA -->
     <template id="tpl-chat">
         <div class="chat-container">
@@ -582,16 +633,25 @@
                 <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
             </div>
             
-            <!-- Containers Isolados -->
             <div class="chat-messages" id="chat-global-container"></div>
             <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
             <div class="chat-messages" id="chat-private-container" style="display:none;"></div>
 
-            <div class="chat-input-area" id="chat-input-container">
-                <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
-                <button class="chat-send-btn" onclick="app.sendChatMessage()">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
+            <!-- Área de input agora encapsulada para o Reply Preview -->
+            <div class="chat-input-wrapper" style="margin-top:auto; flex-shrink: 0; padding-top: 5px;">
+                <div class="reply-preview-container" id="reply-preview-box">
+                    <div class="reply-preview-header">
+                        <span id="reply-preview-author">Respondendo @Usuario</span>
+                        <button class="close-reply-btn" onclick="app.cancelReply()"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="reply-preview-text" id="reply-preview-text">Trecho...</div>
+                </div>
+                <div class="chat-input-area" id="chat-input-container">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
+                    <button class="chat-send-btn" onclick="app.sendChatMessage()">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </template>
@@ -622,13 +682,12 @@
         <div id="public-profile-container"></div>
     </template>
 
-    <!-- MOTOR JAVASCRIPT EM MÓDULOS (Firebase V11 Oficial - Sem dependências Gemini) -->
+    <!-- MOTOR JAVASCRIPT EM MÓDULOS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // === CONFIGURAÇÃO FIREBASE OFICIAL (SUBSTITUA POR SUAS CREDENCIAIS) ===
         const firebaseConfig = {
             apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
             authDomain: "nexushub-50e4a.firebaseapp.com",
@@ -643,18 +702,16 @@
         const auth = getAuth(firebaseApp);
         const db = getFirestore(firebaseApp);
 
-        // Caminhos Firestore Standard (Coleções na Raiz)
         const colPosts = collection(db, 'posts');
         const colUsers = collection(db, 'users');
         const colGlobalChat = collection(db, 'global_chat');
         const colPrivateChat = collection(db, 'private_chat');
 
-        // Estado Global da Aplicação
         const appState = {
             firebaseUser: null,
             currentUserData: null,
             currentView: 'feed',
-            currentPublicProfileUid: null, // Guardar quem estamos visualizando
+            currentPublicProfileUid: null, 
             tempBase64Post: null,
             tempBase64Banner: null,
             allPosts: [],
@@ -663,6 +720,8 @@
             privateMessages: [],
             activeChatMode: 'global', 
             activeCommentPostId: null,
+            activeContextItem: null, // Armazena contexto do click na publicação/mensagem
+            activeReply: null, // Armazena contexto de reply
             unsubscribePosts: null,
             unsubscribeUsers: null,
             unsubscribeGlobalChat: null,
@@ -673,36 +732,27 @@
             init: async () => {
                 app.initParticles();
                 
-                // Observador de Autenticação Oficial
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         appState.firebaseUser = user;
-                        
                         document.getElementById('auth-login-area').style.display = 'none';
                         document.getElementById('auth-form-area').style.display = 'none';
                         document.getElementById('auth-loading').style.display = 'block';
 
-                        // Verifica se o usuário já criou o perfil no Firestore
                         const userDocRef = doc(colUsers, user.uid);
                         try {
                             const userDoc = await getDoc(userDocRef);
-                            
                             if (userDoc.exists()) {
                                 appState.currentUserData = userDoc.data();
                                 app.startGame();
                             } else {
-                                // Usuário Autenticado mas sem documento criado: Mostrar Setup
                                 document.getElementById('auth-setup').style.display = 'flex';
                                 document.getElementById('app-container').style.display = 'none';
                                 document.getElementById('auth-loading').style.display = 'none';
                                 document.getElementById('auth-form-area').style.display = 'block';
                             }
-                        } catch (e) {
-                            console.error("Erro ao ler usuário:", e);
-                            app.showToast("Erro de leitura no servidor central.", "error");
-                        }
+                        } catch (e) { app.showToast("Erro de leitura.", "error"); }
                     } else {
-                        // Deslogado: Mostrar tela inicial de Login
                         appState.firebaseUser = null;
                         document.getElementById('auth-setup').style.display = 'flex';
                         document.getElementById('app-container').style.display = 'none';
@@ -713,30 +763,23 @@
                 });
             },
 
-            // --- 1. AUTENTICAÇÃO OFICIAL ---
             loginEmail: async () => {
                 const email = document.getElementById('auth-email').value;
                 const pass = document.getElementById('auth-password').value;
                 if(!email || !pass) return app.showToast("Insira email e senha.", "error");
-                try {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                } catch(e) { app.showToast("Falha no login: " + e.message, "error"); }
+                try { await signInWithEmailAndPassword(auth, email, pass); } catch(e) { app.showToast("Falha: " + e.message, "error"); }
             },
 
             registerEmail: async () => {
                 const email = document.getElementById('auth-email').value;
                 const pass = document.getElementById('auth-password').value;
                 if(!email || !pass) return app.showToast("Insira email e senha.", "error");
-                try {
-                    await createUserWithEmailAndPassword(auth, email, pass);
-                } catch(e) { app.showToast("Falha no registro: " + e.message, "error"); }
+                try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e) { app.showToast("Falha: " + e.message, "error"); }
             },
 
             loginGoogle: async () => {
                 const provider = new GoogleAuthProvider();
-                try {
-                    await signInWithPopup(auth, provider);
-                } catch(e) { app.showToast("Erro Google Auth: " + e.message, "error"); }
+                try { await signInWithPopup(auth, provider); } catch(e) { app.showToast("Erro Google: " + e.message, "error"); }
             },
 
             logout: async () => {
@@ -746,36 +789,22 @@
                 }
             },
 
-            // --- 2. SETUP DE IDENTIDADE ---
             setupIdentity: async () => {
                 const nameInput = document.getElementById('setup-name').value.trim();
                 let handleInput = document.getElementById('setup-handle').value.trim();
 
-                if (nameInput.length < 2 || handleInput.length < 2) {
-                    app.showToast("Preencha nome e handle com no mínimo 2 caracteres.", "error");
-                    return;
-                }
+                if (nameInput.length < 2 || handleInput.length < 2) return app.showToast("Min. 2 caracteres.", "error");
                 if (!handleInput.startsWith('@')) handleInput = '@' + handleInput;
 
                 const uid = appState.firebaseUser.uid;
-                
                 document.getElementById('auth-form-area').style.display = 'none';
                 document.getElementById('auth-loading').style.display = 'block';
 
                 const newUser = {
-                    uid: uid,
-                    name: nameInput,
-                    handle: handleInput.toLowerCase().replace(/\s/g, ''),
-                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`,
-                    banner: '',
-                    bio: 'Conectado à malha neural recentemente.',
-                    xp: 50,
-                    level: 1,
-                    ncoins: 100,
-                    followers: [],
-                    following: [],
-                    role: 'user', 
-                    createdAt: new Date().toISOString()
+                    uid: uid, name: nameInput, handle: handleInput.toLowerCase().replace(/\s/g, ''),
+                    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, banner: '',
+                    bio: 'Conectado à malha neural recentemente.', xp: 50, level: 1, ncoins: 100, followers: [], following: [],
+                    role: 'user', createdAt: new Date().toISOString()
                 };
 
                 try {
@@ -783,68 +812,48 @@
                     appState.currentUserData = newUser;
                     app.startGame();
                 } catch (e) {
-                    app.showToast("Erro ao gravar perfil: " + e.message, "error");
+                    app.showToast("Erro ao gravar: " + e.message, "error");
                     document.getElementById('auth-form-area').style.display = 'block';
                     document.getElementById('auth-loading').style.display = 'none';
                 }
             },
 
-            // Inicia listeners e o app principal
             startGame: () => {
                 document.getElementById('auth-setup').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
                 
-                if (appState.currentUserData.role === 'admin') {
-                    document.getElementById('admin-icon').style.display = 'inline-block';
-                }
+                if (appState.currentUserData.role === 'admin') document.getElementById('admin-icon').style.display = 'inline-block';
 
-                // LISTENERS FIRESTORE (COM ATUALIZAÇÃO DOM OTIMIZADA)
                 if (appState.unsubscribePosts) appState.unsubscribePosts();
                 appState.unsubscribePosts = onSnapshot(colPosts, (snap) => {
                     appState.allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if (appState.currentView === 'feed' || appState.currentView === 'perfil' || appState.currentView === 'public_profile') {
-                        app.updatePostsInDOM(); 
-                    }
-                    if (appState.activeCommentPostId) {
-                        app.updateCommentsInDOM(appState.activeCommentPostId);
-                    }
-                }, e => console.error(e));
+                    if (['feed', 'perfil', 'public_profile'].includes(appState.currentView)) app.updatePostsInDOM(); 
+                    if (appState.activeCommentPostId) app.updateCommentsInDOM(appState.activeCommentPostId);
+                });
 
                 if (appState.unsubscribeUsers) appState.unsubscribeUsers();
                 appState.unsubscribeUsers = onSnapshot(colUsers, (snap) => {
                     appState.allUsers = snap.docs.map(d => d.data());
-                    
                     const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
                     if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
 
-                    if (appState.currentView === 'perfil' || appState.currentView === 'public_profile') {
-                        app.updateProfileInDOM();
-                    } else if (appState.currentView === 'ranking') {
-                        app.renderRanking();
-                    } else if (appState.currentView === 'search') {
-                        app.performSearch();
-                    }
+                    if (['perfil', 'public_profile'].includes(appState.currentView)) app.updateProfileInDOM();
+                    else if (appState.currentView === 'ranking') app.renderRanking();
+                    else if (appState.currentView === 'search') app.performSearch();
 
-                    // Força atualização dos avatares no feed e chats dinamicamente, sem precisar recarregar
-                    if (appState.currentView === 'feed') {
-                        app.updatePostsInDOM();
-                    }
+                    if (appState.currentView === 'feed') app.updatePostsInDOM();
                     if (appState.currentView === 'chat') {
-                        const containers = ['chat-global-container', 'chat-private-container'];
-                        containers.forEach(cid => {
+                        ['chat-global-container', 'chat-private-container'].forEach(cid => {
                             const c = document.getElementById(cid);
                             if (c) {
-                                // Atualiza foto e nome nos balões do chat logados
-                                const avatars = c.querySelectorAll('.msg-avatar');
-                                avatars.forEach(img => {
+                                c.querySelectorAll('.msg-avatar').forEach(img => {
                                     const uid = img.getAttribute('data-uid');
                                     if (uid) {
                                         const u = appState.allUsers.find(user => user.uid === uid);
                                         if (u && img.src !== u.avatar) img.src = u.avatar;
                                     }
                                 });
-                                const names = c.querySelectorAll('.msg-author');
-                                names.forEach(div => {
+                                c.querySelectorAll('.msg-author').forEach(div => {
                                     const uid = div.getAttribute('data-uid');
                                     if (uid) {
                                         const u = appState.allUsers.find(user => user.uid === uid);
@@ -854,7 +863,7 @@
                             }
                         });
                     }
-                }, e => console.error(e));
+                });
 
                 if (appState.unsubscribeGlobalChat) appState.unsubscribeGlobalChat();
                 appState.unsubscribeGlobalChat = onSnapshot(colGlobalChat, (snap) => {
@@ -862,7 +871,7 @@
                     if (appState.currentView === 'chat' && appState.activeChatMode === 'global') {
                         app.updateChatInDOM(appState.globalMessages, 'chat-global-container');
                     }
-                }, e => console.error(e));
+                });
 
                 if (appState.unsubscribePrivateChat) appState.unsubscribePrivateChat();
                 appState.unsubscribePrivateChat = onSnapshot(colPrivateChat, (snap) => {
@@ -878,12 +887,11 @@
                             app.updateChatInDOM(conversation, 'chat-private-container');
                         }
                     }
-                }, e => console.error(e));
+                });
 
                 app.navigate('feed');
             },
 
-            // --- 4. SISTEMA DE NAVEGAÇÃO SPA ---
             navigate: (viewName, navElement = null, additionalData = null) => {
                 appState.currentView = viewName;
                 if (viewName === 'public_profile') appState.currentPublicProfileUid = additionalData;
@@ -898,38 +906,24 @@
                     });
                 }
 
-                const fab = document.getElementById('fab-add-post');
-                fab.style.display = viewName === 'feed' ? 'flex' : 'none';
-                
+                document.getElementById('fab-add-post').style.display = viewName === 'feed' ? 'flex' : 'none';
                 app.renderCurrentView();
             },
 
             renderCurrentView: () => {
                 const contentArea = document.getElementById('app-content');
-                
-                if (appState.currentView === 'feed') {
-                    contentArea.innerHTML = '';
-                    app.renderFeed();
-                } 
-                else if (appState.currentView === 'perfil') {
-                    app.renderProfile(appState.currentUserData);
-                } 
+                if (appState.currentView === 'feed') { contentArea.innerHTML = ''; app.renderFeed(); } 
+                else if (appState.currentView === 'perfil') app.renderProfile(appState.currentUserData);
                 else if (appState.currentView === 'search') {
-                    contentArea.innerHTML = '';
-                    contentArea.appendChild(document.getElementById('tpl-search').content.cloneNode(true));
-                    app.performSearch();
+                    contentArea.innerHTML = ''; contentArea.appendChild(document.getElementById('tpl-search').content.cloneNode(true)); app.performSearch();
                 }
                 else if (appState.currentView === 'chat') {
-                    contentArea.innerHTML = '';
-                    contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
-                    // Recupera o modo de navegação anterior de forma isolada e inteligente, mantendo estado
+                    contentArea.innerHTML = ''; contentArea.appendChild(document.getElementById('tpl-chat').content.cloneNode(true));
                     if (!appState.activeChatMode) appState.activeChatMode = 'global';
                     app.switchChatTab(appState.activeChatMode); 
                 }
                 else if (appState.currentView === 'ranking') {
-                    contentArea.innerHTML = '';
-                    contentArea.appendChild(document.getElementById('tpl-ranking').content.cloneNode(true));
-                    app.renderRanking();
+                    contentArea.innerHTML = ''; contentArea.appendChild(document.getElementById('tpl-ranking').content.cloneNode(true)); app.renderRanking();
                 }
                 else if (appState.currentView === 'public_profile') {
                     const user = appState.allUsers.find(u => u.uid === appState.currentPublicProfileUid);
@@ -937,35 +931,23 @@
                 }
             },
 
-            // --- 5. FEED E UPDATES INTELIGENTES DE POSTAGENS ---
-            renderFeed: () => {
-                const contentArea = document.getElementById('app-content');
-                contentArea.innerHTML = ''; 
-                app.updatePostsInDOM(); 
-            },
+            renderFeed: () => { document.getElementById('app-content').innerHTML = ''; app.updatePostsInDOM(); },
             
-            // Otimização: Atualiza posts dinamicamente em vez de recarregar tudo
             updatePostsInDOM: () => {
                 const container = appState.currentView === 'feed' ? document.getElementById('app-content') : document.getElementById('user-posts-container');
                 if (!container) return;
 
                 let expectedPosts = [...appState.allPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-                if (appState.currentView === 'perfil') {
-                    expectedPosts = expectedPosts.filter(p => p.authorUid === appState.firebaseUser.uid);
-                } else if (appState.currentView === 'public_profile') {
-                    expectedPosts = expectedPosts.filter(p => p.authorUid === appState.currentPublicProfileUid);
-                }
+                if (appState.currentView === 'perfil') expectedPosts = expectedPosts.filter(p => p.authorUid === appState.firebaseUser.uid);
+                else if (appState.currentView === 'public_profile') expectedPosts = expectedPosts.filter(p => p.authorUid === appState.currentPublicProfileUid);
 
                 if (expectedPosts.length === 0) {
                     if (!container.querySelector('.placeholder-view') && appState.currentView === 'feed') {
                         container.innerHTML = `
                             <div class="placeholder-view">
-                                <i class="fa-solid fa-satellite"></i>
-                                <h3>Feed Vazio</h3>
-                                <p>Seja o primeiro a transmitir algo na rede!</p>
-                            </div>
-                        `;
+                                <i class="fa-solid fa-satellite"></i> <h3>Feed Vazio</h3> <p>Seja o primeiro a transmitir algo na rede!</p>
+                            </div>`;
                     }
                     return;
                 }
@@ -973,55 +955,42 @@
                 const placeholder = container.querySelector('.placeholder-view');
                 if (placeholder) placeholder.remove();
 
-                // 1. Remove os que foram excluídos
                 const currentCards = Array.from(container.querySelectorAll('.post-card'));
                 currentCards.forEach(card => {
-                    const id = card.dataset.id;
-                    if (!expectedPosts.find(p => p.id === id)) {
-                        card.remove();
-                    }
+                    if (!expectedPosts.find(p => p.id === card.dataset.id)) card.remove();
                 });
 
-                // 2. Atualiza os existentes e insere novos
                 expectedPosts.forEach((post, index) => {
                     const existingEl = container.querySelector(`.post-card[data-id="${post.id}"]`);
                     if (existingEl) {
                         const likeBtn = existingEl.querySelector('.btn-like');
                         if (likeBtn) {
                             const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
-                            if (isLiked) {
-                                likeBtn.classList.add('liked');
-                                likeBtn.innerHTML = `<i class="fa-solid fa-heart"></i> <span class="like-count">${post.likes.length}</span>`;
-                            } else {
-                                likeBtn.classList.remove('liked');
-                                likeBtn.innerHTML = `<i class="fa-regular fa-heart"></i> <span class="like-count">${post.likes ? post.likes.length : 0}</span>`;
-                            }
+                            likeBtn.classList.toggle('liked', isLiked);
+                            likeBtn.innerHTML = `<i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> <span class="like-count">${post.likes ? post.likes.length : 0}</span>`;
                         }
                         const commentBtn = existingEl.querySelector('.btn-comment');
-                        if (commentBtn) {
-                            commentBtn.innerHTML = `<i class="fa-regular fa-comment"></i> <span class="comment-count">${post.comments ? post.comments.length : 0}</span>`;
-                        }
+                        if (commentBtn) commentBtn.innerHTML = `<i class="fa-regular fa-comment"></i> <span class="comment-count">${post.comments ? post.comments.length : 0}</span>`;
 
-                        // Atualiza as fotos dinamicamente caso o Perfil do usuário tenha mudado a foto 
                         const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
                         const avatarImg = existingEl.querySelector('.avatar');
-                        if (avatarImg && avatarImg.src !== authorData.avatar) {
-                            avatarImg.src = authorData.avatar;
-                        }
+                        if (avatarImg && avatarImg.src !== authorData.avatar) avatarImg.src = authorData.avatar;
+                        
                         const userNameEl = existingEl.querySelector('.user-info h3');
                         if (userNameEl) {
                             const expectedHtml = `${authorData.name} ${authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`.trim();
-                            if (userNameEl.innerHTML.trim() !== expectedHtml) {
-                                userNameEl.innerHTML = expectedHtml;
-                            }
+                            if (userNameEl.innerHTML.trim() !== expectedHtml) userNameEl.innerHTML = expectedHtml;
+                        }
+
+                        const contentEl = existingEl.querySelector('.post-content');
+                        if(contentEl) {
+                            let contentHtml = post.content.replace(/\n/g, '<br>');
+                            if (post.edited) contentHtml += ' <span class="edited-flag">(editado)</span>';
+                            if(contentEl.innerHTML !== contentHtml) contentEl.innerHTML = contentHtml;
                         }
                         
-                        // Garante a ordem correta caso algo venha com timestamp alterado
-                        if (container.children[index] !== existingEl) {
-                            container.insertBefore(existingEl, container.children[index]);
-                        }
+                        if (container.children[index] !== existingEl) container.insertBefore(existingEl, container.children[index]);
                     } else {
-                        // Novo post, insere na posição correspondente
                         const refNode = container.children[index] || null;
                         app.createPostCard(post, container, appState.currentView !== 'feed', refNode);
                     }
@@ -1032,14 +1001,13 @@
                 const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
                 const likeCount = post.likes ? post.likes.length : 0;
                 const commentCount = post.comments ? post.comments.length : 0;
-                
                 const dateObj = new Date(post.createdAt);
                 const timeStr = dateObj.toLocaleDateString('pt-BR') + ' ' + String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
                 
                 const imgHtml = post.image ? `<img src="${post.image}" class="post-image" alt="Anexo">` : '';
-                
                 const isMyPost = post.authorUid === appState.firebaseUser.uid;
                 const isAdmin = appState.currentUserData.role === 'admin';
+                const editedHtml = post.edited ? ` <span class="edited-flag">(editado)</span>` : '';
 
                 let extraActions = '';
                 if (isMyPost || isAdmin) {
@@ -1047,7 +1015,6 @@
                 }
                 
                 const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
-
                 const article = document.createElement('article');
                 article.className = 'post-card';
                 article.dataset.id = post.id;
@@ -1059,8 +1026,10 @@
                             <span>${authorData.handle} • ${timeStr}</span>
                         </div>
                     </div>
-                    <p class="post-content">${post.content.replace(/\n/g, '<br>')}</p>
-                    ${imgHtml}
+                    <div class="post-body" onclick="app.openContextMenu(event, 'post', '${post.id}')">
+                        <p class="post-content">${post.content.replace(/\n/g, '<br>')}${editedHtml}</p>
+                        ${imgHtml}
+                    </div>
                     <div class="post-actions">
                         <button class="action-btn btn-like ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
                             <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> <span class="like-count">${likeCount}</span>
@@ -1074,12 +1043,8 @@
                         ${extraActions}
                     </div>
                 `;
-                
-                if (refNode) {
-                    container.insertBefore(article, refNode);
-                } else {
-                    container.appendChild(article);
-                }
+                if (refNode) container.insertBefore(article, refNode);
+                else container.appendChild(article);
             },
 
             openPostModal: () => document.getElementById('modal-post').classList.add('active'),
@@ -1098,8 +1063,7 @@
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
+                        let width = img.width; let height = img.height;
                         const MAX = type === 'profile' ? 300 : (type === 'banner' ? 800 : 700);
 
                         if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
@@ -1115,9 +1079,8 @@
                             appState.tempBase64Post = dataUrl;
                             document.getElementById('image-preview').src = dataUrl;
                             document.getElementById('image-preview-container').style.display = 'block';
-                        } else if (type === 'profile') {
-                            app.updateProfileImage(dataUrl);
-                        } else if (type === 'banner') {
+                        } else if (type === 'profile') app.updateProfileImage(dataUrl);
+                        else if (type === 'banner') {
                             appState.tempBase64Banner = dataUrl;
                             app.showToast("Banner pronto. Salve o perfil.", "info");
                             document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-check"></i> Imagem Selecionada`;
@@ -1127,13 +1090,10 @@
                 };
                 reader.readAsDataURL(file);
             },
-
             removeImagePreview: (type) => {
                 if(type==='post') {
-                    appState.tempBase64Post = null;
-                    document.getElementById('image-preview').src = '';
-                    document.getElementById('image-preview-container').style.display = 'none';
-                    document.getElementById('post-image-input').value = '';
+                    appState.tempBase64Post = null; document.getElementById('image-preview').src = '';
+                    document.getElementById('image-preview-container').style.display = 'none'; document.getElementById('post-image-input').value = '';
                 }
             },
 
@@ -1141,51 +1101,28 @@
                 if (!appState.firebaseUser) return;
                 const content = document.getElementById('post-content').value.trim();
                 
-                if (!content && !appState.tempBase64Post) {
-                    app.showToast("Escreva algo ou insira uma imagem.", "error");
-                    return;
-                }
+                if (!content && !appState.tempBase64Post) return app.showToast("Escreva algo ou insira uma imagem.", "error");
 
                 const btn = document.getElementById('btn-publish');
-                btn.disabled = true;
-                btn.innerHTML = 'Transmitindo...';
+                btn.disabled = true; btn.innerHTML = 'Transmitindo...';
 
                 try {
-                    let imageUrl = '';
-                    if (appState.tempBase64Post) {
-                        imageUrl = appState.tempBase64Post;
-                    }
-
                     const newPost = {
-                        authorUid: appState.firebaseUser.uid,
-                        content: content,
-                        image: imageUrl,
-                        likes: [],
-                        comments: [],
-                        saves: [],
-                        createdAt: new Date().toISOString()
+                        authorUid: appState.firebaseUser.uid, content: content, image: appState.tempBase64Post || '',
+                        likes: [], comments: [], saves: [], createdAt: new Date().toISOString()
                     };
-
                     await addDoc(colPosts, newPost);
                     app.addXP(15);
-                    app.closePostModal(); // Modal e imagem resetados somente ao sucesso
+                    app.closePostModal();
                     app.showToast("Transmissão enviada a rede global!", "success");
-                } catch (e) {
-                    app.showToast("Erro ao transmitir: " + e.message, "error");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = 'Transmitir Dados';
-                }
+                } catch (e) { app.showToast("Erro ao transmitir: " + e.message, "error"); } 
+                finally { btn.disabled = false; btn.innerHTML = 'Transmitir Dados'; }
             },
 
             deletePost: async (postId) => {
                 if (confirm("Apagar permanentemente esta transmissão?")) {
-                    try {
-                        await deleteDoc(doc(colPosts, postId));
-                        app.showToast("Postagem removida.", "success");
-                    } catch (e) {
-                        app.showToast("Erro ao apagar.", "error");
-                    }
+                    try { await deleteDoc(doc(colPosts, postId)); app.showToast("Postagem removida.", "success"); } 
+                    catch (e) { app.showToast("Erro ao apagar.", "error"); }
                 }
             },
 
@@ -1193,22 +1130,14 @@
                 if (!appState.firebaseUser) return;
                 const post = appState.allPosts.find(p => p.id === postId);
                 if (!post) return;
-
                 const postRef = doc(colPosts, postId);
                 const uid = appState.firebaseUser.uid;
-
-                // Fire and forget, UI vai atualizar via DOM diffing
                 try {
-                    if (post.likes.includes(uid)) {
-                        await updateDoc(postRef, { likes: arrayRemove(uid) });
-                    } else {
-                        await updateDoc(postRef, { likes: arrayUnion(uid) });
-                        app.addXP(2);
-                    }
-                } catch (e) { console.error("Like error", e); }
+                    if (post.likes.includes(uid)) await updateDoc(postRef, { likes: arrayRemove(uid) });
+                    else { await updateDoc(postRef, { likes: arrayUnion(uid) }); app.addXP(2); }
+                } catch (e) { }
             },
 
-            // --- COMENTÁRIOS COM DOM DIFFING ---
             openComments: (postId) => {
                 appState.activeCommentPostId = postId;
                 document.getElementById('modal-comments').classList.add('active');
@@ -1220,11 +1149,8 @@
             },
             
             renderComments: (postId) => {
-                const list = document.getElementById('comments-list');
-                list.innerHTML = '';
-                app.updateCommentsInDOM(postId);
+                document.getElementById('comments-list').innerHTML = ''; app.updateCommentsInDOM(postId);
             },
-
             updateCommentsInDOM: (postId) => {
                 const post = appState.allPosts.find(p => p.id === postId);
                 const list = document.getElementById('comments-list');
@@ -1235,20 +1161,16 @@
                     list.innerHTML = '<p class="no-comments-msg" style="color:var(--text-muted); text-align:center; padding: 20px;">Nenhum comentário. Seja o primeiro!</p>';
                     return;
                 }
-
                 const msg = list.querySelector('.no-comments-msg');
                 if (msg) msg.remove();
 
-                if (currentComments > post.comments.length) {
-                    list.innerHTML = ''; // Algum foi deletado, limpa para rebuild
-                }
+                if (currentComments > post.comments.length) list.innerHTML = ''; 
 
                 const startingIndex = list.querySelectorAll('.comment-item').length;
                 const newComments = post.comments.slice(startingIndex);
 
                 newComments.forEach(c => {
-                    const author = appState.allUsers.find(u => u.uid === c.authorUid) || {name: 'Netrunner Desconhecido', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
-                    
+                    const author = appState.allUsers.find(u => u.uid === c.authorUid) || {name: 'Desconhecido', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
                     const div = document.createElement('div');
                     div.className = 'comment-item';
                     div.style = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-size: 0.85rem; animation: fadeIn 0.3s ease;";
@@ -1257,7 +1179,6 @@
                     if (c.authorUid === appState.firebaseUser.uid || appState.currentUserData.role === 'admin') {
                         delBtn = `<i class="fa-solid fa-trash" style="color:var(--danger); float:right; cursor:pointer;" onclick="app.deleteComment('${postId}', '${c.id}')"></i>`;
                     }
-
                     div.innerHTML = `
                         ${delBtn}
                         <div style="display:flex; gap:8px; align-items:center; margin-bottom:5px;">
@@ -1268,52 +1189,32 @@
                     `;
                     list.appendChild(div);
                 });
-                
-                if (newComments.length > 0) {
-                    setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
-                }
+                if (newComments.length > 0) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
             },
-
             sendComment: async () => {
                 if (!appState.firebaseUser || !appState.activeCommentPostId) return;
                 const input = document.getElementById('comment-input');
                 const text = input.value.trim();
                 if (!text) return;
-
                 const postRef = doc(colPosts, appState.activeCommentPostId);
-                const newComment = {
-                    id: 'c_' + Date.now(),
-                    authorUid: appState.firebaseUser.uid,
-                    text: text,
-                    createdAt: new Date().toISOString()
-                };
-
-                try {
-                    await updateDoc(postRef, { comments: arrayUnion(newComment) });
-                    input.value = '';
-                    app.addXP(5);
-                } catch(e) { app.showToast("Erro ao comentar", "error"); }
+                const newComment = { id: 'c_' + Date.now(), authorUid: appState.firebaseUser.uid, text: text, createdAt: new Date().toISOString() };
+                try { await updateDoc(postRef, { comments: arrayUnion(newComment) }); input.value = ''; app.addXP(5); } catch(e) {}
             },
             deleteComment: async (postId, commentId) => {
                 const post = appState.allPosts.find(p => p.id === postId);
                 if (!post) return;
                 const comment = post.comments.find(c => c.id === commentId);
                 if (!comment) return;
-
                 try { await updateDoc(doc(colPosts, postId), { comments: arrayRemove(comment) }); } catch(e) {}
             },
 
-            // --- 6. PERFIL (Privado e Público) E UPDATES EM TEMPO REAL ---
             renderProfile: (userData, isPublic = false) => {
                 const contentArea = document.getElementById('app-content');
                 if(!isPublic) contentArea.innerHTML = '';
-                
                 if (!userData) return;
                 
                 const computedLevel = Math.floor((userData.xp || 0) / 100) + 1;
-                if (!isPublic && computedLevel !== userData.level) {
-                    updateDoc(doc(colUsers, userData.uid), { level: computedLevel });
-                }
+                if (!isPublic && computedLevel !== userData.level) updateDoc(doc(colUsers, userData.uid), { level: computedLevel });
 
                 const isMe = userData.uid === appState.firebaseUser.uid;
                 const iFollow = userData.followers && userData.followers.includes(appState.firebaseUser.uid);
@@ -1321,26 +1222,15 @@
 
                 let actionButton = '';
                 if (isMe && !isPublic) {
-                    actionButton = `
-                        <div style="display: flex; gap: 10px; width: 100%;">
-                            <button class="btn-primary" style="flex: 1;" onclick="app.openSettingsModal()">Editar Perfil</button>
-                        </div>
-                    `;
+                    actionButton = `<div style="display: flex; gap: 10px; width: 100%;"><button class="btn-primary" style="flex: 1;" onclick="app.openSettingsModal()">Editar Perfil</button></div>`;
                 } else if (!isMe) {
                     actionButton = `
                         <div style="display: flex; gap: 10px; width: 100%;">
-                            <button id="btn-follow" class="btn-primary ${iFollow ? 'btn-secondary' : ''}" style="flex: 1;" onclick="app.toggleFollow('${userData.uid}')">
-                                ${iFollow ? 'Seguindo' : 'Seguir'}
-                            </button>
-                            <button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.startPrivateChat('${userData.uid}')">
-                                Mensagem
-                            </button>
-                        </div>
-                    `;
+                            <button id="btn-follow" class="btn-primary ${iFollow ? 'btn-secondary' : ''}" style="flex: 1;" onclick="app.toggleFollow('${userData.uid}')">${iFollow ? 'Seguindo' : 'Seguir'}</button>
+                            <button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.startPrivateChat('${userData.uid}')">Mensagem</button>
+                        </div>`;
                 }
-
                 const myPosts = appState.allPosts.filter(p => p.authorUid === userData.uid);
-
                 const html = `
                     <section class="profile-top-section">
                         <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
@@ -1351,33 +1241,19 @@
                                 <div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto">
                                     <i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i>
                                 </div>
-                                <input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">
-                                ` : ''}
+                                <input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">` : ''}
                             </div>
-                            
                             <h2 class="profile-name">${userData.name} ${userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h2>
                             <span class="profile-handle">${userData.handle}</span>
                             <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
-                            
                             <div class="stats-container">
-                                <div class="stat-item">
-                                    <span class="stat-value neon-purple" id="stat-level">LVL ${userData.level || 1}</span>
-                                    <span class="stat-label">Nível</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value neon-cyan" id="stat-followers">${userData.followers ? userData.followers.length : 0}</span>
-                                    <span class="stat-label">Seguidores</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value" id="stat-following">${userData.following ? userData.following.length : 0}</span>
-                                    <span class="stat-label">Seguindo</span>
-                                </div>
+                                <div class="stat-item"><span class="stat-value neon-purple" id="stat-level">LVL ${userData.level || 1}</span><span class="stat-label">Nível</span></div>
+                                <div class="stat-item"><span class="stat-value neon-cyan" id="stat-followers">${userData.followers ? userData.followers.length : 0}</span><span class="stat-label">Seguidores</span></div>
+                                <div class="stat-item"><span class="stat-value" id="stat-following">${userData.following ? userData.following.length : 0}</span><span class="stat-label">Seguindo</span></div>
                             </div>
-
                             ${actionButton}
                         </div>
                     </section>
-                    
                     <section class="profile-posts-section">
                         <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">
                             Transmissões Recentes (<span id="stat-post-count">${myPosts.length}</span>)
@@ -1390,62 +1266,46 @@
                     contentArea.innerHTML = '';
                     contentArea.appendChild(document.getElementById('tpl-public-profile').content.cloneNode(true));
                     document.getElementById('public-profile-container').innerHTML = html;
-                } else {
-                    contentArea.innerHTML = html;
-                }
+                } else { contentArea.innerHTML = html; }
                 
                 app.updatePostsInDOM(); 
             },
 
-            // Atualização Direta de Informações do Perfil sem Reload de Layout Inteiro
             updateProfileInDOM: () => {
                 const viewUid = appState.currentView === 'perfil' ? appState.firebaseUser.uid : appState.currentPublicProfileUid;
                 const viewUser = appState.allUsers.find(u => u.uid === viewUid);
                 if (!viewUser) return;
 
-                // Updates nos valores numéricos (Seguidores, Nível, etc)
-                const elLevel = document.getElementById('stat-level');
-                const elFollowers = document.getElementById('stat-followers');
-                const elFollowing = document.getElementById('stat-following');
-                const elPostCount = document.getElementById('stat-post-count');
-                const btnFollow = document.getElementById('btn-follow');
+                const els = {
+                    level: document.getElementById('stat-level'), followers: document.getElementById('stat-followers'), following: document.getElementById('stat-following'),
+                    postCount: document.getElementById('stat-post-count'), btnFollow: document.getElementById('btn-follow'),
+                    name: document.querySelector('.profile-name'), bio: document.querySelector('.profile-bio'),
+                    avatar: document.querySelector('.profile-avatar'), banner: document.querySelector('.profile-banner')
+                };
 
-                if (elLevel) elLevel.innerText = `LVL ${viewUser.level || 1}`;
-                if (elFollowers) elFollowers.innerText = viewUser.followers ? viewUser.followers.length : 0;
-                if (elFollowing) elFollowing.innerText = viewUser.following ? viewUser.following.length : 0;
+                if (els.level) els.level.innerText = `LVL ${viewUser.level || 1}`;
+                if (els.followers) els.followers.innerText = viewUser.followers ? viewUser.followers.length : 0;
+                if (els.following) els.following.innerText = viewUser.following ? viewUser.following.length : 0;
                 
                 const myPosts = appState.allPosts.filter(p => p.authorUid === viewUid);
-                if (elPostCount) elPostCount.innerText = myPosts.length;
+                if (els.postCount) els.postCount.innerText = myPosts.length;
 
-                if (btnFollow && appState.currentView === 'public_profile') {
+                if (els.btnFollow && appState.currentView === 'public_profile') {
                     const iFollow = viewUser.followers && viewUser.followers.includes(appState.firebaseUser.uid);
-                    if (iFollow) {
-                        btnFollow.classList.add('btn-secondary');
-                        btnFollow.innerText = 'Seguindo';
-                    } else {
-                        btnFollow.classList.remove('btn-secondary');
-                        btnFollow.innerText = 'Seguir';
-                    }
+                    els.btnFollow.classList.toggle('btn-secondary', iFollow);
+                    els.btnFollow.innerText = iFollow ? 'Seguindo' : 'Seguir';
                 }
                 
-                // Updates na imagem e nomes
-                const elName = document.querySelector('.profile-name');
-                const elBio = document.querySelector('.profile-bio');
-                const elAvatar = document.querySelector('.profile-avatar');
-                const elBanner = document.querySelector('.profile-banner');
-
-                if (elName) elName.innerHTML = `${viewUser.name} ${viewUser.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`;
-                if (elBio) elBio.innerText = viewUser.bio || 'Sem biografia...';
-                if (elAvatar && elAvatar.src !== viewUser.avatar) elAvatar.src = viewUser.avatar;
-                if (elBanner && viewUser.banner) elBanner.style.backgroundImage = `url('${viewUser.banner}')`;
+                if (els.name) els.name.innerHTML = `${viewUser.name} ${viewUser.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`;
+                if (els.bio) els.bio.innerText = viewUser.bio || 'Sem biografia...';
+                if (els.avatar && els.avatar.src !== viewUser.avatar) els.avatar.src = viewUser.avatar;
+                if (els.banner && viewUser.banner) els.banner.style.backgroundImage = `url('${viewUser.banner}')`;
             },
 
             updateProfileImage: async (base64) => {
                 app.showToast("Enviando foto...", "info");
-                try {
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 });
-                    app.showToast("Foto atualizada!", "success");
-                } catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
+                try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 }); app.showToast("Foto atualizada!", "success"); } 
+                catch(e) { app.showToast("Erro ao salvar foto.", "error"); }
             },
 
             toggleFollow: async (targetUid) => {
@@ -1455,21 +1315,12 @@
                 if (!target) return;
 
                 const isFollowing = target.followers && target.followers.includes(myUid);
-
-                // Update de Interface Otimista (Muda o Botão Instantaneamente)
                 const btn = document.getElementById('btn-follow');
                 if (btn && appState.currentPublicProfileUid === targetUid) {
-                    const btnStateSeguindo = btn.innerText.includes('Seguindo');
-                    if (btnStateSeguindo) {
-                        btn.innerText = 'Seguir';
-                        btn.classList.remove('btn-secondary');
-                    } else {
-                        btn.innerText = 'Seguindo';
-                        btn.classList.add('btn-secondary');
-                    }
+                    if (btn.innerText.includes('Seguindo')) { btn.innerText = 'Seguir'; btn.classList.remove('btn-secondary'); } 
+                    else { btn.innerText = 'Seguindo'; btn.classList.add('btn-secondary'); }
                 }
 
-                // Dispara Lógica Firestore em Background - Retorno garantido por Snapshot
                 try {
                     if (isFollowing) {
                         await updateDoc(doc(colUsers, targetUid), { followers: arrayRemove(myUid) });
@@ -1479,10 +1330,9 @@
                         await updateDoc(doc(colUsers, myUid), { following: arrayUnion(targetUid) });
                         app.showToast(`Seguindo ${target.name}`, "success");
                     }
-                } catch(e) { console.error(e); }
+                } catch(e) {}
             },
 
-            // --- CONFIGURAÇÕES DE PERFIL ---
             openSettingsModal: () => {
                 document.getElementById('edit-name').value = appState.currentUserData.name;
                 document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
@@ -1491,46 +1341,33 @@
                 document.getElementById('modal-settings').classList.add('active');
             },
             closeSettingsModal: () => document.getElementById('modal-settings').classList.remove('active'),
+            
             saveProfileSettings: async () => {
                 const name = document.getElementById('edit-name').value.trim();
                 const bio = document.getElementById('edit-bio').value.trim();
                 if(name.length < 2) return app.showToast("Nome muito curto", "error");
 
                 const btn = document.getElementById('btn-save-settings');
-                btn.disabled = true;
-                btn.innerHTML = "Salvando...";
+                btn.disabled = true; btn.innerHTML = "Salvando...";
 
                 try {
                     const updates = { name: name, bio: bio };
-                    
-                    if (appState.tempBase64Banner) {
-                        updates.banner = appState.tempBase64Banner;
-                    }
-
+                    if (appState.tempBase64Banner) updates.banner = appState.tempBase64Banner;
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
-                    app.closeSettingsModal();
-                    app.showToast("Perfil salvo!", "success");
-                } catch (e) {
-                    app.showToast("Erro ao salvar", "error");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = "Salvar Perfil";
-                }
+                    app.closeSettingsModal(); app.showToast("Perfil salvo!", "success");
+                } catch (e) { app.showToast("Erro ao salvar", "error"); } 
+                finally { btn.disabled = false; btn.innerHTML = "Salvar Perfil"; }
             },
 
-            // --- 7. PESQUISA DE USUÁRIOS ---
             performSearch: () => {
                 const input = document.getElementById('search-input');
                 const query = input ? input.value.trim().toLowerCase() : '';
                 const container = document.getElementById('search-results-container');
-                
                 if(!container) return;
+                
                 container.innerHTML = '';
-
                 let results = appState.allUsers;
-                if (query) {
-                    results = results.filter(u => u.name.toLowerCase().includes(query) || u.handle.toLowerCase().includes(query));
-                }
+                if (query) results = results.filter(u => u.name.toLowerCase().includes(query) || u.handle.toLowerCase().includes(query));
 
                 if (results.length === 0) {
                     container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum sinal detectado.</p>`;
@@ -1542,19 +1379,14 @@
                     div.className = 'rank-card';
                     div.innerHTML = `
                         <img src="${u.avatar}" class="avatar" style="width: 44px; height: 44px;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                        <div class="rank-info">
-                            <h4>${u.name}</h4>
-                            <span>${u.handle}</span>
-                        </div>
+                        <div class="rank-info"><h4>${u.name}</h4><span>${u.handle}</span></div>
                         <button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>
                     `;
                     container.appendChild(div);
                 });
             },
 
-            // --- 8. CHAT (Global e Privado) COM ATUALIZAÇÃO DOM PROGRESSIVA E ISOLADA ---
             switchChatTab: (mode) => {
-                // Guarda o contexto do estado da aba internamente
                 appState.activeChatMode = mode;
                 
                 const btnGlobal = document.getElementById('tab-global');
@@ -1562,10 +1394,9 @@
                 const cGlobal = document.getElementById('chat-global-container');
                 const cPrivateList = document.getElementById('private-chats-list');
                 const cPrivateChat = document.getElementById('chat-private-container');
-                const inputArea = document.getElementById('chat-input-container');
+                const inputArea = document.querySelector('.chat-input-wrapper');
                 const info = document.getElementById('chat-status-info');
 
-                // Lógica de isolamento de estado (Evita reutilização de containers)
                 if (mode === 'global') {
                     if(btnGlobal) btnGlobal.classList.remove('btn-secondary');
                     if(btnPrivate) btnPrivate.classList.add('btn-secondary');
@@ -1588,18 +1419,13 @@
                     
                     app.renderPrivateChatList();
                 } else {
-                    // Chat individual (Private Link com Alguém específico)
                     if(btnPrivate) btnPrivate.classList.remove('btn-secondary');
                     if(btnGlobal) btnGlobal.classList.add('btn-secondary');
                     if(cGlobal) cGlobal.style.display = 'none';
                     if(cPrivateList) cPrivateList.style.display = 'none';
                     if(cPrivateChat) {
                         cPrivateChat.style.display = 'flex';
-                        // Só limpa o DOM deste container se o usuário do chat privado tiver mudado, para evitar flicker
-                        if (cPrivateChat.dataset.targetUid !== mode) {
-                            cPrivateChat.innerHTML = '';
-                            cPrivateChat.dataset.targetUid = mode;
-                        }
+                        if (cPrivateChat.dataset.targetUid !== mode) { cPrivateChat.innerHTML = ''; cPrivateChat.dataset.targetUid = mode; }
                     }
                     if(inputArea) inputArea.style.display = 'flex';
                     
@@ -1610,9 +1436,7 @@
                     `;
 
                     const myUid = appState.firebaseUser.uid;
-                    const conversation = appState.privateMessages.filter(m => 
-                        m.participants.includes(myUid) && m.participants.includes(mode)
-                    );
+                    const conversation = appState.privateMessages.filter(m => m.participants.includes(myUid) && m.participants.includes(mode));
                     app.updateChatInDOM(conversation, 'chat-private-container');
                 }
             },
@@ -1621,47 +1445,73 @@
                 const container = document.getElementById(containerId);
                 if(!container) return;
                 
-                const sorted = [...messagesArray].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+                const visibleMessages = messagesArray
+                    .filter(m => !m.deletedFor || !m.deletedFor.includes(appState.firebaseUser.uid))
+                    .sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    
                 const currentElements = container.querySelectorAll('.message');
 
-                if (currentElements.length === 0 || currentElements.length > sorted.length) {
+                if (currentElements.length === 0 || currentElements.length > visibleMessages.length) {
                     container.innerHTML = '';
                 }
 
+                // Diffing para mensagens editadas que já estão no DOM
+                currentElements.forEach((el, index) => {
+                    const msg = visibleMessages[index];
+                    if (!msg) return;
+                    const textEl = el.querySelector('.msg-text');
+                    if (textEl) {
+                        let expectedText = msg.content;
+                        if (msg.edited) expectedText += ' <span class="edited-flag">(editado)</span>';
+                        if (textEl.innerHTML !== expectedText) textEl.innerHTML = expectedText;
+                    }
+                });
+
                 const startIndex = container.querySelectorAll('.message').length;
-                const newMessages = sorted.slice(startIndex);
+                const newMessages = visibleMessages.slice(startIndex);
 
                 newMessages.forEach(msg => {
                     const isMine = msg.authorUid === appState.firebaseUser.uid;
                     const dateObj = new Date(msg.createdAt);
                     const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
-                    
                     const author = appState.allUsers.find(u => u.uid === msg.authorUid) || {name: 'Netrunner', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
+
+                    let replyHtml = '';
+                    if (msg.replyTo) {
+                        let preview = msg.replyPreview || '';
+                        if (preview.length > 70) preview = preview.substring(0, 70) + '...';
+                        replyHtml = `
+                            <div class="msg-reply-ref" onclick="app.scrollToMessage('${msg.replyTo}')">
+                                <span class="msg-reply-author">↩ Respondendo ${msg.replyAuthor || 'Alguém'}</span>
+                                <span class="msg-reply-text">${preview}</span>
+                            </div>
+                        `;
+                    }
+
+                    const editedHtml = msg.edited ? ` <span class="edited-flag">(editado)</span>` : '';
 
                     const div = document.createElement('div');
                     div.className = `message ${isMine ? 'mine' : ''}`;
-                    // Injeta a propriedade data-uid para atualização dinâmica do avatar sem renderizar tudo novamente
+                    div.dataset.id = msg.id; 
+                    
                     div.innerHTML = `
                         ${!isMine ? `<img src="${author.avatar}" class="msg-avatar" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
-                        <div class="msg-bubble">
+                        <div class="msg-bubble" style="cursor: pointer;" onclick="app.openContextMenu(event, 'chat', '${msg.id}', '${appState.activeChatMode}')">
                             ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name}</div>` : ''}
-                            <div class="msg-text">${msg.content}</div>
+                            ${replyHtml}
+                            <div class="msg-text">${msg.content}${editedHtml}</div>
                             <span class="msg-time">${timeStr}</span>
                         </div>
                     `;
                     container.appendChild(div);
                 });
 
-                if (newMessages.length > 0) {
-                    setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
-                }
+                if (newMessages.length > 0) setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
             },
 
             startPrivateChat: (targetUid) => {
                 app.navigate('chat');
-                setTimeout(() => {
-                    app.switchChatTab(targetUid); 
-                }, 100);
+                setTimeout(() => { app.switchChatTab(targetUid); }, 100);
             },
 
             renderPrivateChatList: () => {
@@ -1676,41 +1526,29 @@
                 myChats.forEach(m => {
                     const otherUid = m.participants.find(p => p !== myUid);
                     if(otherUid) {
-                        if(!chatMap[otherUid] || new Date(m.createdAt) > new Date(chatMap[otherUid].createdAt)) {
-                            chatMap[otherUid] = m;
-                        }
+                        if(!chatMap[otherUid] || new Date(m.createdAt) > new Date(chatMap[otherUid].createdAt)) { chatMap[otherUid] = m; }
                     }
                 });
 
                 const uniqueUsers = Object.keys(chatMap);
-                
-                if (uniqueUsers.length === 0) {
-                    container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum link privado aberto. Encontre usuários na Busca.</p>`;
-                    return;
-                }
+                if (uniqueUsers.length === 0) return container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum link privado aberto. Encontre usuários na Busca.</p>`;
 
                 uniqueUsers.forEach(uid => {
                     const user = appState.allUsers.find(u => u.uid === uid) || {name: 'Unknown', handle: '@unknown', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
                     const lastMsg = chatMap[uid].content;
                     
                     const div = document.createElement('div');
-                    div.className = 'chat-list-item';
-                    div.onclick = () => app.startPrivateChat(uid);
+                    div.className = 'chat-list-item'; div.onclick = () => app.startPrivateChat(uid);
                     div.innerHTML = `
                         <img src="${user.avatar}" class="avatar" style="width: 44px; height: 44px;">
-                        <div class="user-info">
-                            <h3>${user.name}</h3>
-                            <span style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span>
-                        </div>
+                        <div class="user-info"><h3>${user.name}</h3><span style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span></div>
                         <i class="fa-solid fa-chevron-right" style="color:var(--border-glass);"></i>
                     `;
                     container.appendChild(div);
                 });
             },
 
-            handleChatKeyPress: (e) => {
-                if (e.key === 'Enter') app.sendChatMessage();
-            },
+            handleChatKeyPress: (e) => { if (e.key === 'Enter') app.sendChatMessage(); },
 
             sendChatMessage: async () => {
                 if (!appState.firebaseUser) return;
@@ -1725,10 +1563,16 @@
                     createdAt: new Date().toISOString()
                 };
 
+                if (appState.activeReply) {
+                    baseMsg.replyTo = appState.activeReply.id;
+                    baseMsg.replyAuthor = appState.activeReply.authorName;
+                    baseMsg.replyPreview = appState.activeReply.content;
+                    app.cancelReply();
+                }
+
                 try {
                     if (appState.activeChatMode === 'global') {
-                        await addDoc(colGlobalChat, baseMsg);
-                        app.addXP(1);
+                        await addDoc(colGlobalChat, baseMsg); app.addXP(1);
                     } else {
                         baseMsg.participants = [appState.firebaseUser.uid, appState.activeChatMode];
                         await addDoc(colPrivateChat, baseMsg);
@@ -1736,26 +1580,134 @@
                 } catch(e) { app.showToast("Falha de transmissão.", "error"); }
             },
 
-            // --- 9. RANKING E XP ---
+            // --- FUNÇÕES DE CONTEXTO E MENSAGENS AVANÇADAS ---
+            openContextMenu: (e, type, id, chatMode = null) => {
+                e.stopPropagation();
+                appState.activeContextItem = { type, id, chatMode };
+                const myUid = appState.firebaseUser.uid;
+                let item, authorUid;
+
+                if (type === 'post') {
+                    item = appState.allPosts.find(p => p.id === id);
+                    if(!item) return; authorUid = item.authorUid;
+                } else if (type === 'chat') {
+                    const arr = chatMode === 'global' ? appState.globalMessages : appState.privateMessages;
+                    item = arr.find(m => m.id === id);
+                    if(!item) return; authorUid = item.authorUid;
+                }
+
+                const isMine = authorUid === myUid;
+                let html = '';
+
+                if (type === 'post') {
+                    if (isMine) html += `<button class="context-btn" onclick="app.contextMenuAction('edit')"><i class="fa-solid fa-pen"></i> Editar publicação</button>`;
+                    html += `<button class="context-btn" onclick="app.contextMenuAction('copy')"><i class="fa-regular fa-copy"></i> Copiar texto</button>`;
+                } else if (type === 'chat') {
+                    if (isMine) html += `<button class="context-btn" onclick="app.contextMenuAction('edit')"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
+                    html += `<button class="context-btn" onclick="app.contextMenuAction('reply')"><i class="fa-solid fa-reply"></i> Responder mensagem</button>`;
+                    html += `<button class="context-btn" onclick="app.contextMenuAction('copy')"><i class="fa-regular fa-copy"></i> Copiar mensagem</button>`;
+                    html += `<button class="context-btn danger" onclick="app.contextMenuAction('deleteForMe')"><i class="fa-solid fa-eye-slash"></i> Apagar para mim</button>`;
+                    if (isMine) html += `<button class="context-btn danger" onclick="app.contextMenuAction('deleteForEveryone')"><i class="fa-solid fa-trash"></i> Apagar para todos</button>`;
+                }
+
+                document.getElementById('context-menu-content').innerHTML = html;
+                document.getElementById('context-menu-overlay').classList.add('active');
+            },
+
+            closeContextMenu: (e) => {
+                if(e) e.stopPropagation();
+                document.getElementById('context-menu-overlay').classList.remove('active');
+                appState.activeContextItem = null;
+            },
+
+            contextMenuAction: (action) => {
+                const { type, id, chatMode } = appState.activeContextItem;
+                app.closeContextMenu();
+
+                let item, colRef;
+                if (type === 'post') {
+                    item = appState.allPosts.find(p => p.id === id); colRef = colPosts;
+                } else if (type === 'chat') {
+                    const arr = chatMode === 'global' ? appState.globalMessages : appState.privateMessages;
+                    item = arr.find(m => m.id === id);
+                    colRef = chatMode === 'global' ? colGlobalChat : colPrivateChat;
+                }
+                if (!item) return;
+
+                if (action === 'copy') {
+                    if (!item.content || !item.content.trim()) return app.showToast("Nenhum texto para copiar.", "error");
+                    const ta = document.createElement("textarea"); ta.value = item.content; document.body.appendChild(ta); ta.select();
+                    try { document.execCommand('copy'); app.showToast("Texto copiado!", "success"); } 
+                    catch(err) { app.showToast("Erro ao copiar.", "error"); }
+                    document.body.removeChild(ta);
+                } 
+                else if (action === 'edit') {
+                    document.getElementById('edit-content-input').value = item.content;
+                    document.getElementById('modal-edit-item').classList.add('active');
+                }
+                else if (action === 'reply') {
+                    const author = appState.allUsers.find(u => u.uid === item.authorUid) || {name: 'Usuário', handle: '@user'};
+                    const authorName = type === 'chat' ? (author.handle || author.name) : author.name;
+                    let preview = item.content || (item.image ? '📷 Foto' : '');
+                    
+                    appState.activeReply = { id: item.id, authorName: authorName, content: preview };
+                    const prevBox = document.getElementById('reply-preview-box');
+                    if(prevBox) {
+                        document.getElementById('reply-preview-author').innerText = `Respondendo ${authorName}`;
+                        document.getElementById('reply-preview-text').innerText = preview;
+                        prevBox.style.display = 'block';
+                        document.getElementById('chat-input').focus();
+                    }
+                }
+                else if (action === 'deleteForMe') updateDoc(doc(colRef, id), { deletedFor: arrayUnion(appState.firebaseUser.uid) }).catch(e => console.error(e));
+                else if (action === 'deleteForEveryone') deleteDoc(doc(colRef, id)).catch(e => console.error(e));
+            },
+
+            closeEditModal: () => { document.getElementById('modal-edit-item').classList.remove('active'); document.getElementById('edit-content-input').value = ''; },
+            
+            saveEdit: async () => {
+                const newText = document.getElementById('edit-content-input').value.trim();
+                const { type, id, chatMode } = appState.activeContextItem;
+
+                if(!newText) return app.showToast("O texto não pode ser vazio.", "error");
+                const btn = document.querySelector('#modal-edit-item .btn-primary');
+                btn.disabled = true; btn.innerHTML = 'Salvando...';
+
+                let colRef = type === 'post' ? colPosts : (chatMode === 'global' ? colGlobalChat : colPrivateChat);
+                try { await updateDoc(doc(colRef, id), { content: newText, edited: true }); app.closeEditModal(); } 
+                catch (e) { app.showToast("Erro ao editar", "error"); } 
+                finally { btn.disabled = false; btn.innerHTML = 'Salvar Alteração'; }
+            },
+
+            cancelReply: () => {
+                appState.activeReply = null;
+                const box = document.getElementById('reply-preview-box');
+                if(box) box.style.display = 'none';
+            },
+
+            scrollToMessage: (id) => {
+                const el = document.querySelector(`.message[data-id="${id}"]`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('highlighted');
+                    setTimeout(() => el.classList.remove('highlighted'), 2000);
+                } else { app.showToast("Mensagem original não disponível.", "error"); }
+            },
+
             renderRanking: () => {
                 const container = document.getElementById('ranking-list-container');
                 if(!container) return;
-                
                 const sortedUsers = [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50); 
                 container.innerHTML = '';
                 
                 sortedUsers.forEach((u, idx) => {
                     const isMe = u.uid === appState.firebaseUser?.uid;
                     const div = document.createElement('div');
-                    div.className = 'rank-card';
-                    div.onclick = () => app.navigate('public_profile', null, u.uid);
+                    div.className = 'rank-card'; div.onclick = () => app.navigate('public_profile', null, u.uid);
                     div.innerHTML = `
                         <div class="rank-pos">#${idx + 1}</div>
                         <img src="${u.avatar}" class="avatar" style="width: 38px; height: 38px;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                        <div class="rank-info">
-                            <h4>${u.name} ${isMe ? ' (Você)' : ''} ${u.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h4>
-                            <span>${u.handle} • Nível ${u.level || 1}</span>
-                        </div>
+                        <div class="rank-info"><h4>${u.name} ${isMe ? ' (Você)' : ''} ${u.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h4><span>${u.handle} • Nível ${u.level || 1}</span></div>
                         <div class="rank-score">${u.xp || 0} XP</div>
                     `;
                     container.appendChild(div);
@@ -1766,101 +1718,67 @@
                 if (!appState.firebaseUser || !appState.currentUserData) return;
                 const newXp = (appState.currentUserData.xp || 0) + amount;
                 const newCoins = (appState.currentUserData.ncoins || 0) + Math.floor(amount / 2);
-                try {
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { xp: newXp, ncoins: newCoins });
-                } catch(e) {}
+                try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { xp: newXp, ncoins: newCoins }); } catch(e) {}
             },
 
-            openAdminModal: () => {
-                if (appState.currentUserData.role !== 'admin') return;
-                alert("Painel Admin Restrito.\nNível de Acesso Reconhecido.\nVocê já possui poderes de exclusão direta de qualquer postagem ou comentário no sistema!");
-            },
+            openAdminModal: () => { if (appState.currentUserData.role === 'admin') alert("Painel Admin Restrito.\nNível de Acesso Reconhecido."); },
 
-            // --- UTILS ---
             showToast: (msg, type = 'info') => {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-
                 let icon = 'fa-circle-info';
-                if (type === 'error') icon = 'fa-circle-xmark';
-                if (type === 'success') icon = 'fa-circle-check';
+                if (type === 'error') icon = 'fa-circle-xmark'; if (type === 'success') icon = 'fa-circle-check';
 
                 toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
                 container.appendChild(toast);
-
-                setTimeout(() => {
-                    toast.style.animation = 'fadeOut 0.3s forwards';
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
+                setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
             },
 
             initParticles: () => {
-                const canvas = document.getElementById('particles');
-                const ctx = canvas.getContext('2d');
-                let particles = [];
-                let animationFrameId;
+                const canvas = document.getElementById('particles'); const ctx = canvas.getContext('2d');
+                let particles = []; let animationFrameId;
+                const colors = [{ r: 0, g: 243, b: 255 }, { r: 255, g: 0, b: 255 }, { r: 176, g: 38, b: 255 }];
 
-                const colors = [
-                    { r: 0, g: 243, b: 255 }, { r: 255, g: 0, b: 255 }, { r: 176, g: 38, b: 255 }
-                ];
-
-                function resize() {
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
-                    initNodes();
-                }
+                function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initNodes(); }
                 window.addEventListener('resize', resize);
 
                 class Particle {
                     constructor() {
-                        this.x = Math.random() * canvas.width;
-                        this.y = Math.random() * canvas.height;
-                        this.z = Math.random() * 0.8 + 0.2; 
-                        const baseSize = Math.random() * 2.5 + 1.2;
-                        this.size = baseSize * this.z;
+                        this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.z = Math.random() * 0.8 + 0.2; 
+                        this.size = (Math.random() * 2.5 + 1.2) * this.z;
                         const speedFactor = (Math.random() * 0.5 + 0.15) * this.z;
-                        this.speedX = (Math.random() - 0.5) * speedFactor;
-                        this.speedY = (Math.random() - 0.5) * speedFactor;
+                        this.speedX = (Math.random() - 0.5) * speedFactor; this.speedY = (Math.random() - 0.5) * speedFactor;
                         this.color = colors[Math.floor(Math.random() * colors.length)];
                         this.alpha = (Math.random() * 0.7 + 0.5) * this.z; 
                         this.alphaChange = (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
                     }
                     update() {
                         this.x += this.speedX; this.y += this.speedY;
-                        if (this.x > canvas.width + 10) this.x = -10;
-                        else if (this.x < -10) this.x = canvas.width + 10;
-                        if (this.y > canvas.height + 10) this.y = -10;
-                        else if (this.y < -10) this.y = canvas.height + 10;
+                        if (this.x > canvas.width + 10) this.x = -10; else if (this.x < -10) this.x = canvas.width + 10;
+                        if (this.y > canvas.height + 10) this.y = -10; else if (this.y < -10) this.y = canvas.height + 10;
                         this.alpha += this.alphaChange;
                         if (this.alpha <= 0.25 || this.alpha >= (1.2 * this.z)) { this.alphaChange *= -1; }
                     }
                     draw() {
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 1.5})`; 
-                        ctx.fill();
+                        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 1.5})`; ctx.fill();
                         if (this.z > 0.3) {
-                            ctx.beginPath();
-                            ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
-                            ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 0.4})`;
-                            ctx.fill();
+                            ctx.beginPath(); ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 0.4})`; ctx.fill();
                         }
                     }
                 }
                 function initNodes() {
-                    particles = [];
-                    const area = canvas.width * canvas.height;
+                    particles = []; const area = canvas.width * canvas.height;
                     let count = Math.max(60, Math.min(Math.floor(area / 6000), 140)); 
                     for (let i = 0; i < count; i++) { particles.push(new Particle()); }
                 }
                 function drawConnections() {
-                    const maxDistance = 110;
-                    const maxDistSq = maxDistance * maxDistance; 
+                    const maxDistance = 110; const maxDistSq = maxDistance * maxDistance; 
                     for (let i = 0; i < particles.length; i++) {
                         for (let j = i + 1; j < particles.length; j++) {
-                            const p1 = particles[i];
-                            const p2 = particles[j];
+                            const p1 = particles[i]; const p2 = particles[j];
                             if (Math.abs(p1.z - p2.z) > 0.3) continue;
                             const dx = p1.x - p2.x; const dy = p1.y - p2.y;
                             const distSq = dx * dx + dy * dy;
@@ -1869,22 +1787,18 @@
                                 const opacity = Math.min(1, (1 - (dist / maxDistance)) * ((p1.alpha + p2.alpha) / 1.2));
                                 ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
                                 ctx.strokeStyle = `rgba(${p1.color.r}, ${p1.color.g}, ${p1.color.b}, ${opacity})`;
-                                ctx.lineWidth = 1.4 * ((p1.z + p2.z) / 2);
-                                ctx.stroke();
+                                ctx.lineWidth = 1.4 * ((p1.z + p2.z) / 2); ctx.stroke();
                             }
                         }
                     }
                 }
                 function animate() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.globalCompositeOperation = 'screen';
-                    drawConnections(); 
-                    particles.forEach(p => { p.update(); p.draw(); });
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.globalCompositeOperation = 'screen';
+                    drawConnections(); particles.forEach(p => { p.update(); p.draw(); });
                     ctx.globalCompositeOperation = 'source-over'; 
                     animationFrameId = requestAnimationFrame(animate);
                 }
-                resize();
-                animate();
+                resize(); animate();
             }
         };
 

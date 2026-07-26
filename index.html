@@ -284,6 +284,24 @@
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === SISTEMA DE LOJA === */
+        .store-categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
+        .store-categories::-webkit-scrollbar { display: none; }
+        .category-pill { padding: 8px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: 'Inter', sans-serif;}
+        .category-pill:hover { background: rgba(255,255,255,0.08); }
+        .category-pill.active { background: rgba(0, 243, 255, 0.1); border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 10px var(--cyan-glow); font-weight: 600;}
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+        .product-card { background: var(--bg-glass); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; cursor: pointer; backdrop-filter: blur(10px); }
+        .product-card:hover { transform: translateY(-4px); border-color: var(--cyan); box-shadow: 0 8px 20px rgba(0, 243, 255, 0.15); }
+        .product-img-container { width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .product-img-container i { font-size: 2.8rem; color: var(--purple); text-shadow: 0 0 15px var(--purple-glow); }
+        .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
+        .product-duration { font-size: 0.7rem; color: var(--cyan); margin-bottom: 8px; }
+        .product-price { font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: bold; color: #ffd700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .product-price i { font-size: 0.85rem; }
+        .btn-buy { width: 100%; padding: 8px; background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), rgba(176, 38, 255, 0.1)); border: 1px solid rgba(0, 243, 255, 0.5); border-radius: 6px; color: var(--text-main); font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer; transition: all 0.2s; text-transform: uppercase; font-size: 0.9rem; }
+        .btn-buy:hover { background: linear-gradient(90deg, var(--cyan), var(--purple)); color: white; border-color: transparent; box-shadow: 0 0 15px rgba(176, 38, 255, 0.4); }
+
         /* RANKING & PESQUISA */
         .ranking-list { display: flex; flex-direction: column; gap: 10px; }
         .rank-card { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); transition: transform 0.2s; cursor: pointer;}
@@ -436,6 +454,7 @@
             <div class="logo" onclick="app.navigate('feed')">NEXUS<span>HUB</span></div>
             <div class="actions">
                 <i class="fa-solid fa-shield-halved" id="admin-icon" style="display:none; color: var(--danger);" onclick="app.openAdminModal()" title="Painel Admin"></i>
+                <i class="fa-solid fa-cart-shopping" onclick="app.navigate('store')" title="Loja"></i>
                 <i class="fa-solid fa-gear" onclick="app.openSettingsModal()" title="Configurações"></i>
             </div>
         </header>
@@ -537,6 +556,28 @@
         </div>
     </div>
 
+    <!-- Modal: Compra de Item (Loja) -->
+    <div class="modal-overlay" id="modal-buy">
+        <div class="modal-content" style="max-width: 380px;">
+            <div class="modal-header">
+                <h2>Detalhes do Produto</h2>
+                <button class="close-modal" onclick="app.closeBuyModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 10px 10px 0;">
+                <div id="buy-modal-icon" style="width: 80px; height: 80px; background: rgba(0,0,0,0.5); border: 1px solid var(--purple); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px; font-size: 2.5rem; color: var(--cyan); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);">
+                </div>
+                <h3 id="buy-modal-name" style="color: white; font-size: 1.4rem; margin-bottom: 5px;"></h3>
+                <p id="buy-modal-duration" style="color: var(--cyan); font-size: 0.85rem; margin-bottom: 12px; font-weight: bold;"></p>
+                <p id="buy-modal-desc" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4;"></p>
+                <div id="buy-modal-price" style="font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: bold; color: #ffd700; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,215,0,0.4);">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="app.processPurchase()">Confirmar Compra</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Templates SPA -->
     <template id="tpl-chat">
         <div class="chat-container">
@@ -599,6 +640,16 @@
         <div id="public-profile-container"></div>
     </template>
 
+    <template id="tpl-store">
+        <div style="margin-bottom: 15px; text-align: center;">
+            <i class="fa-solid fa-store" style="font-size: 1.8rem; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 5px;"></i>
+            <h2 style="color: white; margin-bottom: 3px;">Nexus Store</h2>
+            <p style="color: var(--text-muted); font-size: 0.8rem;">Melhore sua experiência no Hub</p>
+        </div>
+        <div class="store-categories" id="store-categories-container"></div>
+        <div class="products-grid" id="products-grid-container"></div>
+    </template>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -646,7 +697,34 @@
             activeContextType: null,
             activeContextCollection: null,
             replyingTo: null,
-            usersLoaded: false
+            usersLoaded: false,
+
+            // --- Variáveis da Loja ---
+            activeStoreCategory: 'vip',
+            selectedProduct: null,
+            storeCategories: [
+                { id: 'vip', name: 'Planos VIP' },
+                { id: 'decor', name: 'Decorações' },
+                { id: 'frames', name: 'Molduras' },
+                { id: 'avatars', name: 'Avatares' },
+                { id: 'banners', name: 'Banners' },
+                { id: 'cosmetics', name: 'Cosméticos' },
+                { id: 'themes', name: 'Temas' },
+                { id: 'special', name: 'Itens Especiais' }
+            ],
+            catalog: [
+                {
+                    id: 'vip_7_dias',
+                    name: 'VIP 7 Dias',
+                    description: 'Desbloqueia recursos exclusivos durante sete dias.',
+                    category: 'vip',
+                    icon: 'fa-solid fa-crown',
+                    image: '',
+                    price: 500,
+                    duration: '7 Dias',
+                    status: 'active'
+                }
+            ]
         };
 
         const app = {
@@ -842,6 +920,12 @@
                 else if (appState.currentView === 'public_profile') {
                     const user = appState.allUsers.find(u => u.uid === appState.currentPublicProfileUid);
                     if (user) app.renderProfile(user, true);
+                }
+                else if (appState.currentView === 'store') {
+                    contentArea.innerHTML = ''; 
+                    contentArea.appendChild(document.getElementById('tpl-store').content.cloneNode(true));
+                    app.renderStoreCategories();
+                    app.renderStoreProducts();
                 }
             },
 
@@ -1559,6 +1643,81 @@
                 document.getElementById('toast-container').appendChild(toast);
                 setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
             },
+            
+            // --- SISTEMA DE LOJA ---
+            renderStoreCategories: () => {
+                const container = document.getElementById('store-categories-container');
+                if (!container) return;
+                container.innerHTML = '';
+                appState.storeCategories.forEach(cat => {
+                    const pill = document.createElement('div');
+                    pill.className = `category-pill ${appState.activeStoreCategory === cat.id ? 'active' : ''}`;
+                    pill.innerText = cat.name;
+                    pill.onclick = () => {
+                        appState.activeStoreCategory = cat.id;
+                        app.renderStoreCategories();
+                        app.renderStoreProducts();
+                    };
+                    container.appendChild(pill);
+                });
+            },
+
+            renderStoreProducts: () => {
+                const container = document.getElementById('products-grid-container');
+                if (!container) return;
+                container.innerHTML = '';
+                
+                const filtered = appState.catalog.filter(p => p.category === appState.activeStoreCategory && p.status === 'active');
+                
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 30vh; text-align: center; color: var(--text-muted);"><i class="fa-solid fa-box-open" style="font-size: 2.5rem; margin-bottom: 12px; color: rgba(255,255,255,0.1);"></i><p>Nenhum produto disponível<br>nesta categoria no momento.</p></div>`;
+                    return;
+                }
+
+                filtered.forEach(prod => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.onclick = () => app.openBuyModal(prod.id);
+                    
+                    const iconOrImg = prod.image ? `<img src="${prod.image}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<i class="${prod.icon}"></i>`;
+                    
+                    card.innerHTML = `
+                        <div class="product-img-container">${iconOrImg}</div>
+                        <div class="product-name">${prod.name}</div>
+                        ${prod.duration ? `<div class="product-duration">${prod.duration}</div>` : ''}
+                        <div class="product-price"><i class="fa-solid fa-coins"></i> ${prod.price}</div>
+                        <button class="btn-buy" onclick="event.stopPropagation(); app.openBuyModal('${prod.id}')">Comprar</button>
+                    `;
+                    container.appendChild(card);
+                });
+            },
+
+            openBuyModal: (productId) => {
+                const product = appState.catalog.find(p => p.id === productId);
+                if (!product) return;
+                appState.selectedProduct = product;
+                
+                const iconEl = document.getElementById('buy-modal-icon');
+                iconEl.innerHTML = product.image ? `<img src="${product.image}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : `<i class="${product.icon}"></i>`;
+                
+                document.getElementById('buy-modal-name').innerText = product.name;
+                document.getElementById('buy-modal-duration').innerText = product.duration ? `Duração: ${product.duration}` : 'Item Permanente';
+                document.getElementById('buy-modal-desc').innerText = product.description;
+                document.getElementById('buy-modal-price').innerHTML = `<i class="fa-solid fa-coins"></i> ${product.price} NCoins`;
+                
+                document.getElementById('modal-buy').classList.add('active');
+            },
+
+            closeBuyModal: () => {
+                document.getElementById('modal-buy').classList.remove('active');
+                appState.selectedProduct = null;
+            },
+
+            processPurchase: () => {
+                app.showToast("O sistema de transações será habilitado em breve.", "info");
+                app.closeBuyModal();
+            },
+
             initParticles: () => {
                 const canvas = document.getElementById('particles'), ctx = canvas.getContext('2d');
                 let particles = [];

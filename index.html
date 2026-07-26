@@ -225,13 +225,26 @@
             transition: all 0.3s ease;
         }
 
-        /* === SISTEMA DE MOLDURAS (CSS PURO) === */
-        /* Estas classes se adaptarão automaticamente ao border-radius da imagem */
+        /* === SISTEMA DE MOLDURAS === */
         .frame_neon_cyan { border: 2px solid var(--cyan) !important; box-shadow: 0 0 10px var(--cyan) !important; padding: 2px; background-clip: content-box; }
         .frame_cyber_purple { border: 2px solid var(--purple) !important; box-shadow: 0 0 12px var(--purple) !important; padding: 2px; background-clip: content-box; }
         .frame_gold_elite { border: 2px solid #ffd700 !important; box-shadow: 0 0 15px rgba(255,215,0,0.6) !important; padding: 2px; background-clip: content-box; }
         .frame_hacker_green { border: 2px solid var(--success) !important; box-shadow: 0 0 12px var(--success) !important; padding: 2px; background-clip: content-box; }
         .frame_blood_red { border: 2px solid var(--danger) !important; box-shadow: 0 0 12px var(--danger) !important; padding: 2px; background-clip: content-box; }
+        
+        /* Nova Moldura RGB Animação */
+        @keyframes neon-rgb-glow {
+            0% { border-color: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+            33% { border-color: var(--magenta); box-shadow: 0 0 12px var(--magenta); }
+            66% { border-color: var(--purple); box-shadow: 0 0 12px var(--purple); }
+            100% { border-color: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+        }
+        .frame_rgb_premium {
+            border: 2px solid var(--cyan) !important;
+            padding: 2px;
+            background-clip: content-box;
+            animation: neon-rgb-glow 4s linear infinite !important;
+        }
 
         .user-info { flex: 1; min-width: 0; }
         .user-info h3 { font-size: 0.95rem; margin: 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -299,17 +312,22 @@
         .category-pill { padding: 8px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: 'Inter', sans-serif;}
         .category-pill:hover { background: rgba(255,255,255,0.08); }
         .category-pill.active { background: rgba(0, 243, 255, 0.1); border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 10px var(--cyan-glow); font-weight: 600;}
+        
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
         .product-card { background: var(--bg-glass); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; cursor: pointer; backdrop-filter: blur(10px); }
-        .product-card:hover { transform: translateY(-4px); border-color: var(--cyan); box-shadow: 0 8px 20px rgba(0, 243, 255, 0.15); }
-        .product-img-container { width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .product-card:hover:not(.owned) { transform: translateY(-4px); border-color: var(--cyan); box-shadow: 0 8px 20px rgba(0, 243, 255, 0.15); }
+        .product-card.owned { border-color: rgba(255,255,255,0.05); cursor: default; }
+        
+        .product-img-container { width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); position: relative; }
         .product-img-container i { font-size: 2.8rem; color: var(--purple); text-shadow: 0 0 15px var(--purple-glow); }
+        
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
         .product-duration { font-size: 0.7rem; color: var(--cyan); margin-bottom: 8px; }
         .product-price { font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: bold; color: #ffd700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
         .product-price i { font-size: 0.85rem; }
+        
         .btn-buy { width: 100%; padding: 8px; background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), rgba(176, 38, 255, 0.1)); border: 1px solid rgba(0, 243, 255, 0.5); border-radius: 6px; color: var(--text-main); font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer; transition: all 0.2s; text-transform: uppercase; font-size: 0.9rem; }
-        .btn-buy:hover { background: linear-gradient(90deg, var(--cyan), var(--purple)); color: white; border-color: transparent; box-shadow: 0 0 15px rgba(176, 38, 255, 0.4); }
+        .btn-buy:hover:not([disabled]) { background: linear-gradient(90deg, var(--cyan), var(--purple)); color: white; border-color: transparent; box-shadow: 0 0 15px rgba(176, 38, 255, 0.4); }
 
         /* RANKING & PESQUISA */
         .ranking-list { display: flex; flex-direction: column; gap: 10px; }
@@ -490,7 +508,7 @@
                 <div class="form-group"><textarea id="post-content" class="form-control" placeholder="Compartilhe algo na malha da rede..."></textarea></div>
                 <div class="file-upload-wrapper">
                     <label class="file-upload-btn">
-                        <i class="fa-solid fa-image"></i> Anexar Imagem
+                        <i class="fa-solid fa-image"></i> Anexar Imagem / GIF
                         <input type="file" id="post-image-input" accept="image/*" onchange="app.handleImageUpload(event, 'post')">
                     </label>
                     <div id="image-preview-container">
@@ -647,11 +665,25 @@
         <div id="public-profile-container"></div>
     </template>
 
+    <!-- Template Refinado da Store -->
     <template id="tpl-store">
-        <div style="margin-bottom: 15px; text-align: center; flex-shrink: 0;">
-            <i class="fa-solid fa-store" style="font-size: 1.8rem; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 5px;"></i>
-            <h2 style="color: white; margin-bottom: 3px;">Nexus Store</h2>
-            <p style="color: var(--text-muted); font-size: 0.8rem;">Melhore sua experiência no Hub</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-shrink: 0; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="text-align: left; display: flex; align-items: center; gap: 12px;">
+                <div style="width: 45px; height: 45px; background: rgba(0, 243, 255, 0.1); border-radius: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(0, 243, 255, 0.3);">
+                    <i class="fa-solid fa-store" style="font-size: 1.4rem; color: var(--cyan); text-shadow: 0 0 10px var(--cyan);"></i>
+                </div>
+                <div>
+                    <h2 style="color: white; margin-bottom: 2px; font-size: 1.2rem;">Nexus Store</h2>
+                    <p style="color: var(--text-muted); font-size: 0.75rem;">Itens exclusivos</p>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">Seu Saldo</span>
+                <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255, 215, 0, 0.3);">
+                    <i class="fa-solid fa-coins" style="color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.5); font-size: 0.9rem;"></i>
+                    <span id="store-user-coins" style="font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: bold; color: #ffd700;">0</span>
+                </div>
+            </div>
         </div>
         <div class="store-categories" id="store-categories-container"></div>
         <div class="products-grid" id="products-grid-container"></div>
@@ -704,33 +736,33 @@
             activeContextCollection: null,
             replyingTo: null,
             usersLoaded: false,
+            
+            vipTimer: null, // Timer global da Loja
 
             activeStoreCategory: 'vip',
             selectedProduct: null,
+            
+            // Categorias limpas
             storeCategories: [
                 { id: 'vip', name: 'Planos VIP' },
-                { id: 'frames', name: 'Molduras' }, /* Nova Categoria Movida p/ frente */
-                { id: 'decor', name: 'Decorações' },
-                { id: 'avatars', name: 'Avatares' },
-                { id: 'banners', name: 'Banners' },
-                { id: 'cosmetics', name: 'Cosméticos' },
-                { id: 'themes', name: 'Temas' },
-                { id: 'special', name: 'Itens Especiais' }
+                { id: 'frames', name: 'Molduras' }
             ],
-            // Catálogo expandido
+            
+            // Catálogo Atualizado
             catalog: [
-                // VIP
-                { id: 'vip_7_dias', name: 'VIP 7 Dias', description: 'Desbloqueia recursos exclusivos durante sete dias na rede global.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 500, duration: '7 Dias', durationDays: 7, status: 'active' },
-                { id: 'vip_30_dias', name: 'VIP 30 Dias', description: 'Benefícios VIP estendidos. Conexão prioritária garantida.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 1800, duration: '30 Dias', durationDays: 30, status: 'active' },
-                { id: 'vip_anual', name: 'VIP Anual', description: 'Domine a malha neural com benefícios premium por um ano inteiro.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 15000, duration: '365 Dias', durationDays: 365, status: 'active' },
+                // VIP (Rebalanceado)
+                { id: 'vip_7_dias', name: 'VIP 7 Dias', description: 'Desbloqueia recursos exclusivos durante sete dias na rede global.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 2500, duration: '7 Dias', durationDays: 7, status: 'active' },
+                { id: 'vip_30_dias', name: 'VIP 30 Dias', description: 'Benefícios VIP estendidos. Conexão prioritária garantida.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 8000, duration: '30 Dias', durationDays: 30, status: 'active' },
+                { id: 'vip_anual', name: 'VIP Anual', description: 'Domine a malha neural com benefícios premium por um ano inteiro.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 35000, duration: '365 Dias', durationDays: 365, status: 'active' },
                 { id: 'vip_permanente', name: 'VIP Permanente', description: 'O nível máximo de acesso à rede. Desbloqueio vitalício de todos os recursos.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 45000, duration: 'Vitalício', durationDays: null, status: 'active' },
                 
-                // MOLDURAS (Novos Itens integrados com as classes CSS)
-                { id: 'frame_neon_cyan', name: 'Neon Ciano', description: 'Borda brilhante com assinatura cibernética clássica.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 300, duration: '', status: 'active' },
-                { id: 'frame_cyber_purple', name: 'Cyber Roxo', description: 'Aura roxa pulsante da malha profunda.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 450, duration: '', status: 'active' },
-                { id: 'frame_blood_red', name: 'Blood Red', description: 'Aviso de sistema crítico. Chamativo e perigoso.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 600, duration: '', status: 'active' },
-                { id: 'frame_hacker_green', name: 'Hacker Core', description: 'Terminal verde bruto e direto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 500, duration: '', status: 'active' },
-                { id: 'frame_gold_elite', name: 'Gold Elite', description: 'Moldura dourada premium para alta hierarquia.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 1500, duration: '', status: 'active' }
+                // MOLDURAS (Rebalanceado + Nova RGB)
+                { id: 'frame_neon_cyan', name: 'Neon Ciano', description: 'Borda brilhante com assinatura cibernética clássica.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 1500, duration: '', status: 'active' },
+                { id: 'frame_cyber_purple', name: 'Cyber Roxo', description: 'Aura roxa pulsante da malha profunda.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2000, duration: '', status: 'active' },
+                { id: 'frame_hacker_green', name: 'Hacker Core', description: 'Terminal verde bruto e direto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2200, duration: '', status: 'active' },
+                { id: 'frame_blood_red', name: 'Blood Red', description: 'Aviso de sistema crítico. Chamativo e perigoso.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2500, duration: '', status: 'active' },
+                { id: 'frame_gold_elite', name: 'Gold Elite', description: 'Moldura dourada premium para alta hierarquia.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 5000, duration: '', status: 'active' },
+                { id: 'frame_rgb_premium', name: 'Nexus RGB Premium', description: 'Moldura animada reativa. A essência do neon em seu perfil.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' }
             ]
         };
 
@@ -828,7 +860,7 @@
 
             getFrameClass: (userData) => {
                 if (!userData || !userData.equippedFrame || userData.equippedFrame === 'default') return '';
-                return userData.equippedFrame; // Retorna exatamente o ID da classe (ex: 'frame_neon_cyan')
+                return userData.equippedFrame; 
             },
             // ---------------------------
 
@@ -904,6 +936,7 @@
                     if (['perfil', 'public_profile'].includes(appState.currentView)) app.updateProfileInDOM();
                     else if (appState.currentView === 'ranking') app.renderRanking();
                     else if (appState.currentView === 'search') app.performSearch();
+                    else if (appState.currentView === 'store') app.updateStoreCoins();
                     
                     if (appState.currentView === 'feed') app.updatePostsInDOM();
                     if (appState.currentView === 'chat') {
@@ -961,6 +994,9 @@
             navigate: (viewName, navElement = null, additionalData = null) => {
                 app.cancelReply(); 
                 
+                // Limpar timers globais para evitar vazamento
+                if (appState.vipTimer) { clearInterval(appState.vipTimer); appState.vipTimer = null; }
+
                 appState.currentView = viewName;
                 if (viewName === 'public_profile') appState.currentPublicProfileUid = additionalData;
                 
@@ -1003,6 +1039,7 @@
                 else if (appState.currentView === 'store') {
                     contentArea.innerHTML = ''; 
                     contentArea.appendChild(document.getElementById('tpl-store').content.cloneNode(true));
+                    app.updateStoreCoins();
                     app.renderStoreCategories();
                     app.renderStoreProducts();
                 }
@@ -1300,12 +1337,11 @@
                     if (!isVIP && (type === 'profile' || type === 'banner')) {
                         return app.showToast("Arquivos animados (.GIF) são um benefício exclusivo de Planos VIP. Considere adquirir um!", "error");
                     }
-                    // Validação de limite de tamanho (Máx 2MB)
-                    if (file.size > 2 * 1024 * 1024) {
-                        return app.showToast("O GIF excedeu o tamanho permitido. O limite de rede é 2MB.", "error");
+                    // Validação de limite de tamanho (Melhoria Loja/VIP: 10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        return app.showToast("O arquivo excedeu o tamanho permitido. O limite VIP é 10MB.", "error");
                     }
                     
-                    // Tratamento direto via FileReader para preservar a animação
                     const reader = new FileReader();
                     reader.onload = (evt) => {
                         const dataUrl = evt.target.result;
@@ -1321,10 +1357,10 @@
                         }
                     };
                     reader.readAsDataURL(file);
-                    return; // Finaliza o fluxo VIP aqui
+                    return; 
                 }
 
-                // Fluxo Normal (Canvas Resizing para Imagens estáticas JPEGs/PNGs)
+                // Fluxo Normal
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
@@ -1794,7 +1830,14 @@
                 setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
             },
             
-            // --- SISTEMA DE LOJA ---
+            // --- SISTEMA DE LOJA & VIP MELHORADO ---
+            updateStoreCoins: () => {
+                const coinsEl = document.getElementById('store-user-coins');
+                if (coinsEl && appState.currentUserData) {
+                    coinsEl.innerText = appState.currentUserData.ncoins || 0;
+                }
+            },
+
             renderStoreCategories: () => {
                 const container = document.getElementById('store-categories-container');
                 if (!container) return;
@@ -1824,27 +1867,101 @@
                     return;
                 }
 
+                if (appState.vipTimer) { clearInterval(appState.vipTimer); appState.vipTimer = null; }
+
+                const vipInfo = app.getVIPInfo(appState.currentUserData);
+                const ownedFrames = appState.currentUserData.ownedFrames || [];
+
                 filtered.forEach(prod => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
-                    card.onclick = () => app.openBuyModal(prod.id);
+                    
+                    const isFrame = prod.category === 'frames';
+                    const isVIP = prod.category === 'vip';
+                    const isOwned = isFrame && ownedFrames.includes(prod.id);
+                    const isCurrentVIP = isVIP && vipInfo.isActive && vipInfo.planId === prod.id;
+
+                    let buttonHtml = `<button class="btn-buy" onclick="event.stopPropagation(); app.openBuyModal('${prod.id}')">Comprar</button>`;
+                    let extraHtml = '';
+
+                    if (isOwned) {
+                        card.classList.add('owned');
+                        buttonHtml = `<button class="btn-buy" disabled style="background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: transparent;"><i class="fa-solid fa-check"></i> Comprado</button>`;
+                    }
+
+                    if (isVIP && vipInfo.isActive) {
+                        buttonHtml = `<button class="btn-buy" onclick="event.stopPropagation(); app.showToast('Você já possui um plano VIP ativo. Aguarde o término para adquirir um novo.', 'info')">Comprar</button>`;
+                        
+                        if (isCurrentVIP) {
+                            card.style.borderColor = 'var(--cyan)';
+                            card.style.boxShadow = '0 0 15px rgba(0, 243, 255, 0.2)';
+                            extraHtml = `<div style="color: var(--success); font-size: 0.8rem; font-weight: bold; margin-bottom: 8px;"><i class="fa-solid fa-check-circle"></i> VIP Ativo</div>`;
+                            
+                            if (vipInfo.expiresAt) {
+                                extraHtml += `<div id="vip-countdown-${prod.id}" class="vip-countdown" data-expires="${vipInfo.expiresAt}" style="font-size: 0.75rem; color: var(--cyan); margin-bottom: 8px;">Calculando...</div>`;
+                            } else {
+                                extraHtml += `<div style="font-size: 0.75rem; color: var(--cyan); margin-bottom: 8px;">Plano Vitalício</div>`;
+                            }
+                        }
+                    }
+
+                    if (!isCurrentVIP && isVIP) {
+                        card.onclick = () => {
+                            if(vipInfo.isActive) app.showToast('Você já possui um plano VIP ativo. Aguarde o término para adquirir um novo.', 'info');
+                            else app.openBuyModal(prod.id);
+                        };
+                    } else if (!isOwned && !isCurrentVIP) {
+                        card.onclick = () => app.openBuyModal(prod.id);
+                    }
                     
                     const iconOrImg = prod.image ? `<img src="${prod.image}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<i class="${prod.icon}"></i>`;
                     
                     card.innerHTML = `
-                        <div class="product-img-container">${iconOrImg}</div>
+                        <div class="product-img-container" style="${isOwned ? 'opacity:0.5;' : ''}">${iconOrImg}</div>
                         <div class="product-name">${prod.name}</div>
                         ${prod.duration ? `<div class="product-duration">${prod.duration}</div>` : ''}
+                        ${extraHtml}
                         <div class="product-price"><i class="fa-solid fa-coins"></i> ${prod.price}</div>
-                        <button class="btn-buy" onclick="event.stopPropagation(); app.openBuyModal('${prod.id}')">Comprar</button>
+                        ${buttonHtml}
                     `;
                     container.appendChild(card);
+                });
+
+                if (container.querySelector('.vip-countdown')) {
+                    app.updateVIPCountdowns();
+                    appState.vipTimer = setInterval(app.updateVIPCountdowns, 1000);
+                }
+            },
+
+            updateVIPCountdowns: () => {
+                document.querySelectorAll('.vip-countdown').forEach(el => {
+                    const expires = new Date(el.dataset.expires).getTime();
+                    const now = new Date().getTime();
+                    const diff = expires - now;
+
+                    if (diff <= 0) {
+                        el.innerText = "Expirado";
+                        app.checkAndExpireVIP(); 
+                        return;
+                    }
+
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    el.innerHTML = `Restam:<br>${days}d ${hours}h ${minutes}m ${seconds}s`;
                 });
             },
 
             openBuyModal: (productId) => {
                 const product = appState.catalog.find(p => p.id === productId);
                 if (!product) return;
+                
+                if (product.category === 'vip' && app.getVIPInfo(appState.currentUserData).isActive) {
+                    return app.showToast("Você já possui um plano VIP ativo. Aguarde o término para adquirir um novo.", "info");
+                }
+
                 appState.selectedProduct = product;
                 
                 const iconEl = document.getElementById('buy-modal-icon');
@@ -1868,6 +1985,12 @@
                 if (!product) return;
 
                 const btn = document.querySelector('#modal-buy .btn-primary');
+                const myCoins = appState.currentUserData.ncoins || 0;
+
+                if (myCoins < product.price) {
+                    app.showToast("NCoins insuficientes para esta transação.", "error");
+                    return;
+                }
                 
                 if (product.category === 'vip') {
                     btn.disabled = true;
@@ -1879,7 +2002,10 @@
                             expiresAt = new Date(now.getTime() + (product.durationDays * 24 * 60 * 60 * 1000)).toISOString();
                         }
                         const vipData = { active: true, planId: product.id, activatedAt: now.toISOString(), expiresAt: expiresAt };
-                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), { vip: vipData });
+                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), { 
+                            vip: vipData,
+                            ncoins: myCoins - product.price 
+                        });
                         app.showToast(`Plano ${product.name} ativado com sucesso!`, "success");
                         app.closeBuyModal();
                     } catch (e) {
@@ -1897,13 +2023,6 @@
                         app.showToast("Você já possui esta moldura registrada.", "info");
                         btn.disabled = false; btn.innerHTML = 'Confirmar Compra';
                         app.closeBuyModal();
-                        return;
-                    }
-                    
-                    const myCoins = appState.currentUserData.ncoins || 0;
-                    if (myCoins < product.price) {
-                        app.showToast("NCoins insuficientes para esta transação.", "error");
-                        btn.disabled = false; btn.innerHTML = 'Confirmar Compra';
                         return;
                     }
 

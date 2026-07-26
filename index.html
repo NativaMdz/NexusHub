@@ -136,7 +136,7 @@
             scrollbar-width: none;
             position: relative;
             
-            /* Otimizações de Scroll da Main */
+            /* Otimizações Nativas de Scroll */
             will-change: scroll-position;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
@@ -206,7 +206,7 @@
         .fab:hover { transform: scale(1.05); box-shadow: 0 5px 25px rgba(176, 38, 255, 0.6); }
         .fab:active { transform: scale(0.95); }
 
-        /* POST CARDS - ALTAMENTE OTIMIZADO */
+        /* POST CARDS */
         .post-card {
             background: var(--bg-glass);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -218,23 +218,8 @@
             animation: fadeIn 0.4s ease forwards;
             cursor: pointer;
             transition: border-color 0.3s;
-            
-            /* Otimização pesada para listas longas (pula processamento) */
-            content-visibility: auto;
-            contain-intrinsic-size: auto 250px;
-            contain: layout style;
         }
         .post-card:active { border-color: rgba(0,243,255,0.3); }
-
-        /* Off-screen Observer Class - Pausa animações e GIFs quando fora da tela */
-        .post-card.off-screen .post-image,
-        .post-card.off-screen .avatar {
-            visibility: hidden;
-        }
-        .post-card.off-screen,
-        .post-card.off-screen * {
-            animation: none !important;
-        }
 
         .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0.8rem; cursor: pointer;}
         .avatar {
@@ -325,7 +310,7 @@
         .badge-vip { color: #ffd700; font-size: 0.8rem; opacity: 0.9; }
 
         .post-content { font-size: 0.92rem; line-height: 1.5; margin-bottom: 0.8rem; color: #d8d8d8; word-break: break-word; user-select: text; pointer-events: none;}
-        .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); cursor: pointer; content-visibility: auto;}
+        .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); cursor: pointer;}
 
         .post-actions { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.8rem; cursor: default;}
         .action-btn { background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: color 0.2s; }
@@ -802,7 +787,7 @@
             unsubscribeGlobalChat: null,
             unsubscribePrivateChat: null,
             
-            feedObserver: null, // Sistema de otimização de Viewport
+            feedLimit: 15, // Controle de Infinite Scroll da Viewport
             
             activeContextItem: null,
             activeContextType: null,
@@ -843,16 +828,22 @@
             init: async () => {
                 app.initParticles();
                 
-                // Configurando o Observer para Lazy Animations & Rendering (Otimização Pesada)
-                appState.feedObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.remove('off-screen');
-                        } else {
-                            entry.target.classList.add('off-screen');
+                // Lógica simples e eficaz de Infinite Scroll sem destruir componentes
+                const mainArea = document.getElementById('app-content');
+                mainArea.addEventListener('scroll', () => {
+                    if (['feed', 'perfil', 'public_profile'].includes(appState.currentView)) {
+                        if (mainArea.scrollTop + mainArea.clientHeight >= mainArea.scrollHeight - 600) {
+                            let currentTotal = appState.allPosts.length;
+                            if (appState.currentView === 'perfil') currentTotal = appState.allPosts.filter(p => p.authorUid === appState.firebaseUser.uid).length;
+                            else if (appState.currentView === 'public_profile') currentTotal = appState.allPosts.filter(p => p.authorUid === appState.currentPublicProfileUid).length;
+                            
+                            if (appState.feedLimit < currentTotal) {
+                                appState.feedLimit += 15;
+                                app.updatePostsInDOM();
+                            }
                         }
-                    });
-                }, { rootMargin: '200px 0px 200px 0px' });
+                    }
+                });
                 
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
@@ -890,7 +881,6 @@
                 });
             },
 
-            // Sistema Inteligente de Diffing (Hashes) - Reduz drasticamente carga na CPU
             generatePostHash: (post, authorData) => {
                 return `${post.id}_${post.likes ? post.likes.length : 0}_${post.comments ? post.comments.length : 0}_${post.content.length}_${post.edited ? 1 : 0}_${authorData.equippedFrame}_${authorData.name}_${authorData.avatar}`;
             },
@@ -1090,6 +1080,8 @@
                 if (appState.vipTimer) { clearInterval(appState.vipTimer); appState.vipTimer = null; }
 
                 appState.currentView = viewName;
+                if (['feed', 'perfil', 'public_profile'].includes(viewName)) appState.feedLimit = 15; // Reset de paginação
+
                 if (viewName === 'public_profile') appState.currentPublicProfileUid = additionalData;
                 
                 if (navElement && typeof navElement.classList !== 'undefined') {
@@ -1286,7 +1278,6 @@
                 contentArea.innerHTML = ''; app.updatePostsInDOM(); 
             },
             
-            // Otimização Principal: Intelligent Diffing para reduzir atualizações no DOM e Repaints
             updatePostsInDOM: () => {
                 if (!appState.usersLoaded) return;
                 const container = appState.currentView === 'feed' ? document.getElementById('app-content') : document.getElementById('user-posts-container');
@@ -1295,6 +1286,11 @@
                 let expectedPosts = [...appState.allPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 if (appState.currentView === 'perfil') expectedPosts = expectedPosts.filter(p => p.authorUid === appState.firebaseUser.uid);
                 else if (appState.currentView === 'public_profile') expectedPosts = expectedPosts.filter(p => p.authorUid === appState.currentPublicProfileUid);
+
+                // Aplicação da Paginação (Infinite Scroll suave mantendo os elementos no DOM)
+                if (['feed', 'perfil', 'public_profile'].includes(appState.currentView)) {
+                    expectedPosts = expectedPosts.slice(0, appState.feedLimit);
+                }
 
                 if (expectedPosts.length === 0) {
                     if (!container.querySelector('.placeholder-view') && appState.currentView === 'feed') {
@@ -1308,10 +1304,9 @@
 
                 const currentCards = Array.from(container.querySelectorAll('.post-card'));
                 
-                // Limpeza Otimizada: Desobservar itens removidos
+                // Remove apenas as que saíram dos dados (ou por exclusão, ou se excederem o feedLimit por algum motivo)
                 currentCards.forEach(card => {
                     if (!expectedPosts.find(p => p.id === card.dataset.id)) {
-                        if (appState.feedObserver) appState.feedObserver.unobserve(card);
                         card.remove();
                     }
                 });
@@ -1322,13 +1317,13 @@
                     const existingEl = container.querySelector(`.post-card[data-id="${post.id}"]`);
 
                     if (existingEl) {
-                        // Evita reflows caros pulando se não houve mudanças
+                        // Evita reflows caros pulando se não houve mudanças reais
                         if (existingEl.dataset.hash === currentHash) {
                             if (container.children[index] !== existingEl) container.insertBefore(existingEl, container.children[index]);
                             return; 
                         }
 
-                        // Se mudou, atualiza pontualmente (ainda sem re-renderizar bloco todo)
+                        // Se mudou, atualiza pontualmente
                         const likeBtn = existingEl.querySelector('.btn-like');
                         if (likeBtn) {
                             const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
@@ -1364,7 +1359,7 @@
                             avatarImg.className = `avatar ${app.getFrameClass(authorData)}`;
                         }
                         
-                        existingEl.dataset.hash = currentHash; // Atualiza hash
+                        existingEl.dataset.hash = currentHash; 
                         if (container.children[index] !== existingEl) container.insertBefore(existingEl, container.children[index]);
                     } else {
                         app.createPostCard(post, container, appState.currentView !== 'feed', container.children[index] || null, currentHash, authorData);
@@ -1387,7 +1382,7 @@
                 }
 
                 const article = document.createElement('article');
-                article.className = 'post-card off-screen'; // Inicializa off-screen
+                article.className = 'post-card';
                 article.dataset.id = post.id;
                 article.dataset.hash = currentHash;
                 
@@ -1396,7 +1391,6 @@
                     app.openContextMenu(post.id, 'post');
                 };
 
-                // Otimização: Adicionado loading="lazy" e decoding="async" em todas as imagens pesadas
                 article.innerHTML = `
                     <div class="post-header" onclick="app.navigate('public_profile', null, '${authorData.uid}')">
                         <img src="${authorData.avatar}" loading="lazy" decoding="async" alt="Avatar" class="avatar ${app.getFrameClass(authorData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
@@ -1420,9 +1414,6 @@
                 `;
                 
                 refNode ? container.insertBefore(article, refNode) : container.appendChild(article);
-                
-                // Ativar o observer para economia visual de CPU/GPU
-                if (appState.feedObserver) appState.feedObserver.observe(article);
             },
 
             openPostModal: () => document.getElementById('modal-post').classList.add('active'),
@@ -1617,7 +1608,6 @@
                 }
             },
 
-            // Aplicação da otimização de Hash no Chat para não quebrar a tela de comunicação
             updateChatInDOM: (messagesArray, containerId) => {
                 const container = document.getElementById(containerId);
                 if(!container) return;
@@ -1639,7 +1629,7 @@
                     const msgHash = `${msg.content.length}_${msg.edited ? 1 : 0}`;
 
                     if (existingEl) {
-                        if (existingEl.dataset.hash === msgHash) return; // Skip update! Performance boost.
+                        if (existingEl.dataset.hash === msgHash) return; 
                         
                         const textEl = existingEl.querySelector('.msg-text');
                         if (textEl && textEl.innerText !== msg.content) {
@@ -2184,7 +2174,6 @@
                 }
             },
 
-            // Otimização no Canvas: Remoção de cálculos internos redundantes
             initParticles: () => {
                 const canvas = document.getElementById('particles'), ctx = canvas.getContext('2d');
                 let particles = [];

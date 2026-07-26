@@ -246,6 +246,59 @@
             animation: neon-rgb-glow 4s linear infinite !important;
         }
 
+        /* Novas Molduras Adicionais com o Mesmo Padrão da RGB */
+        @keyframes neon-white-glow {
+            0% { border-color: #ffffff; box-shadow: 0 0 12px #ffffff; }
+            33% { border-color: rgba(255,255,255,0.7); box-shadow: 0 0 15px #ffffff; }
+            66% { border-color: #cccccc; box-shadow: 0 0 10px #ffffff; }
+            100% { border-color: #ffffff; box-shadow: 0 0 12px #ffffff; }
+        }
+        .frame_white_glow {
+            border: 2px solid #ffffff !important;
+            padding: 2px;
+            background-clip: content-box;
+            animation: neon-white-glow 4s linear infinite !important;
+        }
+
+        @keyframes neon-magenta-glow {
+            0% { border-color: var(--magenta); box-shadow: 0 0 12px var(--magenta); }
+            33% { border-color: #ff33ff; box-shadow: 0 0 15px var(--magenta); }
+            66% { border-color: #cc00cc; box-shadow: 0 0 10px var(--magenta); }
+            100% { border-color: var(--magenta); box-shadow: 0 0 12px var(--magenta); }
+        }
+        .frame_magenta_glow {
+            border: 2px solid var(--magenta) !important;
+            padding: 2px;
+            background-clip: content-box;
+            animation: neon-magenta-glow 4s linear infinite !important;
+        }
+
+        @keyframes neon-silver-glow {
+            0% { border-color: #c0c0c0; box-shadow: 0 0 12px #c0c0c0; }
+            33% { border-color: #e0e0e0; box-shadow: 0 0 15px #c0c0c0; }
+            66% { border-color: #a0a0a0; box-shadow: 0 0 10px #c0c0c0; }
+            100% { border-color: #c0c0c0; box-shadow: 0 0 12px #c0c0c0; }
+        }
+        .frame_silver_glow {
+            border: 2px solid #c0c0c0 !important;
+            padding: 2px;
+            background-clip: content-box;
+            animation: neon-silver-glow 4s linear infinite !important;
+        }
+
+        @keyframes neon-navy-glow {
+            0% { border-color: #000080; box-shadow: 0 0 12px #000080; }
+            33% { border-color: #0000ff; box-shadow: 0 0 15px #0000ff; }
+            66% { border-color: #000050; box-shadow: 0 0 10px #000080; }
+            100% { border-color: #000080; box-shadow: 0 0 12px #000080; }
+        }
+        .frame_navy_glow {
+            border: 2px solid #000080 !important;
+            padding: 2px;
+            background-clip: content-box;
+            animation: neon-navy-glow 4s linear infinite !important;
+        }
+
         .user-info { flex: 1; min-width: 0; }
         .user-info h3 { font-size: 0.95rem; margin: 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-info span { font-size: 0.78rem; color: var(--cyan); }
@@ -761,7 +814,11 @@
                 { id: 'frame_hacker_green', name: 'Hacker Core', description: 'Terminal verde bruto e direto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2200, duration: '', status: 'active' },
                 { id: 'frame_blood_red', name: 'Blood Red', description: 'Aviso de sistema crítico. Chamativo e perigoso.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2500, duration: '', status: 'active' },
                 { id: 'frame_gold_elite', name: 'Gold Elite', description: 'Moldura dourada premium para alta hierarquia.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 5000, duration: '', status: 'active' },
-                { id: 'frame_rgb_premium', name: 'Nexus RGB Premium', description: 'Moldura animada reativa. A essência do neon em seu perfil.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' }
+                { id: 'frame_rgb_premium', name: 'Nexus RGB Premium', description: 'Moldura animada reativa. A essência do neon em seu perfil.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
+                { id: 'frame_white_glow', name: 'White Glow', description: 'Brilho branco puro e suave com animação fluida.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
+                { id: 'frame_magenta_glow', name: 'Magenta Glow', description: 'Efeito neon magenta pulsante e vibrante.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
+                { id: 'frame_silver_glow', name: 'Silver Glow', description: 'Cinza metálico com brilho elegante e discreto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
+                { id: 'frame_navy_glow', name: 'Navy Glow', description: 'Azul marinho profundo, assinatura visual do Nexus.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' }
             ]
         };
 

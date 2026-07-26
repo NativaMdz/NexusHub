@@ -286,7 +286,8 @@
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
         /* === SISTEMA DE LOJA === */
-        .store-categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
+        /* CORREÇÃO: Adicionado flex-shrink: 0; para evitar que as categorias colapsem */
+        .store-categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; flex-shrink: 0; }
         .store-categories::-webkit-scrollbar { display: none; }
         .category-pill { padding: 8px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: 'Inter', sans-serif;}
         .category-pill:hover { background: rgba(255,255,255,0.08); }
@@ -606,7 +607,8 @@
     </template>
 
     <template id="tpl-ranking">
-        <div style="margin-bottom: 15px; text-align: center;">
+        <!-- CORREÇÃO: Adicionado flex-shrink: 0; para o cabeçalho não encolher em telas menores -->
+        <div style="margin-bottom: 15px; text-align: center; flex-shrink: 0;">
             <i class="fa-solid fa-ranking-star" style="font-size: 1.8rem; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 5px;"></i>
             <h2 style="color: white; margin-bottom: 3px;">Hall dos Netrunners</h2>
             <p style="color: var(--text-muted); font-size: 0.8rem;">Maiores níveis (Atualizado em tempo real)</p>
@@ -615,7 +617,8 @@
     </template>
 
     <template id="tpl-search">
-        <div class="search-container">
+        <!-- CORREÇÃO: flex-shrink adicionado na barra de pesquisa por precaução -->
+        <div class="search-container" style="flex-shrink: 0;">
             <input type="text" id="search-input" class="search-bar" placeholder="Pesquisar por @handle ou Nome..." oninput="app.performSearch()">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
         </div>
@@ -632,7 +635,8 @@
     </template>
 
     <template id="tpl-store">
-        <div style="margin-bottom: 15px; text-align: center;">
+        <!-- CORREÇÃO: Adicionado flex-shrink: 0; aqui para evitar que o título encolha para altura 0 -->
+        <div style="margin-bottom: 15px; text-align: center; flex-shrink: 0;">
             <i class="fa-solid fa-store" style="font-size: 1.8rem; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 5px;"></i>
             <h2 style="color: white; margin-bottom: 3px;">Nexus Store</h2>
             <p style="color: var(--text-muted); font-size: 0.8rem;">Melhore sua experiência no Hub</p>

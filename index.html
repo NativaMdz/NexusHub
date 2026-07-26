@@ -135,6 +135,11 @@
             flex-direction: column; 
             scrollbar-width: none;
             position: relative;
+            
+            /* Otimizações de Scroll da Main */
+            will-change: scroll-position;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
         }
         main::-webkit-scrollbar { display: none; }
 
@@ -201,7 +206,7 @@
         .fab:hover { transform: scale(1.05); box-shadow: 0 5px 25px rgba(176, 38, 255, 0.6); }
         .fab:active { transform: scale(0.95); }
 
-        /* POST CARDS */
+        /* POST CARDS - ALTAMENTE OTIMIZADO */
         .post-card {
             background: var(--bg-glass);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -213,8 +218,23 @@
             animation: fadeIn 0.4s ease forwards;
             cursor: pointer;
             transition: border-color 0.3s;
+            
+            /* Otimização pesada para listas longas (pula processamento) */
+            content-visibility: auto;
+            contain-intrinsic-size: auto 250px;
+            contain: layout style;
         }
         .post-card:active { border-color: rgba(0,243,255,0.3); }
+
+        /* Off-screen Observer Class - Pausa animações e GIFs quando fora da tela */
+        .post-card.off-screen .post-image,
+        .post-card.off-screen .avatar {
+            visibility: hidden;
+        }
+        .post-card.off-screen,
+        .post-card.off-screen * {
+            animation: none !important;
+        }
 
         .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0.8rem; cursor: pointer;}
         .avatar {
@@ -232,7 +252,6 @@
         .frame_hacker_green { border: 2px solid var(--success) !important; box-shadow: 0 0 12px var(--success) !important; padding: 2px; background-clip: content-box; }
         .frame_blood_red { border: 2px solid var(--danger) !important; box-shadow: 0 0 12px var(--danger) !important; padding: 2px; background-clip: content-box; }
         
-        /* Nova Moldura RGB Animação */
         @keyframes neon-rgb-glow {
             0% { border-color: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
             33% { border-color: var(--magenta); box-shadow: 0 0 12px var(--magenta); }
@@ -246,7 +265,6 @@
             animation: neon-rgb-glow 4s linear infinite !important;
         }
 
-        /* Novas Molduras Adicionais com o Mesmo Padrão da RGB */
         @keyframes neon-white-glow {
             0% { border-color: #ffffff; box-shadow: 0 0 12px #ffffff; }
             33% { border-color: rgba(255,255,255,0.7); box-shadow: 0 0 15px #ffffff; }
@@ -307,7 +325,7 @@
         .badge-vip { color: #ffd700; font-size: 0.8rem; opacity: 0.9; }
 
         .post-content { font-size: 0.92rem; line-height: 1.5; margin-bottom: 0.8rem; color: #d8d8d8; word-break: break-word; user-select: text; pointer-events: none;}
-        .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); cursor: pointer;}
+        .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); cursor: pointer; content-visibility: auto;}
 
         .post-actions { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.8rem; cursor: default;}
         .action-btn { background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: color 0.2s; }
@@ -340,7 +358,7 @@
         .chat-list-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; cursor: pointer; transition: background 0.2s; }
         .chat-list-item:hover { background: rgba(255,255,255,0.08); }
 
-        .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; min-height: 0; margin-bottom: 15px; scroll-behavior: smooth; }
+        .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; min-height: 0; margin-bottom: 15px; scroll-behavior: smooth; overscroll-behavior-y: contain;}
         .message { display: flex; gap: 10px; max-width: 88%; animation: fadeIn 0.3s ease; }
         .message.mine { align-self: flex-end; flex-direction: row-reverse; }
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid transparent; flex-shrink: 0; cursor: pointer;}
@@ -718,7 +736,6 @@
         <div id="public-profile-container"></div>
     </template>
 
-    <!-- Template Refinado da Store -->
     <template id="tpl-store">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-shrink: 0; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
             <div style="text-align: left; display: flex; align-items: center; gap: 12px;">
@@ -785,6 +802,8 @@
             unsubscribeGlobalChat: null,
             unsubscribePrivateChat: null,
             
+            feedObserver: null, // Sistema de otimização de Viewport
+            
             activeContextItem: null,
             activeContextType: null,
             activeContextCollection: null,
@@ -802,13 +821,11 @@
             ],
             
             catalog: [
-                // VIP (Rebalanceado)
                 { id: 'vip_7_dias', name: 'VIP 7 Dias', description: 'Desbloqueia recursos exclusivos durante sete dias na rede global.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 2500, duration: '7 Dias', durationDays: 7, status: 'active' },
                 { id: 'vip_30_dias', name: 'VIP 30 Dias', description: 'Benefícios VIP estendidos. Conexão prioritária garantida.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 8000, duration: '30 Dias', durationDays: 30, status: 'active' },
                 { id: 'vip_anual', name: 'VIP Anual', description: 'Domine a malha neural com benefícios premium por um ano inteiro.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 35000, duration: '365 Dias', durationDays: 365, status: 'active' },
                 { id: 'vip_permanente', name: 'VIP Permanente', description: 'O nível máximo de acesso à rede. Desbloqueio vitalício de todos os recursos.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 45000, duration: 'Vitalício', durationDays: null, status: 'active' },
                 
-                // MOLDURAS
                 { id: 'frame_neon_cyan', name: 'Neon Ciano', description: 'Borda brilhante com assinatura cibernética clássica.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 1500, duration: '', status: 'active' },
                 { id: 'frame_cyber_purple', name: 'Cyber Roxo', description: 'Aura roxa pulsante da malha profunda.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2000, duration: '', status: 'active' },
                 { id: 'frame_hacker_green', name: 'Hacker Core', description: 'Terminal verde bruto e direto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2200, duration: '', status: 'active' },
@@ -825,6 +842,17 @@
         const app = {
             init: async () => {
                 app.initParticles();
+                
+                // Configurando o Observer para Lazy Animations & Rendering (Otimização Pesada)
+                appState.feedObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.remove('off-screen');
+                        } else {
+                            entry.target.classList.add('off-screen');
+                        }
+                    });
+                }, { rootMargin: '200px 0px 200px 0px' });
                 
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
@@ -862,6 +890,11 @@
                 });
             },
 
+            // Sistema Inteligente de Diffing (Hashes) - Reduz drasticamente carga na CPU
+            generatePostHash: (post, authorData) => {
+                return `${post.id}_${post.likes ? post.likes.length : 0}_${post.comments ? post.comments.length : 0}_${post.content.length}_${post.edited ? 1 : 0}_${authorData.equippedFrame}_${authorData.name}_${authorData.avatar}`;
+            },
+
             getVIPInfo: (user = appState.currentUserData) => {
                 if (!user || !user.vip) return { isActive: false, status: 'Nenhum' };
                 
@@ -897,7 +930,6 @@
                         const user = appState.currentUserData;
                         const defaultAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${appState.firebaseUser.uid}`;
 
-                        // Restauração Automática das Imagens
                         if (user.avatar && user.avatar.includes('data:image/gif')) {
                             updates.avatar = user.staticAvatarFallback || defaultAvatar;
                         }
@@ -1000,7 +1032,7 @@
                     else if (appState.currentView === 'search') app.performSearch();
                     else if (appState.currentView === 'store') { 
                         app.updateStoreCoins(); 
-                        app.renderStoreProducts(); // Atualização Imediata (Real-time Loja)
+                        app.renderStoreProducts();
                     }
                     
                     if (appState.currentView === 'feed') app.updatePostsInDOM();
@@ -1254,6 +1286,7 @@
                 contentArea.innerHTML = ''; app.updatePostsInDOM(); 
             },
             
+            // Otimização Principal: Intelligent Diffing para reduzir atualizações no DOM e Repaints
             updatePostsInDOM: () => {
                 if (!appState.usersLoaded) return;
                 const container = appState.currentView === 'feed' ? document.getElementById('app-content') : document.getElementById('user-posts-container');
@@ -1274,13 +1307,28 @@
                 if (placeholder) placeholder.remove();
 
                 const currentCards = Array.from(container.querySelectorAll('.post-card'));
+                
+                // Limpeza Otimizada: Desobservar itens removidos
                 currentCards.forEach(card => {
-                    if (!expectedPosts.find(p => p.id === card.dataset.id)) card.remove();
+                    if (!expectedPosts.find(p => p.id === card.dataset.id)) {
+                        if (appState.feedObserver) appState.feedObserver.unobserve(card);
+                        card.remove();
+                    }
                 });
 
                 expectedPosts.forEach((post, index) => {
+                    const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
+                    const currentHash = app.generatePostHash(post, authorData);
                     const existingEl = container.querySelector(`.post-card[data-id="${post.id}"]`);
+
                     if (existingEl) {
+                        // Evita reflows caros pulando se não houve mudanças
+                        if (existingEl.dataset.hash === currentHash) {
+                            if (container.children[index] !== existingEl) container.insertBefore(existingEl, container.children[index]);
+                            return; 
+                        }
+
+                        // Se mudou, atualiza pontualmente (ainda sem re-renderizar bloco todo)
                         const likeBtn = existingEl.querySelector('.btn-like');
                         if (likeBtn) {
                             const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
@@ -1295,7 +1343,6 @@
                             contentEl.innerHTML = post.content.replace(/\n/g, '<br>');
                         }
                         
-                        const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
                         const userInfoSpan = existingEl.querySelector('.user-info span');
                         if (userInfoSpan) {
                             const dateObj = new Date(post.createdAt);
@@ -1317,14 +1364,15 @@
                             avatarImg.className = `avatar ${app.getFrameClass(authorData)}`;
                         }
                         
+                        existingEl.dataset.hash = currentHash; // Atualiza hash
                         if (container.children[index] !== existingEl) container.insertBefore(existingEl, container.children[index]);
                     } else {
-                        app.createPostCard(post, container, appState.currentView !== 'feed', container.children[index] || null);
+                        app.createPostCard(post, container, appState.currentView !== 'feed', container.children[index] || null, currentHash, authorData);
                     }
                 });
             },
 
-            createPostCard: (post, container, isProfileView = false, refNode = null) => {
+            createPostCard: (post, container, isProfileView = false, refNode = null, currentHash, authorData) => {
                 const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
                 const dateObj = new Date(post.createdAt);
                 const timeStr = dateObj.toLocaleDateString('pt-BR') + ' ' + String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
@@ -1332,7 +1380,6 @@
                 
                 const isMyPost = post.authorUid === appState.firebaseUser.uid;
                 const isAdmin = appState.currentUserData.role === 'admin';
-                const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
                 
                 let extraActions = '';
                 if (isMyPost || isAdmin) {
@@ -1340,24 +1387,26 @@
                 }
 
                 const article = document.createElement('article');
-                article.className = 'post-card';
+                article.className = 'post-card off-screen'; // Inicializa off-screen
                 article.dataset.id = post.id;
+                article.dataset.hash = currentHash;
                 
                 article.onclick = (e) => {
                     if (e.target.closest('.post-header') || e.target.closest('.post-actions') || e.target.closest('.post-image') || e.target.tagName.toLowerCase() === 'img') return;
                     app.openContextMenu(post.id, 'post');
                 };
 
+                // Otimização: Adicionado loading="lazy" e decoding="async" em todas as imagens pesadas
                 article.innerHTML = `
                     <div class="post-header" onclick="app.navigate('public_profile', null, '${authorData.uid}')">
-                        <img src="${authorData.avatar}" alt="Avatar" class="avatar ${app.getFrameClass(authorData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                        <img src="${authorData.avatar}" loading="lazy" decoding="async" alt="Avatar" class="avatar ${app.getFrameClass(authorData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                         <div class="user-info">
                             <h3>${authorData.name} ${app.getUserBadges(authorData)}</h3>
                             <span>${authorData.handle} • ${timeStr}${editedHtml}</span>
                         </div>
                     </div>
                     <p class="post-content">${post.content.replace(/\n/g, '<br>')}</p>
-                    ${post.image ? `<img src="${post.image}" class="post-image" alt="Anexo">` : ''}
+                    ${post.image ? `<img src="${post.image}" loading="lazy" decoding="async" class="post-image" alt="Anexo">` : ''}
                     <div class="post-actions">
                         <button class="action-btn btn-like ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
                             <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i> <span class="like-count">${post.likes ? post.likes.length : 0}</span>
@@ -1371,6 +1420,9 @@
                 `;
                 
                 refNode ? container.insertBefore(article, refNode) : container.appendChild(article);
+                
+                // Ativar o observer para economia visual de CPU/GPU
+                if (appState.feedObserver) appState.feedObserver.observe(article);
             },
 
             openPostModal: () => document.getElementById('modal-post').classList.add('active'),
@@ -1510,7 +1562,7 @@
                     div.style = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-size: 0.85rem; animation: fadeIn 0.3s ease;";
                     
                     let delBtn = (c.authorUid === appState.firebaseUser.uid || appState.currentUserData.role === 'admin') ? `<i class="fa-solid fa-trash" style="color:var(--danger); float:right; cursor:pointer;" onclick="app.deleteComment('${postId}', '${c.id}')"></i>` : '';
-                    div.innerHTML = `${delBtn}<div style="display:flex; gap:8px; align-items:center; margin-bottom:5px;"><img src="${author.avatar}" class="avatar ${app.getFrameClass(author)}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border-width: 1px !important; padding: 1px !important;"><span style="color:var(--cyan); font-weight:bold;">${author.name} ${app.getUserBadges(author)}</span></div><div style="padding-left:32px;">${c.text}</div>`;
+                    div.innerHTML = `${delBtn}<div style="display:flex; gap:8px; align-items:center; margin-bottom:5px;"><img src="${author.avatar}" loading="lazy" decoding="async" class="avatar ${app.getFrameClass(author)}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border-width: 1px !important; padding: 1px !important;"><span style="color:var(--cyan); font-weight:bold;">${author.name} ${app.getUserBadges(author)}</span></div><div style="padding-left:32px;">${c.text}</div>`;
                     list.appendChild(div);
                 });
                 if (post.comments.slice(startingIndex).length > 0) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
@@ -1565,6 +1617,7 @@
                 }
             },
 
+            // Aplicação da otimização de Hash no Chat para não quebrar a tela de comunicação
             updateChatInDOM: (messagesArray, containerId) => {
                 const container = document.getElementById(containerId);
                 if(!container) return;
@@ -1582,14 +1635,19 @@
                     const dateObj = new Date(msg.createdAt);
                     const timeStr = String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0');
                     const editedHtml = msg.edited ? `<span class="edited-tag">(editado)</span>` : '';
+                    
+                    const msgHash = `${msg.content.length}_${msg.edited ? 1 : 0}`;
 
                     if (existingEl) {
+                        if (existingEl.dataset.hash === msgHash) return; // Skip update! Performance boost.
+                        
                         const textEl = existingEl.querySelector('.msg-text');
                         if (textEl && textEl.innerText !== msg.content) {
                             textEl.innerText = msg.content;
                             const timeEl = existingEl.querySelector('.msg-time');
                             if (timeEl) timeEl.innerHTML = `${timeStr}${editedHtml}`;
                         }
+                        existingEl.dataset.hash = msgHash;
                     } else {
                         const isMine = msg.authorUid === appState.firebaseUser.uid;
                         const author = appState.allUsers.find(u => u.uid === msg.authorUid) || {name: 'Netrunner', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=x'};
@@ -1607,8 +1665,9 @@
                         const div = document.createElement('div');
                         div.className = `message ${isMine ? 'mine' : ''}`;
                         div.id = `msg-${msg.id}`;
+                        div.dataset.hash = msgHash;
                         div.innerHTML = `
-                            ${!isMine ? `<img src="${author.avatar}" class="msg-avatar ${app.getFrameClass(author)}" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
+                            ${!isMine ? `<img src="${author.avatar}" loading="lazy" decoding="async" class="msg-avatar ${app.getFrameClass(author)}" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
                             <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
                                 ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
@@ -1651,7 +1710,7 @@
                     div.className = 'chat-list-item';
                     div.onclick = () => app.startPrivateChat(uid);
                     div.innerHTML = `
-                        <img src="${user.avatar}" class="avatar ${app.getFrameClass(user)}" style="width: 44px; height: 44px;">
+                        <img src="${user.avatar}" loading="lazy" decoding="async" class="avatar ${app.getFrameClass(user)}" style="width: 44px; height: 44px;">
                         <div class="user-info">
                             <h3>${user.name} ${app.getUserBadges(user)}</h3>
                             <span style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span>
@@ -1719,7 +1778,7 @@
                         <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
                         <div class="profile-header">
                             <div class="profile-avatar-container">
-                                <img src="${userData.avatar}" alt="Avatar" class="profile-avatar ${app.getFrameClass(userData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                                <img src="${userData.avatar}" loading="lazy" decoding="async" alt="Avatar" class="profile-avatar ${app.getFrameClass(userData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                                 ${isMe && !isPublic ? `<div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto"><i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i></div><input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">` : ''}
                             </div>
                             <h2 class="profile-name">${userData.name} ${app.getUserBadges(userData)}</h2>
@@ -1792,11 +1851,10 @@
                     const isGif = base64.includes('data:image/gif');
                     const updates = { avatar: base64 };
                     
-                    // Lógica de Backup (Fallback)
                     if (!isGif) {
-                        updates.staticAvatarFallback = base64; // Atualiza o fallback para o novo estático
+                        updates.staticAvatarFallback = base64; 
                     } else if (!appState.currentUserData.staticAvatarFallback) {
-                        updates.staticAvatarFallback = appState.currentUserData.avatar; // Primeira vez de GIF salva o atual
+                        updates.staticAvatarFallback = appState.currentUserData.avatar; 
                     }
 
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates); 
@@ -1856,7 +1914,6 @@
                     if (appState.tempBase64Banner) {
                         updates.banner = appState.tempBase64Banner;
                         
-                        // Lógica de Backup (Fallback)
                         const isGif = appState.tempBase64Banner.includes('data:image/gif');
                         if (!isGif) {
                             updates.staticBannerFallback = appState.tempBase64Banner;
@@ -1885,7 +1942,7 @@
                 results.forEach(u => {
                     const div = document.createElement('div');
                     div.className = 'rank-card';
-                    div.innerHTML = `<img src="${u.avatar}" class="avatar ${app.getFrameClass(u)}" style="width: 44px; height: 44px;"><div class="rank-info"><h4>${u.name} ${app.getUserBadges(u)}</h4><span>${u.handle}</span></div><button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>`;
+                    div.innerHTML = `<img src="${u.avatar}" loading="lazy" class="avatar ${app.getFrameClass(u)}" style="width: 44px; height: 44px;"><div class="rank-info"><h4>${u.name} ${app.getUserBadges(u)}</h4><span>${u.handle}</span></div><button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>`;
                     container.appendChild(div);
                 });
             },
@@ -1896,7 +1953,7 @@
                 [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50).forEach((u, idx) => {
                     const div = document.createElement('div');
                     div.className = 'rank-card'; div.onclick = () => app.navigate('public_profile', null, u.uid);
-                    div.innerHTML = `<div class="rank-pos">#${idx + 1}</div><img src="${u.avatar}" class="avatar ${app.getFrameClass(u)}" style="width: 38px; height: 38px;"><div class="rank-info"><h4>${u.name} ${app.getUserBadges(u)}</h4><span>${u.handle} • Nível ${u.level || 1}</span></div><div class="rank-score">${u.xp || 0} XP</div>`;
+                    div.innerHTML = `<div class="rank-pos">#${idx + 1}</div><img src="${u.avatar}" loading="lazy" class="avatar ${app.getFrameClass(u)}" style="width: 38px; height: 38px;"><div class="rank-info"><h4>${u.name} ${app.getUserBadges(u)}</h4><span>${u.handle} • Nível ${u.level || 1}</span></div><div class="rank-score">${u.xp || 0} XP</div>`;
                     container.appendChild(div);
                 });
             },
@@ -1910,7 +1967,7 @@
                 setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
             },
             
-            // --- SISTEMA DE LOJA & VIP (Totalmente Refinado) ---
+            // --- SISTEMA DE LOJA & VIP ---
             updateStoreCoins: () => {
                 const coinsEl = document.getElementById('store-user-coins');
                 if (coinsEl && appState.currentUserData) {
@@ -1964,7 +2021,6 @@
                     let durationHtml = prod.duration ? `<div class="product-duration">${prod.duration}</div>` : '';
                     let buttonHtml = `<button class="btn-buy" onclick="event.stopPropagation(); app.openBuyModal('${prod.id}')">Comprar</button>`;
 
-                    // Verificações e Travas Visuais
                     if (isOwned) {
                         card.classList.add('owned');
                         buttonHtml = `<button class="btn-buy" disabled style="background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: transparent; opacity: 1;"><i class="fa-solid fa-check"></i> Comprado</button>`;
@@ -1975,7 +2031,6 @@
                             card.style.borderColor = 'var(--cyan)';
                             card.style.boxShadow = '0 0 15px rgba(0, 243, 255, 0.2)';
                             
-                            // Swap da Duração para o Countdown (mantém alinhamento igual aos outros cards)
                             if (vipInfo.expiresAt) {
                                 durationHtml = `<div id="vip-countdown-${prod.id}" class="vip-countdown product-duration" data-expires="${vipInfo.expiresAt}" style="color: var(--success); font-weight: bold; margin-bottom: 8px;">Calculando...</div>`;
                             } else {
@@ -1997,9 +2052,8 @@
                         card.onclick = () => app.openBuyModal(prod.id);
                     }
                     
-                    const iconOrImg = prod.image ? `<img src="${prod.image}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<i class="${prod.icon}"></i>`;
+                    const iconOrImg = prod.image ? `<img src="${prod.image}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<i class="${prod.icon}"></i>`;
                     
-                    // Estrutura interna garante que o botão fique no bottom e a altura não quebre
                     card.innerHTML = `
                         <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
                             <div class="product-img-container" style="${isOwned ? 'opacity:0.5;' : ''}">${iconOrImg}</div>
@@ -2029,7 +2083,7 @@
                     if (diff <= 0) {
                         el.innerText = "Expirado";
                         if (appState.currentUserData.vip?.active) {
-                            app.checkAndExpireVIP(); // Auto-expiração e restauração instantânea
+                            app.checkAndExpireVIP();
                         }
                         return;
                     }
@@ -2130,22 +2184,49 @@
                 }
             },
 
+            // Otimização no Canvas: Remoção de cálculos internos redundantes
             initParticles: () => {
                 const canvas = document.getElementById('particles'), ctx = canvas.getContext('2d');
                 let particles = [];
                 function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; const count = Math.max(60, Math.min(Math.floor((canvas.width * canvas.height) / 6000), 140)); for (let i = 0; i < count; i++) particles.push(new Particle()); }
                 window.addEventListener('resize', resize);
                 const colors = [{ r: 0, g: 243, b: 255 }, { r: 255, g: 0, b: 255 }, { r: 176, g: 38, b: 255 }];
+                
                 class Particle {
                     constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.z = Math.random() * 0.8 + 0.2; this.size = (Math.random() * 2.5 + 1.2) * this.z; const sf = (Math.random() * 0.5 + 0.15) * this.z; this.speedX = (Math.random() - 0.5) * sf; this.speedY = (Math.random() - 0.5) * sf; this.color = colors[Math.floor(Math.random() * colors.length)]; this.alpha = (Math.random() * 0.7 + 0.5) * this.z; this.alphaChange = (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1); }
-                    update() { this.x += this.speedX; this.y += this.speedY; if (this.x > canvas.width + 10) this.x = -10; else if (this.x < -10) this.x = canvas.width + 10; if (this.y > canvas.height + 10) this.y = -10; else if (this.y < -10) this.y = canvas.height + 10; this.alpha += this.alphaChange; if (this.alpha <= 0.25 || this.alpha >= (1.2 * this.z)) this.alphaChange *= -1; }
+                    update(cw, ch) { this.x += this.speedX; this.y += this.speedY; if (this.x > cw + 10) this.x = -10; else if (this.x < -10) this.x = cw + 10; if (this.y > ch + 10) this.y = -10; else if (this.y < -10) this.y = ch + 10; this.alpha += this.alphaChange; if (this.alpha <= 0.25 || this.alpha >= (1.2 * this.z)) this.alphaChange *= -1; }
                     draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 1.5})`; ctx.fill(); }
                 }
+
                 function animate() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.globalCompositeOperation = 'screen';
-                    for (let i = 0; i < particles.length; i++) { for (let j = i + 1; j < particles.length; j++) { if (Math.abs(particles[i].z - particles[j].z) > 0.3) continue; const distSq = Math.pow(particles[i].x - particles[j].x, 2) + Math.pow(particles[i].y - particles[j].y, 2); if (distSq < 12100) { ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.strokeStyle = `rgba(${particles[i].color.r}, ${particles[i].color.g}, ${particles[i].color.b}, ${Math.min(1, (1 - (Math.sqrt(distSq) / 110)) * ((particles[i].alpha + particles[j].alpha) / 1.2))})`; ctx.lineWidth = 1.4 * ((particles[i].z + particles[j].z) / 2); ctx.stroke(); } } }
-                    particles.forEach(p => { p.update(); p.draw(); }); ctx.globalCompositeOperation = 'source-over'; requestAnimationFrame(animate);
+                    const cw = canvas.width;
+                    const ch = canvas.height;
+                    
+                    ctx.clearRect(0, 0, cw, ch); 
+                    ctx.globalCompositeOperation = 'screen';
+                    
+                    for (let i = 0; i < particles.length; i++) { 
+                        for (let j = i + 1; j < particles.length; j++) { 
+                            if (Math.abs(particles[i].z - particles[j].z) > 0.3) continue; 
+                            
+                            const distSq = Math.pow(particles[i].x - particles[j].x, 2) + Math.pow(particles[i].y - particles[j].y, 2); 
+                            
+                            if (distSq < 12100) { 
+                                ctx.beginPath(); 
+                                ctx.moveTo(particles[i].x, particles[i].y); 
+                                ctx.lineTo(particles[j].x, particles[j].y); 
+                                ctx.strokeStyle = `rgba(${particles[i].color.r}, ${particles[i].color.g}, ${particles[i].color.b}, ${Math.min(1, (1 - (Math.sqrt(distSq) / 110)) * ((particles[i].alpha + particles[j].alpha) / 1.2))})`; 
+                                ctx.lineWidth = 1.4 * ((particles[i].z + particles[j].z) / 2); 
+                                ctx.stroke(); 
+                            } 
+                        } 
+                    }
+                    
+                    particles.forEach(p => { p.update(cw, ch); p.draw(); }); 
+                    ctx.globalCompositeOperation = 'source-over'; 
+                    requestAnimationFrame(animate);
                 }
+                
                 resize(); animate();
             }
         };

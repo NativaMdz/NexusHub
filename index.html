@@ -645,7 +645,8 @@
             activeContextItem: null,
             activeContextType: null,
             activeContextCollection: null,
-            replyingTo: null
+            replyingTo: null,
+            usersLoaded: false
         };
 
         const app = {
@@ -740,16 +741,10 @@
                 document.getElementById('app-container').style.display = 'flex';
                 if (appState.currentUserData.role === 'admin') document.getElementById('admin-icon').style.display = 'inline-block';
 
-                if (appState.unsubscribePosts) appState.unsubscribePosts();
-                appState.unsubscribePosts = onSnapshot(colPosts, (snap) => {
-                    appState.allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                    if (['feed', 'perfil', 'public_profile'].includes(appState.currentView)) app.updatePostsInDOM(); 
-                    if (appState.activeCommentPostId) app.updateCommentsInDOM(appState.activeCommentPostId);
-                });
-
                 if (appState.unsubscribeUsers) appState.unsubscribeUsers();
                 appState.unsubscribeUsers = onSnapshot(colUsers, (snap) => {
                     appState.allUsers = snap.docs.map(d => d.data());
+                    appState.usersLoaded = true;
                     const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
                     if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
 
@@ -773,6 +768,13 @@
                             }
                         });
                     }
+                });
+
+                if (appState.unsubscribePosts) appState.unsubscribePosts();
+                appState.unsubscribePosts = onSnapshot(colPosts, (snap) => {
+                    appState.allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    if (['feed', 'perfil', 'public_profile'].includes(appState.currentView)) app.updatePostsInDOM(); 
+                    if (appState.activeCommentPostId) app.updateCommentsInDOM(appState.activeCommentPostId);
                 });
 
                 if (appState.unsubscribeGlobalChat) appState.unsubscribeGlobalChat();
@@ -1001,6 +1003,7 @@
             },
             
             updatePostsInDOM: () => {
+                if (!appState.usersLoaded) return;
                 const container = appState.currentView === 'feed' ? document.getElementById('app-content') : document.getElementById('user-posts-container');
                 if (!container) return;
 

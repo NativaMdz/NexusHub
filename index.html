@@ -211,7 +211,7 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             animation: fadeIn 0.4s ease forwards;
-            cursor: pointer; /* Indicar clicável */
+            cursor: pointer;
             transition: border-color 0.3s;
         }
         .post-card:active { border-color: rgba(0,243,255,0.3); }
@@ -230,6 +230,7 @@
         .user-info span { font-size: 0.78rem; color: var(--cyan); }
         
         .badge-verified { color: var(--cyan); font-size: 0.8rem; }
+        .badge-vip { color: #ffd700; font-size: 0.8rem; opacity: 0.9; }
 
         .post-content { font-size: 0.92rem; line-height: 1.5; margin-bottom: 0.8rem; color: #d8d8d8; word-break: break-word; user-select: text; pointer-events: none;}
         .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-bottom: 0.8rem; border: 1px solid rgba(0, 243, 255, 0.25); cursor: pointer;}
@@ -368,8 +369,6 @@
         .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; text-align: center; color: var(--text-muted); animation: fadeIn 0.4s ease; }
         .placeholder-view i { font-size: 2.8rem; color: var(--purple); margin-bottom: 1rem; text-shadow: 0 0 15px var(--purple); }
 
-        /* === NOVAS FUNCIONALIDADES: INTERAÇÕES, RESPONDER E EDIÇÃO === */
-        
         /* Menu Contextual (Bottom Sheet) */
         .bottom-sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 600px; background: rgba(10, 10, 15, 0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--purple); border-radius: 20px 20px 0 0; z-index: 101; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding-bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,0.8); }
         .modal-overlay.active .bottom-sheet { transform: translateX(-50%) translateY(0); }
@@ -397,7 +396,6 @@
         /* Tag de Edição Discreta */
         .edited-tag { font-size: 0.65rem; color: var(--text-muted); font-style: italic; opacity: 0.8; margin-left: 6px; font-weight: normal; }
 
-        /* Animação de Destaque (Highlight) ao clicar numa resposta */
         @keyframes flashHighlight { 0% { background-color: rgba(0, 243, 255, 0.4); box-shadow: 0 0 15px var(--cyan); } 100% { background-color: rgba(255,255,255,0.06); box-shadow: none; } }
         @keyframes flashHighlightMine { 0% { background-color: rgba(0, 243, 255, 0.5); box-shadow: 0 0 15px var(--cyan); } 100% { background-color: rgba(0, 243, 255, 0.12); box-shadow: none; } }
         .highlighted-msg { animation: flashHighlight 2s ease-out forwards !important; }
@@ -527,18 +525,13 @@
     </div>
 
     <!-- Modais de Interação Novos -->
-    
-    <!-- Modal: Menu de Contexto (Bottom Sheet) -->
     <div class="modal-overlay" id="modal-context-menu" onclick="if(event.target===this) app.closeContextMenu()">
         <div class="bottom-sheet">
             <div style="width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 10px auto 15px;"></div>
-            <div id="context-menu-content">
-                <!-- Injetado dinamicamente via JS -->
-            </div>
+            <div id="context-menu-content"></div>
         </div>
     </div>
 
-    <!-- Modal: Editar Texto -->
     <div class="modal-overlay" id="modal-edit-text">
         <div class="modal-content">
             <div class="modal-header">
@@ -556,7 +549,6 @@
         </div>
     </div>
 
-    <!-- Modal: Compra de Item (Loja) -->
     <div class="modal-overlay" id="modal-buy">
         <div class="modal-content" style="max-width: 380px;">
             <div class="modal-header">
@@ -594,7 +586,6 @@
             <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
             <div class="chat-messages" id="chat-private-container" style="display:none;"></div>
 
-            <!-- Área unificada de Input com Preview de Resposta -->
             <div style="flex-shrink: 0; width: 100%;">
                 <div id="reply-preview-container">
                     <div class="reply-preview-content">
@@ -692,14 +683,12 @@
             unsubscribeGlobalChat: null,
             unsubscribePrivateChat: null,
             
-            // --- Variáveis de Interação com Mensagens ---
             activeContextItem: null,
             activeContextType: null,
             activeContextCollection: null,
             replyingTo: null,
             usersLoaded: false,
 
-            // --- Variáveis da Loja ---
             activeStoreCategory: 'vip',
             selectedProduct: null,
             storeCategories: [
@@ -712,18 +701,12 @@
                 { id: 'themes', name: 'Temas' },
                 { id: 'special', name: 'Itens Especiais' }
             ],
+            // Catálogo expandido com planos VIP e suas durações em dias
             catalog: [
-                {
-                    id: 'vip_7_dias',
-                    name: 'VIP 7 Dias',
-                    description: 'Desbloqueia recursos exclusivos durante sete dias.',
-                    category: 'vip',
-                    icon: 'fa-solid fa-crown',
-                    image: '',
-                    price: 500,
-                    duration: '7 Dias',
-                    status: 'active'
-                }
+                { id: 'vip_7_dias', name: 'VIP 7 Dias', description: 'Desbloqueia recursos exclusivos durante sete dias na rede global.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 500, duration: '7 Dias', durationDays: 7, status: 'active' },
+                { id: 'vip_30_dias', name: 'VIP 30 Dias', description: 'Benefícios VIP estendidos. Conexão prioritária garantida.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 1800, duration: '30 Dias', durationDays: 30, status: 'active' },
+                { id: 'vip_anual', name: 'VIP Anual', description: 'Domine a malha neural com benefícios premium por um ano inteiro.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 15000, duration: '365 Dias', durationDays: 365, status: 'active' },
+                { id: 'vip_permanente', name: 'VIP Permanente', description: 'O nível máximo de acesso à rede. Desbloqueio vitalício de todos os recursos.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 45000, duration: 'Vitalício', durationDays: null, status: 'active' }
             ]
         };
 
@@ -763,6 +746,50 @@
                     }
                 });
             },
+
+            // --- SISTEMA CENTRAL VIP ---
+            getVIPInfo: (user = appState.currentUserData) => {
+                if (!user || !user.vip) return { isActive: false, status: 'Nenhum' };
+                
+                const now = new Date();
+                const expires = user.vip.expiresAt ? new Date(user.vip.expiresAt) : null;
+
+                if (user.vip.active) {
+                    if (expires && now > expires) {
+                        return { isActive: false, status: 'Expirado', planId: user.vip.planId };
+                    }
+                    const timeRemainingMs = expires ? expires - now : Infinity;
+                    const daysRemaining = expires ? Math.ceil(timeRemainingMs / (1000 * 60 * 60 * 24)) : 'Permanente';
+                    
+                    return {
+                        isActive: true,
+                        status: 'Ativo',
+                        planId: user.vip.planId,
+                        expiresAt: user.vip.expiresAt,
+                        activatedAt: user.vip.activatedAt,
+                        daysRemaining: daysRemaining
+                    };
+                }
+                return { isActive: false, status: 'Expirado', planId: user.vip.planId };
+            },
+
+            checkAndExpireVIP: async () => {
+                if (!appState.currentUserData) return;
+                const vipInfo = app.getVIPInfo(appState.currentUserData);
+                
+                // Se no banco consta como ativo, mas a checagem diz que o tempo acabou:
+                if (appState.currentUserData.vip && appState.currentUserData.vip.active && !vipInfo.isActive) {
+                    try {
+                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), {
+                            'vip.active': false
+                        });
+                        app.showToast("Sua assinatura VIP expirou.", "info");
+                    } catch (e) {
+                        console.error("Erro na expiração do VIP", e);
+                    }
+                }
+            },
+            // ---------------------------
 
             loginEmail: async () => {
                 const email = document.getElementById('auth-email').value;
@@ -818,13 +845,20 @@
                 document.getElementById('auth-setup').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
                 if (appState.currentUserData.role === 'admin') document.getElementById('admin-icon').style.display = 'inline-block';
+                
+                // Checa automaticamente se o VIP expirou no momento do login inicial
+                app.checkAndExpireVIP();
 
                 if (appState.unsubscribeUsers) appState.unsubscribeUsers();
                 appState.unsubscribeUsers = onSnapshot(colUsers, (snap) => {
                     appState.allUsers = snap.docs.map(d => d.data());
                     appState.usersLoaded = true;
+                    
                     const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
-                    if (myUpdatedProfile) appState.currentUserData = myUpdatedProfile;
+                    if (myUpdatedProfile) {
+                        appState.currentUserData = myUpdatedProfile;
+                        app.checkAndExpireVIP(); // Mantém checagem rodando a cada atualização de perfil
+                    }
 
                     if (['perfil', 'public_profile'].includes(appState.currentView)) app.updateProfileInDOM();
                     else if (appState.currentView === 'ranking') app.renderRanking();
@@ -880,7 +914,7 @@
             },
 
             navigate: (viewName, navElement = null, additionalData = null) => {
-                app.cancelReply(); // Limpa estado de resposta ao navegar
+                app.cancelReply(); 
                 
                 appState.currentView = viewName;
                 if (viewName === 'public_profile') appState.currentPublicProfileUid = additionalData;
@@ -928,8 +962,6 @@
                     app.renderStoreProducts();
                 }
             },
-
-            // --- FUNÇÕES DE INTERAÇÃO (CONTEXTO, EDIÇÃO, RESPOSTA, APAGAR) ---
 
             openContextMenu: (itemId, type) => {
                 let item = null;
@@ -1067,7 +1099,7 @@
             },
 
             scrollToMessage: (msgId, event) => {
-                if(event) event.stopPropagation(); // Previne abertura do menu contexto
+                if(event) event.stopPropagation();
                 const el = document.getElementById(`msg-${msgId}`);
                 if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1078,8 +1110,6 @@
                     app.showToast("Mensagem original não disponível na malha local.", "info");
                 }
             },
-
-            // --- SISTEMA DE FEED E POSTS ---
 
             renderFeed: () => {
                 const contentArea = document.getElementById('app-content');
@@ -1122,7 +1152,6 @@
                         const commentBtn = existingEl.querySelector('.btn-comment');
                         if (commentBtn) commentBtn.innerHTML = `<i class="fa-regular fa-comment"></i> <span class="comment-count">${post.comments ? post.comments.length : 0}</span>`;
 
-                        // Diffing de conteúdo e TAG de editado
                         const contentEl = existingEl.querySelector('.post-content');
                         if (contentEl && contentEl.innerHTML !== post.content.replace(/\n/g, '<br>')) {
                             contentEl.innerHTML = post.content.replace(/\n/g, '<br>');
@@ -1136,6 +1165,16 @@
                             const editedHtml = post.edited ? `<span class="edited-tag">(editado)</span>` : '';
                             const newHTML = `${authorData.handle} • ${timeStr}${editedHtml}`;
                             if (userInfoSpan.innerHTML !== newHTML) userInfoSpan.innerHTML = newHTML;
+                        }
+
+                        // Atualiza a visualização do header e badges VIP/Admin para postagens existentes
+                        const h3El = existingEl.querySelector('.user-info h3');
+                        if (h3El) {
+                            const authorVIP = app.getVIPInfo(authorData);
+                            const adminBadgeHtml = authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
+                            const vipBadgeHtml = authorVIP.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP"></i>` : '';
+                            const expectedH3Html = `${authorData.name} ${adminBadgeHtml} ${vipBadgeHtml}`;
+                            if (h3El.innerHTML !== expectedH3Html) h3El.innerHTML = expectedH3Html;
                         }
 
                         const avatarImg = existingEl.querySelector('.avatar');
@@ -1157,6 +1196,10 @@
                 const isMyPost = post.authorUid === appState.firebaseUser.uid;
                 const isAdmin = appState.currentUserData.role === 'admin';
                 const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
+                
+                const authorVIP = app.getVIPInfo(authorData);
+                const adminBadgeHtml = authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
+                const vipBadgeHtml = authorVIP.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP"></i>` : '';
 
                 let extraActions = '';
                 if (isMyPost || isAdmin) {
@@ -1167,7 +1210,6 @@
                 article.className = 'post-card';
                 article.dataset.id = post.id;
                 
-                // Dispara o menu contextual apenas se clicar fora de áreas interativas (header, ações, imagem)
                 article.onclick = (e) => {
                     if (e.target.closest('.post-header') || e.target.closest('.post-actions') || e.target.closest('.post-image') || e.target.tagName.toLowerCase() === 'img') return;
                     app.openContextMenu(post.id, 'post');
@@ -1177,7 +1219,7 @@
                     <div class="post-header" onclick="app.navigate('public_profile', null, '${authorData.uid}')">
                         <img src="${authorData.avatar}" alt="Avatar" class="avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                         <div class="user-info">
-                            <h3>${authorData.name} ${authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h3>
+                            <h3>${authorData.name} ${adminBadgeHtml} ${vipBadgeHtml}</h3>
                             <span>${authorData.handle} • ${timeStr}${editedHtml}</span>
                         </div>
                     </div>
@@ -1277,7 +1319,6 @@
                 } catch (e) {}
             },
 
-            // --- COMENTÁRIOS ---
             openComments: (postId) => {
                 appState.activeCommentPostId = postId;
                 document.getElementById('modal-comments').classList.add('active');
@@ -1328,9 +1369,8 @@
                 if (comment) try { await updateDoc(doc(colPosts, postId), { comments: arrayRemove(comment) }); } catch(e) {}
             },
 
-            // --- SISTEMA DE CHAT E ATUALIZAÇÃO DOM PROGRESSIVA (Com Suporte a Resposta/Edição/Ocultar) ---
             switchChatTab: (mode) => {
-                app.cancelReply(); // Reseta modo de resposta
+                app.cancelReply(); 
                 appState.activeChatMode = mode;
                 
                 const btnG = document.getElementById('tab-global'), btnP = document.getElementById('tab-private');
@@ -1370,7 +1410,6 @@
                 const sorted = [...messagesArray].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
                 const validMessages = sorted.filter(m => !(m.deletedFor && m.deletedFor.includes(appState.firebaseUser.uid)));
 
-                // Remove da UI os apagados
                 const currentElements = Array.from(container.querySelectorAll('.message'));
                 currentElements.forEach(el => {
                     if (!validMessages.find(m => m.id === el.id.replace('msg-', ''))) el.remove();
@@ -1471,7 +1510,6 @@
                 input.value = '';
                 const baseMsg = { authorUid: appState.firebaseUser.uid, content: content, createdAt: new Date().toISOString() };
 
-                // Adicionar referências de Resposta no envio do BD
                 if (appState.replyingTo) {
                     baseMsg.replyTo = appState.replyingTo.id;
                     const author = appState.allUsers.find(u => u.uid === appState.replyingTo.authorUid);
@@ -1504,6 +1542,12 @@
                 const iFollow = userData.followers && userData.followers.includes(appState.firebaseUser.uid);
                 const bannerImg = userData.banner || ''; 
 
+                // Informações do VIP para o Perfil
+                const vipInfo = app.getVIPInfo(userData);
+                const vipBadge = vipInfo.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP Ativo"></i>` : '';
+                const adminBadge = userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
+                const vipStatusDisplay = userData.vip ? `<div class="profile-vip-status" style="font-size: 0.75rem; color: ${vipInfo.isActive ? '#ffd700' : 'var(--text-muted)'}; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; justify-content: center;"><i class="fa-solid fa-crown"></i> Status: VIP ${vipInfo.status}</div>` : '';
+
                 let actionButton = '';
                 if (isMe && !isPublic) {
                     actionButton = `<div style="display: flex; gap: 10px; width: 100%;"><button class="btn-primary" style="flex: 1;" onclick="app.openSettingsModal()">Editar Perfil</button></div>`;
@@ -1519,8 +1563,9 @@
                                 <img src="${userData.avatar}" alt="Avatar" class="profile-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                                 ${isMe && !isPublic ? `<div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto"><i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i></div><input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">` : ''}
                             </div>
-                            <h2 class="profile-name">${userData.name} ${userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}</h2>
+                            <h2 class="profile-name">${userData.name} ${adminBadge} ${vipBadge}</h2>
                             <span class="profile-handle">${userData.handle}</span>
+                            ${vipStatusDisplay}
                             <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
                             
                             <div class="stats-container">
@@ -1561,7 +1606,20 @@
                     else { btnFollow.classList.remove('btn-secondary'); btnFollow.innerText = 'Seguir'; }
                 }
                 
-                if (document.querySelector('.profile-name')) document.querySelector('.profile-name').innerHTML = `${viewUser.name} ${viewUser.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : ''}`;
+                // Atualização dos nomes e status VIP em tempo real
+                const vipInfo = app.getVIPInfo(viewUser);
+                const adminBadge = viewUser.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
+                const vipBadge = vipInfo.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP Ativo"></i>` : '';
+                
+                const nameEl = document.querySelector('.profile-name');
+                if (nameEl) nameEl.innerHTML = `${viewUser.name} ${adminBadge} ${vipBadge}`;
+                
+                const statusEl = document.querySelector('.profile-vip-status');
+                if (statusEl) {
+                    statusEl.innerHTML = `<i class="fa-solid fa-crown"></i> Status: VIP ${vipInfo.status}`;
+                    statusEl.style.color = vipInfo.isActive ? '#ffd700' : 'var(--text-muted)';
+                }
+
                 if (document.querySelector('.profile-bio')) document.querySelector('.profile-bio').innerText = viewUser.bio || 'Sem biografia...';
                 if (document.querySelector('.profile-avatar') && document.querySelector('.profile-avatar').src !== viewUser.avatar) document.querySelector('.profile-avatar').src = viewUser.avatar;
                 if (document.querySelector('.profile-banner') && viewUser.banner) document.querySelector('.profile-banner').style.backgroundImage = `url('${viewUser.banner}')`;
@@ -1603,7 +1661,6 @@
                 } catch (e) { app.showToast("Erro", "error"); } finally { btn.disabled = false; btn.innerHTML = "Salvar Perfil"; }
             },
 
-            // --- PESQUISA, RANKING E UTILIDADES ---
             performSearch: () => {
                 const input = document.getElementById('search-input');
                 const query = input ? input.value.trim().toLowerCase() : '';
@@ -1713,9 +1770,50 @@
                 appState.selectedProduct = null;
             },
 
-            processPurchase: () => {
-                app.showToast("O sistema de transações será habilitado em breve.", "info");
-                app.closeBuyModal();
+            processPurchase: async () => {
+                const product = appState.selectedProduct;
+                if (!product) return;
+
+                // Processamento exclusivo da Lógica de Planos VIP
+                if (product.category === 'vip') {
+                    const btn = document.querySelector('#modal-buy .btn-primary');
+                    btn.disabled = true;
+                    btn.innerHTML = 'Ativando Ligação...';
+
+                    try {
+                        const now = new Date();
+                        let expiresAt = null;
+
+                        // Calcula data de expiração (Se null, é vitalício)
+                        if (product.durationDays) {
+                            expiresAt = new Date(now.getTime() + (product.durationDays * 24 * 60 * 60 * 1000)).toISOString();
+                        }
+
+                        const vipData = {
+                            active: true,
+                            planId: product.id,
+                            activatedAt: now.toISOString(),
+                            expiresAt: expiresAt
+                        };
+
+                        // Salva diretamente no usuário
+                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), {
+                            vip: vipData
+                        });
+
+                        app.showToast(`Plano ${product.name} ativado com sucesso!`, "success");
+                        app.closeBuyModal();
+                    } catch (e) {
+                        console.error(e);
+                        app.showToast("Falha na ativação da malha neural.", "error");
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Confirmar Compra';
+                    }
+                } else {
+                    app.showToast("O sistema de transações será habilitado em breve.", "info");
+                    app.closeBuyModal();
+                }
             },
 
             initParticles: () => {

@@ -220,11 +220,18 @@
         .avatar {
             width: 44px; height: 44px; border-radius: 12px; object-fit: cover;
             border: 2px solid transparent;
-            background-image: linear-gradient(var(--bg-base), var(--bg-base)), linear-gradient(45deg, var(--cyan), var(--purple));
-            background-origin: border-box; background-clip: content-box, border-box;
+            background-color: var(--bg-base);
             flex-shrink: 0;
-            position: relative;
+            transition: all 0.3s ease;
         }
+
+        /* === SISTEMA DE MOLDURAS (CSS PURO) === */
+        /* Estas classes se adaptarão automaticamente ao border-radius da imagem */
+        .frame_neon_cyan { border: 2px solid var(--cyan) !important; box-shadow: 0 0 10px var(--cyan) !important; padding: 2px; background-clip: content-box; }
+        .frame_cyber_purple { border: 2px solid var(--purple) !important; box-shadow: 0 0 12px var(--purple) !important; padding: 2px; background-clip: content-box; }
+        .frame_gold_elite { border: 2px solid #ffd700 !important; box-shadow: 0 0 15px rgba(255,215,0,0.6) !important; padding: 2px; background-clip: content-box; }
+        .frame_hacker_green { border: 2px solid var(--success) !important; box-shadow: 0 0 12px var(--success) !important; padding: 2px; background-clip: content-box; }
+        .frame_blood_red { border: 2px solid var(--danger) !important; box-shadow: 0 0 12px var(--danger) !important; padding: 2px; background-clip: content-box; }
 
         .user-info { flex: 1; min-width: 0; }
         .user-info h3 { font-size: 0.95rem; margin: 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -249,8 +256,8 @@
         .profile-banner { width: 100%; height: 120px; border-radius: 16px 16px 0 0; background-size: cover; background-position: center; background-color: #222; margin-bottom: 0; border: 1px solid rgba(176, 38, 255, 0.25); border-bottom: none; flex-shrink: 0; }
         .profile-header { display: flex; flex-direction: column; align-items: center; padding: 3.5rem 1rem 1.8rem; background: var(--bg-glass); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem; border: 1px solid rgba(176, 38, 255, 0.25); border-top: none; box-shadow: 0 0 25px rgba(176, 38, 255, 0.12); animation: fadeIn 0.4s ease forwards; text-align: center; position: relative; flex-shrink: 0; }
         .profile-avatar-container { position: absolute; top: -42px; left: 50%; transform: translateX(-50%); z-index: 5; }
-        .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid var(--purple); box-shadow: 0 0 15px rgba(176, 38, 255, 0.6); background: var(--bg-base); position: relative; z-index: 2; }
-        .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; z-index: 2;}
+        .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; background-color: var(--bg-base); transition: all 0.3s ease; }
+        .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 8px;}
         .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.5rem; z-index: 2;}
         .profile-bio { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; max-width: 90%; }
         
@@ -261,14 +268,6 @@
         .stat-value.neon-cyan { color: var(--cyan); text-shadow: 0 0 8px rgba(0,243,255,0.6); }
         .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
 
-        /* === SISTEMA DE COSMÉTICOS E INVENTÁRIO === */
-        .rarity-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .cosmetic-frame { position: absolute; top: -12%; left: -12%; width: 124%; height: 124%; pointer-events: none; z-index: 10; border-radius: 50%; box-sizing: border-box; background-size: cover; background-position: center;}
-        .cosmetic-decor { position: absolute; width: 35px; height: 35px; z-index: 11; pointer-events: none; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
-        .decor-pos-0 { top: -5px; left: -15px; }
-        .decor-pos-1 { top: -5px; right: -15px; }
-        .decor-pos-2 { bottom: -5px; right: -15px; }
-        
         /* CHAT / COMMS */
         .chat-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
         .chat-header-info { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; flex-shrink: 0; }
@@ -278,13 +277,13 @@
         .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; min-height: 0; margin-bottom: 15px; scroll-behavior: smooth; }
         .message { display: flex; gap: 10px; max-width: 88%; animation: fadeIn 0.3s ease; }
         .message.mine { align-self: flex-end; flex-direction: row-reverse; }
-        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--purple); flex-shrink: 0; cursor: pointer;}
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid transparent; flex-shrink: 0; cursor: pointer;}
         .msg-bubble { background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); position: relative; user-select: text; cursor: pointer; transition: background 0.2s; }
         .msg-bubble:active { background: rgba(255,255,255,0.1); }
         .message.mine .msg-bubble { background: rgba(0, 243, 255, 0.12); border-color: rgba(0, 243, 255, 0.3); border-bottom-right-radius: 2px; }
         .message.mine .msg-bubble:active { background: rgba(0, 243, 255, 0.18); }
         .message:not(.mine) .msg-bubble { border-bottom-left-radius: 2px; }
-        .msg-author { font-size: 0.72rem; color: var(--cyan); margin-bottom: 3px; font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer;}
+        .msg-author { font-size: 0.72rem; color: var(--cyan); margin-bottom: 3px; font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;}
         .msg-text { font-size: 0.88rem; line-height: 1.4; word-break: break-word; pointer-events: none;}
         .msg-time { font-size: 0.62rem; color: var(--text-muted); text-align: right; margin-top: 4px; display: block; }
 
@@ -294,39 +293,23 @@
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
-        /* SISTEMA DE LOJA / INVENTÁRIO */
+        /* === SISTEMA DE LOJA === */
         .store-categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; flex-shrink: 0; }
         .store-categories::-webkit-scrollbar { display: none; }
         .category-pill { padding: 8px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: 'Inter', sans-serif;}
         .category-pill:hover { background: rgba(255,255,255,0.08); }
         .category-pill.active { background: rgba(0, 243, 255, 0.1); border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 10px var(--cyan-glow); font-weight: 600;}
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-        .product-card { background: var(--bg-glass); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; cursor: pointer; backdrop-filter: blur(10px); position: relative; }
+        .product-card { background: var(--bg-glass); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; cursor: pointer; backdrop-filter: blur(10px); }
         .product-card:hover { transform: translateY(-4px); border-color: var(--cyan); box-shadow: 0 8px 20px rgba(0, 243, 255, 0.15); }
-        
-        /* Destaques Baseados na Raridade */
-        .product-card.rarity-comum { border-color: #a0a0a0; }
-        .product-card.rarity-incomum { border-color: #00ff88; }
-        .product-card.rarity-raro { border-color: #0088ff; }
-        .product-card.rarity-epico { border-color: #b026ff; }
-        .product-card.rarity-lendario { border-color: #ffd700; }
-        .product-card.rarity-mitico { border-color: #ff2a2a; }
-        .product-card.rarity-exclusivo { border-color: #00f3ff; }
-
-        .product-img-container { width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; position: relative;}
+        .product-img-container { width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
         .product-img-container i { font-size: 2.8rem; color: var(--purple); text-shadow: 0 0 15px var(--purple-glow); }
-        .product-img-container img { width: 100%; height: 100%; object-fit: cover; }
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
         .product-duration { font-size: 0.7rem; color: var(--cyan); margin-bottom: 8px; }
         .product-price { font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: bold; color: #ffd700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
         .product-price i { font-size: 0.85rem; }
         .btn-buy { width: 100%; padding: 8px; background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), rgba(176, 38, 255, 0.1)); border: 1px solid rgba(0, 243, 255, 0.5); border-radius: 6px; color: var(--text-main); font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer; transition: all 0.2s; text-transform: uppercase; font-size: 0.9rem; }
         .btn-buy:hover { background: linear-gradient(90deg, var(--cyan), var(--purple)); color: white; border-color: transparent; box-shadow: 0 0 15px rgba(176, 38, 255, 0.4); }
-        
-        .btn-equip { background: rgba(0, 255, 136, 0.1); border-color: rgba(0, 255, 136, 0.5); color: var(--success); }
-        .btn-equip:hover { background: var(--success); color: #000; box-shadow: 0 0 15px rgba(0, 255, 136, 0.4); }
-        .btn-unequip { background: rgba(255, 42, 42, 0.1); border-color: rgba(255, 42, 42, 0.5); color: var(--danger); }
-        .btn-unequip:hover { background: var(--danger); color: #fff; box-shadow: 0 0 15px rgba(255, 42, 42, 0.4); }
 
         /* RANKING & PESQUISA */
         .ranking-list { display: flex; flex-direction: column; gap: 10px; }
@@ -337,7 +320,7 @@
         .rank-card:nth-child(2) .rank-pos { color: #c0c0c0; text-shadow: 0 0 10px rgba(192,192,192,0.5); }
         .rank-card:nth-child(3) .rank-pos { color: #cd7f32; text-shadow: 0 0 10px rgba(205,127,50,0.5); }
         .rank-info { flex: 1; min-width: 0; }
-        .rank-info h4 { font-size: 0.95rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rank-info h4 { font-size: 0.95rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;}
         .rank-info span { font-size: 0.75rem; color: var(--text-muted); }
         .rank-score { font-family: 'Rajdhani', sans-serif; font-weight: bold; color: var(--cyan); font-size: 1.1rem; }
 
@@ -364,6 +347,7 @@
         .form-control { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); color: white; padding: 12px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s; user-select: text; }
         .form-control:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,243,255,0.2); }
         textarea.form-control { resize: vertical; min-height: 90px; }
+        select.form-control { appearance: none; -webkit-appearance: none; cursor: pointer;}
         
         .btn-primary { width: 100%; padding: 12px; background: linear-gradient(90deg, var(--cyan), var(--purple)); border: none; border-radius: 8px; color: white; font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: opacity 0.3s; }
         .btn-primary:hover { opacity: 0.9; box-shadow: 0 0 15px rgba(176,38,255,0.4); }
@@ -384,6 +368,7 @@
         .toast { background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-left: 4px solid var(--cyan); color: white; padding: 10px 16px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; animation: slideDown 0.3s ease forwards; }
         .toast.error { border-left-color: var(--danger); }
         .toast.success { border-left-color: var(--success); }
+        .toast.info { border-left-color: var(--purple); }
 
         /* TELA DE AUTENTICAÇÃO E LOADER */
         #auth-setup { position: fixed; top:0; left:0; width: 100vw; height: 100dvh; background: var(--bg-base); z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem; text-align: center; }
@@ -478,7 +463,6 @@
             <div class="actions">
                 <i class="fa-solid fa-shield-halved" id="admin-icon" style="display:none; color: var(--danger);" onclick="app.openAdminModal()" title="Painel Admin"></i>
                 <i class="fa-solid fa-cart-shopping" onclick="app.navigate('store')" title="Loja"></i>
-                <i class="fa-solid fa-backpack" onclick="app.navigate('inventory')" title="Inventário de Cosméticos"></i>
                 <i class="fa-solid fa-gear" onclick="app.openSettingsModal()" title="Configurações"></i>
             </div>
         </header>
@@ -538,28 +522,20 @@
                 <p style="font-size: 0.82rem; color: var(--success); margin-bottom: 1rem;"><i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.</p>
                 <div class="form-group"><label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label><input type="text" id="edit-name" class="form-control"></div>
                 <div class="form-group"><label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SUA BIO</label><textarea id="edit-bio" class="form-control" placeholder="Fale sobre você..."></textarea></div>
+                <div class="form-group">
+                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">MOLDURA EQUIPADA</label>
+                    <select id="edit-frame" class="form-control">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
                 <div class="file-upload-wrapper">
                     <label class="file-upload-btn" id="lbl-banner-upload">
-                        <i class="fa-solid fa-image"></i> Alterar Banner de Fundo (Envio)
+                        <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
                         <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">
                     </label>
                 </div>
                 <button class="btn-primary" id="btn-save-settings" onclick="app.saveProfileSettings()" style="margin-bottom: 10px;">Salvar Perfil</button>
                 <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()"><i class="fa-solid fa-power-off"></i> Desconectar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Personalizar Perfil (Inventário Rápido) -->
-    <div class="modal-overlay" id="modal-customize">
-        <div class="modal-content" style="max-width: 550px; height: 85dvh;">
-            <div class="modal-header">
-                <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Personalizar Perfil</h2>
-                <button class="close-modal" onclick="app.closeCustomizeModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body" style="padding-right: 0;">
-                <div class="store-categories" id="customize-categories-container"></div>
-                <div class="products-grid" id="customize-grid-container" style="padding-right: 5px;"></div>
             </div>
         </div>
     </div>
@@ -592,24 +568,20 @@
     <div class="modal-overlay" id="modal-buy">
         <div class="modal-content" style="max-width: 380px;">
             <div class="modal-header">
-                <h2>Detalhes do Item</h2>
+                <h2>Detalhes do Produto</h2>
                 <button class="close-modal" onclick="app.closeBuyModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body" style="text-align: center; padding: 10px 10px 0;">
-                <div id="buy-modal-icon" style="width: 80px; height: 80px; background: rgba(0,0,0,0.5); border: 1px solid var(--purple); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px; font-size: 2.5rem; color: var(--cyan); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); overflow: hidden;">
+                <div id="buy-modal-icon" style="width: 80px; height: 80px; background: rgba(0,0,0,0.5); border: 1px solid var(--purple); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px; font-size: 2.5rem; color: var(--cyan); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);">
                 </div>
-                <div id="buy-modal-rarity" class="rarity-tag" style="display:inline-block;"></div>
                 <h3 id="buy-modal-name" style="color: white; font-size: 1.4rem; margin-bottom: 5px;"></h3>
                 <p id="buy-modal-duration" style="color: var(--cyan); font-size: 0.85rem; margin-bottom: 12px; font-weight: bold;"></p>
                 <p id="buy-modal-desc" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4;"></p>
-                
-                <div id="buy-modal-vip-warning" style="display:none; color: var(--danger); font-size: 0.8rem; margin-bottom: 10px;"><i class="fa-solid fa-lock"></i> Requer conexão VIP para equipar.</div>
-
                 <div id="buy-modal-price" style="font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: bold; color: #ffd700; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,215,0,0.4);">
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-primary" onclick="app.processPurchase()">Confirmar Transação</button>
+                <button class="btn-primary" onclick="app.processPurchase()">Confirmar Compra</button>
             </div>
         </div>
     </div>
@@ -679,20 +651,10 @@
         <div style="margin-bottom: 15px; text-align: center; flex-shrink: 0;">
             <i class="fa-solid fa-store" style="font-size: 1.8rem; color: var(--cyan); text-shadow: 0 0 15px var(--cyan); margin-bottom: 5px;"></i>
             <h2 style="color: white; margin-bottom: 3px;">Nexus Store</h2>
-            <p style="color: var(--text-muted); font-size: 0.8rem;">Melhore e customize sua experiência</p>
+            <p style="color: var(--text-muted); font-size: 0.8rem;">Melhore sua experiência no Hub</p>
         </div>
         <div class="store-categories" id="store-categories-container"></div>
         <div class="products-grid" id="products-grid-container"></div>
-    </template>
-
-    <template id="tpl-inventory">
-        <div style="margin-bottom: 15px; text-align: center; flex-shrink: 0;">
-            <i class="fa-solid fa-backpack" style="font-size: 1.8rem; color: var(--purple); text-shadow: 0 0 15px var(--purple); margin-bottom: 5px;"></i>
-            <h2 style="color: white; margin-bottom: 3px;">Meu Inventário</h2>
-            <p style="color: var(--text-muted); font-size: 0.8rem;">Todos os seus cosméticos e itens</p>
-        </div>
-        <div class="store-categories" id="inventory-categories-container"></div>
-        <div class="products-grid" id="inventory-grid-container"></div>
     </template>
 
     <script type="module">
@@ -743,51 +705,32 @@
             replyingTo: null,
             usersLoaded: false,
 
-            // LOJA, INVENTÁRIO E COSMÉTICOS
             activeStoreCategory: 'vip',
-            activeInventoryCategory: 'decor',
-            activeCustomizeCategory: 'decor',
+            selectedProduct: null,
             storeCategories: [
                 { id: 'vip', name: 'Planos VIP' },
+                { id: 'frames', name: 'Molduras' }, /* Nova Categoria Movida p/ frente */
                 { id: 'decor', name: 'Decorações' },
-                { id: 'frames', name: 'Molduras' },
                 { id: 'avatars', name: 'Avatares' },
                 { id: 'banners', name: 'Banners' },
-                { id: 'effects', name: 'Efeitos' },
-                { id: 'emotes', name: 'Emotes' }
+                { id: 'cosmetics', name: 'Cosméticos' },
+                { id: 'themes', name: 'Temas' },
+                { id: 'special', name: 'Itens Especiais' }
             ],
-            // Map de cores e labels de raridade
-            rarities: {
-                comum: { label: 'Comum', color: '#a0a0a0' },
-                incomum: { label: 'Incomum', color: '#00ff88' },
-                raro: { label: 'Raro', color: '#0088ff' },
-                epico: { label: 'Épico', color: '#b026ff' },
-                lendario: { label: 'Lendário', color: '#ffd700' },
-                mitico: { label: 'Mítico', color: '#ff2a2a' },
-                exclusivo: { label: 'Exclusivo', color: '#00f3ff' }
-            },
+            // Catálogo expandido
             catalog: [
-                /* Planos VIP (Originais) */
-                { id: 'vip_7_dias', name: 'VIP 7 Dias', description: 'Desbloqueia recursos exclusivos durante sete dias na rede global.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 500, duration: '7 Dias', durationDays: 7, status: 'active', rarity: 'exclusivo' },
-                { id: 'vip_30_dias', name: 'VIP 30 Dias', description: 'Benefícios VIP estendidos. Conexão prioritária garantida.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 1800, duration: '30 Dias', durationDays: 30, status: 'active', rarity: 'exclusivo' },
-                { id: 'vip_anual', name: 'VIP Anual', description: 'Domine a malha neural com benefícios premium por um ano inteiro.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 15000, duration: '365 Dias', durationDays: 365, status: 'active', rarity: 'exclusivo' },
-                { id: 'vip_permanente', name: 'VIP Permanente', description: 'O nível máximo de acesso à rede. Desbloqueio vitalício de todos os recursos.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 45000, duration: 'Vitalício', durationDays: null, status: 'active', rarity: 'exclusivo' },
+                // VIP
+                { id: 'vip_7_dias', name: 'VIP 7 Dias', description: 'Desbloqueia recursos exclusivos durante sete dias na rede global.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 500, duration: '7 Dias', durationDays: 7, status: 'active' },
+                { id: 'vip_30_dias', name: 'VIP 30 Dias', description: 'Benefícios VIP estendidos. Conexão prioritária garantida.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 1800, duration: '30 Dias', durationDays: 30, status: 'active' },
+                { id: 'vip_anual', name: 'VIP Anual', description: 'Domine a malha neural com benefícios premium por um ano inteiro.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 15000, duration: '365 Dias', durationDays: 365, status: 'active' },
+                { id: 'vip_permanente', name: 'VIP Permanente', description: 'O nível máximo de acesso à rede. Desbloqueio vitalício de todos os recursos.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 45000, duration: 'Vitalício', durationDays: null, status: 'active' },
                 
-                /* Novos Itens Cosméticos Integrados */
-                // Molduras
-                { id: 'frame_neon', name: 'Moldura Ciano', description: 'Arco elétrico em neon puro.', category: 'frames', rarity: 'epico', vipRequired: false, icon: 'fa-regular fa-circle', image: '', price: 300, status: 'active' },
-                { id: 'frame_vip', name: 'Aura VIP Ouro', description: 'O prestígio moldado em luz. (Requer VIP)', category: 'frames', rarity: 'lendario', vipRequired: true, icon: 'fa-solid fa-certificate', image: '', price: 1200, status: 'active' },
-                { id: 'frame_glitch', name: 'Anomalia', description: 'Pixels distorcidos da malha central.', category: 'frames', rarity: 'mitico', vipRequired: false, icon: 'fa-solid fa-qrcode', image: '', price: 2500, status: 'active' },
-                // Decorações (Posicionadas ao redor do avatar)
-                { id: 'decor_skull', name: 'Holo Caveira', description: 'Holograma clássico de intimidação.', category: 'decor', rarity: 'raro', vipRequired: false, icon: 'fa-solid fa-skull', image: '', price: 150, status: 'active' },
-                { id: 'decor_crown', name: 'Coroa Elite', description: 'Apenas os reis do Hub.', category: 'decor', rarity: 'lendario', vipRequired: true, icon: 'fa-solid fa-crown', image: '', price: 900, status: 'active' },
-                { id: 'decor_cat', name: 'Gato Cyber', description: 'Mascote virtual de companhia.', category: 'decor', rarity: 'incomum', vipRequired: false, icon: 'fa-solid fa-cat', image: '', price: 200, status: 'active' },
-                { id: 'decor_spark', name: 'Fagulha', description: 'Pequena centelha de energia.', category: 'decor', rarity: 'comum', vipRequired: false, icon: 'fa-solid fa-bolt', image: '', price: 50, status: 'active' },
-                // Banners
-                { id: 'banner_matrix', name: 'Código Cascata', description: 'O clássico fluxo de dados verdes.', category: 'banners', rarity: 'mitico', vipRequired: false, icon: 'fa-solid fa-barcode', image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=800', price: 1500, status: 'active' },
-                { id: 'banner_vip', name: 'Luxo Cyber', description: 'Design corporativo da elite. (Requer VIP)', category: 'banners', rarity: 'lendario', vipRequired: true, icon: 'fa-solid fa-city', image: 'https://images.unsplash.com/photo-1517505166089-da654876bafc?auto=format&fit=crop&q=80&w=800', price: 1000, status: 'active' },
-                // Avatares
-                { id: 'avatar_glitch', name: 'Protocolo Erro', description: 'Um rosto perdido na malha.', category: 'avatars', rarity: 'raro', vipRequired: false, icon: 'fa-solid fa-user-ninja', image: 'https://api.dicebear.com/7.x/bottts/svg?seed=glitch&style=glitch', price: 400, status: 'active' }
+                // MOLDURAS (Novos Itens integrados com as classes CSS)
+                { id: 'frame_neon_cyan', name: 'Neon Ciano', description: 'Borda brilhante com assinatura cibernética clássica.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 300, duration: '', status: 'active' },
+                { id: 'frame_cyber_purple', name: 'Cyber Roxo', description: 'Aura roxa pulsante da malha profunda.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 450, duration: '', status: 'active' },
+                { id: 'frame_blood_red', name: 'Blood Red', description: 'Aviso de sistema crítico. Chamativo e perigoso.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 600, duration: '', status: 'active' },
+                { id: 'frame_hacker_green', name: 'Hacker Core', description: 'Terminal verde bruto e direto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 500, duration: '', status: 'active' },
+                { id: 'frame_gold_elite', name: 'Gold Elite', description: 'Moldura dourada premium para alta hierarquia.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 1500, duration: '', status: 'active' }
             ]
         };
 
@@ -807,6 +750,10 @@
                             const userDoc = await getDoc(userDocRef);
                             if (userDoc.exists()) {
                                 appState.currentUserData = userDoc.data();
+                                // Assegurar que os arrays de molduras existam nas configurações novas
+                                if (!appState.currentUserData.ownedFrames) appState.currentUserData.ownedFrames = ['default'];
+                                if (!appState.currentUserData.equippedFrame) appState.currentUserData.equippedFrame = 'default';
+                                
                                 app.startGame();
                             } else {
                                 document.getElementById('auth-setup').style.display = 'flex';
@@ -858,50 +805,30 @@
                 if (!appState.currentUserData) return;
                 const vipInfo = app.getVIPInfo(appState.currentUserData);
                 
-                let updates = {};
-                let changedEquipped = false;
-
-                // 1. Desativa VIP no banco se expirou
                 if (appState.currentUserData.vip && appState.currentUserData.vip.active && !vipInfo.isActive) {
-                    updates['vip.active'] = false;
-                    app.showToast("Sua assinatura VIP expirou.", "info");
-                }
-                
-                // 2. Proteção do Inventário VIP: Remove cosméticos VIP equipados se perder o VIP
-                const equipped = appState.currentUserData.equipped;
-                if (equipped && !vipInfo.isActive) {
-                    let newEquipped = { ...equipped };
-                    
-                    const requiresVip = (itemId) => {
-                        if(!itemId) return false;
-                        const item = appState.catalog.find(i => i.id === itemId);
-                        return item && item.vipRequired;
-                    };
-
-                    if (requiresVip(newEquipped.frames)) { newEquipped.frames = null; changedEquipped = true; }
-                    if (requiresVip(newEquipped.avatars)) { newEquipped.avatars = null; changedEquipped = true; }
-                    if (requiresVip(newEquipped.banners)) { newEquipped.banners = null; changedEquipped = true; }
-                    if (requiresVip(newEquipped.effects)) { newEquipped.effects = null; changedEquipped = true; }
-                    
-                    if (newEquipped.decor) {
-                        const originalLen = newEquipped.decor.length;
-                        newEquipped.decor = newEquipped.decor.filter(id => !requiresVip(id));
-                        if (newEquipped.decor.length !== originalLen) changedEquipped = true;
-                    }
-                    
-                    if (changedEquipped) {
-                        updates['equipped'] = newEquipped;
-                        app.showToast("Alguns cosméticos VIP foram desequipados.", "info");
-                    }
-                }
-
-                if (Object.keys(updates).length > 0) {
                     try {
-                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
+                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), {
+                            'vip.active': false
+                        });
+                        app.showToast("Sua assinatura VIP expirou.", "info");
                     } catch (e) {
-                        console.error("Erro na atualização automática", e);
+                        console.error("Erro na expiração do VIP", e);
                     }
                 }
+            },
+            
+            // --- UTILITÁRIOS GLOBAIS DE EXIBIÇÃO DE USUÁRIO (Badges e Molduras) ---
+            getUserBadges: (userData) => {
+                if (!userData) return '';
+                const authorVIP = app.getVIPInfo(userData);
+                const adminBadge = userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
+                const vipBadge = authorVIP.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP"></i>` : '';
+                return `${adminBadge} ${vipBadge}`.trim();
+            },
+
+            getFrameClass: (userData) => {
+                if (!userData || !userData.equippedFrame || userData.equippedFrame === 'default') return '';
+                return userData.equippedFrame; // Retorna exatamente o ID da classe (ex: 'frame_neon_cyan')
             },
             // ---------------------------
 
@@ -939,13 +866,11 @@
                 document.getElementById('auth-form-area').style.display = 'none';
                 document.getElementById('auth-loading').style.display = 'block';
 
-                // Estrutura inicial expandida com inventário
                 const newUser = {
                     uid: uid, name: nameInput, handle: handleInput.toLowerCase().replace(/\s/g, ''),
                     avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, banner: '', bio: 'Conectado à malha neural recentemente.',
-                    xp: 50, level: 1, ncoins: 1000, followers: [], following: [], role: 'user', createdAt: new Date().toISOString(),
-                    inventory: [], // Array de IDs de produtos possuídos
-                    equipped: { decor: [], frames: null, avatars: null, banners: null, effects: null }
+                    xp: 50, level: 1, ncoins: 100, followers: [], following: [], role: 'user', createdAt: new Date().toISOString(),
+                    ownedFrames: ['default'], equippedFrame: 'default'
                 };
 
                 try {
@@ -973,11 +898,7 @@
                     const myUpdatedProfile = appState.allUsers.find(u => u.uid === appState.firebaseUser.uid);
                     if (myUpdatedProfile) {
                         appState.currentUserData = myUpdatedProfile;
-                        app.checkAndExpireVIP();
-                        
-                        // Atualiza as interfaces do inventário se abertas
-                        if (appState.currentView === 'inventory') app.renderInventoryItems();
-                        if (document.getElementById('modal-customize').classList.contains('active')) app.renderCustomizeItems();
+                        app.checkAndExpireVIP(); 
                     }
 
                     if (['perfil', 'public_profile'].includes(appState.currentView)) app.updateProfileInDOM();
@@ -992,10 +913,14 @@
                                 c.querySelectorAll('.msg-avatar').forEach(img => {
                                     const u = appState.allUsers.find(user => user.uid === img.getAttribute('data-uid'));
                                     if (u && img.src !== u.avatar) img.src = u.avatar;
+                                    // Atualizar classe da moldura se necessário
+                                    if (u) {
+                                        img.className = `msg-avatar ${app.getFrameClass(u)}`;
+                                    }
                                 });
                                 c.querySelectorAll('.msg-author').forEach(div => {
                                     const u = appState.allUsers.find(user => user.uid === div.getAttribute('data-uid'));
-                                    if (u && div.innerText !== u.name) div.innerText = u.name;
+                                    if (u && div.innerText !== u.name) div.innerHTML = `${u.name} ${app.getUserBadges(u)}`;
                                 });
                             }
                         });
@@ -1081,72 +1006,7 @@
                     app.renderStoreCategories();
                     app.renderStoreProducts();
                 }
-                else if (appState.currentView === 'inventory') {
-                    contentArea.innerHTML = ''; 
-                    contentArea.appendChild(document.getElementById('tpl-inventory').content.cloneNode(true));
-                    app.renderInventoryCategories();
-                    app.renderInventoryItems();
-                }
             },
-
-            // --- RENDERIZAÇÕES EXTRAS DE COSMÉTICOS ---
-            renderCosmeticsOnAvatar: (userData, containerElement) => {
-                if (!userData || !containerElement) return;
-                
-                // Limpa overlays cosméticos antigos sem remover a imagem base
-                containerElement.querySelectorAll('.cosmetic-frame, .cosmetic-decor').forEach(el => el.remove());
-                
-                const equipped = userData.equipped || {};
-                
-                // Molduras
-                if (equipped.frames) {
-                    const frame = appState.catalog.find(i => i.id === equipped.frames);
-                    if (frame) {
-                        const frameDiv = document.createElement('div');
-                        frameDiv.className = 'cosmetic-frame';
-                        if (frame.image) {
-                            frameDiv.style.backgroundImage = `url('${frame.image}')`;
-                        } else {
-                            frameDiv.style.border = `3px solid ${appState.rarities[frame.rarity].color}`;
-                            frameDiv.style.boxShadow = `0 0 15px ${appState.rarities[frame.rarity].color}`;
-                        }
-                        containerElement.appendChild(frameDiv);
-                    }
-                }
-                
-                // Decorações
-                if (equipped.decor && equipped.decor.length > 0) {
-                    equipped.decor.forEach((decorId, index) => {
-                        const decor = appState.catalog.find(i => i.id === decorId);
-                        if (decor) {
-                            const decorDiv = document.createElement('div');
-                            decorDiv.className = `cosmetic-decor decor-pos-${index}`;
-                            if (decor.image) decorDiv.innerHTML = `<img src="${decor.image}" style="width:100%;height:100%;object-fit:contain;">`;
-                            else decorDiv.innerHTML = `<i class="${decor.icon}" style="color:${appState.rarities[decor.rarity].color}"></i>`;
-                            containerElement.appendChild(decorDiv);
-                        }
-                    });
-                }
-            },
-            
-            getDisplayAvatar: (userData) => {
-                if (!userData) return '';
-                if (userData.equipped && userData.equipped.avatars) {
-                    const avatarItem = appState.catalog.find(i => i.id === userData.equipped.avatars);
-                    if (avatarItem && avatarItem.image) return avatarItem.image;
-                }
-                return userData.avatar;
-            },
-            
-            getDisplayBanner: (userData) => {
-                if (!userData) return '';
-                if (userData.equipped && userData.equipped.banners) {
-                    const bannerItem = appState.catalog.find(i => i.id === userData.equipped.banners);
-                    if (bannerItem && bannerItem.image) return bannerItem.image;
-                }
-                return userData.banner || '';
-            },
-            // ------------------------------------------
 
             openContextMenu: (itemId, type) => {
                 let item = null;
@@ -1354,19 +1214,16 @@
 
                         const h3El = existingEl.querySelector('.user-info h3');
                         if (h3El) {
-                            const authorVIP = app.getVIPInfo(authorData);
-                            const adminBadgeHtml = authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
-                            const vipBadgeHtml = authorVIP.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP"></i>` : '';
-                            const expectedH3Html = `${authorData.name} ${adminBadgeHtml} ${vipBadgeHtml}`;
+                            const expectedH3Html = `${authorData.name} ${app.getUserBadges(authorData)}`;
                             if (h3El.innerHTML !== expectedH3Html) h3El.innerHTML = expectedH3Html;
                         }
 
-                        const avatarImg = existingEl.querySelector('.avatar > img');
-                        const displayAvatarSrc = app.getDisplayAvatar(authorData);
-                        if (avatarImg && avatarImg.src !== displayAvatarSrc) avatarImg.src = displayAvatarSrc;
-                        
-                        const avatarContainer = existingEl.querySelector('.avatar');
-                        if (avatarContainer) app.renderCosmeticsOnAvatar(authorData, avatarContainer);
+                        const avatarImg = existingEl.querySelector('.avatar');
+                        if (avatarImg) {
+                            if (avatarImg.src !== authorData.avatar) avatarImg.src = authorData.avatar;
+                            const frameClass = app.getFrameClass(authorData);
+                            avatarImg.className = `avatar ${frameClass}`;
+                        }
                         
                         if (container.children[index] !== existingEl) container.insertBefore(existingEl, container.children[index]);
                     } else {
@@ -1385,10 +1242,6 @@
                 const isAdmin = appState.currentUserData.role === 'admin';
                 const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
                 
-                const authorVIP = app.getVIPInfo(authorData);
-                const adminBadgeHtml = authorData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
-                const vipBadgeHtml = authorVIP.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP"></i>` : '';
-
                 let extraActions = '';
                 if (isMyPost || isAdmin) {
                     extraActions = `<button class="action-btn" onclick="app.deletePost('${post.id}')" style="margin-left: auto; color: var(--danger);"><i class="fa-solid fa-trash"></i></button>`;
@@ -1403,15 +1256,11 @@
                     app.openContextMenu(post.id, 'post');
                 };
 
-                const displayAvatarSrc = app.getDisplayAvatar(authorData);
-
                 article.innerHTML = `
                     <div class="post-header" onclick="app.navigate('public_profile', null, '${authorData.uid}')">
-                        <div class="avatar">
-                            <img src="${displayAvatarSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;position:relative;z-index:2;" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                        </div>
+                        <img src="${authorData.avatar}" alt="Avatar" class="avatar ${app.getFrameClass(authorData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                         <div class="user-info">
-                            <h3>${authorData.name} ${adminBadgeHtml} ${vipBadgeHtml}</h3>
+                            <h3>${authorData.name} ${app.getUserBadges(authorData)}</h3>
                             <span>${authorData.handle} • ${timeStr}${editedHtml}</span>
                         </div>
                     </div>
@@ -1429,9 +1278,6 @@
                     </div>
                 `;
                 
-                const avatarContainer = article.querySelector('.avatar');
-                app.renderCosmeticsOnAvatar(authorData, avatarContainer);
-                
                 refNode ? container.insertBefore(article, refNode) : container.appendChild(article);
             },
 
@@ -1445,6 +1291,40 @@
             handleImageUpload: (e, type) => {
                 const file = e.target.files[0];
                 if (!file) return;
+
+                const isGif = file.type === 'image/gif';
+                const isVIP = app.getVIPInfo(appState.currentUserData).isActive;
+
+                // Restrição e Lógica VIP para GIFs
+                if (isGif) {
+                    if (!isVIP && (type === 'profile' || type === 'banner')) {
+                        return app.showToast("Arquivos animados (.GIF) são um benefício exclusivo de Planos VIP. Considere adquirir um!", "error");
+                    }
+                    // Validação de limite de tamanho (Máx 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        return app.showToast("O GIF excedeu o tamanho permitido. O limite de rede é 2MB.", "error");
+                    }
+                    
+                    // Tratamento direto via FileReader para preservar a animação
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        const dataUrl = evt.target.result;
+                        if (type === 'post') {
+                            appState.tempBase64Post = dataUrl;
+                            document.getElementById('image-preview').src = dataUrl;
+                            document.getElementById('image-preview-container').style.display = 'block';
+                        } else if (type === 'profile') app.updateProfileImage(dataUrl);
+                        else if (type === 'banner') {
+                            appState.tempBase64Banner = dataUrl;
+                            app.showToast("Banner pronto. Salve o perfil.", "info");
+                            document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-check"></i> Imagem Selecionada`;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                    return; // Finaliza o fluxo VIP aqui
+                }
+
+                // Fluxo Normal (Canvas Resizing para Imagens estáticas JPEGs/PNGs)
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
@@ -1543,7 +1423,7 @@
                     div.style = "background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-size: 0.85rem; animation: fadeIn 0.3s ease;";
                     
                     let delBtn = (c.authorUid === appState.firebaseUser.uid || appState.currentUserData.role === 'admin') ? `<i class="fa-solid fa-trash" style="color:var(--danger); float:right; cursor:pointer;" onclick="app.deleteComment('${postId}', '${c.id}')"></i>` : '';
-                    div.innerHTML = `${delBtn}<div style="display:flex; gap:8px; align-items:center; margin-bottom:5px;"><img src="${app.getDisplayAvatar(author)}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="color:var(--cyan); font-weight:bold;">${author.name}</span></div><div style="padding-left:32px;">${c.text}</div>`;
+                    div.innerHTML = `${delBtn}<div style="display:flex; gap:8px; align-items:center; margin-bottom:5px;"><img src="${author.avatar}" class="avatar ${app.getFrameClass(author)}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border-width: 1px !important; padding: 1px !important;"><span style="color:var(--cyan); font-weight:bold;">${author.name} ${app.getUserBadges(author)}</span></div><div style="padding-left:32px;">${c.text}</div>`;
                     list.appendChild(div);
                 });
                 if (post.comments.slice(startingIndex).length > 0) setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
@@ -1641,9 +1521,9 @@
                         div.className = `message ${isMine ? 'mine' : ''}`;
                         div.id = `msg-${msg.id}`;
                         div.innerHTML = `
-                            ${!isMine ? `<img src="${app.getDisplayAvatar(author)}" class="msg-avatar" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
+                            ${!isMine ? `<img src="${author.avatar}" class="msg-avatar ${app.getFrameClass(author)}" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
                             <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
-                                ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name}</div>` : ''}
+                                ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
                                 <div class="msg-text">${msg.content}</div>
                                 <span class="msg-time">${timeStr}${editedHtml}</span>
@@ -1684,9 +1564,9 @@
                     div.className = 'chat-list-item';
                     div.onclick = () => app.startPrivateChat(uid);
                     div.innerHTML = `
-                        <img src="${app.getDisplayAvatar(user)}" class="avatar" style="width: 44px; height: 44px;">
+                        <img src="${user.avatar}" class="avatar ${app.getFrameClass(user)}" style="width: 44px; height: 44px;">
                         <div class="user-info">
-                            <h3>${user.name}</h3>
+                            <h3>${user.name} ${app.getUserBadges(user)}</h3>
                             <span style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span>
                         </div>
                         <i class="fa-solid fa-chevron-right" style="color:var(--border-glass);"></i>
@@ -1724,7 +1604,7 @@
                 } catch(e) { app.showToast("Falha de transmissão.", "error"); }
             },
 
-            // --- PERFIL ---
+            // --- PERFIL E CONFIGURAÇÕES ---
             renderProfile: (userData, isPublic = false) => {
                 const contentArea = document.getElementById('app-content');
                 if(!isPublic) contentArea.innerHTML = '';
@@ -1735,34 +1615,27 @@
 
                 const isMe = userData.uid === appState.firebaseUser.uid;
                 const iFollow = userData.followers && userData.followers.includes(appState.firebaseUser.uid);
-                
-                const displayBanner = app.getDisplayBanner(userData);
-                const displayAvatar = app.getDisplayAvatar(userData);
+                const bannerImg = userData.banner || ''; 
 
                 const vipInfo = app.getVIPInfo(userData);
-                const vipBadge = vipInfo.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP Ativo"></i>` : '';
-                const adminBadge = userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
                 const vipStatusDisplay = userData.vip ? `<div class="profile-vip-status" style="font-size: 0.75rem; color: ${vipInfo.isActive ? '#ffd700' : 'var(--text-muted)'}; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; justify-content: center;"><i class="fa-solid fa-crown"></i> Status: VIP ${vipInfo.status}</div>` : '';
 
                 let actionButton = '';
                 if (isMe && !isPublic) {
-                    actionButton = `
-                        <div style="display: flex; gap: 10px; width: 100%; flex-wrap: wrap;">
-                            <button class="btn-primary" style="flex: 1; padding: 10px; font-size: 0.95rem; background: linear-gradient(90deg, var(--purple), var(--cyan));" onclick="app.openCustomizeModal()"><i class="fa-solid fa-wand-magic-sparkles"></i> Personalizar Perfil</button>
-                        </div>
-                    `;
+                    actionButton = `<div style="display: flex; gap: 10px; width: 100%;"><button class="btn-primary" style="flex: 1;" onclick="app.openSettingsModal()">Editar Perfil</button></div>`;
                 } else if (!isMe) {
                     actionButton = `<div style="display: flex; gap: 10px; width: 100%;"><button id="btn-follow" class="btn-primary ${iFollow ? 'btn-secondary' : ''}" style="flex: 1;" onclick="app.toggleFollow('${userData.uid}')">${iFollow ? 'Seguindo' : 'Seguir'}</button><button class="btn-primary btn-secondary" style="flex: 1;" onclick="app.startPrivateChat('${userData.uid}')">Mensagem</button></div>`;
                 }
 
                 const html = `
                     <section class="profile-top-section">
-                        <div class="profile-banner" style="background-image: url('${displayBanner}');"></div>
+                        <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
                         <div class="profile-header">
-                            <div class="profile-avatar-container" id="profile-avatar-wrap">
-                                <img src="${displayAvatar}" alt="Avatar" class="profile-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                            <div class="profile-avatar-container">
+                                <img src="${userData.avatar}" alt="Avatar" class="profile-avatar ${app.getFrameClass(userData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
+                                ${isMe && !isPublic ? `<div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto"><i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i></div><input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">` : ''}
                             </div>
-                            <h2 class="profile-name">${userData.name} ${adminBadge} ${vipBadge}</h2>
+                            <h2 class="profile-name">${userData.name} ${app.getUserBadges(userData)}</h2>
                             <span class="profile-handle">${userData.handle}</span>
                             ${vipStatusDisplay}
                             <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
@@ -1787,10 +1660,6 @@
                     document.getElementById('public-profile-container').innerHTML = html;
                 } else { contentArea.innerHTML = html; }
                 
-                // Aplica cosméticos no container recém-criado
-                const avatarContainer = document.getElementById('profile-avatar-wrap');
-                app.renderCosmeticsOnAvatar(userData, avatarContainer);
-                
                 app.updatePostsInDOM(); 
             },
 
@@ -1810,11 +1679,9 @@
                 }
                 
                 const vipInfo = app.getVIPInfo(viewUser);
-                const adminBadge = viewUser.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
-                const vipBadge = vipInfo.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP Ativo"></i>` : '';
                 
                 const nameEl = document.querySelector('.profile-name');
-                if (nameEl) nameEl.innerHTML = `${viewUser.name} ${adminBadge} ${vipBadge}`;
+                if (nameEl) nameEl.innerHTML = `${viewUser.name} ${app.getUserBadges(viewUser)}`;
                 
                 const statusEl = document.querySelector('.profile-vip-status');
                 if (statusEl) {
@@ -1824,16 +1691,13 @@
 
                 if (document.querySelector('.profile-bio')) document.querySelector('.profile-bio').innerText = viewUser.bio || 'Sem biografia...';
                 
-                const displayBanner = app.getDisplayBanner(viewUser);
-                if (document.querySelector('.profile-banner') && displayBanner) document.querySelector('.profile-banner').style.backgroundImage = `url('${displayBanner}')`;
-
-                const avatarContainer = document.getElementById('profile-avatar-wrap');
-                if (avatarContainer) {
-                    const avatarImg = avatarContainer.querySelector('.profile-avatar');
-                    const displayAvatarSrc = app.getDisplayAvatar(viewUser);
-                    if (avatarImg && avatarImg.src !== displayAvatarSrc) avatarImg.src = displayAvatarSrc;
-                    app.renderCosmeticsOnAvatar(viewUser, avatarContainer);
+                const avatarEl = document.querySelector('.profile-avatar');
+                if (avatarEl) {
+                    if (avatarEl.src !== viewUser.avatar) avatarEl.src = viewUser.avatar;
+                    avatarEl.className = `profile-avatar ${app.getFrameClass(viewUser)}`;
                 }
+
+                if (document.querySelector('.profile-banner') && viewUser.banner) document.querySelector('.profile-banner').style.backgroundImage = `url('${viewUser.banner}')`;
             },
             updateProfileImage: async (base64) => { try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { avatar: base64 }); app.showToast("Foto atualizada!", "success"); } catch(e) {} },
             toggleFollow: async (targetUid) => {
@@ -1855,6 +1719,19 @@
 
             openSettingsModal: () => {
                 document.getElementById('edit-name').value = appState.currentUserData.name; document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
+                
+                // Popula select de Molduras Equipadas
+                const frameSelect = document.getElementById('edit-frame');
+                frameSelect.innerHTML = '<option value="default">Nenhuma / Padrão</option>';
+                const owned = appState.currentUserData.ownedFrames || ['default'];
+                
+                appState.catalog.filter(p => p.category === 'frames').forEach(frame => {
+                    if (owned.includes(frame.id)) {
+                        const isSelected = appState.currentUserData.equippedFrame === frame.id ? 'selected' : '';
+                        frameSelect.innerHTML += `<option value="${frame.id}" ${isSelected}>${frame.name}</option>`;
+                    }
+                });
+
                 appState.tempBase64Banner = null; document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-image"></i> Alterar Banner de Fundo <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">`;
                 document.getElementById('modal-settings').classList.add('active');
             },
@@ -1865,7 +1742,12 @@
 
                 const btn = document.getElementById('btn-save-settings'); btn.disabled = true; btn.innerHTML = "Salvando...";
                 try {
-                    const updates = { name: name, bio: document.getElementById('edit-bio').value.trim() };
+                    const selectedFrame = document.getElementById('edit-frame').value;
+                    const updates = { 
+                        name: name, 
+                        bio: document.getElementById('edit-bio').value.trim(),
+                        equippedFrame: selectedFrame 
+                    };
                     if (appState.tempBase64Banner) updates.banner = appState.tempBase64Banner;
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
                     app.closeSettingsModal(); app.showToast("Perfil salvo!", "success");
@@ -1887,7 +1769,7 @@
                 results.forEach(u => {
                     const div = document.createElement('div');
                     div.className = 'rank-card';
-                    div.innerHTML = `<img src="${app.getDisplayAvatar(u)}" class="avatar" style="width: 44px; height: 44px;"><div class="rank-info"><h4>${u.name}</h4><span>${u.handle}</span></div><button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>`;
+                    div.innerHTML = `<img src="${u.avatar}" class="avatar ${app.getFrameClass(u)}" style="width: 44px; height: 44px;"><div class="rank-info"><h4>${u.name} ${app.getUserBadges(u)}</h4><span>${u.handle}</span></div><button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>`;
                     container.appendChild(div);
                 });
             },
@@ -1898,7 +1780,7 @@
                 [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50).forEach((u, idx) => {
                     const div = document.createElement('div');
                     div.className = 'rank-card'; div.onclick = () => app.navigate('public_profile', null, u.uid);
-                    div.innerHTML = `<div class="rank-pos">#${idx + 1}</div><img src="${app.getDisplayAvatar(u)}" class="avatar" style="width: 38px; height: 38px;"><div class="rank-info"><h4>${u.name} ${u.uid === appState.firebaseUser?.uid ? ' (Você)' : ''}</h4><span>${u.handle} • Nível ${u.level || 1}</span></div><div class="rank-score">${u.xp || 0} XP</div>`;
+                    div.innerHTML = `<div class="rank-pos">#${idx + 1}</div><img src="${u.avatar}" class="avatar ${app.getFrameClass(u)}" style="width: 38px; height: 38px;"><div class="rank-info"><h4>${u.name} ${app.getUserBadges(u)}</h4><span>${u.handle} • Nível ${u.level || 1}</span></div><div class="rank-score">${u.xp || 0} XP</div>`;
                     container.appendChild(div);
                 });
             },
@@ -1912,7 +1794,7 @@
                 setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
             },
             
-            // --- SISTEMA DE LOJA, INVENTÁRIO E COSMÉTICOS ---
+            // --- SISTEMA DE LOJA ---
             renderStoreCategories: () => {
                 const container = document.getElementById('store-categories-container');
                 if (!container) return;
@@ -1944,195 +1826,20 @@
 
                 filtered.forEach(prod => {
                     const card = document.createElement('div');
-                    card.className = `product-card rarity-${prod.rarity || 'comum'}`;
+                    card.className = 'product-card';
                     card.onclick = () => app.openBuyModal(prod.id);
                     
-                    const iconOrImg = prod.image ? `<img src="${prod.image}">` : `<i class="${prod.icon}"></i>`;
-                    const rarityData = appState.rarities[prod.rarity || 'comum'];
-                    const inv = appState.currentUserData.inventory || [];
-                    const alreadyOwned = prod.category !== 'vip' && inv.includes(prod.id);
+                    const iconOrImg = prod.image ? `<img src="${prod.image}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<i class="${prod.icon}"></i>`;
                     
                     card.innerHTML = `
                         <div class="product-img-container">${iconOrImg}</div>
-                        <div class="rarity-tag" style="background: rgba(0,0,0,0.5); color: ${rarityData.color}; border: 1px solid ${rarityData.color};">${rarityData.label}</div>
                         <div class="product-name">${prod.name}</div>
                         ${prod.duration ? `<div class="product-duration">${prod.duration}</div>` : ''}
-                        ${prod.vipRequired ? `<div style="font-size:0.7rem; color:var(--danger); margin-bottom:5px;"><i class="fa-solid fa-lock"></i> VIP</div>` : ''}
                         <div class="product-price"><i class="fa-solid fa-coins"></i> ${prod.price}</div>
-                        <button class="btn-buy" onclick="event.stopPropagation(); app.openBuyModal('${prod.id}')">${alreadyOwned ? 'Possuído' : 'Comprar'}</button>
+                        <button class="btn-buy" onclick="event.stopPropagation(); app.openBuyModal('${prod.id}')">Comprar</button>
                     `;
                     container.appendChild(card);
                 });
-            },
-
-            // Aba de Inventário
-            renderInventoryCategories: () => {
-                const container = document.getElementById('inventory-categories-container');
-                if (!container) return;
-                container.innerHTML = '';
-                
-                // Ignora categoria VIP no Inventário
-                appState.storeCategories.filter(c => c.id !== 'vip').forEach(cat => {
-                    const pill = document.createElement('div');
-                    pill.className = `category-pill ${appState.activeInventoryCategory === cat.id ? 'active' : ''}`;
-                    pill.innerText = cat.name;
-                    pill.onclick = () => {
-                        appState.activeInventoryCategory = cat.id;
-                        app.renderInventoryCategories();
-                        app.renderInventoryItems();
-                    };
-                    container.appendChild(pill);
-                });
-            },
-
-            renderInventoryItems: () => {
-                const container = document.getElementById('inventory-grid-container');
-                if (!container) return;
-                container.innerHTML = '';
-                
-                const myInventory = appState.currentUserData.inventory || [];
-                const equipped = appState.currentUserData.equipped || { decor: [], frames: null, avatars: null, banners: null, effects: null };
-                
-                const filtered = appState.catalog.filter(p => myInventory.includes(p.id) && p.category === appState.activeInventoryCategory);
-                
-                if (filtered.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 30vh; text-align: center; color: var(--text-muted);"><i class="fa-solid fa-box-open" style="font-size: 2.5rem; margin-bottom: 12px; color: rgba(255,255,255,0.1);"></i><p>Nenhum item nesta categoria.<br>Visite a Loja para adquirir mais.</p></div>`;
-                    return;
-                }
-
-                filtered.forEach(prod => {
-                    const isEquipped = prod.category === 'decor' ? equipped.decor.includes(prod.id) : equipped[prod.category] === prod.id;
-                    
-                    const card = document.createElement('div');
-                    card.className = `product-card rarity-${prod.rarity || 'comum'}`;
-                    
-                    const iconOrImg = prod.image ? `<img src="${prod.image}">` : `<i class="${prod.icon}"></i>`;
-                    const rarityData = appState.rarities[prod.rarity || 'comum'];
-                    
-                    card.innerHTML = `
-                        <div class="product-img-container">${iconOrImg}</div>
-                        <div class="rarity-tag" style="background: rgba(0,0,0,0.5); color: ${rarityData.color}; border: 1px solid ${rarityData.color};">${rarityData.label}</div>
-                        <div class="product-name">${prod.name}</div>
-                        ${prod.vipRequired ? `<div style="font-size:0.7rem; color:var(--danger); margin-bottom:5px;"><i class="fa-solid fa-lock"></i> VIP</div>` : ''}
-                        
-                        <div style="flex:1"></div>
-                        <button class="btn-buy ${isEquipped ? 'btn-unequip' : 'btn-equip'}" onclick="app.toggleEquipItem('${prod.id}')">
-                            ${isEquipped ? 'Desequipar' : 'Equipar'}
-                        </button>
-                    `;
-                    container.appendChild(card);
-                });
-            },
-
-            // Aba de Personalizar Perfil (No Modal)
-            openCustomizeModal: () => {
-                document.getElementById('modal-customize').classList.add('active');
-                app.renderCustomizeCategories();
-                app.renderCustomizeItems();
-            },
-            closeCustomizeModal: () => {
-                document.getElementById('modal-customize').classList.remove('active');
-            },
-            
-            renderCustomizeCategories: () => {
-                const container = document.getElementById('customize-categories-container');
-                if (!container) return;
-                container.innerHTML = '';
-                
-                // Apenas categorias equipáveis no modal
-                const equipCategories = ['decor', 'frames', 'avatars', 'banners'];
-                appState.storeCategories.filter(c => equipCategories.includes(c.id)).forEach(cat => {
-                    const pill = document.createElement('div');
-                    pill.className = `category-pill ${appState.activeCustomizeCategory === cat.id ? 'active' : ''}`;
-                    pill.innerText = cat.name;
-                    pill.onclick = () => {
-                        appState.activeCustomizeCategory = cat.id;
-                        app.renderCustomizeCategories();
-                        app.renderCustomizeItems();
-                    };
-                    container.appendChild(pill);
-                });
-            },
-
-            renderCustomizeItems: () => {
-                const container = document.getElementById('customize-grid-container');
-                if (!container) return;
-                container.innerHTML = '';
-                
-                const myInventory = appState.currentUserData.inventory || [];
-                const equipped = appState.currentUserData.equipped || { decor: [], frames: null, avatars: null, banners: null, effects: null };
-                
-                const filtered = appState.catalog.filter(p => myInventory.includes(p.id) && p.category === appState.activeCustomizeCategory);
-                
-                if (filtered.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 10px; text-align: center; color: var(--text-muted);"><i class="fa-solid fa-ghost" style="font-size: 2rem; margin-bottom: 12px; color: rgba(255,255,255,0.1);"></i><p>Vazio.<br>Obtenha itens na Loja.</p></div>`;
-                    return;
-                }
-
-                filtered.forEach(prod => {
-                    const isEquipped = prod.category === 'decor' ? equipped.decor.includes(prod.id) : equipped[prod.category] === prod.id;
-                    const card = document.createElement('div');
-                    card.className = `product-card rarity-${prod.rarity || 'comum'}`;
-                    
-                    const iconOrImg = prod.image ? `<img src="${prod.image}">` : `<i class="${prod.icon}"></i>`;
-                    const rarityData = appState.rarities[prod.rarity || 'comum'];
-                    
-                    card.innerHTML = `
-                        <div class="product-img-container">${iconOrImg}</div>
-                        <div class="rarity-tag" style="background: rgba(0,0,0,0.5); color: ${rarityData.color}; border: 1px solid ${rarityData.color};">${rarityData.label}</div>
-                        <div class="product-name" style="font-size: 0.9rem;">${prod.name}</div>
-                        <div style="flex:1"></div>
-                        <button class="btn-buy ${isEquipped ? 'btn-unequip' : 'btn-equip'}" onclick="app.toggleEquipItem('${prod.id}')" style="font-size:0.8rem; padding: 6px;">
-                            ${isEquipped ? 'Desequipar' : 'Equipar'}
-                        </button>
-                    `;
-                    container.appendChild(card);
-                });
-            },
-
-            // Lógica de Equipar/Desequipar
-            toggleEquipItem: async (itemId) => {
-                const item = appState.catalog.find(i => i.id === itemId);
-                if (!item) return;
-
-                const userData = appState.currentUserData;
-                let equipped = userData.equipped ? { ...userData.equipped } : { decor: [], frames: null, avatars: null, banners: null, effects: null };
-                
-                const isEquipped = item.category === 'decor' 
-                    ? equipped.decor.includes(itemId) 
-                    : equipped[item.category] === itemId;
-
-                if (!isEquipped) {
-                    // Verificação de restrição VIP em tempo real
-                    if (item.vipRequired) {
-                        const vipInfo = app.getVIPInfo(userData);
-                        if (!vipInfo.isActive) {
-                            return app.showToast("Você precisa de uma assinatura VIP ativa para equipar este cosmético.", "error");
-                        }
-                    }
-
-                    // Equipando
-                    if (item.category === 'decor') {
-                        if (equipped.decor.length >= 3) return app.showToast("Limite de 3 decorações simultâneas.", "error");
-                        equipped.decor.push(itemId);
-                    } else {
-                        equipped[item.category] = itemId;
-                    }
-                } else {
-                    // Desequipando
-                    if (item.category === 'decor') {
-                        equipped.decor = equipped.decor.filter(id => id !== itemId);
-                    } else {
-                        equipped[item.category] = null;
-                    }
-                }
-
-                try {
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { equipped });
-                    app.showToast(isEquipped ? "Cosmético removido." : "Cosmético aplicado!", "success");
-                } catch(e) {
-                    app.showToast("Erro ao sincronizar inventário.", "error");
-                }
             },
 
             openBuyModal: (productId) => {
@@ -2143,19 +1850,10 @@
                 const iconEl = document.getElementById('buy-modal-icon');
                 iconEl.innerHTML = product.image ? `<img src="${product.image}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : `<i class="${product.icon}"></i>`;
                 
-                const rarityData = appState.rarities[product.rarity || 'comum'];
-                const rarityEl = document.getElementById('buy-modal-rarity');
-                rarityEl.innerText = rarityData.label;
-                rarityEl.style.color = rarityData.color;
-                rarityEl.style.border = `1px solid ${rarityData.color}`;
-                rarityEl.style.background = `rgba(0,0,0,0.5)`;
-
                 document.getElementById('buy-modal-name').innerText = product.name;
-                document.getElementById('buy-modal-duration').innerText = product.duration ? `Duração: ${product.duration}` : 'Item Permanente / Cosmético';
+                document.getElementById('buy-modal-duration').innerText = product.duration ? `Duração: ${product.duration}` : 'Item Permanente';
                 document.getElementById('buy-modal-desc').innerText = product.description;
                 document.getElementById('buy-modal-price').innerHTML = `<i class="fa-solid fa-coins"></i> ${product.price} NCoins`;
-                
-                document.getElementById('buy-modal-vip-warning').style.display = product.vipRequired ? 'block' : 'none';
                 
                 document.getElementById('modal-buy').classList.add('active');
             },
@@ -2170,56 +1868,60 @@
                 if (!product) return;
 
                 const btn = document.querySelector('#modal-buy .btn-primary');
-                btn.disabled = true;
-                btn.innerHTML = 'Processando...';
-
-                try {
-                    // Processamento Lógica de Planos VIP
-                    if (product.category === 'vip') {
+                
+                if (product.category === 'vip') {
+                    btn.disabled = true;
+                    btn.innerHTML = 'Ativando Ligação...';
+                    try {
                         const now = new Date();
                         let expiresAt = null;
-
                         if (product.durationDays) {
                             expiresAt = new Date(now.getTime() + (product.durationDays * 24 * 60 * 60 * 1000)).toISOString();
                         }
-
-                        const vipData = {
-                            active: true,
-                            planId: product.id,
-                            activatedAt: now.toISOString(),
-                            expiresAt: expiresAt
-                        };
-
-                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), {
-                            vip: vipData
-                        });
-
+                        const vipData = { active: true, planId: product.id, activatedAt: now.toISOString(), expiresAt: expiresAt };
+                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), { vip: vipData });
                         app.showToast(`Plano ${product.name} ativado com sucesso!`, "success");
                         app.closeBuyModal();
-                    } else {
-                        // Processamento Lógica de Cosméticos
-                        const userData = appState.currentUserData;
-                        const inv = userData.inventory || [];
-                        
-                        if (inv.includes(product.id)) {
-                            app.showToast("Você já possui este item em seu Inventário!", "info");
-                            app.closeBuyModal();
-                            return;
-                        }
-                        
-                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), {
-                            inventory: arrayUnion(product.id)
-                        });
-                        
-                        app.showToast(`${product.name} adicionado ao Inventário!`, "success");
-                        app.closeBuyModal();
+                    } catch (e) {
+                        app.showToast("Falha na ativação da malha neural.", "error");
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Confirmar Compra';
                     }
-                } catch (e) {
-                    console.error(e);
-                    app.showToast("Falha na transação da malha neural.", "error");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = 'Confirmar Transação';
+                } else if (product.category === 'frames') {
+                    btn.disabled = true;
+                    btn.innerHTML = 'Processando...';
+                    
+                    const owned = appState.currentUserData.ownedFrames || ['default'];
+                    if (owned.includes(product.id)) {
+                        app.showToast("Você já possui esta moldura registrada.", "info");
+                        btn.disabled = false; btn.innerHTML = 'Confirmar Compra';
+                        app.closeBuyModal();
+                        return;
+                    }
+                    
+                    const myCoins = appState.currentUserData.ncoins || 0;
+                    if (myCoins < product.price) {
+                        app.showToast("NCoins insuficientes para esta transação.", "error");
+                        btn.disabled = false; btn.innerHTML = 'Confirmar Compra';
+                        return;
+                    }
+
+                    try {
+                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), { 
+                            ownedFrames: arrayUnion(product.id),
+                            ncoins: myCoins - product.price
+                        });
+                        app.showToast(`Você adquiriu a moldura ${product.name}. Vá em configurações para equipá-la.`, "success");
+                        app.closeBuyModal();
+                    } catch (e) {
+                        app.showToast("Erro na transação. Tente novamente.", "error");
+                    } finally {
+                        btn.disabled = false; btn.innerHTML = 'Confirmar Compra';
+                    }
+                } else {
+                    app.showToast("O sistema de transações para esta categoria será habilitado em breve.", "info");
+                    app.closeBuyModal();
                 }
             },
 

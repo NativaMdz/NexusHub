@@ -351,47 +351,51 @@
         ========================== */
 
         .theme-special_nebula{
-            position: relative;
-            z-index: 0; /* Define um novo contexto de empilhamento para evitar vazamento das camadas negativas */
-        }
+    position: relative;
+    z-index: 0;
+    border-radius: 16px;
+    overflow: hidden;
+}
 
       .theme-special_nebula .profile-header::after{
             content:"";
             position:absolute;
-            inset:0;
+            inset: -30px;
             pointer-events:none;
             z-index:-1; /* Coloca a animação sob o texto principal mas acima da cor opaca (z-index -2 do header::before) */
 
             background:
-                radial-gradient(circle at 15% 20%, rgba(162,72,255,.30), transparent 28%),
-                radial-gradient(circle at 80% 35%, rgba(0,195,255,.22), transparent 32%),
-                radial-gradient(circle at 45% 80%, rgba(255,0,255,.18), transparent 26%),
-                radial-gradient(circle,#ffffff 1px,transparent 2px),
-                radial-gradient(circle,#b57cff 1px,transparent 2px),
-                radial-gradient(circle,#7edcff 1px,transparent 2px);
+    radial-gradient(circle at 18% 18%, rgba(162,72,255,.28), transparent 30%),
+    radial-gradient(circle at 82% 22%, rgba(0,195,255,.24), transparent 34%),
+    radial-gradient(circle at 55% 75%, rgba(255,0,255,.18), transparent 28%),
+    radial-gradient(circle at 28% 60%, rgba(100,160,255,.14), transparent 25%),
+    radial-gradient(circle,#ffffff 1px,transparent 2px),
+    radial-gradient(circle,#b57cff 1px,transparent 2px),
+    radial-gradient(circle,#7edcff 1px,transparent 2px);
 
             background-size:
-                150% 150%,
-                150% 150%,
-                150% 150%,
-                140px 140px,
-                190px 190px,
-                240px 240px;
+    160% 160%,
+    160% 160%,
+    150% 150%,
+    170% 170%,
+    140px 140px,
+    190px 190px,
+    240px 240px;
 
             background-repeat:
-                no-repeat,
-                no-repeat,
-                no-repeat,
-                repeat,
-                repeat,
-                repeat;
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    repeat,
+    repeat,
+    repeat;
 
             opacity:.95;
 
             animation:
-                nebulaMove 18s ease-in-out infinite alternate,
-                starsMove 35s linear infinite,
-                starsTwinkle 4s ease-in-out infinite;
+    nebulaMove 18s ease-in-out infinite alternate,
+    starsTwinkle 4s ease-in-out infinite;
         }
 
         /* Conteúdo acima da animação */
@@ -408,46 +412,48 @@
         ================================ */
 
         @keyframes nebulaMove{
-            0%{
-                background-position:
-                0% 0%,
-                100% 20%,
-                30% 90%,
-                0 0,
-                0 0,
-                0 0;
-                transform:scale(1);
-            }
 
-            50%{
-                background-position:
-                40% 30%,
-                70% 60%,
-                80% 20%,
-                0 450px,
-                0 300px,
-                0 600px;
-                transform:scale(1.04);
-            }
+    0%{
+        background-position:
+            10% 10%,
+            90% 20%,
+            45% 80%,
+            25% 60%,
+            0 0,
+            0 0,
+            0 0;
 
-            100%{
-                background-position:
-                80% 60%,
-                20% 90%,
-                0% 0%,
-                0 900px,
-                0 600px,
-                0 1200px;
-                transform:scale(1);
-            }
-        }
+        transform: scale(1);
+    }
 
-        @keyframes starsMove{
-            0%{ transform:translateY(0px); }
-            100%{ transform:translateY(20px); }
-        }
+    50%{
+        background-position:
+            25% 25%,
+            70% 45%,
+            70% 40%,
+            40% 80%,
+            0 350px,
+            0 250px,
+            0 500px;
 
-        @keyframes starsTwinkle{
+        transform: scale(1.04);
+    }
+
+    100%{
+        background-position:
+            40% 40%,
+            55% 70%,
+            25% 25%,
+            15% 35%,
+            0 700px,
+            0 500px,
+            0 1000px;
+
+        transform: scale(1);
+    }
+}
+
+    @keyframes starsTwinkle{
             0%,100%{ opacity:.45; }
             50%{ opacity:.75; }
         }
@@ -2698,4 +2704,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-</html>
+    </html>

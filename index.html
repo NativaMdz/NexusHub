@@ -385,41 +385,31 @@
         .product-img-container i { font-size: 2.8rem; color: var(--purple); text-shadow: 0 0 15px var(--purple-glow); }
         
         /* Badges de Raridade e VIP */
-        .badges-container { position: absolute; top: 8px; left: 8px; display: flex; flex-direction: column; gap: 4px; z-index: 10; align-items: flex-start; }
-        .rarity-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; background: rgba(0,0,0,0.8); border: 1px solid; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
-        .vip-req-badge {
-    position: absolute;
+        .rarity-badge { position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; z-index: 10; background: rgba(0,0,0,0.8); border: 1px solid; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
+        .vip-req-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
 
-    /* Canto inferior esquerdo */
-    left: 8px;
-    bottom: 8px;
+    margin:8px 0 6px;
 
-    /* Remove as posições do topo */
-    top: unset;
-    right: unset;
+    padding:3px 8px;
 
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 0.65rem;
-    font-weight: bold;
-    z-index: 10;
+    border-radius:6px;
+    font-size:.65rem;
+    font-weight:bold;
 
-    background: rgba(0,0,0,.8);
-    color: #ffd700;
-    border: 1px solid #ffd700;
+    background:rgba(0,0,0,.8);
+    color:#ffd700;
+    border:1px solid #ffd700;
 
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
 
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    backdrop-filter: blur(4px);
+    backdrop-filter:blur(4px);
 }
 
-.vip-req-badge i{
-    font-size: 0.65rem;
-}
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
         .product-duration { font-size: 0.7rem; color: var(--cyan); margin-bottom: 8px; }
         .product-price { font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: bold; color: #ffd700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
@@ -2336,32 +2326,37 @@
                         iconOrImg = `<img src="${prod.image}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:10px; z-index: 2;">`;
                     }
                     
-                    let badgesHtml = '';
-                    if (prod.rarityLabel || (prod.requiresVip && !isOwned)) {
-                        badgesHtml = `<div class="badges-container">`;
-                        if (prod.rarityLabel) {
-                            badgesHtml += `<div class="rarity-badge" style="color: ${prod.rarityColor}; border-color: ${prod.rarityColor};">${prod.rarityLabel}</div>`;
-                        }
-                        if (prod.requiresVip && !isOwned) {
-                            badgesHtml += `<div class="vip-req-badge"><i class="fa-solid fa-crown"></i> REQUER VIP</div>`;
-                        }
-                        badgesHtml += `</div>`;
+                    let rarityHtml = '';
+                    if (prod.rarityLabel) {
+                        rarityHtml = `<div class="rarity-badge" style="color: ${prod.rarityColor}; border-color: ${prod.rarityColor};">${prod.rarityLabel}</div>`;
+                    }
+                    let vipReqHtml = '';
+                    if (prod.requiresVip && !isOwned) {
+                        vipReqHtml = `<div class="vip-req-badge"><i class="fa-solid fa-crown"></i> VIP</div>`;
                     }
                     
                     card.innerHTML = `
-                        <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                            <div class="product-img-container" style="${imgContainerStyle}">
-                                ${badgesHtml}
-                                ${iconOrImg}
-                            </div>
-                            <div class="product-name">${prod.name}</div>
-                            ${durationHtml}
-                            <div class="product-price"><i class="fa-solid fa-coins"></i> ${prod.price}</div>
-                        </div>
-                        <div style="width: 100%; margin-top: auto; padding-top: 10px;">
-                            ${buttonHtml}
-                        </div>
-                    `;
+    <div style="display:flex;flex-direction:column;align-items:center;width:100%;">
+
+        <div class="product-img-container" style="${imgContainerStyle}">
+            ${rarityHtml}
+            ${iconOrImg}
+        </div>
+
+        ${vipReqHtml}
+
+        <div class="product-name">${prod.name}</div>
+        ${durationHtml}
+        <div class="product-price">
+            <i class="fa-solid fa-coins"></i> ${prod.price}
+        </div>
+
+    </div>
+
+    <div style="width:100%;margin-top:auto;padding-top:10px;">
+        ${buttonHtml}
+    </div>
+`;
                     container.appendChild(card);
                 });
 
@@ -2553,4 +2548,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-</html>
+    </html>

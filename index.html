@@ -357,13 +357,28 @@
     overflow: hidden;
 }
 
+.theme-special_nebula .profile-header{
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 16px 16px;
+}
+
 .theme-special_nebula .profile-header::after{
     content:"";
     position:absolute;
-    inset:0;
-    border-radius:0 0 16px 16px;
+
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    border-radius:inherit;
+    box-sizing:border-box;
+
     pointer-events:none;
-    overflow:hidden;
     z-index:-1;
 
     background:
@@ -2698,4 +2713,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+            </html>

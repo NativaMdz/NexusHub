@@ -319,189 +319,173 @@
         .action-btn:hover { color: var(--cyan); }
 
         /* PERFIL (ESTRUTURAS ISOLADAS COM VARIÁVEIS CSS DE TEMA) */
-.profile-top-section { 
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    width: 100%;
+        .profile-top-section { 
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            width: 100%;
 
-    /* Variáveis do tema */
-    --theme-bg: var(--bg-glass);
-    --theme-border: rgba(176, 38, 255, 0.25);
-    --theme-glow: rgba(176, 38, 255, 0.12);
-}
+            /* Variáveis do tema */
+            --theme-bg: var(--bg-glass);
+            --theme-border: rgba(176, 38, 255, 0.25);
+            --theme-glow: rgba(176, 38, 255, 0.12);
+        }
 
-.theme-special_nebula,
-.theme-special_glacial,
-.theme-special_aurora,
-.theme-special_eclipse,
-.theme-special_royal {
-    position: relative;
-    overflow: hidden;
-}
+        .theme-special_nebula,
+        .theme-special_glacial,
+        .theme-special_aurora,
+        .theme-special_eclipse,
+        .theme-special_royal {
+            position: relative;
+            overflow: hidden;
+        }
 
-.profile-posts-section {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
+        .profile-posts-section {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
 
-/* ==========================
-   TEMA ESPECIAL - NEBULA
-========================== */
+        /* ==========================
+           TEMA ESPECIAL - NEBULA
+        ========================== */
 
-.theme-special_nebula{
-    position: relative;
-}
+        .theme-special_nebula{
+            position: relative;
+            z-index: 0; /* Define um novo contexto de empilhamento para evitar vazamento das camadas negativas */
+        }
 
-.theme-special_nebula::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:1;
+        .theme-special_nebula::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            z-index:-1; /* Coloca a animação sob o texto principal mas acima da cor opaca (z-index -2 do header::before) */
 
-    background:
-        radial-gradient(circle at 15% 20%, rgba(162,72,255,.30), transparent 28%),
-        radial-gradient(circle at 80% 35%, rgba(0,195,255,.22), transparent 32%),
-        radial-gradient(circle at 45% 80%, rgba(255,0,255,.18), transparent 26%),
-        radial-gradient(circle,#ffffff 1px,transparent 2px),
-        radial-gradient(circle,#b57cff 1px,transparent 2px),
-        radial-gradient(circle,#7edcff 1px,transparent 2px);
+            background:
+                radial-gradient(circle at 15% 20%, rgba(162,72,255,.30), transparent 28%),
+                radial-gradient(circle at 80% 35%, rgba(0,195,255,.22), transparent 32%),
+                radial-gradient(circle at 45% 80%, rgba(255,0,255,.18), transparent 26%),
+                radial-gradient(circle,#ffffff 1px,transparent 2px),
+                radial-gradient(circle,#b57cff 1px,transparent 2px),
+                radial-gradient(circle,#7edcff 1px,transparent 2px);
 
-    background-size:
-        150% 150%,
-        150% 150%,
-        150% 150%,
-        140px 140px,
-        190px 190px,
-        240px 240px;
+            background-size:
+                150% 150%,
+                150% 150%,
+                150% 150%,
+                140px 140px,
+                190px 190px,
+                240px 240px;
 
-    background-repeat:
-        no-repeat,
-        no-repeat,
-        no-repeat,
-        repeat,
-        repeat,
-        repeat;
+            background-repeat:
+                no-repeat,
+                no-repeat,
+                no-repeat,
+                repeat,
+                repeat,
+                repeat;
 
-    opacity:.95;
+            opacity:.95;
 
-    animation:
-        nebulaMove 18s ease-in-out infinite alternate,
-        starsMove 35s linear infinite,
-        starsTwinkle 4s ease-in-out infinite;
-}
+            animation:
+                nebulaMove 18s ease-in-out infinite alternate,
+                starsMove 35s linear infinite,
+                starsTwinkle 4s ease-in-out infinite;
+        }
 
-/* Conteúdo acima da animação */
+        /* Conteúdo acima da animação */
 
-.theme-special_nebula .profile-banner,
-.theme-special_nebula .profile-header{
-    position:relative;
-    z-index:2;
-}
+        .theme-special_nebula .profile-banner,
+        .theme-special_nebula .profile-header{
+            position:relative;
+            /* z-index 2 foi removido. Isso permite que o header caia no fluxo padrão e 
+               seu ::before negativo desça corretamente para sob o ::after do Nebula. */
+        }
 
-/* ===============================
-   ANIMAÇÕES
-================================ */
+        /* ===============================
+           ANIMAÇÕES
+        ================================ */
 
-@keyframes nebulaMove{
+        @keyframes nebulaMove{
+            0%{
+                background-position:
+                0% 0%,
+                100% 20%,
+                30% 90%,
+                0 0,
+                0 0,
+                0 0;
+                transform:scale(1);
+            }
 
-0%{
-background-position:
-0% 0%,
-100% 20%,
-30% 90%,
-0 0,
-0 0,
-0 0;
-transform:scale(1);
-}
+            50%{
+                background-position:
+                40% 30%,
+                70% 60%,
+                80% 20%,
+                0 450px,
+                0 300px,
+                0 600px;
+                transform:scale(1.04);
+            }
 
-50%{
-background-position:
-40% 30%,
-70% 60%,
-80% 20%,
-0 450px,
-0 300px,
-0 600px;
-transform:scale(1.04);
-}
+            100%{
+                background-position:
+                80% 60%,
+                20% 90%,
+                0% 0%,
+                0 900px,
+                0 600px,
+                0 1200px;
+                transform:scale(1);
+            }
+        }
 
-100%{
-background-position:
-80% 60%,
-20% 90%,
-0% 0%,
-0 900px,
-0 600px,
-0 1200px;
-transform:scale(1);
-}
+        @keyframes starsMove{
+            0%{ transform:translateY(0px); }
+            100%{ transform:translateY(20px); }
+        }
 
-}
-
-@keyframes starsMove{
-
-0%{
-transform:translateY(0px);
-}
-
-100%{
-transform:translateY(20px);
-}
-
-}
-
-@keyframes starsTwinkle{
-
-0%,100%{
-opacity:.45;
-}
-
-50%{
-opacity:.75;
-}
-
-}
+        @keyframes starsTwinkle{
+            0%,100%{ opacity:.45; }
+            50%{ opacity:.75; }
+        }
 
         .profile-banner { width: 100%; height: 120px; border-radius: 16px 16px 0 0; background-size: cover; background-position: center; background-color: #222; margin-bottom: 0; border: 1px solid var(--theme-border); border-bottom: none; flex-shrink: 0; }
 
-.profile-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 3.5rem 1rem 1.8rem;
-    background: transparent;
-    border-radius: 0 0 16px 16px;
-    margin-bottom: 1.2rem;
-    border: 1px solid var(--theme-border);
-    border-top: none;
-    box-shadow: 0 0 25px var(--theme-glow);
-    animation: fadeIn .4s ease forwards;
-    text-align: center;
-    position: relative;
-    flex-shrink: 0;
-}
+        .profile-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3.5rem 1rem 1.8rem;
+            background: transparent;
+            border-radius: 0 0 16px 16px;
+            margin-bottom: 1.2rem;
+            border: 1px solid var(--theme-border);
+            border-top: none;
+            box-shadow: 0 0 25px var(--theme-glow);
+            animation: fadeIn .4s ease forwards;
+            text-align: center;
+            position: relative;
+            flex-shrink: 0;
+        }
    
-    .profile-header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    z-index:-2;
-    background:var(--theme-bg);
-}
+        .profile-header::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            z-index:-2;
+            background:var(--theme-bg);
+        }
 
-.profile-header::after{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    pointer-events:none;
-
-    z-index:-1;
-}  
+        .profile-header::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            z-index:-1;
+        }  
            
         .profile-avatar-container { position: absolute; top: -42px; left: 50%; transform: translateX(-50%); z-index: 5; }
         .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; background-color: var(--bg-base); transition: all 0.3s ease; }
@@ -559,28 +543,22 @@ opacity:.75;
         /* Badges de Raridade e VIP */
         .rarity-badge { position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; z-index: 10; background: rgba(0,0,0,0.8); border: 1px solid; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
         .vip-req-badge{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:4px;
-
-    margin:8px 0 6px;
-
-    padding:3px 8px;
-
-    border-radius:6px;
-    font-size:.65rem;
-    font-weight:bold;
-
-    background:rgba(0,0,0,.8);
-    color:#ffd700;
-    border:1px solid #ffd700;
-
-    text-transform:uppercase;
-    letter-spacing:.5px;
-
-    backdrop-filter:blur(4px);
-}
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:4px;
+            margin:8px 0 6px;
+            padding:3px 8px;
+            border-radius:6px;
+            font-size:.65rem;
+            font-weight:bold;
+            background:rgba(0,0,0,.8);
+            color:#ffd700;
+            border:1px solid #ffd700;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+            backdrop-filter:blur(4px);
+        }
 
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
         .product-duration { font-size: 0.7rem; color: var(--cyan); margin-bottom: 8px; }
@@ -2720,4 +2698,4 @@ opacity:.75;
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+</html>

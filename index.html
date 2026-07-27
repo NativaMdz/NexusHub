@@ -386,7 +386,29 @@
         
         /* Badges de Raridade e VIP */
         .rarity-badge { position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; z-index: 10; background: rgba(0,0,0,0.8); border: 1px solid; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
-        .vip-req-badge { display:inline-flex; align-items:center; justify-content:center; gap:4px; margin:8px 0 6px; padding:3px 8px; border-radius:6px; font-size:.65rem; font-weight:bold; background:rgba(0,0,0,.8); color:#ffd700; border:1px solid #ffd700; text-transform:uppercase; letter-spacing:.5px; backdrop-filter:blur(4px); }
+        .vip-req-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+
+    margin:8px 0 6px;
+
+    padding:3px 8px;
+
+    border-radius:6px;
+    font-size:.65rem;
+    font-weight:bold;
+
+    background:rgba(0,0,0,.8);
+    color:#ffd700;
+    border:1px solid #ffd700;
+
+    text-transform:uppercase;
+    letter-spacing:.5px;
+
+    backdrop-filter:blur(4px);
+}
 
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
         .product-duration { font-size: 0.7rem; color: var(--cyan); margin-bottom: 8px; }
@@ -500,29 +522,6 @@
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* TEMA ECLIPSE MÍTICO - UPGRADE VISUAL */
-        @keyframes eclipseBreathingHeader {
-            0%, 100% {
-                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95), 0 0 15px rgba(40, 10, 80, 0.5), inset 0 0 10px rgba(255, 0, 255, 0.05);
-                border-color: rgba(60, 20, 80, 0.6);
-            }
-            50% {
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 1), 0 0 45px rgba(100, 20, 150, 0.8), inset 0 0 25px rgba(255, 0, 255, 0.2);
-                border-color: rgba(140, 30, 180, 0.9);
-            }
-        }
-        @keyframes eclipseBreathingBanner {
-            0%, 100% { border-color: rgba(60, 20, 80, 0.6) !important; }
-            50% { border-color: rgba(140, 30, 180, 0.9) !important; }
-        }
-        .theme-eclipse-active .profile-header {
-            animation: eclipseBreathingHeader 9s ease-in-out infinite !important;
-            background: radial-gradient(circle at 50% -20%, rgba(20, 5, 35, 0.95) 0%, rgba(5, 5, 7, 1) 80%) !important;
-        }
-        .theme-eclipse-active .profile-banner {
-            animation: eclipseBreathingBanner 9s ease-in-out infinite !important;
-        }
     </style>
 </head>
 <body>
@@ -878,12 +877,12 @@
                 { id: 'theme_graphite', name: 'Graphite Gray', description: 'Neutro, tático e militarizado.', category: 'themes', icon: 'fa-solid fa-shield', price: 1200, status: 'active', previewColor: 'rgba(25, 25, 28, 0.9)', previewBorder: 'rgba(140, 140, 145, 0.5)' },
                 { id: 'theme_cyan', name: 'Cyan', description: 'O clássico néon ciano das mega corporações.', category: 'themes', icon: 'fa-solid fa-snowflake', price: 1500, status: 'active', previewColor: 'rgba(5, 25, 35, 0.85)', previewBorder: 'rgba(0, 243, 255, 0.5)' },
 
-                /* NOVOS TEMAS ESPECIAIS */
-                { id: 'special_nebula', name: 'Nebula', description: 'Inspirado no espaço profundo. Nebulosas discretas, sensação de profundidade e visual premium.', category: 'special_themes', icon: 'fa-solid fa-meteor', price: 15000, status: 'active', rarityColor: '#ffd700', rarityLabel: '🟡 Lendário', previewColor: 'radial-gradient(circle at 20% 30%, #280a50, #05050a)', previewBorder: '#9632ff', requiresVip: true },
-                { id: 'special_glacial', name: 'Neon Glacial', description: 'Cristais de gelo, reflexos cristalinos e brilho neon suave. Extremamente limpo e elegante.', category: 'special_themes', icon: 'fa-regular fa-snowflake', price: 12000, status: 'active', rarityColor: '#b026ff', rarityLabel: '🟣 Épico', previewColor: 'linear-gradient(135deg, #0a1928, #050f19)', previewBorder: '#b4e6ff', requiresVip: false },
-                { id: 'special_aurora', name: 'Aurora', description: 'Inspirado na Aurora Boreal. Faixas luminosas suaves entre verde, azul e roxo. Iluminação delicada.', category: 'special_themes', icon: 'fa-solid fa-smog', price: 20000, status: 'active', rarityColor: '#00f3ff', rarityLabel: '🌈 Exclusivo', previewColor: 'linear-gradient(to bottom, #050a0f, #050a0f), radial-gradient(ellipse at 50% 0%, rgba(0, 255, 150, 0.4), transparent)', previewBorder: '#00ff96', requiresVip: true },
-                { id: 'special_eclipse', name: 'Eclipse', description: 'Preto premium com reflexos em roxo escuro e sombras suaves. Luxuoso e minimalista.', category: 'special_themes', icon: 'fa-solid fa-moon', price: 30000, status: 'active', rarityColor: '#ff2a2a', rarityLabel: '🔴 Mítico', previewColor: 'radial-gradient(circle at 50% 50%, #0f0a14, #000000)', previewBorder: '#28143c', requiresVip: true },
-                { id: 'special_royal', name: 'Royal Prestige', description: 'Azul-marinho profundo com detalhes dourados metálicos e reflexos elegantes. Realeza corporativa.', category: 'special_themes', icon: 'fa-solid fa-chess-king', price: 22000, status: 'active', rarityColor: '#00f3ff', rarityLabel: '🌈 Exclusivo', previewColor: 'linear-gradient(135deg, #0a0f28, #05050f)', previewBorder: '#ffd700', requiresVip: false },
+                /* NOVOS TEMAS ESPECIAIS - VIP Globalmente Requerido pela Categoria */
+                { id: 'special_nebula', name: 'Nebula', description: 'Inspirado no espaço profundo. Nebulosas discretas, sensação de profundidade e visual premium.', category: 'special_themes', icon: 'fa-solid fa-meteor', price: 15000, status: 'active', rarityColor: '#ffd700', rarityLabel: '🟡 Lendário', previewColor: 'radial-gradient(circle at 20% 30%, #280a50, #05050a)', previewBorder: '#9632ff' },
+                { id: 'special_glacial', name: 'Neon Glacial', description: 'Cristais de gelo, reflexos cristalinos e brilho neon suave. Extremamente limpo e elegante.', category: 'special_themes', icon: 'fa-regular fa-snowflake', price: 12000, status: 'active', rarityColor: '#b026ff', rarityLabel: '🟣 Épico', previewColor: 'linear-gradient(135deg, #0a1928, #050f19)', previewBorder: '#b4e6ff' },
+                { id: 'special_aurora', name: 'Aurora', description: 'Inspirado na Aurora Boreal. Faixas luminosas suaves entre verde, azul e roxo. Iluminação delicada.', category: 'special_themes', icon: 'fa-solid fa-smog', price: 20000, status: 'active', rarityColor: '#00f3ff', rarityLabel: '🌈 Exclusivo', previewColor: 'linear-gradient(to bottom, #050a0f, #050a0f), radial-gradient(ellipse at 50% 0%, rgba(0, 255, 150, 0.4), transparent)', previewBorder: '#00ff96' },
+                { id: 'special_eclipse', name: 'Eclipse', description: 'Preto premium com reflexos em roxo escuro e sombras suaves. Luxuoso e minimalista.', category: 'special_themes', icon: 'fa-solid fa-moon', price: 30000, status: 'active', rarityColor: '#ff2a2a', rarityLabel: '🔴 Mítico', previewColor: 'radial-gradient(circle at 50% 50%, #0f0a14, #000000)', previewBorder: '#28143c' },
+                { id: 'special_royal', name: 'Royal Prestige', description: 'Azul-marinho profundo com detalhes dourados metálicos e reflexos elegantes. Realeza corporativa.', category: 'special_themes', icon: 'fa-solid fa-chess-king', price: 22000, status: 'active', rarityColor: '#00f3ff', rarityLabel: '🌈 Exclusivo', previewColor: 'linear-gradient(135deg, #0a0f28, #05050f)', previewBorder: '#ffd700' },
 
                 { id: 'frame_neon_cyan', name: 'Neon Ciano', description: 'Borda brilhante com assinatura cibernética clássica.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 1500, duration: '', status: 'active' },
                 { id: 'frame_cyber_purple', name: 'Cyber Roxo', description: 'Aura roxa pulsante da malha profunda.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2000, duration: '', status: 'active' },
@@ -1002,11 +1001,10 @@
                             updates.banner = user.staticBannerFallback || '';
                         }
                         
-                        // Os Temas Especiais (requiresVip) não são mais removidos ao expirar o VIP.
-                        // Eles pertencem ao usuário permanentemente após a compra e podem ser usados.
+                        // Temas especiais agora permanecem mesmo após expiração, portanto não são mais revertidos.
 
                         await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
-                        app.showToast("Sua assinatura VIP expirou. Benefícios e imagens animadas restaurados.", "info");
+                        app.showToast("Sua assinatura VIP expirou. Benefícios e imagens restaurados.", "info");
                     } catch (e) {
                         console.error("Erro na expiração do VIP", e);
                     }
@@ -1922,9 +1920,6 @@
                 const vipStatusDisplay = userData.vip ? `<div class="profile-vip-status" style="font-size: 0.75rem; color: ${vipInfo.isActive ? '#ffd700' : 'var(--text-muted)'}; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; justify-content: center;"><i class="fa-solid fa-crown"></i> Status: VIP ${vipInfo.status}</div>` : '';
 
                 const themeStyle = app.getProfileThemeStyle(userData);
-                
-                const activeThemeId = userData.profileTheme || 'default';
-                const eclipseClass = activeThemeId === 'special_eclipse' ? 'theme-eclipse-active' : '';
 
                 let actionButton = '';
                 if (isMe && !isPublic) {
@@ -1934,7 +1929,7 @@
                 }
 
                 const html = `
-                    <section class="profile-top-section ${eclipseClass}" style="${themeStyle}">
+                    <section class="profile-top-section" style="${themeStyle}">
                         <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
                         <div class="profile-header">
                             <div class="profile-avatar-container">
@@ -1974,14 +1969,7 @@
                 if (!viewUser) return;
 
                 const topSection = document.querySelector('.profile-top-section');
-                if (topSection) {
-                    topSection.style.cssText = app.getProfileThemeStyle(viewUser);
-                    if (viewUser.profileTheme === 'special_eclipse') {
-                        topSection.classList.add('theme-eclipse-active');
-                    } else {
-                        topSection.classList.remove('theme-eclipse-active');
-                    }
-                }
+                if (topSection) topSection.style.cssText = app.getProfileThemeStyle(viewUser);
 
                 if (document.getElementById('stat-level')) document.getElementById('stat-level').innerText = `LVL ${viewUser.level || 1}`;
                 if (document.getElementById('stat-followers')) document.getElementById('stat-followers').innerText = viewUser.followers ? viewUser.followers.length : 0;
@@ -2310,11 +2298,17 @@
                         }
                     }
 
+                    if (isSpecialTheme && !vipInfo.isActive && !isOwned) {
+                        buttonHtml = `<button class="btn-buy" style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border-color: transparent; cursor: not-allowed; opacity: 1;" onclick="event.stopPropagation(); app.showToast('Este item é exclusivo para usuários com um Plano VIP ativo.', 'error')"><i class="fa-solid fa-lock"></i> Comprar</button>`;
+                    }
+
                     if (!isCurrentVIP && isVIP) {
                         card.onclick = () => {
                             if(vipInfo.isActive) app.showToast('Você já possui um plano VIP ativo. Aguarde o término para adquirir um novo.', 'info');
                             else app.openBuyModal(prod.id);
                         };
+                    } else if (isSpecialTheme && !vipInfo.isActive && !isOwned) {
+                        card.onclick = () => app.showToast('Este item é exclusivo para usuários com um Plano VIP ativo.', 'error');
                     } else if (!isOwned && !isCurrentVIP) {
                         card.onclick = () => app.openBuyModal(prod.id);
                     }
@@ -2334,8 +2328,8 @@
                         rarityHtml = `<div class="rarity-badge" style="color: ${prod.rarityColor}; border-color: ${prod.rarityColor};">${prod.rarityLabel}</div>`;
                     }
                     let vipReqHtml = '';
-                    if (prod.requiresVip && !isOwned) {
-                        vipReqHtml = `<div class="vip-req-badge"><i class="fa-solid fa-crown"></i> VIP</div>`;
+                    if (isSpecialTheme && !isOwned) {
+                        vipReqHtml = `<div class="vip-req-badge"><i class="fa-solid fa-crown"></i> SOMENTE VIP</div>`;
                     }
                     
                     card.innerHTML = `
@@ -2420,7 +2414,8 @@
                 
                 document.getElementById('buy-modal-duration').innerText = product.duration ? `Duração: ${product.duration}` : 'Item Permanente';
                 
-                let descExtra = product.requiresVip ? `<br><br><span style="color: #ffd700; font-weight: bold; padding: 6px 10px; background: rgba(255, 215, 0, 0.1); border: 1px dashed rgba(255, 215, 0, 0.5); border-radius: 6px; display: inline-block; width: 100%;"><i class="fa-solid fa-crown"></i> Este item requer um Plano VIP ativo para ser adquirido. Após a compra, será seu permanentemente.</span>` : '';
+                let descExtra = (product.category === 'special_themes' && !(appState.currentUserData.ownedThemes || []).includes(product.id)) 
+                    ? `<br><br><span style="color: #ffd700; font-weight: bold; padding: 6px 10px; background: rgba(255, 215, 0, 0.1); border: 1px dashed rgba(255, 215, 0, 0.5); border-radius: 6px; display: inline-block; width: 100%;"><i class="fa-solid fa-crown"></i> Este item é exclusivo para usuários com um Plano VIP ativo.</span>` : '';
                 document.getElementById('buy-modal-desc').innerHTML = product.description + descExtra;
                 
                 document.getElementById('buy-modal-price').innerHTML = `<i class="fa-solid fa-coins"></i> ${product.price} NCoins`;
@@ -2469,8 +2464,8 @@
                     }
                 } else if (product.category === 'frames' || product.category === 'themes' || product.category === 'special_themes') {
                     
-                    if (product.requiresVip && !app.getVIPInfo(appState.currentUserData).isActive) {
-                        app.showToast("Este item requer um Plano VIP ativo.", "error");
+                    if (product.category === 'special_themes' && !app.getVIPInfo(appState.currentUserData).isActive) {
+                        app.showToast("Este item é exclusivo para usuários com um Plano VIP ativo.", "error");
                         return;
                     }
                     

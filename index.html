@@ -318,19 +318,26 @@
         .action-btn.liked { color: var(--magenta); text-shadow: 0 0 10px var(--magenta-glow); }
         .action-btn:hover { color: var(--cyan); }
 
-        /* PERFIL (ESTRUTURAS ISOLADAS) */
-        .profile-top-section { display: flex; flex-direction: column; flex-shrink: 0; width: 100%; }
+        /* PERFIL (ESTRUTURAS ISOLADAS COM VARIÁVEIS CSS DE TEMA) */
+        .profile-top-section { 
+            display: flex; flex-direction: column; flex-shrink: 0; width: 100%; 
+            /* Variáveis injetadas pelo Tema */
+            --theme-bg: var(--bg-glass);
+            --theme-border: rgba(176, 38, 255, 0.25);
+            --theme-glow: rgba(176, 38, 255, 0.12);
+        }
         .profile-posts-section { display: flex; flex-direction: column; width: 100%; }
 
-        .profile-banner { width: 100%; height: 120px; border-radius: 16px 16px 0 0; background-size: cover; background-position: center; background-color: #222; margin-bottom: 0; border: 1px solid rgba(176, 38, 255, 0.25); border-bottom: none; flex-shrink: 0; }
-        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 3.5rem 1rem 1.8rem; background: var(--bg-glass); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem; border: 1px solid rgba(176, 38, 255, 0.25); border-top: none; box-shadow: 0 0 25px rgba(176, 38, 255, 0.12); animation: fadeIn 0.4s ease forwards; text-align: center; position: relative; flex-shrink: 0; }
+        .profile-banner { width: 100%; height: 120px; border-radius: 16px 16px 0 0; background-size: cover; background-position: center; background-color: #222; margin-bottom: 0; border: 1px solid var(--theme-border); border-bottom: none; flex-shrink: 0; }
+        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 3.5rem 1rem 1.8rem; background: var(--theme-bg); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem; border: 1px solid var(--theme-border); border-top: none; box-shadow: 0 0 25px var(--theme-glow); animation: fadeIn 0.4s ease forwards; text-align: center; position: relative; flex-shrink: 0; }
+        
         .profile-avatar-container { position: absolute; top: -42px; left: 50%; transform: translateX(-50%); z-index: 5; }
         .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; background-color: var(--bg-base); transition: all 0.3s ease; }
         .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 8px;}
         .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.5rem; z-index: 2;}
         .profile-bio { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; max-width: 90%; }
         
-        .stats-container { display: flex; width: 100%; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 0.9rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 10px;}
+        .stats-container { display: flex; width: 100%; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 0.9rem; border-radius: 12px; border: 1px solid var(--theme-border); margin-bottom: 10px;}
         .stat-item { display: flex; flex-direction: column; align-items: center; }
         .stat-value { font-size: 1.15rem; font-weight: bold; font-family: 'Rajdhani', sans-serif; transition: color 0.3s; }
         .stat-value.neon-purple { color: var(--purple); text-shadow: 0 0 8px rgba(176,38,255,0.6); }
@@ -374,7 +381,7 @@
         .product-card:hover:not(.owned):not(.locked) { transform: translateY(-4px); border-color: var(--cyan); box-shadow: 0 8px 20px rgba(0, 243, 255, 0.15); }
         .product-card.owned, .product-card.locked { border-color: rgba(255,255,255,0.05); cursor: default; }
         
-        .product-img-container { width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .product-img-container { width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
         .product-img-container i { font-size: 2.8rem; color: var(--purple); text-shadow: 0 0 15px var(--purple-glow); }
         
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
@@ -602,6 +609,26 @@
                         <!-- Populated via JS -->
                     </select>
                 </div>
+                <div class="form-group">
+                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">TEMA DO PERFIL</label>
+                    <select id="edit-theme" class="form-control" onchange="app.toggleGradientOptions()">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+                <div id="vip-gradient-section" style="display: none; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ffd700;">
+                    <label style="font-size: 0.75rem; color: #ffd700; display: block; margin-bottom: 8px;"><i class="fa-solid fa-crown"></i> GRADIENTE PERSONALIZADO (VIP)</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="color" id="grad-color1" class="form-control" style="padding: 2px; height: 35px; cursor: pointer;" title="Cor Primária">
+                        <input type="color" id="grad-color2" class="form-control" style="padding: 2px; height: 35px; cursor: pointer;" title="Cor Secundária">
+                    </div>
+                    <select id="grad-direction" class="form-control">
+                        <option value="to right">Linear (Horizontal)</option>
+                        <option value="to bottom">Vertical</option>
+                        <option value="45deg">Diagonal (Cima Direita)</option>
+                        <option value="-45deg">Diagonal (Cima Esquerda)</option>
+                        <option value="radial">Radial (Centro)</option>
+                    </select>
+                </div>
                 <div class="file-upload-wrapper">
                     <label class="file-upload-btn" id="lbl-banner-upload">
                         <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
@@ -787,7 +814,7 @@
             unsubscribeGlobalChat: null,
             unsubscribePrivateChat: null,
             
-            feedLimit: 15, // Controle de Infinite Scroll da Viewport
+            feedLimit: 15,
             
             activeContextItem: null,
             activeContextType: null,
@@ -802,6 +829,7 @@
             
             storeCategories: [
                 { id: 'vip', name: 'Planos VIP' },
+                { id: 'themes', name: 'Temas' },
                 { id: 'frames', name: 'Molduras' }
             ],
             
@@ -811,6 +839,17 @@
                 { id: 'vip_anual', name: 'VIP Anual', description: 'Domine a malha neural com benefícios premium por um ano inteiro.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 35000, duration: '365 Dias', durationDays: 365, status: 'active' },
                 { id: 'vip_permanente', name: 'VIP Permanente', description: 'O nível máximo de acesso à rede. Desbloqueio vitalício de todos os recursos.', category: 'vip', icon: 'fa-solid fa-crown', image: '', price: 45000, duration: 'Vitalício', durationDays: null, status: 'active' },
                 
+                { id: 'theme_midnight', name: 'Midnight Black', description: 'Escuridão elegante para máxima discrição na rede.', category: 'themes', icon: 'fa-solid fa-moon', price: 1000, status: 'active', previewColor: 'rgba(10, 10, 12, 0.95)', previewBorder: 'rgba(60, 60, 60, 0.8)' },
+                { id: 'theme_pearl', name: 'Pearl White', description: 'Limpo, claro e sofisticado.', category: 'themes', icon: 'fa-regular fa-circle-dot', price: 1200, status: 'active', previewColor: 'rgba(35, 35, 45, 0.85)', previewBorder: 'rgba(220, 220, 230, 0.6)' },
+                { id: 'theme_royal_blue', name: 'Royal Blue', description: 'Azul profundo de alta hierarquia corporativa.', category: 'themes', icon: 'fa-solid fa-gem', price: 1500, status: 'active', previewColor: 'rgba(5, 15, 40, 0.85)', previewBorder: 'rgba(0, 80, 255, 0.6)' },
+                { id: 'theme_purple', name: 'Purple', description: 'A verdadeira essência do ciberespaço.', category: 'themes', icon: 'fa-solid fa-bolt', price: 1500, status: 'active', previewColor: 'rgba(20, 5, 35, 0.85)', previewBorder: 'rgba(176, 38, 255, 0.6)' },
+                { id: 'theme_emerald', name: 'Emerald', description: 'Código limpo. Matrix verde.', category: 'themes', icon: 'fa-solid fa-leaf', price: 1800, status: 'active', previewColor: 'rgba(5, 30, 15, 0.85)', previewBorder: 'rgba(0, 255, 136, 0.5)' },
+                { id: 'theme_crimson', name: 'Crimson', description: 'Ameaça detectada. Vermelho sangue intenso.', category: 'themes', icon: 'fa-solid fa-fire', price: 2000, status: 'active', previewColor: 'rgba(35, 5, 10, 0.85)', previewBorder: 'rgba(220, 20, 60, 0.6)' },
+                { id: 'theme_sunset', name: 'Sunset Orange', description: 'Pôr do sol radioativo nas terras desoladas.', category: 'themes', icon: 'fa-solid fa-sun', price: 2000, status: 'active', previewColor: 'rgba(35, 15, 5, 0.85)', previewBorder: 'rgba(255, 100, 0, 0.6)' },
+                { id: 'theme_gold', name: 'Gold', description: 'Luxo e ostentação. Status máximo.', category: 'themes', icon: 'fa-solid fa-coins', price: 3000, status: 'active', previewColor: 'rgba(30, 25, 5, 0.85)', previewBorder: 'rgba(255, 215, 0, 0.6)' },
+                { id: 'theme_graphite', name: 'Graphite Gray', description: 'Neutro, tático e militarizado.', category: 'themes', icon: 'fa-solid fa-shield', price: 1200, status: 'active', previewColor: 'rgba(25, 25, 28, 0.9)', previewBorder: 'rgba(140, 140, 145, 0.5)' },
+                { id: 'theme_cyan', name: 'Cyan', description: 'O clássico néon ciano das mega corporações.', category: 'themes', icon: 'fa-solid fa-snowflake', price: 1500, status: 'active', previewColor: 'rgba(5, 25, 35, 0.85)', previewBorder: 'rgba(0, 243, 255, 0.5)' },
+
                 { id: 'frame_neon_cyan', name: 'Neon Ciano', description: 'Borda brilhante com assinatura cibernética clássica.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 1500, duration: '', status: 'active' },
                 { id: 'frame_cyber_purple', name: 'Cyber Roxo', description: 'Aura roxa pulsante da malha profunda.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2000, duration: '', status: 'active' },
                 { id: 'frame_hacker_green', name: 'Hacker Core', description: 'Terminal verde bruto e direto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2200, duration: '', status: 'active' },
@@ -828,7 +867,6 @@
             init: async () => {
                 app.initParticles();
                 
-                // Lógica simples e eficaz de Infinite Scroll sem destruir componentes
                 const mainArea = document.getElementById('app-content');
                 mainArea.addEventListener('scroll', () => {
                     if (['feed', 'perfil', 'public_profile'].includes(appState.currentView)) {
@@ -859,6 +897,8 @@
                                 appState.currentUserData = userDoc.data();
                                 if (!appState.currentUserData.ownedFrames) appState.currentUserData.ownedFrames = ['default'];
                                 if (!appState.currentUserData.equippedFrame) appState.currentUserData.equippedFrame = 'default';
+                                if (!appState.currentUserData.ownedThemes) appState.currentUserData.ownedThemes = ['default'];
+                                if (!appState.currentUserData.profileTheme) appState.currentUserData.profileTheme = 'default';
                                 
                                 app.startGame();
                             } else {
@@ -948,6 +988,50 @@
                 return userData.equippedFrame; 
             },
 
+            getProfileThemeStyle: (userData) => {
+                const themes = {
+                    'default': { bg: 'var(--bg-glass)', border: 'rgba(176, 38, 255, 0.25)', glow: 'rgba(176, 38, 255, 0.12)' },
+                    'theme_midnight': { bg: 'rgba(10, 10, 12, 0.95)', border: 'rgba(60, 60, 60, 0.8)', glow: 'rgba(255, 255, 255, 0.05)' },
+                    'theme_pearl': { bg: 'rgba(35, 35, 45, 0.85)', border: 'rgba(220, 220, 230, 0.6)', glow: 'rgba(255, 255, 255, 0.15)' },
+                    'theme_royal_blue': { bg: 'rgba(5, 15, 40, 0.85)', border: 'rgba(0, 80, 255, 0.6)', glow: 'rgba(0, 80, 255, 0.25)' },
+                    'theme_purple': { bg: 'rgba(20, 5, 35, 0.85)', border: 'rgba(176, 38, 255, 0.6)', glow: 'rgba(176, 38, 255, 0.3)' },
+                    'theme_emerald': { bg: 'rgba(5, 30, 15, 0.85)', border: 'rgba(0, 255, 136, 0.5)', glow: 'rgba(0, 255, 136, 0.2)' },
+                    'theme_crimson': { bg: 'rgba(35, 5, 10, 0.85)', border: 'rgba(220, 20, 60, 0.6)', glow: 'rgba(220, 20, 60, 0.25)' },
+                    'theme_sunset': { bg: 'rgba(35, 15, 5, 0.85)', border: 'rgba(255, 100, 0, 0.6)', glow: 'rgba(255, 100, 0, 0.25)' },
+                    'theme_gold': { bg: 'rgba(30, 25, 5, 0.85)', border: 'rgba(255, 215, 0, 0.6)', glow: 'rgba(255, 215, 0, 0.2)' },
+                    'theme_graphite': { bg: 'rgba(25, 25, 28, 0.9)', border: 'rgba(140, 140, 145, 0.5)', glow: 'rgba(140, 140, 145, 0.15)' },
+                    'theme_cyan': { bg: 'rgba(5, 25, 35, 0.85)', border: 'rgba(0, 243, 255, 0.5)', glow: 'rgba(0, 243, 255, 0.2)' }
+                };
+
+                const isVIP = app.getVIPInfo(userData).isActive;
+                const themeId = userData.profileTheme || 'default';
+
+                if (themeId === 'custom_gradient' && isVIP) {
+                    const c1 = userData.gradientColor1 || '#00f3ff';
+                    const c2 = userData.gradientColor2 || '#b026ff';
+                    const dir = userData.gradientDirection || 'to right';
+                    
+                    const hexToRgba = (hex, alpha) => {
+                        let r = 0, g = 0, b = 0;
+                        if (hex.length == 4) { r = parseInt(hex[1]+hex[1], 16); g = parseInt(hex[2]+hex[2], 16); b = parseInt(hex[3]+hex[3], 16); }
+                        else if (hex.length == 7) { r = parseInt(hex.substring(1,3), 16); g = parseInt(hex.substring(3,5), 16); b = parseInt(hex.substring(5,7), 16); }
+                        return `rgba(${r},${g},${b},${alpha})`;
+                    };
+                    
+                    const gradBg = dir === 'radial' 
+                        ? `radial-gradient(circle, ${hexToRgba(c1, 0.7)}, ${hexToRgba(c2, 0.85)})` 
+                        : `linear-gradient(${dir}, ${hexToRgba(c1, 0.7)}, ${hexToRgba(c2, 0.85)})`;
+                    
+                    return `--theme-bg: ${gradBg}; --theme-border: ${c1}; --theme-glow: ${hexToRgba(c2, 0.4)};`;
+                }
+
+                let activeThemeId = themeId;
+                if (themeId === 'custom_gradient' && !isVIP) activeThemeId = 'default';
+                
+                const activeTheme = themes[activeThemeId] || themes['default'];
+                return `--theme-bg: ${activeTheme.bg}; --theme-border: ${activeTheme.border}; --theme-glow: ${activeTheme.glow};`;
+            },
+
             loginEmail: async () => {
                 const email = document.getElementById('auth-email').value;
                 const pass = document.getElementById('auth-password').value;
@@ -986,7 +1070,9 @@
                     uid: uid, name: nameInput, handle: handleInput.toLowerCase().replace(/\s/g, ''),
                     avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, banner: '', bio: 'Conectado à malha neural recentemente.',
                     xp: 50, level: 1, ncoins: 100, followers: [], following: [], role: 'user', createdAt: new Date().toISOString(),
-                    ownedFrames: ['default'], equippedFrame: 'default', staticAvatarFallback: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, staticBannerFallback: ''
+                    ownedFrames: ['default'], equippedFrame: 'default', ownedThemes: ['default'], profileTheme: 'default',
+                    gradientColor1: '#00f3ff', gradientColor2: '#b026ff', gradientDirection: 'to right',
+                    staticAvatarFallback: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, staticBannerFallback: ''
                 };
 
                 try {
@@ -1080,7 +1166,7 @@
                 if (appState.vipTimer) { clearInterval(appState.vipTimer); appState.vipTimer = null; }
 
                 appState.currentView = viewName;
-                if (['feed', 'perfil', 'public_profile'].includes(viewName)) appState.feedLimit = 15; // Reset de paginação
+                if (['feed', 'perfil', 'public_profile'].includes(viewName)) appState.feedLimit = 15;
 
                 if (viewName === 'public_profile') appState.currentPublicProfileUid = additionalData;
                 
@@ -1287,7 +1373,6 @@
                 if (appState.currentView === 'perfil') expectedPosts = expectedPosts.filter(p => p.authorUid === appState.firebaseUser.uid);
                 else if (appState.currentView === 'public_profile') expectedPosts = expectedPosts.filter(p => p.authorUid === appState.currentPublicProfileUid);
 
-                // Aplicação da Paginação (Infinite Scroll suave mantendo os elementos no DOM)
                 if (['feed', 'perfil', 'public_profile'].includes(appState.currentView)) {
                     expectedPosts = expectedPosts.slice(0, appState.feedLimit);
                 }
@@ -1304,7 +1389,6 @@
 
                 const currentCards = Array.from(container.querySelectorAll('.post-card'));
                 
-                // Remove apenas as que saíram dos dados (ou por exclusão, ou se excederem o feedLimit por algum motivo)
                 currentCards.forEach(card => {
                     if (!expectedPosts.find(p => p.id === card.dataset.id)) {
                         card.remove();
@@ -1317,13 +1401,11 @@
                     const existingEl = container.querySelector(`.post-card[data-id="${post.id}"]`);
 
                     if (existingEl) {
-                        // Evita reflows caros pulando se não houve mudanças reais
                         if (existingEl.dataset.hash === currentHash) {
                             if (container.children[index] !== existingEl) container.insertBefore(existingEl, container.children[index]);
                             return; 
                         }
 
-                        // Se mudou, atualiza pontualmente
                         const likeBtn = existingEl.querySelector('.btn-like');
                         if (likeBtn) {
                             const isLiked = post.likes && post.likes.includes(appState.firebaseUser.uid);
@@ -1454,7 +1536,6 @@
                     return; 
                 }
 
-                // Fluxo Estático / Resize
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
@@ -1546,7 +1627,6 @@
                 const list = document.getElementById('comments-list');
                 if (!list) return;
 
-                // Forçar limpeza total se mudou a postagem renderizada
                 if (list.dataset.renderedPostId !== postId) {
                     list.innerHTML = '';
                     list.dataset.renderedPostId = postId;
@@ -1562,7 +1642,6 @@
                 const msg = list.querySelector('.no-comments-msg');
                 if (msg) msg.remove();
                 
-                // Validação profunda para garantir que nenhum comentário fantasma seja misturado
                 let needsFullRender = false;
                 if (currentCommentNodes.length > post.comments.length) {
                     needsFullRender = true;
@@ -1778,7 +1857,7 @@
                 } catch(e) { app.showToast("Falha de transmissão.", "error"); }
             },
 
-            // --- PERFIL E CONFIGURAÇÕES COM BACKUP STATIC ---
+            // --- PERFIL E CONFIGURAÇÕES COM BACKUP STATIC E TEMAS INJETADOS ---
             renderProfile: (userData, isPublic = false) => {
                 const contentArea = document.getElementById('app-content');
                 if(!isPublic) contentArea.innerHTML = '';
@@ -1794,6 +1873,8 @@
                 const vipInfo = app.getVIPInfo(userData);
                 const vipStatusDisplay = userData.vip ? `<div class="profile-vip-status" style="font-size: 0.75rem; color: ${vipInfo.isActive ? '#ffd700' : 'var(--text-muted)'}; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; justify-content: center;"><i class="fa-solid fa-crown"></i> Status: VIP ${vipInfo.status}</div>` : '';
 
+                const themeStyle = app.getProfileThemeStyle(userData);
+
                 let actionButton = '';
                 if (isMe && !isPublic) {
                     actionButton = `<div style="display: flex; gap: 10px; width: 100%;"><button class="btn-primary" style="flex: 1;" onclick="app.openSettingsModal()">Editar Perfil</button></div>`;
@@ -1802,7 +1883,7 @@
                 }
 
                 const html = `
-                    <section class="profile-top-section">
+                    <section class="profile-top-section" style="${themeStyle}">
                         <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
                         <div class="profile-header">
                             <div class="profile-avatar-container">
@@ -1840,6 +1921,9 @@
             updateProfileInDOM: () => {
                 const viewUser = appState.allUsers.find(u => u.uid === (appState.currentView === 'perfil' ? appState.firebaseUser.uid : appState.currentPublicProfileUid));
                 if (!viewUser) return;
+
+                const topSection = document.querySelector('.profile-top-section');
+                if (topSection) topSection.style.cssText = app.getProfileThemeStyle(viewUser);
 
                 if (document.getElementById('stat-level')) document.getElementById('stat-level').innerText = `LVL ${viewUser.level || 1}`;
                 if (document.getElementById('stat-followers')) document.getElementById('stat-followers').innerText = viewUser.followers ? viewUser.followers.length : 0;
@@ -1907,23 +1991,60 @@
                 } catch(e) {}
             },
 
+            toggleGradientOptions: () => {
+                const themeVal = document.getElementById('edit-theme').value;
+                const gradSection = document.getElementById('vip-gradient-section');
+                if (themeVal === 'custom_gradient') {
+                    gradSection.style.display = 'block';
+                } else {
+                    gradSection.style.display = 'none';
+                }
+            },
+
             openSettingsModal: () => {
-                document.getElementById('edit-name').value = appState.currentUserData.name; document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
+                document.getElementById('edit-name').value = appState.currentUserData.name; 
+                document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
                 
                 const frameSelect = document.getElementById('edit-frame');
                 frameSelect.innerHTML = '<option value="default">Nenhuma / Padrão</option>';
-                const owned = appState.currentUserData.ownedFrames || ['default'];
+                const ownedFrames = appState.currentUserData.ownedFrames || ['default'];
                 
                 appState.catalog.filter(p => p.category === 'frames').forEach(frame => {
-                    if (owned.includes(frame.id)) {
+                    if (ownedFrames.includes(frame.id)) {
                         const isSelected = appState.currentUserData.equippedFrame === frame.id ? 'selected' : '';
                         frameSelect.innerHTML += `<option value="${frame.id}" ${isSelected}>${frame.name}</option>`;
                     }
                 });
 
-                appState.tempBase64Banner = null; document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-image"></i> Alterar Banner de Fundo <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">`;
+                const themeSelect = document.getElementById('edit-theme');
+                themeSelect.innerHTML = '<option value="default">Padrão</option>';
+                const ownedThemes = appState.currentUserData.ownedThemes || ['default'];
+                
+                appState.catalog.filter(p => p.category === 'themes').forEach(theme => {
+                    if (ownedThemes.includes(theme.id)) {
+                        const isSelected = appState.currentUserData.profileTheme === theme.id ? 'selected' : '';
+                        themeSelect.innerHTML += `<option value="${theme.id}" ${isSelected}>${theme.name}</option>`;
+                    }
+                });
+
+                const isVIP = app.getVIPInfo(appState.currentUserData).isActive;
+                if (isVIP) {
+                    const isGradSelected = appState.currentUserData.profileTheme === 'custom_gradient' ? 'selected' : '';
+                    themeSelect.innerHTML += `<option value="custom_gradient" ${isGradSelected}>🎨 Gradiente VIP Personalizado</option>`;
+                }
+
+                document.getElementById('grad-color1').value = appState.currentUserData.gradientColor1 || '#00f3ff';
+                document.getElementById('grad-color2').value = appState.currentUserData.gradientColor2 || '#b026ff';
+                document.getElementById('grad-direction').value = appState.currentUserData.gradientDirection || 'to right';
+                
+                app.toggleGradientOptions();
+
+                appState.tempBase64Banner = null; 
+                document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-image"></i> Alterar Banner de Fundo <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">`;
+                
                 document.getElementById('modal-settings').classList.add('active');
             },
+
             closeSettingsModal: () => document.getElementById('modal-settings').classList.remove('active'),
             
             saveProfileSettings: async () => {
@@ -1933,11 +2054,20 @@
                 const btn = document.getElementById('btn-save-settings'); btn.disabled = true; btn.innerHTML = "Salvando...";
                 try {
                     const selectedFrame = document.getElementById('edit-frame').value;
+                    const selectedTheme = document.getElementById('edit-theme').value;
+
                     const updates = { 
                         name: name, 
                         bio: document.getElementById('edit-bio').value.trim(),
-                        equippedFrame: selectedFrame 
+                        equippedFrame: selectedFrame,
+                        profileTheme: selectedTheme
                     };
+
+                    if (selectedTheme === 'custom_gradient') {
+                        updates.gradientColor1 = document.getElementById('grad-color1').value;
+                        updates.gradientColor2 = document.getElementById('grad-color2').value;
+                        updates.gradientDirection = document.getElementById('grad-direction').value;
+                    }
                     
                     if (appState.tempBase64Banner) {
                         updates.banner = appState.tempBase64Banner;
@@ -2025,10 +2155,14 @@
                 if (!container) return;
                 container.innerHTML = '';
                 
+                if (appState.activeStoreCategory === 'themes') {
+                    container.innerHTML += `<div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">Personalize completamente a aparência do seu perfil com temas exclusivos e gradientes premium.</div>`;
+                }
+
                 const filtered = appState.catalog.filter(p => p.category === appState.activeStoreCategory && p.status === 'active');
                 
                 if (filtered.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 30vh; text-align: center; color: var(--text-muted);"><i class="fa-solid fa-box-open" style="font-size: 2.5rem; margin-bottom: 12px; color: rgba(255,255,255,0.1);"></i><p>Nenhum produto disponível<br>nesta categoria no momento.</p></div>`;
+                    container.innerHTML += `<div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 30vh; text-align: center; color: var(--text-muted);"><i class="fa-solid fa-box-open" style="font-size: 2.5rem; margin-bottom: 12px; color: rgba(255,255,255,0.1);"></i><p>Nenhum produto disponível<br>nesta categoria no momento.</p></div>`;
                     return;
                 }
 
@@ -2036,14 +2170,20 @@
 
                 const vipInfo = app.getVIPInfo(appState.currentUserData);
                 const ownedFrames = appState.currentUserData.ownedFrames || [];
+                const ownedThemes = appState.currentUserData.ownedThemes || [];
 
                 filtered.forEach(prod => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     
                     const isFrame = prod.category === 'frames';
+                    const isTheme = prod.category === 'themes';
                     const isVIP = prod.category === 'vip';
-                    const isOwned = isFrame && ownedFrames.includes(prod.id);
+                    
+                    let isOwned = false;
+                    if (isFrame) isOwned = ownedFrames.includes(prod.id);
+                    if (isTheme) isOwned = ownedThemes.includes(prod.id);
+                    
                     const isCurrentVIP = isVIP && vipInfo.isActive && vipInfo.planId === prod.id;
 
                     let durationHtml = prod.duration ? `<div class="product-duration">${prod.duration}</div>` : '';
@@ -2080,11 +2220,19 @@
                         card.onclick = () => app.openBuyModal(prod.id);
                     }
                     
-                    const iconOrImg = prod.image ? `<img src="${prod.image}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : `<i class="${prod.icon}"></i>`;
+                    let iconOrImg = `<i class="${prod.icon}"></i>`;
+                    let imgContainerStyle = isOwned ? 'opacity:0.5;' : '';
+
+                    if (isTheme) {
+                        imgContainerStyle += `background: ${prod.previewColor}; border: 1px solid ${prod.previewBorder}; box-shadow: 0 0 15px ${prod.previewBorder}40 inset;`;
+                        iconOrImg = `<i class="${prod.icon}" style="color: ${prod.previewBorder}; text-shadow: 0 0 10px ${prod.previewBorder};"></i>`;
+                    } else if (prod.image) {
+                        iconOrImg = `<img src="${prod.image}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+                    }
                     
                     card.innerHTML = `
                         <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                            <div class="product-img-container" style="${isOwned ? 'opacity:0.5;' : ''}">${iconOrImg}</div>
+                            <div class="product-img-container" style="${imgContainerStyle}">${iconOrImg}</div>
                             <div class="product-name">${prod.name}</div>
                             ${durationHtml}
                             <div class="product-price"><i class="fa-solid fa-coins"></i> ${prod.price}</div>
@@ -2136,7 +2284,17 @@
                 appState.selectedProduct = product;
                 
                 const iconEl = document.getElementById('buy-modal-icon');
-                iconEl.innerHTML = product.image ? `<img src="${product.image}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : `<i class="${product.icon}"></i>`;
+                if (product.category === 'themes') {
+                    iconEl.style.background = product.previewColor;
+                    iconEl.style.border = `1px solid ${product.previewBorder}`;
+                    iconEl.style.boxShadow = `0 0 15px ${product.previewBorder}40 inset, 0 0 20px rgba(0, 243, 255, 0.2)`;
+                    iconEl.innerHTML = `<i class="${product.icon}" style="color: ${product.previewBorder}; text-shadow: 0 0 10px ${product.previewBorder};"></i>`;
+                } else {
+                    iconEl.style.background = 'rgba(0,0,0,0.5)';
+                    iconEl.style.border = '1px solid var(--purple)';
+                    iconEl.style.boxShadow = '0 0 20px rgba(0, 243, 255, 0.2)';
+                    iconEl.innerHTML = product.image ? `<img src="${product.image}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : `<i class="${product.icon}"></i>`;
+                }
                 
                 document.getElementById('buy-modal-name').innerText = product.name;
                 document.getElementById('buy-modal-duration').innerText = product.duration ? `Duração: ${product.duration}` : 'Item Permanente';
@@ -2185,13 +2343,15 @@
                         btn.disabled = false;
                         btn.innerHTML = 'Confirmar Compra';
                     }
-                } else if (product.category === 'frames') {
+                } else if (product.category === 'frames' || product.category === 'themes') {
                     btn.disabled = true;
                     btn.innerHTML = 'Processando...';
                     
-                    const owned = appState.currentUserData.ownedFrames || ['default'];
+                    const listKey = product.category === 'frames' ? 'ownedFrames' : 'ownedThemes';
+                    const owned = appState.currentUserData[listKey] || ['default'];
+                    
                     if (owned.includes(product.id)) {
-                        app.showToast("Você já possui esta moldura registrada.", "info");
+                        app.showToast(`Você já possui ${product.category === 'frames' ? 'esta moldura' : 'este tema'}.`, "info");
                         btn.disabled = false; btn.innerHTML = 'Confirmar Compra';
                         app.closeBuyModal();
                         return;
@@ -2199,10 +2359,10 @@
 
                     try {
                         await updateDoc(doc(colUsers, appState.firebaseUser.uid), { 
-                            ownedFrames: arrayUnion(product.id),
+                            [listKey]: arrayUnion(product.id),
                             ncoins: myCoins - product.price
                         });
-                        app.showToast(`Você adquiriu a moldura ${product.name}. Vá em configurações para equipá-la.`, "success");
+                        app.showToast(`Você adquiriu o item ${product.name}. Vá em configurações para equipá-lo.`, "success");
                         app.closeBuyModal();
                     } catch (e) {
                         app.showToast("Erro na transação. Tente novamente.", "error");

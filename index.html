@@ -346,58 +346,57 @@
     width: 100%;
 }
 
-/* ============================
-   NEBULA PREMIUM
-============================ */
+/* ===============================
+   TEMA ESPECIAL - NEBULA
+================================ */
 
-.theme-special_nebula::before{
+.theme-special_nebula .profile-header::after{
     content:"";
     position:absolute;
     inset:0;
     pointer-events:none;
-    z-index:0;
+    z-index:-1;
 
     background:
+
     radial-gradient(circle at 15% 20%, rgba(162,72,255,.30), transparent 28%),
     radial-gradient(circle at 80% 35%, rgba(0,195,255,.22), transparent 32%),
-    radial-gradient(circle at 45% 80%, rgba(255,0,255,.18), transparent 26%);
-
-    background-size:150% 150%;
-
-    filter:blur(18px);
-
-    animation:nebulaMove 18s ease-in-out infinite alternate;
-}
-
-.theme-special_nebula::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:1;
-
-    background-image:
+    radial-gradient(circle at 45% 80%, rgba(255,0,255,.18), transparent 26%),
 
     radial-gradient(circle,#ffffff 1px,transparent 2px),
     radial-gradient(circle,#b57cff 1px,transparent 2px),
     radial-gradient(circle,#7edcff 1px,transparent 2px);
 
     background-size:
+    150% 150%,
+    150% 150%,
+    150% 150%,
     140px 140px,
     190px 190px,
     240px 240px;
 
-    opacity:.45;
+    background-repeat:no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;
+
+    filter:blur(0);
+
+    opacity:.95;
 
     animation:
+    nebulaMove 18s ease-in-out infinite alternate,
     starsMove 35s linear infinite,
     starsTwinkle 4s ease-in-out infinite;
 }
 
-.theme-special_nebula > *{
+/* Mantém todo o conteúdo acima da animação */
+
+.theme-special_nebula .profile-header > *{
     position:relative;
     z-index:2;
 }
+
+/* ===============================
+   ANIMAÇÕES
+================================ */
 
 @keyframes nebulaMove{
 
@@ -405,7 +404,10 @@
 background-position:
 0% 0%,
 100% 20%,
-30% 90%;
+30% 90%,
+0 0,
+0 0,
+0 0;
 transform:scale(1);
 }
 
@@ -413,15 +415,21 @@ transform:scale(1);
 background-position:
 40% 30%,
 70% 60%,
-80% 20%;
-transform:scale(1.05);
+80% 20%,
+0 450px,
+0 300px,
+0 600px;
+transform:scale(1.04);
 }
 
 100%{
 background-position:
 80% 60%,
 20% 90%,
-0% 0%;
+0% 0%,
+0 900px,
+0 600px,
+0 1200px;
 transform:scale(1);
 }
 
@@ -429,18 +437,12 @@ transform:scale(1);
 
 @keyframes starsMove{
 
-from{
-background-position:
-0 0,
-0 0,
-0 0;
+0%{
+transform:translateY(0px);
 }
 
-to{
-background-position:
-0 900px,
-0 600px,
-0 1200px;
+100%{
+transform:translateY(20px);
 }
 
 }
@@ -448,18 +450,66 @@ background-position:
 @keyframes starsTwinkle{
 
 0%,100%{
-opacity:.35;
+opacity:.45;
 }
 
 50%{
-opacity:.65;
+opacity:.75;
 }
 
 }
 
         .profile-banner { width: 100%; height: 120px; border-radius: 16px 16px 0 0; background-size: cover; background-position: center; background-color: #222; margin-bottom: 0; border: 1px solid var(--theme-border); border-bottom: none; flex-shrink: 0; }
-        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 3.5rem 1rem 1.8rem; background: var(--theme-bg); border-radius: 0 0 16px 16px; margin-bottom: 1.2rem; border: 1px solid var(--theme-border); border-top: none; box-shadow: 0 0 25px var(--theme-glow); animation: fadeIn 0.4s ease forwards; text-align: center; position: relative; flex-shrink: 0; }
-        
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3.5rem 1rem 1.8rem;
+
+    background: transparent;
+
+    border-radius: 0 0 16px 16px;
+    margin-bottom: 1.2rem;
+
+    border: 1px solid var(--theme-border);
+    border-top: none;
+
+    box-shadow: 0 0 25px var(--theme-glow);
+
+    animation: fadeIn .4s ease forwards;
+
+    text-align: center;
+
+    position: relative;
+
+    overflow: hidden;
+
+    isolation: isolate;
+
+    flex-shrink: 0;
+}
+   
+     .profile-header::before{
+    content:"";
+    position:absolute;
+    inset:0;
+
+    background:var(--theme-bg);
+
+    z-index:-2;
+}
+
+.profile-header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+
+    pointer-events:none;
+
+    z-index:-1;
+}  
+           
         .profile-avatar-container { position: absolute; top: -42px; left: 50%; transform: translateX(-50%); z-index: 5; }
         .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; background-color: var(--bg-base); transition: all 0.3s ease; }
         .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 8px;}

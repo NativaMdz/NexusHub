@@ -357,46 +357,48 @@
     overflow: hidden;
 }
 
-      .theme-special_nebula .profile-header::after{
-            content:"";
-            position:absolute;
-            inset: 15px;
-            pointer-events:none;
-            z-index:-1; /* Coloca a animação sob o texto principal mas acima da cor opaca (z-index -2 do header::before) */
+.theme-special_nebula .profile-header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:0 0 16px 16px;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:-1;
 
-            background:
-    radial-gradient(circle at 18% 18%, rgba(162,72,255,.28), transparent 30%),
-    radial-gradient(circle at 82% 22%, rgba(0,195,255,.24), transparent 34%),
-    radial-gradient(circle at 55% 75%, rgba(255,0,255,.18), transparent 28%),
-    radial-gradient(circle at 28% 60%, rgba(100,160,255,.14), transparent 25%),
-    radial-gradient(circle,#ffffff 1px,transparent 2px),
-    radial-gradient(circle,#b57cff 1px,transparent 2px),
-    radial-gradient(circle,#7edcff 1px,transparent 2px);
+    background:
+        radial-gradient(circle at 18% 18%, rgba(162,72,255,.28), transparent 30%),
+        radial-gradient(circle at 82% 22%, rgba(0,195,255,.24), transparent 34%),
+        radial-gradient(circle at 55% 75%, rgba(255,0,255,.18), transparent 28%),
+        radial-gradient(circle at 28% 60%, rgba(100,160,255,.14), transparent 25%),
+        radial-gradient(circle,#ffffff 1px,transparent 2px),
+        radial-gradient(circle,#b57cff 1px,transparent 2px),
+        radial-gradient(circle,#7edcff 1px,transparent 2px);
 
-            background-size:
-    160% 160%,
-    160% 160%,
-    150% 150%,
-    170% 170%,
-    140px 140px,
-    190px 190px,
-    240px 240px;
+    background-size:
+        120% 120%,
+        120% 120%,
+        120% 120%,
+        120% 120%,
+        100px 100px,
+        140px 140px,
+        180px 180px;
 
-            background-repeat:
-    no-repeat,
-    no-repeat,
-    no-repeat,
-    no-repeat,
-    repeat,
-    repeat,
-    repeat;
+    background-repeat:
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        repeat,
+        repeat,
+        repeat;
 
-            opacity:.95;
+    opacity:.95;
 
-            animation:
-    nebulaMove 18s ease-in-out infinite alternate,
-    starsTwinkle 4s ease-in-out infinite;
-        }
+    animation:
+        nebulaMove 18s ease-in-out infinite alternate,
+        starsTwinkle 4s ease-in-out infinite;
+}
 
         /* Conteúdo acima da animação */
 
@@ -484,14 +486,6 @@
             z-index:-2;
             background:var(--theme-bg);
         }
-
-        .profile-header::after{
-            content:"";
-            position:absolute;
-            inset:0;
-            pointer-events:none;
-            z-index:-1;
-        }  
            
         .profile-avatar-container { position: absolute; top: -42px; left: 50%; transform: translateX(-50%); z-index: 5; }
         .profile-avatar { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; background-color: var(--bg-base); transition: all 0.3s ease; }

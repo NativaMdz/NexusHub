@@ -387,8 +387,39 @@
         /* Badges de Raridade e VIP */
         .badges-container { position: absolute; top: 8px; left: 8px; display: flex; flex-direction: column; gap: 4px; z-index: 10; align-items: flex-start; }
         .rarity-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; background: rgba(0,0,0,0.8); border: 1px solid; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
-        .vip-req-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; background: rgba(0,0,0,0.8); color: #ffd700; border: 1px solid #ffd700; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
+        .vip-req-badge {
+    position: absolute;
+    top: 38px;          /* logo abaixo da raridade */
+    left: 8px;
 
+    padding: 3px 8px;
+    border-radius: 6px;
+
+    font-size: 0.65rem;
+    font-weight: bold;
+
+    z-index: 10;
+
+    background: rgba(0,0,0,0.8);
+    color: #ffd700;
+    border: 1px solid #ffd700;
+
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    text-transform: uppercase;
+    letter-spacing: .5px;
+
+    backdrop-filter: blur(4px);
+
+    width: fit-content;
+    white-space: nowrap;
+}
+
+.vip-req-badge i{
+    font-size: 0.65rem;
+}
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
         .product-duration { font-size: 0.7rem; color: var(--cyan); margin-bottom: 8px; }
         .product-price { font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: bold; color: #ffd700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }

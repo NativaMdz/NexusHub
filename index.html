@@ -450,25 +450,57 @@
         }
 
         /* Alterando scale no size em vez de transform, para não violar os limites do border-radius */
-        @keyframes nebulaMove {
-            0% {
-                background-position: 10% 10%, 90% 20%, 45% 80%, 25% 60%, 0 0, 0 0, 0 0;
-                background-size: 120% 120%, 120% 120%, 120% 120%, 120% 120%, 100px 100px, 140px 140px, 180px 180px;
-            }
-            50% {
-                background-position: 25% 25%, 70% 45%, 70% 40%, 40% 80%, 0 350px, 0 250px, 0 500px;
-                background-size: 130% 130%, 130% 130%, 130% 130%, 130% 130%, 100px 100px, 140px 140px, 180px 180px;
-            }
-            100% {
-                background-position: 40% 40%, 55% 70%, 25% 25%, 15% 35%, 0 700px, 0 500px, 0 1000px;
-                background-size: 120% 120%, 120% 120%, 120% 120%, 120% 120%, 100px 100px, 140px 140px, 180px 180px;
-            }
-        }
+@keyframes nebulaMove {
+    0% {
+        background-position:
+            10% 10%,
+            90% 20%,
+            45% 80%,
+            25% 60%,
+            -30px 0,
+            -30px 0,
+            -30px 0;
 
-        @keyframes starsTwinkle {
-            0%, 100% { opacity: .45; }
-            50% { opacity: .75; }
-        }
+        background-size:
+            120% 120%, 120% 120%, 120% 120%, 120% 120%,
+            100px 100px, 140px 140px, 180px 180px;
+    }
+
+    50% {
+        background-position:
+            25% 25%,
+            70% 45%,
+            70% 40%,
+            40% 80%,
+            -30px 350px,
+            -30px 250px,
+            -30px 500px;
+
+        background-size:
+            130% 130%, 130% 130%, 130% 130%, 130% 130%,
+            100px 100px, 140px 140px, 180px 180px;
+    }
+
+    100% {
+        background-position:
+            40% 40%,
+            55% 70%,
+            25% 25%,
+            15% 35%,
+            -30px 700px,
+            -30px 500px,
+            -30px 1000px;
+
+        background-size:
+            120% 120%, 120% 120%, 120% 120%, 120% 120%,
+            100px 100px, 140px 140px, 180px 180px;
+    }
+}
+
+@keyframes starsTwinkle {
+    0%, 100% { opacity: .45; }
+    50% { opacity: .75; }
+}
 
         /* CHAT / COMMS */
         .chat-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
@@ -2668,4 +2700,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-</html>
+                    </html>

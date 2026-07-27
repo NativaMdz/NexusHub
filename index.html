@@ -386,29 +386,7 @@
         
         /* Badges de Raridade e VIP */
         .rarity-badge { position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; z-index: 10; background: rgba(0,0,0,0.8); border: 1px solid; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
-        .vip-req-badge{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:4px;
-
-    margin:8px 0 6px;
-
-    padding:3px 8px;
-
-    border-radius:6px;
-    font-size:.65rem;
-    font-weight:bold;
-
-    background:rgba(0,0,0,.8);
-    color:#ffd700;
-    border:1px solid #ffd700;
-
-    text-transform:uppercase;
-    letter-spacing:.5px;
-
-    backdrop-filter:blur(4px);
-}
+        .vip-req-badge { display:inline-flex; align-items:center; justify-content:center; gap:4px; margin:8px 0 6px; padding:3px 8px; border-radius:6px; font-size:.65rem; font-weight:bold; background:rgba(0,0,0,.8); color:#ffd700; border:1px solid #ffd700; text-transform:uppercase; letter-spacing:.5px; backdrop-filter:blur(4px); }
 
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
         .product-duration { font-size: 0.7rem; color: var(--cyan); margin-bottom: 8px; }
@@ -522,6 +500,29 @@
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* TEMA ECLIPSE MÍTICO - UPGRADE VISUAL */
+        @keyframes eclipseBreathingHeader {
+            0%, 100% {
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95), 0 0 15px rgba(40, 10, 80, 0.5), inset 0 0 10px rgba(255, 0, 255, 0.05);
+                border-color: rgba(60, 20, 80, 0.6);
+            }
+            50% {
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 1), 0 0 45px rgba(100, 20, 150, 0.8), inset 0 0 25px rgba(255, 0, 255, 0.2);
+                border-color: rgba(140, 30, 180, 0.9);
+            }
+        }
+        @keyframes eclipseBreathingBanner {
+            0%, 100% { border-color: rgba(60, 20, 80, 0.6) !important; }
+            50% { border-color: rgba(140, 30, 180, 0.9) !important; }
+        }
+        .theme-eclipse-active .profile-header {
+            animation: eclipseBreathingHeader 9s ease-in-out infinite !important;
+            background: radial-gradient(circle at 50% -20%, rgba(20, 5, 35, 0.95) 0%, rgba(5, 5, 7, 1) 80%) !important;
+        }
+        .theme-eclipse-active .profile-banner {
+            animation: eclipseBreathingBanner 9s ease-in-out infinite !important;
+        }
     </style>
 </head>
 <body>
@@ -1001,14 +1002,11 @@
                             updates.banner = user.staticBannerFallback || '';
                         }
                         
-                        // Fallback especial se o tema equipado for bloqueado por VIP
-                        const currentThemeData = appState.catalog.find(p => p.id === user.profileTheme);
-                        if (currentThemeData && currentThemeData.requiresVip) {
-                            updates.profileTheme = 'default';
-                        }
+                        // Os Temas Especiais (requiresVip) não são mais removidos ao expirar o VIP.
+                        // Eles pertencem ao usuário permanentemente após a compra e podem ser usados.
 
                         await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
-                        app.showToast("Sua assinatura VIP expirou. Benefícios e imagens restaurados.", "info");
+                        app.showToast("Sua assinatura VIP expirou. Benefícios e imagens animadas restaurados.", "info");
                     } catch (e) {
                         console.error("Erro na expiração do VIP", e);
                     }
@@ -1052,7 +1050,6 @@
 
                 const isVIP = app.getVIPInfo(userData).isActive;
                 const themeId = userData.profileTheme || 'default';
-                const currentThemeData = appState.catalog.find(p => p.id === themeId);
 
                 let activeThemeId = themeId;
 
@@ -1077,10 +1074,6 @@
                         
                         return `--theme-bg: ${gradBg}; --theme-border: ${c1}; --theme-glow: ${hexToRgba(c2, 0.4)};`;
                     }
-                }
-
-                if (currentThemeData && currentThemeData.requiresVip && !isVIP) {
-                    activeThemeId = 'default';
                 }
                 
                 const activeTheme = themes[activeThemeId] || themes['default'];
@@ -1929,6 +1922,9 @@
                 const vipStatusDisplay = userData.vip ? `<div class="profile-vip-status" style="font-size: 0.75rem; color: ${vipInfo.isActive ? '#ffd700' : 'var(--text-muted)'}; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; justify-content: center;"><i class="fa-solid fa-crown"></i> Status: VIP ${vipInfo.status}</div>` : '';
 
                 const themeStyle = app.getProfileThemeStyle(userData);
+                
+                const activeThemeId = userData.profileTheme || 'default';
+                const eclipseClass = activeThemeId === 'special_eclipse' ? 'theme-eclipse-active' : '';
 
                 let actionButton = '';
                 if (isMe && !isPublic) {
@@ -1938,7 +1934,7 @@
                 }
 
                 const html = `
-                    <section class="profile-top-section" style="${themeStyle}">
+                    <section class="profile-top-section ${eclipseClass}" style="${themeStyle}">
                         <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
                         <div class="profile-header">
                             <div class="profile-avatar-container">
@@ -1978,7 +1974,14 @@
                 if (!viewUser) return;
 
                 const topSection = document.querySelector('.profile-top-section');
-                if (topSection) topSection.style.cssText = app.getProfileThemeStyle(viewUser);
+                if (topSection) {
+                    topSection.style.cssText = app.getProfileThemeStyle(viewUser);
+                    if (viewUser.profileTheme === 'special_eclipse') {
+                        topSection.classList.add('theme-eclipse-active');
+                    } else {
+                        topSection.classList.remove('theme-eclipse-active');
+                    }
+                }
 
                 if (document.getElementById('stat-level')) document.getElementById('stat-level').innerText = `LVL ${viewUser.level || 1}`;
                 if (document.getElementById('stat-followers')) document.getElementById('stat-followers').innerText = viewUser.followers ? viewUser.followers.length : 0;
@@ -2417,7 +2420,7 @@
                 
                 document.getElementById('buy-modal-duration').innerText = product.duration ? `Duração: ${product.duration}` : 'Item Permanente';
                 
-                let descExtra = product.requiresVip ? `<br><br><span style="color: #ffd700; font-weight: bold; padding: 6px 10px; background: rgba(255, 215, 0, 0.1); border: 1px dashed rgba(255, 215, 0, 0.5); border-radius: 6px; display: inline-block; width: 100%;"><i class="fa-solid fa-crown"></i> Este cosmético requer um Plano VIP ativo para ser adquirido e utilizado.</span>` : '';
+                let descExtra = product.requiresVip ? `<br><br><span style="color: #ffd700; font-weight: bold; padding: 6px 10px; background: rgba(255, 215, 0, 0.1); border: 1px dashed rgba(255, 215, 0, 0.5); border-radius: 6px; display: inline-block; width: 100%;"><i class="fa-solid fa-crown"></i> Este item requer um Plano VIP ativo para ser adquirido. Após a compra, será seu permanentemente.</span>` : '';
                 document.getElementById('buy-modal-desc').innerHTML = product.description + descExtra;
                 
                 document.getElementById('buy-modal-price').innerHTML = `<i class="fa-solid fa-coins"></i> ${product.price} NCoins`;
@@ -2467,7 +2470,7 @@
                 } else if (product.category === 'frames' || product.category === 'themes' || product.category === 'special_themes') {
                     
                     if (product.requiresVip && !app.getVIPInfo(appState.currentUserData).isActive) {
-                        app.showToast("É necessário possuir um Plano VIP ativo para adquirir este cosmético especial.", "error");
+                        app.showToast("Este item requer um Plano VIP ativo.", "error");
                         return;
                     }
                     
@@ -2548,4 +2551,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+</html>

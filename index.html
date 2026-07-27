@@ -346,53 +346,59 @@
     width: 100%;
 }
 
-/* ===============================
+/* ==========================
    TEMA ESPECIAL - NEBULA
-================================ */
+========================== */
+
+.theme-special_nebula{
+    position: relative;
+}
 
 .theme-special_nebula::after{
     content:"";
     position:absolute;
     inset:0;
     pointer-events:none;
-    z-index:-1;
+    z-index:1;
 
     background:
-
-    radial-gradient(circle at 15% 20%, rgba(162,72,255,.30), transparent 28%),
-    radial-gradient(circle at 80% 35%, rgba(0,195,255,.22), transparent 32%),
-    radial-gradient(circle at 45% 80%, rgba(255,0,255,.18), transparent 26%),
-
-    radial-gradient(circle,#ffffff 1px,transparent 2px),
-    radial-gradient(circle,#b57cff 1px,transparent 2px),
-    radial-gradient(circle,#7edcff 1px,transparent 2px);
+        radial-gradient(circle at 15% 20%, rgba(162,72,255,.30), transparent 28%),
+        radial-gradient(circle at 80% 35%, rgba(0,195,255,.22), transparent 32%),
+        radial-gradient(circle at 45% 80%, rgba(255,0,255,.18), transparent 26%),
+        radial-gradient(circle,#ffffff 1px,transparent 2px),
+        radial-gradient(circle,#b57cff 1px,transparent 2px),
+        radial-gradient(circle,#7edcff 1px,transparent 2px);
 
     background-size:
-    150% 150%,
-    150% 150%,
-    150% 150%,
-    140px 140px,
-    190px 190px,
-    240px 240px;
+        150% 150%,
+        150% 150%,
+        150% 150%,
+        140px 140px,
+        190px 190px,
+        240px 240px;
 
-    background-repeat:no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;
-
-    filter:blur(0);
+    background-repeat:
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        repeat,
+        repeat,
+        repeat;
 
     opacity:.95;
 
     animation:
-    nebulaMove 18s ease-in-out infinite alternate,
-    starsMove 35s linear infinite,
-    starsTwinkle 4s ease-in-out infinite;
+        nebulaMove 18s ease-in-out infinite alternate,
+        starsMove 35s linear infinite,
+        starsTwinkle 4s ease-in-out infinite;
 }
 
-/* Mantém todo o conteúdo acima da animação */
+/* Conteúdo acima da animação */
 
-.theme-special_nebula .profile-header,
-.theme-special_nebula .profile-banner {
-    position: relative;
-    z-index: 2;
+.theme-special_nebula .profile-banner,
+.theme-special_nebula .profile-header{
+    position:relative;
+    z-index:2;
 }
 
 /* ===============================
@@ -479,14 +485,12 @@ opacity:.75;
     flex-shrink: 0;
 }
    
-     .profile-header::before{
+    .profile-header::before{
     content:"";
     position:absolute;
     inset:0;
-
-    background:var(--theme-bg);
-
     z-index:-2;
+    background:var(--theme-bg);
 }
 
 .profile-header::after{
@@ -2716,4 +2720,4 @@ opacity:.75;
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-</html>
+    </html>

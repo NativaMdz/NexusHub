@@ -2155,9 +2155,29 @@
                 if (!container) return;
                 container.innerHTML = '';
                 
-                if (appState.activeStoreCategory === 'themes') {
-                    container.innerHTML += `<div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">Personalize completamente a aparência do seu perfil com temas exclusivos e gradientes premium.</div>`;
-                }
+                if (appState.activeStoreCategory === 'frames') {
+    container.innerHTML += `
+        <div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
+            Destaque seu perfil com molduras exclusivas que aparecem em todo o Nexus Hub, incluindo Feed, Chats, Comentários, Ranking e Pesquisa de Usuários.
+        </div>
+    `;
+}
+
+if (appState.activeStoreCategory === 'themes') {
+    container.innerHTML += `
+        <div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
+            Personalize completamente a aparência do seu perfil com temas exclusivos e gradientes premium.
+        </div>
+    `;
+}
+
+if (appState.activeStoreCategory === 'vip') {
+    container.innerHTML += `
+        <div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
+            Desbloqueie benefícios exclusivos, como GIFs para foto e banner, gradientes personalizados, badge VIP e acesso a recursos premium.
+        </div>
+    `;
+        }
 
                 const filtered = appState.catalog.filter(p => p.category === appState.activeStoreCategory && p.status === 'active');
                 

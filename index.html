@@ -450,276 +450,123 @@
         }
 
         /* Alterando scale no size em vez de transform, para não violar os limites do border-radius */
-@keyframes nebulaMove {
-    0% {
-        background-position:
-            10% 10%,
-            90% 20%,
-            45% 80%,
-            25% 60%,
-            -30px 0,
-            -30px 0,
-            -30px 0;
+        @keyframes nebulaMove {
+            0% {
+                background-position:
+                    10% 10%,
+                    90% 20%,
+                    45% 80%,
+                    25% 60%,
+                    -30px 0,
+                    -30px 0,
+                    -30px 0;
 
-        background-size:
-            120% 120%, 120% 120%, 120% 120%, 120% 120%,
-            100px 100px, 140px 140px, 180px 180px;
-    }
+                background-size:
+                    120% 120%, 120% 120%, 120% 120%, 120% 120%,
+                    100px 100px, 140px 140px, 180px 180px;
+            }
 
-    50% {
-        background-position:
-            25% 25%,
-            70% 45%,
-            70% 40%,
-            40% 80%,
-            -30px 350px,
-            -30px 250px,
-            -30px 500px;
+            50% {
+                background-position:
+                    25% 25%,
+                    70% 45%,
+                    70% 40%,
+                    40% 80%,
+                    -30px 350px,
+                    -30px 250px,
+                    -30px 500px;
 
-        background-size:
-            130% 130%, 130% 130%, 130% 130%, 130% 130%,
-            100px 100px, 140px 140px, 180px 180px;
-    }
+                background-size:
+                    130% 130%, 130% 130%, 130% 130%, 130% 130%,
+                    100px 100px, 140px 140px, 180px 180px;
+            }
 
-    100% {
-        background-position:
-            40% 40%,
-            55% 70%,
-            25% 25%,
-            15% 35%,
-            -30px 700px,
-            -30px 500px,
-            -30px 1000px;
+            100% {
+                background-position:
+                    40% 40%,
+                    55% 70%,
+                    25% 25%,
+                    15% 35%,
+                    -30px 700px,
+                    -30px 500px,
+                    -30px 1000px;
 
-        background-size:
-            120% 120%, 120% 120%, 120% 120%, 120% 120%,
-            100px 100px, 140px 140px, 180px 180px;
-    }
-}
+                background-size:
+                    120% 120%, 120% 120%, 120% 120%, 120% 120%,
+                    100px 100px, 140px 140px, 180px 180px;
+            }
+        }
 
-@keyframes starsTwinkle {
-    0%, 100% { opacity: .45; }
-    50% { opacity: .75; }
-}
+        @keyframes starsTwinkle {
+            0%, 100% { opacity: .45; }
+            50% { opacity: .75; }
+        }
 
-/* =========================================
-   TEMA ESPECIAL - NEON GLACIAL
-========================================= */
+        /* ==========================
+           TEMA ESPECIAL - NEON GLACIAL
+        ========================== */
+        .theme-special_glacial .profile-header::after {
+            background:
+                /* Reflexo Cristal/Gelo (Intersecção 1) */
+                repeating-linear-gradient(115deg, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.03) 45%, rgba(150, 220, 255, 0.06) 48%, transparent 52%, transparent 100%),
+                /* Reflexo Cristal/Gelo (Intersecção 2) - Causa efeito de faceta de pedra/gelo ao cruzar */
+                repeating-linear-gradient(65deg, transparent 0%, transparent 35%, rgba(255, 255, 255, 0.02) 40%, rgba(0, 243, 255, 0.04) 42%, transparent 46%, transparent 100%),
+                /* Aurora Gélida (Topo) */
+                radial-gradient(ellipse at 50% -20%, rgba(0, 195, 255, 0.15), transparent 60%),
+                /* Neve / Vento Frio - Camada Frontal (Rápida/Maior) */
+                radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 2px),
+                /* Neve / Vento Frio - Camada Média (Ciano/Média) */
+                radial-gradient(circle, rgba(150, 230, 255, 0.6) 1px, transparent 1.5px),
+                /* Neve / Vento Frio - Camada Fundo (Lenta/Fina) */
+                radial-gradient(circle, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
 
-.theme-special_glacial .profile-header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:inherit;
-    pointer-events:none;
-    z-index:0;
+            background-size:
+                300px 300px, 
+                300px 300px, 
+                100% 100%,
+                90px 90px, 
+                60px 60px, 
+                40px 40px;
 
-    background:
-        linear-gradient(
-            110deg,
-            transparent 0%,
-            rgba(180,235,255,.04) 30%,
-            rgba(255,255,255,.10) 50%,
-            rgba(180,235,255,.04) 70%,
-            transparent 100%
-        );
+            background-repeat:
+                repeat, 
+                repeat, 
+                no-repeat,
+                repeat, 
+                repeat, 
+                repeat;
 
-    background-size:180% 100%;
-    opacity:.55;
-    filter:blur(14px);
+            opacity: 0.95;
+            animation: glacialBlizzard 12s linear infinite, glacialPulse 6s ease-in-out infinite alternate;
+        }
 
-    animation:glacialWind 14s ease-in-out infinite;
-}
+        /* Animação com precisão matemática em múltiplos (LCM) para loop contínuo (Linear) sem cortes */
+        @keyframes glacialBlizzard {
+            0% {
+                background-position: 
+                    0px 0px, 
+                    0px 0px, 
+                    0px 0px, 
+                    0px 0px, 
+                    0px 0px, 
+                    0px 0px;
+            }
+            100% {
+                background-position:
+                    300px 300px,   /* Cristal 1 desce/direita (Loop 1 ciclo = 300) */
+                    -300px 300px,  /* Cristal 2 desce/esquerda (Cruza e gera efeito vítreo) */
+                    0px 0px,       /* Aurora estática */
+                    -180px 360px,  /* Neve Frontal (90x90) -> move x:-2(90), y:4(90) */
+                    -120px 240px,  /* Neve Média (60x60) -> move x:-2(60), y:4(60) */
+                    -80px 160px;   /* Neve Fundo (40x40) -> move x:-2(40), y:4(40) */
+            }
+        }
 
-.theme-special_glacial .profile-header::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 0;
-    mix-blend-mode: screen;
+        @keyframes glacialPulse {
+            0%, 100% { opacity: 0.85; filter: brightness(1); }
+            50% { opacity: 1; filter: brightness(1.15); } /* Brilho de frio extremo pulsante */
+        }
 
-    background:
-
-    /* Aurora glacial */
-    radial-gradient(circle at 15% 20%, rgba(180,235,255,.14), transparent 32%),
-    radial-gradient(circle at 85% 18%, rgba(110,200,255,.14), transparent 30%),
-    radial-gradient(circle at 45% 82%, rgba(140,220,255,.10), transparent 34%),
-    radial-gradient(circle at 72% 65%, rgba(220,250,255,.08), transparent 24%),
-
-    /* Flocos grandes */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24'%3E%3Cg stroke='white' stroke-width='1.2' stroke-linecap='round'%3E%3Cline x1='12' y1='3' x2='12' y2='21'/%3E%3Cline x1='3' y1='12' x2='21' y2='12'/%3E%3Cline x1='5' y1='5' x2='19' y2='19'/%3E%3Cline x1='19' y1='5' x2='5' y2='19'/%3E%3C/g%3E%3C/svg%3E"),
-
-    /* Flocos médios */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 18 18'%3E%3Cg stroke='%23bdefff' stroke-width='1.1' stroke-linecap='round'%3E%3Cline x1='9' y1='2' x2='9' y2='16'/%3E%3Cline x1='2' y1='9' x2='16' y2='9'/%3E%3Cline x1='4' y1='4' x2='14' y2='14'/%3E%3Cline x1='14' y1='4' x2='4' y2='14'/%3E%3C/g%3E%3C/svg%3E"),
-
-    /* Flocos pequenos */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 14 14'%3E%3Cg stroke='%237fd8ff' stroke-width='1' stroke-linecap='round'%3E%3Cline x1='7' y1='2' x2='7' y2='12'/%3E%3Cline x1='2' y1='7' x2='12' y2='7'/%3E%3Cline x1='4' y1='4' x2='10' y2='10'/%3E%3Cline x1='10' y1='4' x2='4' y2='10'/%3E%3C/g%3E%3C/svg%3E");
-
-    background-repeat:
-        no-repeat,
-        no-repeat,
-        no-repeat,
-        no-repeat,
-        repeat,
-        repeat,
-        repeat;
-
-    background-size:
-    120% 120%,
-    120% 120%,
-    120% 120%,
-    120% 120%,
-    170px 170px,
-    230px 230px,
-    290px 290px;
-
-    opacity: .95;
-
-    animation:
-        glacialSnow 18s ease-in-out infinite alternate,
-        glacialTwinkle 5s ease-in-out infinite;
-}
-
-.theme-special_glacial .profile-header > *{
-    position: relative;
-    z-index: 0;
-}
-
-@keyframes glacialSnow {
-
-    0%{
-        background-position:
-            15% 20%,
-            85% 18%,
-            45% 82%,
-            72% 65%,
-
-            -12px -40px,
-            18px -80px,
-            -25px -120px;
-    }
-
-    12%{
-        background-position:
-            18% 22%,
-            82% 20%,
-            48% 76%,
-            68% 68%,
-
-            10px 80px,
-            -8px 40px,
-            18px 120px;
-    }
-
-    24%{
-        background-position:
-            22% 26%,
-            76% 24%,
-            54% 68%,
-            60% 74%,
-
-            32px 180px,
-            -26px 150px,
-            36px 260px;
-    }
-
-    38%{
-        background-position:
-            28% 32%,
-            70% 34%,
-            60% 58%,
-            46% 80%,
-
-            -18px 310px,
-            22px 260px,
-            -12px 420px;
-    }
-
-    52%{
-        background-position:
-            33% 36%,
-            64% 46%,
-            54% 48%,
-            34% 82%,
-
-            28px 430px,
-            -34px 360px,
-            22px 560px;
-    }
-
-    68%{
-        background-position:
-            37% 40%,
-            58% 58%,
-            42% 38%,
-            24% 60%,
-
-            -20px 540px,
-            18px 470px,
-            -30px 700px;
-    }
-
-    84%{
-        background-position:
-            40% 43%,
-            54% 64%,
-            35% 32%,
-            20% 46%,
-
-            16px 650px,
-            -18px 590px,
-            26px 860px;
-    }
-
-    100%{
-        background-position:
-            42% 45%,
-            52% 68%,
-            30% 28%,
-            18% 38%,
-
-            -10px 780px,
-            12px 720px,
-            -22px 1020px;
-    }
-
-}
-
-@keyframes glacialTwinkle{
-
-    0%{
-        opacity:.72;
-        filter:brightness(.95) saturate(1);
-    }
-
-    20%{
-        opacity:.82;
-        filter:brightness(1.05) saturate(1.05);
-    }
-
-    40%{
-        opacity:1;
-        filter:brightness(1.18) saturate(1.12);
-    }
-
-    60%{
-        opacity:.88;
-        filter:brightness(1.08) saturate(1.06);
-    }
-
-    80%{
-        opacity:.96;
-        filter:brightness(1.15) saturate(1.1);
-    }
-
-    100%{
-        opacity:.72;
-        filter:brightness(.95) saturate(1);
-    }
-
-}
         /* CHAT / COMMS */
         .chat-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
         .chat-header-info { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; flex-shrink: 0; }
@@ -2918,4 +2765,5 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+</html>
+

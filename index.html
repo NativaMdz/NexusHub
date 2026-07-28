@@ -583,63 +583,138 @@
 }
 
 @keyframes glacialSnow {
-    0% {
+
+    0%{
         background-position:
             15% 20%,
             85% 18%,
             45% 82%,
             72% 65%,
-            -20px 0,
-            15px 0,
-            -10px 0;
+
+            -12px -40px,
+            18px -80px,
+            -25px -120px;
     }
 
-    25% {
+    12%{
         background-position:
-            20% 25%,
-            78% 24%,
-            50% 70%,
-            60% 75%,
-            20px 160px,
-            -15px 120px,
-            25px 220px;
+            18% 22%,
+            82% 20%,
+            48% 76%,
+            68% 68%,
+
+            10px 80px,
+            -8px 40px,
+            18px 120px;
     }
 
-    55% {
+    24%{
         background-position:
-            30% 35%,
-            65% 40%,
-            58% 55%,
-            40% 80%,
-            -25px 340px,
-            30px 260px,
-            -20px 420px;
+            22% 26%,
+            76% 24%,
+            54% 68%,
+            60% 74%,
+
+            32px 180px,
+            -26px 150px,
+            36px 260px;
     }
 
-    100% {
+    38%{
         background-position:
-            40% 45%,
-            52% 65%,
-            30% 30%,
-            20% 40%,
-            18px 620px,
-            -30px 520px,
-            35px 760px;
+            28% 32%,
+            70% 34%,
+            60% 58%,
+            46% 80%,
+
+            -18px 310px,
+            22px 260px,
+            -12px 420px;
     }
+
+    52%{
+        background-position:
+            33% 36%,
+            64% 46%,
+            54% 48%,
+            34% 82%,
+
+            28px 430px,
+            -34px 360px,
+            22px 560px;
+    }
+
+    68%{
+        background-position:
+            37% 40%,
+            58% 58%,
+            42% 38%,
+            24% 60%,
+
+            -20px 540px,
+            18px 470px,
+            -30px 700px;
+    }
+
+    84%{
+        background-position:
+            40% 43%,
+            54% 64%,
+            35% 32%,
+            20% 46%,
+
+            16px 650px,
+            -18px 590px,
+            26px 860px;
+    }
+
+    100%{
+        background-position:
+            42% 45%,
+            52% 68%,
+            30% 28%,
+            18% 38%,
+
+            -10px 780px,
+            12px 720px,
+            -22px 1020px;
+    }
+
 }
 
-@keyframes glacialTwinkle {
-    0%,100%{
-        opacity:.75;
-        filter:brightness(.95);
+@keyframes glacialTwinkle{
+
+    0%{
+        opacity:.72;
+        filter:brightness(.95) saturate(1);
     }
 
-    50%{
+    20%{
+        opacity:.82;
+        filter:brightness(1.05) saturate(1.05);
+    }
+
+    40%{
         opacity:1;
-        filter:brightness(1.25);
+        filter:brightness(1.18) saturate(1.12);
     }
-}
 
+    60%{
+        opacity:.88;
+        filter:brightness(1.08) saturate(1.06);
+    }
+
+    80%{
+        opacity:.96;
+        filter:brightness(1.15) saturate(1.1);
+    }
+
+    100%{
+        opacity:.72;
+        filter:brightness(.95) saturate(1);
+    }
+
+}
         /* CHAT / COMMS */
         .chat-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
         .chat-header-info { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; flex-shrink: 0; }
@@ -2838,4 +2913,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                    </html>
+    </html>

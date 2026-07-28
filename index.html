@@ -503,13 +503,12 @@
 }
 
 /* =========================================
-   TEMA ESPECIAL - NEON GLACIAL (DO ZERO)
+   TEMA ESPECIAL - NEON GLACIAL (CORRIGIDO)
 ========================================= */
 
-/* Base estrutural com brilho neon suave e borda cristalina */
+/* Base estrutural (Removido o overflow: hidden para não cortar a foto) */
 .theme-special_glacial .profile-header {
     position: relative;
-    overflow: hidden;
     background: linear-gradient(135deg, #09121b 0%, #041221 100%);
     border: 1px solid rgba(180, 230, 255, 0.25);
     box-shadow: 
@@ -519,46 +518,42 @@
 
 /* 
    CAMADA 1: O Reflexo Cristalino 
-   Um feixe de luz afiado que corta o elemento simulando 
-   a luz batendo em uma faceta de gelo.
+   Ajustado com "inset: 0" e "background-position" para não vazar 
+   e não precisar cortar a foto de perfil.
 */
 .theme-special_glacial .profile-header::before {
     content: "";
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    inset: 0; /* Preenche apenas o espaço exato da capa */
+    border-radius: inherit; /* Respeita o arredondamento original da capa */
     background: linear-gradient(
-        90deg,
-        transparent 45%,
-        rgba(255, 255, 255, 0.05) 48%,
-        rgba(255, 255, 255, 0.5) 50%, /* O pico do corte de luz */
-        rgba(180, 230, 255, 0.2) 52%,
-        transparent 55%
+        105deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.05) 45%,
+        rgba(255, 255, 255, 0.5) 50%, /* O pico do brilho */
+        rgba(180, 230, 255, 0.2) 55%,
+        transparent 65%
     );
+    background-size: 300% 100%;
     pointer-events: none;
-    z-index: 1;
-    /* Animação exclusiva de refração */
+    z-index: 0; /* Fica atrás da foto de perfil */
     animation: crystalRefraction 7s cubic-bezier(0.1, 0.7, 0.1, 1) infinite;
 }
 
 /* 
    CAMADA 2: A Atmosfera Glacial
-   Glows estáticos nos cantos que pulsam suavemente 
-   para dar a sensação de um "neon frio" vivo.
 */
 .theme-special_glacial .profile-header::after {
     content: "";
     position: absolute;
     inset: 0;
+    border-radius: inherit;
     background-image: 
         radial-gradient(circle at 10% 90%, rgba(180, 230, 255, 0.12) 0%, transparent 50%),
         radial-gradient(circle at 90% 10%, rgba(100, 180, 255, 0.15) 0%, transparent 60%);
     pointer-events: none;
     mix-blend-mode: screen;
     z-index: 0;
-    /* Animação exclusiva de pulso */
     animation: glacialPulse 5s ease-in-out infinite alternate;
 }
 
@@ -566,20 +561,20 @@
    KEYFRAMES EXCLUSIVOS DO TEMA GLACIAL
 ========================================= */
 
-/* A luz bate e reflete rapidamente, passando um longo período estática, como gelo de verdade */
+/* A luz bate e reflete movendo a textura, sem alterar o tamanho do elemento */
 @keyframes crystalRefraction {
     0% {
-        transform: translateX(-100%) rotate(35deg);
+        background-position: 200% 0;
     }
     15% {
-        transform: translateX(100%) rotate(35deg);
+        background-position: -100% 0;
     }
     100% {
-        transform: translateX(100%) rotate(35deg);
+        background-position: -100% 0;
     }
 }
 
-/* Pulsação de brilho térmico invertido (frio extremo) */
+/* Pulsação de brilho térmico invertido (frio) */
 @keyframes glacialPulse {
     0% {
         opacity: 0.5;
@@ -590,7 +585,6 @@
         filter: brightness(1.2) contrast(1.1);
     }
 }
-
 
         /* CHAT / COMMS */
         .chat-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
@@ -2790,4 +2784,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                    </html>
+    </html>

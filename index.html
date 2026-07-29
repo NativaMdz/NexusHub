@@ -567,87 +567,130 @@
             50% { opacity: 1; filter: brightness(1.15); } /* Brilho de frio extremo pulsante */
         }
 
-        /* ==========================
-           TEMA ESPECIAL - AURORA
-        ========================== */
-        .theme-special_aurora .profile-header::after {
-            background:
-                /* Camada 1: Poeira Estelar Fina */
-                radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1.5px),
-                /* Camada 2: Estrelas Mais Brilhantes e Esparsas */
-                radial-gradient(circle, rgba(150, 255, 230, 0.25) 1px, transparent 2px),
-                /* Camada 3: Feixe Central Intenso (Verde Aurora / Ciano) */
-                radial-gradient(ellipse 130% 60% at 50% 50%, rgba(0, 255, 150, 0.22), transparent 60%),
-                /* Camada 4: Cortina Luminosa Superior (Azul Profundo / Roxo Suave) */
-                radial-gradient(ellipse 150% 70% at 80% -10%, rgba(0, 100, 255, 0.18), rgba(120, 50, 200, 0.12), transparent 60%),
-                /* Camada 5: Cortina Luminosa Inferior (Verde Esmeralda) */
-                radial-gradient(ellipse 140% 60% at 10% 110%, rgba(0, 250, 130, 0.18), rgba(0, 150, 200, 0.08), transparent 65%),
-                /* Camada 6: Atmosfera / Neblina Fria Noturna */
-                linear-gradient(160deg, rgba(5, 10, 20, 0.4) 0%, rgba(0, 15, 30, 0.15) 100%);
+/* ==========================
+   TEMA ESPECIAL - AURORA
+========================== */
 
-            background-size:
-                100px 100px,
-                180px 180px,
-                160% 160%,
-                180% 150%,
-                170% 150%,
-                100% 100%;
+/* Camada Base (Céu Noturno, Estrelas e Aurora Boreal ondulante) */
+.theme-special_aurora .profile-header::before {
+    /* Substitui o var(--theme-bg) padrão por múltiplas camadas hiper-detalhadas */
+    background:
+        /* Brilho Superior da Aurora (Verde/Ciano) */
+        radial-gradient(ellipse at 50% -20%, rgba(0, 255, 150, 0.25) 0%, rgba(0, 100, 255, 0.15) 50%, transparent 70%),
+        /* Onda 1 da Aurora (Verde Brilhante) */
+        radial-gradient(ellipse 80% 60% at 20% 110%, rgba(0, 255, 150, 0.35) 0%, rgba(0, 150, 255, 0.15) 50%, transparent 100%),
+        /* Onda 2 da Aurora (Ciano/Roxo) */
+        radial-gradient(ellipse 70% 50% at 80% 110%, rgba(0, 200, 255, 0.3) 0%, rgba(120, 50, 255, 0.2) 60%, transparent 100%),
+        /* Onda 3 da Aurora (Base Suave ao fundo) */
+        radial-gradient(ellipse 100% 50% at 50% 120%, rgba(0, 255, 100, 0.2) 0%, transparent 80%),
+        /* Estrelas Menores e Distantes */
+        radial-gradient(circle, rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+        /* Estrelas Médias e Brilhantes */
+        radial-gradient(circle, rgba(255, 255, 255, 0.8) 1.5px, transparent 1.5px),
+        /* Fundo Escuro do Céu Noturno Profundo */
+        linear-gradient(to bottom, rgba(5, 8, 15, 0.96), rgba(8, 12, 20, 0.98));
 
-            background-repeat:
-                repeat,
-                repeat,
-                no-repeat,
-                no-repeat,
-                no-repeat,
-                no-repeat;
+    background-size:
+        100% 100%, 
+        200% 200%, 
+        200% 200%, 
+        200% 200%, 
+        60px 60px, 
+        140px 140px, 
+        100% 100%;
 
-            opacity: 0.95;
-            /* Combina o movimento fluido da aurora com a respiração luminosa */
-            animation: auroraFlow 22s ease-in-out infinite alternate, auroraBreathe 7s ease-in-out infinite alternate;
-        }
+    background-position:
+        0 0,
+        0% 100%,
+        100% 100%,
+        50% 100%,
+        0 0,
+        30px 40px,
+        0 0;
 
-        /* Anima o deslocamento das cortinas de luz simulando o balanço do vento solar */
-        @keyframes auroraFlow {
-            0% {
-                background-position:
-                    0px 0px,
-                    0px 0px,
-                    10% 40%,
-                    90% 0%,
-                    0% 90%,
-                    0% 0%;
-            }
-            50% {
-                background-position:
-                    -15px -10px,
-                    -10px -20px,
-                    45% 55%,
-                    60% 20%,
-                    40% 100%,
-                    0% 0%;
-            }
-            100% {
-                background-position:
-                    -30px -20px,
-                    -20px -40px,
-                    85% 35%,
-                    10% 15%,
-                    100% 85%,
-                    0% 0%;
-            }
-        }
+    background-repeat:
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        repeat,
+        repeat,
+        no-repeat;
 
-        /* Cria a pulsação natural e a leve mudança de cor (Verde -> Ciano) característica das Auroras */
-        @keyframes auroraBreathe {
-            0% { 
-                opacity: 0.85; 
-                filter: hue-rotate(0deg) brightness(1); 
-            }
-            100% { 
-                opacity: 1; 
-                filter: hue-rotate(12deg) brightness(1.15); 
-            }
-        }
+    animation: auroraSkyDrift 18s ease-in-out infinite alternate;
+}
+
+/* Camada Frontal (Meteoros extremamente raros e Poeira Estelar fluida) */
+.theme-special_aurora .profile-header::after {
+    background:
+        /* Meteoro 1 (Rápido, brilhante, cruza da direita para esquerda) */
+        radial-gradient(circle at 50px 600px, rgba(255, 255, 255, 1) 0%, rgba(150, 255, 200, 0.6) 2px, transparent 6px),
+        /* Meteoro 2 (Mais lento, tom ciano, cruza da esquerda para direita) */
+        radial-gradient(circle at 2400px 2400px, rgba(255, 255, 255, 0.9) 0%, rgba(0, 200, 255, 0.5) 1.5px, transparent 4px),
+        /* Poeira Atmosférica (Verde aurora) */
+        radial-gradient(circle, rgba(0, 255, 150, 0.25) 1px, transparent 1.5px),
+        /* Poeira Atmosférica (Azul suave) */
+        radial-gradient(circle, rgba(0, 150, 255, 0.15) 1.5px, transparent 2px);
+
+    background-size:
+        2000px 2000px, /* Malha de 2000px. O meteoro aparece ~1 vez por ciclo na tela pequena */
+        3000px 3000px, /* Malha colossal de 3000px para o segundo meteoro ser ainda mais raro */
+        90px 90px,     /* Grid de poeira 1 */
+        130px 130px;   /* Grid de poeira 2 */
+
+    background-repeat: repeat;
+    opacity: 0.85;
+    animation: auroraMeteors 14s linear infinite;
+}
+
+/* 1. Movimento Orgânico das Auroras e Estrelas (Loop Alternado) */
+@keyframes auroraSkyDrift {
+    0% {
+        background-position:
+            0 0,
+            0% 100%,    /* Onda 1 inicia à esquerda */
+            100% 100%,  /* Onda 2 inicia à direita */
+            20% 100%,   /* Onda 3 levemente à esquerda */
+            0px 0px,    /* Estrelas 1 */
+            30px 40px,  /* Estrelas 2 */
+            0 0;
+        filter: brightness(0.95);
+    }
+    50% {
+        filter: brightness(1.15); /* Pulso de luminosidade natural da Aurora */
+    }
+    100% {
+        background-position:
+            0 0,
+            100% 90%,   /* Onda 1 flutua para a direita e sobe */
+            0% 95%,     /* Onda 2 flutua para a esquerda e sobe */
+            80% 105%,   /* Onda 3 desliza para a direita */
+            -20px -10px,/* Paralaxe nas estrelas (movimento contrário) */
+            10px 20px,
+            0 0;
+        filter: brightness(1);
+    }
+}
+
+/* 2. Disparo Discreto dos Meteoros e Poeira (Loop Linear Contínuo) */
+@keyframes auroraMeteors {
+    0% {
+        background-position:
+            2000px -2000px,   /* Start M1 */
+            -3000px -3000px,  /* Start M2 */
+            0px 0px,          /* Start Poeira 1 */
+            0px 0px;          /* Start Poeira 2 */
+    }
+    100% {
+        /* Para o loop ser invisível em 'linear', o deslocamento X e Y 
+           DEVE ser um múltiplo exato do seu respectivo background-size */
+        background-position:
+            0px 0px,          /* M1 deslocou exatos -2000px(X) e +2000px(Y). Loop invisível. */
+            0px 0px,          /* M2 deslocou exatos +3000px(X) e +3000px(Y). Loop invisível. */
+            -180px 270px,     /* 90 * (-2) X, 90 * (3) Y. Loop perfeito. */
+            260px -390px;     /* 130 * (2) X, 130 * (-3) Y. Loop perfeito. */
+    }
+}
 
         /* CHAT / COMMS */
         .chat-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
@@ -2847,4 +2890,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+                                                                                                                   </html>

@@ -704,20 +704,18 @@
     border-radius: inherit;
     background:
         /* 1. O Corpo do Eclipse (Escuridão Total no Centro Superior) */
-        radial-gradient(circle at 50% 0%, #000000 15%, transparent 38%),
-        /* 2. A Coroa (Halo luxuoso Roxo Escuro / Vinho bloqueado pelo centro) */
-        radial-gradient(ellipse 120% 80% at 50% -10%, rgba(60, 20, 100, 0.35) 0%, rgba(40, 10, 45, 0.2) 40%, transparent 80%),
-        /* 3. Profundidade Inferior (Névoa vinho extremamente sutil) */
-        radial-gradient(circle at 50% 120%, rgba(25, 5, 30, 0.2) 0%, transparent 60%),
-        /* 4. Base Negra Premium (Vazio absoluto) */
-        linear-gradient(to bottom, #010101 0%, #050508 100%);
-    animation: eclipseHaloBreath 16s ease-in-out infinite alternate;
+        radial-gradient(circle at 50% 0%, #000000 15%, transparent 45%),
+        /* 2. A Coroa (Halo luxuoso Roxo Escuro / Vinho - Opacidade aumentada para presença premium) */
+        radial-gradient(ellipse 120% 90% at 50% -5%, rgba(100, 35, 160, 0.6) 0%, rgba(50, 15, 75, 0.35) 45%, transparent 80%),
+        /* 3. Profundidade Inferior (Névoa vinho perceptível) */
+        radial-gradient(circle at 50% 120%, rgba(60, 15, 80, 0.4) 0%, transparent 65%),
+        /* 4. Base Negra Premium (Vazio absoluto com leve tom violeta profundo para contrastar as sombras) */
+        linear-gradient(to bottom, #080312 0%, #030105 100%);
+    animation: eclipseHaloBreath 12s ease-in-out infinite alternate;
 }
 
 /* Camada Frontal: Reflexos Metálicos de Luxo e Sombras Respirantes */
 .theme-special_eclipse .profile-header::after {
-    /* Não é necessário recriar content, absolute e z-index se já existirem no CSS global, 
-       mas estão incluídos aqui por segurança para garantir a integridade do visual */
     content: "";
     position: absolute;
     inset: 0;
@@ -725,35 +723,35 @@
     border-radius: inherit;
     pointer-events: none;
     background:
-        /* Sombra Viva 1 (Desloca-se lentamente escondendo os reflexos) */
-        radial-gradient(circle at 30% 70%, rgba(0, 0, 0, 0.8) 0%, transparent 60%),
+        /* Sombra Viva 1 (Mais escura e intensa, desliza escondendo os reflexos) */
+        radial-gradient(circle at 30% 70%, rgba(0, 0, 0, 0.95) 0%, transparent 65%),
         /* Sombra Viva 2 */
-        radial-gradient(circle at 70% 30%, rgba(0, 0, 0, 0.7) 0%, transparent 60%),
-        /* Reflexo Metálico Primário (Roxo Profundo / Luxo) */
-        linear-gradient(135deg, transparent 0%, transparent 35%, rgba(60, 20, 100, 0.05) 45%, rgba(80, 25, 120, 0.12) 50%, rgba(60, 20, 100, 0.05) 55%, transparent 65%, transparent 100%),
-        /* Reflexo Metálico Secundário (Vinho Sutil com traços Prata) */
-        linear-gradient(45deg, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.015) 47%, rgba(40, 10, 30, 0.06) 50%, rgba(255, 255, 255, 0.015) 53%, transparent 60%, transparent 100%);
+        radial-gradient(circle at 70% 30%, rgba(0, 0, 0, 0.9) 0%, transparent 65%),
+        /* Reflexo Metálico Primário (Roxo Profundo / Luxo - Brilho reajustado para ser visível) */
+        linear-gradient(135deg, transparent 0%, transparent 35%, rgba(120, 40, 190, 0.15) 45%, rgba(160, 60, 240, 0.4) 50%, rgba(120, 40, 190, 0.15) 55%, transparent 65%, transparent 100%),
+        /* Reflexo Metálico Secundário (Vinho Sutil com traços Prata - Cristalino) */
+        linear-gradient(45deg, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.08) 47%, rgba(140, 50, 180, 0.25) 50%, rgba(255, 255, 255, 0.08) 53%, transparent 60%, transparent 100%);
     
     background-size:
-        250% 250%, /* Sombras grandes para movimento fluído */
+        250% 250%, 
         250% 250%,
-        300% 300%, /* Reflexos expandidos para transição invisível */
+        300% 300%, 
         300% 300%;
     
     background-repeat: no-repeat;
-    animation: eclipseShadowDrift 24s ease-in-out infinite alternate;
+    animation: eclipseShadowDrift 18s ease-in-out infinite alternate;
 }
 
-/* Animações (Loop Constante, Suave e Sem Cortes) */
+/* Animações (Loop Constante, Suave e Claramente Perceptível) */
 
 @keyframes eclipseHaloBreath {
     0% {
-        opacity: 0.85;
-        filter: brightness(0.9) contrast(1);
+        opacity: 0.9;
+        filter: brightness(0.85) contrast(1.1);
     }
     100% {
         opacity: 1;
-        filter: brightness(1.15) contrast(1.05); /* Pulso de luminosidade muito elegante */
+        filter: brightness(1.3) contrast(1.05); /* Delta ampliado para a "respiração" ser evidente */
     }
 }
 
@@ -2972,4 +2970,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                    </html>
+                </html>

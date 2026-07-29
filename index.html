@@ -695,7 +695,7 @@
    TEMA ESPECIAL - ECLIPSE
 ========================== */
 
-/* Camada Base: Atmosfera, Fundo Escuro e Feixes Difusos de Energia */
+/* Camada Base: Atmosfera, Fundo Escuro, Feixes Contínuos e Rede de Energia */
 .theme-special_eclipse .profile-header::before {
     content: "";
     position: absolute;
@@ -705,31 +705,57 @@
     background:
         /* 1. O Corpo do Eclipse (Escuridão Central Superior) */
         radial-gradient(circle at 50% 0%, #000000 18%, transparent 50%),
-        /* 2. Feixe Difuso 1 - Energia Roxa Profunda */
-        radial-gradient(ellipse 100% 70% at 20% 40%, rgba(110, 30, 175, 0.22) 0%, rgba(70, 18, 115, 0.08) 50%, transparent 80%),
-        /* 3. Feixe Difuso 2 - Energia Vinho Sutil */
-        radial-gradient(ellipse 90% 80% at 80% 60%, rgba(140, 40, 190, 0.18) 0%, rgba(50, 12, 85, 0.06) 55%, transparent 85%),
+        
+        /* 2. Feixe Difuso 1 - Energia Roxa Profunda (Tamanho expandido p/ evitar corte) */
+        radial-gradient(ellipse 90% 70% at 50% 50%, rgba(110, 30, 175, 0.22) 0%, rgba(70, 18, 115, 0.08) 40%, transparent 65%),
+        
+        /* 3. Feixe Difuso 2 - Energia Vinho Sutil (Tamanho expandido p/ evitar corte) */
+        radial-gradient(ellipse 80% 80% at 50% 50%, rgba(140, 40, 190, 0.18) 0%, rgba(50, 12, 85, 0.06) 45%, transparent 65%),
+        
         /* 4. A Coroa (Halo luxuoso Roxo Escuro no Topo) */
         radial-gradient(ellipse 130% 90% at 50% -5%, rgba(100, 35, 160, 0.55) 0%, rgba(45, 12, 70, 0.3) 45%, transparent 80%),
+        
         /* 5. Névoa Inferior Discreta */
         radial-gradient(circle at 50% 120%, rgba(65, 15, 85, 0.35) 0%, transparent 70%),
+
+        /* --- INÍCIO DA REDE DE ENERGIA ROXA (FUNDO PROFUNDO) --- */
+        /* Malha 1 (Menor, Conexões em Roxo Profundo) */
+        radial-gradient(circle at 50% 50%, rgba(110, 30, 160, 0.3) 1px, transparent 2px),
+        linear-gradient(65deg, transparent 49.7%, rgba(90, 20, 130, 0.12) 49.7%, rgba(90, 20, 130, 0.12) 50.3%, transparent 50.3%),
+        linear-gradient(-25deg, transparent 49.7%, rgba(60, 10, 90, 0.1) 49.7%, rgba(60, 10, 90, 0.1) 50.3%, transparent 50.3%),
+        
+        /* Malha 2 (Maior, Conexões em Vinho/Violeta Discreto) */
+        radial-gradient(circle at 50% 50%, rgba(140, 40, 120, 0.2) 1.5px, transparent 2.5px),
+        linear-gradient(75deg, transparent 49.8%, rgba(100, 25, 100, 0.08) 49.8%, rgba(100, 25, 100, 0.08) 50.2%, transparent 50.2%),
+        linear-gradient(-15deg, transparent 49.8%, rgba(70, 15, 80, 0.06) 49.8%, rgba(70, 15, 80, 0.06) 50.2%, transparent 50.2%),
+        /* --- FIM DA REDE --- */
+
         /* 6. Fundo Negro Absoluto com Toque Violeta */
         linear-gradient(to bottom, #070210 0%, #030105 100%);
     
     background-size:
-        100% 100%,
-        180% 180%,
-        180% 180%,
-        100% 100%,
-        100% 100%,
-        100% 100%;
+        100% 100%,     /* 1. Eclipse Body */
+        280% 280%,     /* 2. Feixe 1 (Gigante p/ nunca mostrar bordas) */
+        280% 280%,     /* 3. Feixe 2 (Gigante p/ nunca mostrar bordas) */
+        100% 100%,     /* 4. Coroa */
+        100% 100%,     /* 5. Névoa */
+        140px 160px,   /* Malha 1 - Partículas */
+        140px 160px,   /* Malha 1 - Linha 1 */
+        140px 160px,   /* Malha 1 - Linha 2 */
+        220px 250px,   /* Malha 2 - Partículas */
+        220px 250px,   /* Malha 2 - Linha 1 */
+        220px 250px,   /* Malha 2 - Linha 2 */
+        100% 100%;     /* 6. Fundo Negro */
         
-    background-repeat: no-repeat;
-    /* SEPARADO: Movimento e Pulso operam em tempos diferentes para nunca sincronizarem pausas */
-    animation: eclipseEnergyDrift 25s ease-in-out infinite alternate, eclipseEnergyPulse 14s ease-in-out infinite alternate;
+    background-repeat: 
+        no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, 
+        repeat, repeat, repeat, repeat, repeat, repeat, 
+        no-repeat;
+        
+    animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyPulse 14s ease-in-out infinite alternate;
 }
 
-/* Camada Frontal: Reflexos Metálicos Contínuos e Sombras Vivas */
+/* Camada Frontal: Reflexos Metálicos Contínuos (Infinitos) e Sombras Vivas */
 .theme-special_eclipse .profile-header::after {
     content: "";
     position: absolute;
@@ -739,31 +765,31 @@
     pointer-events: none;
     background:
         /* Sombra Viva 1 */
-        radial-gradient(ellipse 80% 80% at 30% 70%, rgba(0, 0, 0, 0.96) 0%, transparent 75%),
+        radial-gradient(ellipse 90% 90% at 50% 50%, rgba(0, 0, 0, 0.96) 0%, transparent 60%),
         /* Sombra Viva 2 */
-        radial-gradient(ellipse 80% 80% at 70% 30%, rgba(0, 0, 0, 0.92) 0%, transparent 75%),
+        radial-gradient(ellipse 90% 90% at 50% 50%, rgba(0, 0, 0, 0.92) 0%, transparent 60%),
         /* Reflexo Metálico Primário (Varredura Contínua Roxo Luxo) */
-        radial-gradient(ellipse 160% 35% at 50% 50%, rgba(175, 70, 255, 0.35) 0%, rgba(120, 40, 190, 0.18) 35%, transparent 70%),
+        radial-gradient(ellipse 150% 30% at 50% 50%, rgba(175, 70, 255, 0.35) 0%, rgba(120, 40, 190, 0.18) 35%, transparent 65%),
         /* Reflexo Metálico Secundário (Varredura Cristal Prata/Vinho) */
-        radial-gradient(ellipse 35% 160% at 50% 50%, rgba(255, 255, 255, 0.12) 0%, rgba(150, 50, 200, 0.22) 30%, transparent 70%);
+        radial-gradient(ellipse 30% 150% at 50% 50%, rgba(255, 255, 255, 0.12) 0%, rgba(150, 50, 200, 0.22) 30%, transparent 65%);
 
+    /* 300% garante que as bordas do gradiente fiquem eternamente fora da tela */
     background-size:
-        200% 200%, 
-        200% 200%,
-        200% 200%, 
-        200% 200%;
+        300% 300%, 
+        300% 300%,
+        300% 300%, 
+        300% 300%;
     
     background-repeat: repeat;
     opacity: 0.95;
-    /* Tempo ímpar (19s) garante total independência visual do fundo */
-    animation: eclipseReflectionsDrift 19s ease-in-out infinite alternate;
+    animation: eclipseReflectionsDrift 22s ease-in-out infinite alternate;
 }
 
 /* ==========================
    ANIMAÇÕES DO ECLIPSE
 ========================== */
 
-/* 1. Pulsação Suave Global (Independente do movimento, mantém a iluminação sempre viva) */
+/* 1. Pulsação Suave Global */
 @keyframes eclipseEnergyPulse {
     0% {
         opacity: 0.92;
@@ -775,53 +801,62 @@
     }
 }
 
-/* 2. Deslocamento dos Feixes de Fundo (Nunca deixam a tela totalmente) */
+/* 2. Deslocamento dos Feixes e Paralaxe da Rede (Posições contidas para evitar cortes) */
 @keyframes eclipseEnergyDrift {
     0% {
         background-position:
             0 0,
-            -10% 20%,   /* Feixe 1 descansa na esquerda */
-            110% 80%,   /* Feixe 2 descansa na direita */
-            0 0, 0 0, 0 0;
+            20% 80%,    /* Feixe 1 */
+            80% 20%,    /* Feixe 2 */
+            0 0, 0 0,
+            0px 0px, 0px 0px, 0px 0px,       /* Rede 1 (Zero) */
+            0px 0px, 0px 0px, 0px 0px,       /* Rede 2 (Zero) */
+            0 0;
     }
     50% {
         background-position:
             0 0,
-            50% 50%,    /* Cruzam organicamente */
             50% 50%,
-            0 0, 0 0, 0 0;
+            50% 50%,
+            0 0, 0 0,
+            -25px -35px, -25px -35px, -25px -35px, /* Rede 1 Paralaxe Lenta */
+            30px 20px, 30px 20px, 30px 20px,       /* Rede 2 Paralaxe Inversa */
+            0 0;
     }
     100% {
         background-position:
             0 0,
-            110% 70%,   /* Feixe 1 atinge direita */
-            -10% 30%,   /* Feixe 2 atinge esquerda */
-            0 0, 0 0, 0 0;
+            80% 20%,
+            20% 80%,
+            0 0, 0 0,
+            -50px -70px, -50px -70px, -50px -70px,
+            60px 40px, 60px 40px, 60px 40px,
+            0 0;
     }
 }
 
-/* 3. Movimentação Contínua dos Reflexos (Agora sempre visíveis e cruzando assimetricamente) */
+/* 3. Movimentação Contínua dos Reflexos (Sem tocar as bordas do tamanho de 300%) */
 @keyframes eclipseReflectionsDrift {
     0% {
         background-position:
-            10% 90%,    /* Sombra 1 */
-            90% 10%,    /* Sombra 2 */
-            0% 20%,     /* R1 sempre visível na margem esquerda */
-            100% 80%;   /* R2 sempre visível na margem direita */
+            20% 80%,    /* Sombra 1 */
+            80% 20%,    /* Sombra 2 */
+            20% 50%,    /* R1 esq */
+            80% 50%;    /* R2 dir */
     }
     50% {
         background-position:
-            50% 50%,    /* Sombras dispersas pelo centro */
+            50% 50%,    
             50% 50%,
-            70% 60%,    /* R1 avança e desce */
-            30% 40%;    /* R2 sobe cruzando assimetricamente */
+            80% 30%,    
+            20% 70%;    
     }
     100% {
         background-position:
-            90% 10%,    /* Sombra 1 */
-            10% 90%,    /* Sombra 2 */
-            100% 80%,   /* R1 finaliza perfeitamente na direita */
-            0% 20%;     /* R2 finaliza perfeitamente na esquerda */
+            80% 20%,    
+            20% 80%,    
+            50% 80%,   
+            50% 20%;     
     }
 }
 
@@ -3023,4 +3058,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-            </html>
+    </html>

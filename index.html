@@ -505,12 +505,12 @@
         /* ==========================
            TEMA ESPECIAL - NEON GLACIAL
         ========================== */
-        .theme-special_glacial .profile-header::after {
+                .theme-special_glacial .profile-header::after {
             background:
                 /* Reflexo Cristal/Gelo (Intersecção 1) */
-                repeating-linear-gradient(115deg, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.03) 45%, rgba(150, 220, 255, 0.06) 48%, transparent 52%, transparent 100%),
+                linear-gradient(to bottom right, transparent 0%, transparent 19%, rgba(255, 255, 255, 0.03) 23%, rgba(150, 220, 255, 0.06) 25%, rgba(255, 255, 255, 0.03) 27%, transparent 31%, transparent 69%, rgba(255, 255, 255, 0.03) 73%, rgba(150, 220, 255, 0.06) 75%, rgba(255, 255, 255, 0.03) 77%, transparent 81%, transparent 100%),
                 /* Reflexo Cristal/Gelo (Intersecção 2) - Causa efeito de faceta de pedra/gelo ao cruzar */
-                repeating-linear-gradient(65deg, transparent 0%, transparent 35%, rgba(255, 255, 255, 0.02) 40%, rgba(0, 243, 255, 0.04) 42%, transparent 46%, transparent 100%),
+                linear-gradient(to bottom left, transparent 0%, transparent 19%, rgba(255, 255, 255, 0.02) 23%, rgba(0, 243, 255, 0.04) 25%, rgba(255, 255, 255, 0.02) 27%, transparent 31%, transparent 69%, rgba(255, 255, 255, 0.02) 73%, rgba(0, 243, 255, 0.04) 75%, rgba(255, 255, 255, 0.02) 77%, transparent 81%, transparent 100%),
                 /* Aurora Gélida (Topo) */
                 radial-gradient(ellipse at 50% -20%, rgba(0, 195, 255, 0.15), transparent 60%),
                 /* Neve / Vento Frio - Camada Frontal (Rápida/Maior) */
@@ -538,8 +538,7 @@
 
             opacity: 0.95;
             animation: glacialBlizzard 12s linear infinite, glacialPulse 6s ease-in-out infinite alternate;
-        }
-
+           }
         /* Animação com precisão matemática em múltiplos (LCM) para loop contínuo (Linear) sem cortes */
         @keyframes glacialBlizzard {
             0% {

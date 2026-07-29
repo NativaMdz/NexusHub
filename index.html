@@ -693,7 +693,7 @@
 
 /* ==========================
    TEMA ESPECIAL - ECLIPSE
-   ========================== */
+========================== */
 
 /* Camada Base: Atmosfera, Fundo Escuro e Feixes Difusos de Energia */
 .theme-special_eclipse .profile-header::before {
@@ -705,9 +705,9 @@
     background:
         /* 1. O Corpo do Eclipse (Escuridão Central Superior) */
         radial-gradient(circle at 50% 0%, #000000 18%, transparent 50%),
-        /* 2. Feixe Difuso 1 - Energia Roxa Profunda (Esquerda para Centro) */
+        /* 2. Feixe Difuso 1 - Energia Roxa Profunda */
         radial-gradient(ellipse 100% 70% at 20% 40%, rgba(110, 30, 175, 0.22) 0%, rgba(70, 18, 115, 0.08) 50%, transparent 80%),
-        /* 3. Feixe Difuso 2 - Energia Vinho Sutil (Direita para Centro) */
+        /* 3. Feixe Difuso 2 - Energia Vinho Sutil */
         radial-gradient(ellipse 90% 80% at 80% 60%, rgba(140, 40, 190, 0.18) 0%, rgba(50, 12, 85, 0.06) 55%, transparent 85%),
         /* 4. A Coroa (Halo luxuoso Roxo Escuro no Topo) */
         radial-gradient(ellipse 130% 90% at 50% -5%, rgba(100, 35, 160, 0.55) 0%, rgba(45, 12, 70, 0.3) 45%, transparent 80%),
@@ -725,10 +725,11 @@
         100% 100%;
         
     background-repeat: no-repeat;
-    animation: eclipseEnergyPulse 16s ease-in-out infinite alternate;
+    /* SEPARADO: Movimento e Pulso operam em tempos diferentes para nunca sincronizarem pausas */
+    animation: eclipseEnergyDrift 25s ease-in-out infinite alternate, eclipseEnergyPulse 14s ease-in-out infinite alternate;
 }
 
-/* Camada Frontal: Reflexos Metálicos Contínuos (Sem Costuras) e Sombras Vivas */
+/* Camada Frontal: Reflexos Metálicos Contínuos e Sombras Vivas */
 .theme-special_eclipse .profile-header::after {
     content: "";
     position: absolute;
@@ -737,7 +738,7 @@
     border-radius: inherit;
     pointer-events: none;
     background:
-        /* Sombra Viva 1 (Desliza e oculta partes dos reflexos) */
+        /* Sombra Viva 1 */
         radial-gradient(ellipse 80% 80% at 30% 70%, rgba(0, 0, 0, 0.96) 0%, transparent 75%),
         /* Sombra Viva 2 */
         radial-gradient(ellipse 80% 80% at 70% 30%, rgba(0, 0, 0, 0.92) 0%, transparent 75%),
@@ -754,54 +755,73 @@
     
     background-repeat: repeat;
     opacity: 0.95;
-    animation: eclipseReflectionsDrift 20s ease-in-out infinite alternate;
+    /* Tempo ímpar (19s) garante total independência visual do fundo */
+    animation: eclipseReflectionsDrift 19s ease-in-out infinite alternate;
 }
 
 /* ==========================
    ANIMAÇÕES DO ECLIPSE
 ========================== */
 
-/* Pulsação Suave dos Feixes Difusos de Fundo */
+/* 1. Pulsação Suave Global (Independente do movimento, mantém a iluminação sempre viva) */
 @keyframes eclipseEnergyPulse {
     0% {
-        opacity: 0.85;
-        background-position:
-            0 0,
-            0% 0%,      /* Feixe 1 */
-            100% 100%,  /* Feixe 2 */
-            0 0, 0 0, 0 0;
-        filter: brightness(0.9);
+        opacity: 0.92;
+        filter: brightness(0.95);
     }
-    50% {
+    100% {
         opacity: 1;
         filter: brightness(1.15);
     }
-    100% {
-        opacity: 0.95;
+}
+
+/* 2. Deslocamento dos Feixes de Fundo (Nunca deixam a tela totalmente) */
+@keyframes eclipseEnergyDrift {
+    0% {
         background-position:
             0 0,
-            60% 40%,    /* Feixe 1 desliza suavemente */
-            40% 60%,    /* Feixe 2 desliza suavemente */
+            -10% 20%,   /* Feixe 1 descansa na esquerda */
+            110% 80%,   /* Feixe 2 descansa na direita */
             0 0, 0 0, 0 0;
-        filter: brightness(1.05);
+    }
+    50% {
+        background-position:
+            0 0,
+            50% 50%,    /* Cruzam organicamente */
+            50% 50%,
+            0 0, 0 0, 0 0;
+    }
+    100% {
+        background-position:
+            0 0,
+            110% 70%,   /* Feixe 1 atinge direita */
+            -10% 30%,   /* Feixe 2 atinge esquerda */
+            0 0, 0 0, 0 0;
     }
 }
 
-/* Movimentação dos Reflexos Metálicos sem Emendas ou Artefatos Quadrados */
+/* 3. Movimentação Contínua dos Reflexos (Agora sempre visíveis e cruzando assimetricamente) */
 @keyframes eclipseReflectionsDrift {
     0% {
         background-position:
-            0% 100%,    /* Sombra 1 */
-            100% 0%,    /* Sombra 2 */
-            -80% -80%,  /* Reflexo 1 entra pela diagonal */
-            80% 80%;    /* Reflexo 2 entra pela diagonal oposta */
+            10% 90%,    /* Sombra 1 */
+            90% 10%,    /* Sombra 2 */
+            0% 20%,     /* R1 sempre visível na margem esquerda */
+            100% 80%;   /* R2 sempre visível na margem direita */
+    }
+    50% {
+        background-position:
+            50% 50%,    /* Sombras dispersas pelo centro */
+            50% 50%,
+            70% 60%,    /* R1 avança e desce */
+            30% 40%;    /* R2 sobe cruzando assimetricamente */
     }
     100% {
         background-position:
-            100% 0%,    /* Sombra 1 */
-            0% 100%,    /* Sombra 2 */
-            80% 80%,    /* Reflexo 1 cruza o perfil */
-            -80% -80%;  /* Reflexo 2 cruza o perfil */
+            90% 10%,    /* Sombra 1 */
+            10% 90%,    /* Sombra 2 */
+            100% 80%,   /* R1 finaliza perfeitamente na direita */
+            0% 20%;     /* R2 finaliza perfeitamente na esquerda */
     }
 }
 
@@ -3003,4 +3023,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+            </html>

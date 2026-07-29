@@ -505,7 +505,7 @@
         /* ==========================
            TEMA ESPECIAL - NEON GLACIAL
         ========================== */
-                .theme-special_glacial .profile-header::after {
+        .theme-special_glacial .profile-header::after {
             background:
                 /* Reflexo Cristal/Gelo (Intersecção 1) */
                 linear-gradient(to bottom right, transparent 0%, transparent 19%, rgba(255, 255, 255, 0.03) 23%, rgba(150, 220, 255, 0.06) 25%, rgba(255, 255, 255, 0.03) 27%, transparent 31%, transparent 69%, rgba(255, 255, 255, 0.03) 73%, rgba(150, 220, 255, 0.06) 75%, rgba(255, 255, 255, 0.03) 77%, transparent 81%, transparent 100%),
@@ -538,7 +538,8 @@
 
             opacity: 0.95;
             animation: glacialBlizzard 12s linear infinite, glacialPulse 6s ease-in-out infinite alternate;
-           }
+        }
+
         /* Animação com precisão matemática em múltiplos (LCM) para loop contínuo (Linear) sem cortes */
         @keyframes glacialBlizzard {
             0% {
@@ -564,6 +565,88 @@
         @keyframes glacialPulse {
             0%, 100% { opacity: 0.85; filter: brightness(1); }
             50% { opacity: 1; filter: brightness(1.15); } /* Brilho de frio extremo pulsante */
+        }
+
+        /* ==========================
+           TEMA ESPECIAL - AURORA
+        ========================== */
+        .theme-special_aurora .profile-header::after {
+            background:
+                /* Camada 1: Poeira Estelar Fina */
+                radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1.5px),
+                /* Camada 2: Estrelas Mais Brilhantes e Esparsas */
+                radial-gradient(circle, rgba(150, 255, 230, 0.25) 1px, transparent 2px),
+                /* Camada 3: Feixe Central Intenso (Verde Aurora / Ciano) */
+                radial-gradient(ellipse 130% 60% at 50% 50%, rgba(0, 255, 150, 0.22), transparent 60%),
+                /* Camada 4: Cortina Luminosa Superior (Azul Profundo / Roxo Suave) */
+                radial-gradient(ellipse 150% 70% at 80% -10%, rgba(0, 100, 255, 0.18), rgba(120, 50, 200, 0.12), transparent 60%),
+                /* Camada 5: Cortina Luminosa Inferior (Verde Esmeralda) */
+                radial-gradient(ellipse 140% 60% at 10% 110%, rgba(0, 250, 130, 0.18), rgba(0, 150, 200, 0.08), transparent 65%),
+                /* Camada 6: Atmosfera / Neblina Fria Noturna */
+                linear-gradient(160deg, rgba(5, 10, 20, 0.4) 0%, rgba(0, 15, 30, 0.15) 100%);
+
+            background-size:
+                100px 100px,
+                180px 180px,
+                160% 160%,
+                180% 150%,
+                170% 150%,
+                100% 100%;
+
+            background-repeat:
+                repeat,
+                repeat,
+                no-repeat,
+                no-repeat,
+                no-repeat,
+                no-repeat;
+
+            opacity: 0.95;
+            /* Combina o movimento fluido da aurora com a respiração luminosa */
+            animation: auroraFlow 22s ease-in-out infinite alternate, auroraBreathe 7s ease-in-out infinite alternate;
+        }
+
+        /* Anima o deslocamento das cortinas de luz simulando o balanço do vento solar */
+        @keyframes auroraFlow {
+            0% {
+                background-position:
+                    0px 0px,
+                    0px 0px,
+                    10% 40%,
+                    90% 0%,
+                    0% 90%,
+                    0% 0%;
+            }
+            50% {
+                background-position:
+                    -15px -10px,
+                    -10px -20px,
+                    45% 55%,
+                    60% 20%,
+                    40% 100%,
+                    0% 0%;
+            }
+            100% {
+                background-position:
+                    -30px -20px,
+                    -20px -40px,
+                    85% 35%,
+                    10% 15%,
+                    100% 85%,
+                    0% 0%;
+            }
+        }
+
+        /* Cria a pulsação natural e a leve mudança de cor (Verde -> Ciano) característica das Auroras */
+        @keyframes auroraBreathe {
+            0% { 
+                opacity: 0.85; 
+                filter: hue-rotate(0deg) brightness(1); 
+            }
+            100% { 
+                opacity: 1; 
+                filter: hue-rotate(12deg) brightness(1.15); 
+            }
         }
 
         /* CHAT / COMMS */
@@ -2764,5 +2847,4 @@
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-</html>
-
+    </html>

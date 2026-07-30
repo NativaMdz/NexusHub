@@ -890,6 +890,156 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     }
 }
 
+/* ===========================================
+   ROYAL PRESTIGE - EXCLUSIVO
+=========================================== */
+
+.theme-special_royal::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1;
+
+    background:
+
+    radial-gradient(circle at 15% 18%, rgba(255,215,0,.18), transparent 22%),
+    radial-gradient(circle at 85% 25%, rgba(255,255,255,.08), transparent 20%),
+    radial-gradient(circle at 60% 85%, rgba(255,215,0,.12), transparent 28%),
+
+    linear-gradient(
+        120deg,
+        transparent 0%,
+        rgba(255,215,0,.05) 20%,
+        rgba(255,255,255,.10) 35%,
+        rgba(255,215,0,.06) 50%,
+        transparent 70%
+    ),
+
+    radial-gradient(circle,#ffd700 1px,transparent 2px),
+    radial-gradient(circle,#ffffff 1px,transparent 2px),
+    radial-gradient(circle,#8ec8ff 1px,transparent 2px);
+
+    background-size:
+        170% 170%,
+        180% 180%,
+        170% 170%,
+        260% 260%,
+        170px 170px,
+        230px 230px,
+        310px 310px;
+
+    background-repeat:
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat,
+        repeat,
+        repeat,
+        repeat;
+
+    opacity:.95;
+
+    animation:
+        royalGlow 12s ease-in-out infinite alternate,
+        royalShine 8s linear infinite,
+        royalStars 28s linear infinite,
+        royalTwinkle 4s ease-in-out infinite;
+}
+
+.theme-special_royal .profile-banner,
+.theme-special_royal .profile-header{
+    position:relative;
+    z-index:2;
+}
+
+/* ===========================================
+   ANIMAÇÕES
+=========================================== */
+
+@keyframes royalGlow{
+
+0%{
+background-position:
+0% 0%,
+100% 0%,
+50% 100%,
+0% 0%,
+0 0,
+0 0,
+0 0;
+
+transform:scale(1);
+}
+
+50%{
+background-position:
+40% 20%,
+70% 30%,
+60% 80%,
+40% 0%,
+0 300px,
+0 180px,
+0 420px;
+
+transform:scale(1.03);
+}
+
+100%{
+background-position:
+80% 60%,
+30% 50%,
+20% 100%,
+100% 0%,
+0 600px,
+0 360px,
+0 840px;
+
+transform:scale(1);
+}
+
+}
+
+@keyframes royalShine{
+
+0%{
+filter:brightness(1);
+}
+
+50%{
+filter:brightness(1.18);
+}
+
+100%{
+filter:brightness(1);
+}
+
+}
+
+@keyframes royalStars{
+
+from{
+transform:translateY(0px);
+}
+
+to{
+transform:translateY(18px);
+}
+
+}
+
+@keyframes royalTwinkle{
+
+0%,100%{
+opacity:.45;
+}
+
+50%{
+opacity:.9;
+}
+
+}
+
         /* CHAT / COMMS */
         .chat-container { display: flex; flex-direction: column; flex: 1; min-height: 0; }
         .chat-header-info { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; flex-shrink: 0; }
@@ -3098,4 +3248,4 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                        </html>
+            </html>

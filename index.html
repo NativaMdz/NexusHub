@@ -1340,7 +1340,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1355,6 +1355,15 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
         const firebaseApp = initializeApp(firebaseConfig);
         const auth = getAuth(firebaseApp);
+        getRedirectResult(auth)
+  .then((result) => {
+    if (result?.user) {
+      console.log("Login realizado:", result.user);
+    }
+  })
+  .catch((error) => {
+    app.showToast("Erro: " + error.message, "error");
+  });
         const db = getFirestore(firebaseApp);
 
         const colPosts = collection(db, 'posts');
@@ -1642,7 +1651,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             },
 
             loginGoogle: async () => {
-                try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch(e) { app.showToast("Erro: " + e.message, "error"); }
+                try { const provider = new GoogleAuthProvider();
+await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + e.message, "error"); }
             },
 
             logout: async () => {
@@ -3088,4 +3098,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+                        </html>

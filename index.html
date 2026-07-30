@@ -890,154 +890,96 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     }
 }
 
-/* ===========================================
-   ROYAL PRESTIGE - EXCLUSIVO
-=========================================== */
+/* ==========================
+   TEMA ESPECIAL - ROYAL PRESTIGE
+========================== */
 
-.theme-special_royal::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:1;
-
+/* Camada Base: Atmosfera luxuosa, partículas de ouro e brilho sutil */
+.theme-special_royal .profile-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
     background:
+        /* Iluminação Dourada Superior (Coroa/Halo) */
+        radial-gradient(ellipse 120% 70% at 50% -10%, rgba(255, 215, 0, 0.18) 0%, rgba(180, 140, 0, 0.05) 45%, transparent 75%),
+        
+        /* Iluminação Azulada Profunda (Base) */
+        radial-gradient(ellipse 150% 80% at 50% 120%, rgba(10, 30, 90, 0.35) 0%, rgba(5, 10, 30, 0.1) 50%, transparent 80%),
+        
+        /* Poeira de Ouro (Média/Brilhante) */
+        radial-gradient(circle, rgba(255, 215, 0, 0.7) 1px, transparent 1.5px),
+        
+        /* Poeira de Estrelas/Prata (Fina/Suave) */
+        radial-gradient(circle, rgba(255, 255, 255, 0.4) 1px, transparent 1.2px),
+        
+        /* Fundo Marinho/Preto Premium - O contraste principal */
+        linear-gradient(to bottom, #050814 0%, #020308 100%);
+        
+    background-size:
+        100% 100%,
+        100% 100%,
+        90px 90px,
+        140px 140px,
+        100% 100%;
+        
+    background-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat;
+    animation: royalDustDrift 24s linear infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.15));
+}
 
-    radial-gradient(circle at 15% 18%, rgba(255,215,0,.18), transparent 22%),
-    radial-gradient(circle at 85% 25%, rgba(255,255,255,.08), transparent 20%),
-    radial-gradient(circle at 60% 85%, rgba(255,215,0,.12), transparent 28%),
-
-    linear-gradient(
-        120deg,
-        transparent 0%,
-        rgba(255,215,0,.05) 20%,
-        rgba(255,255,255,.10) 35%,
-        rgba(255,215,0,.06) 50%,
-        transparent 70%
-    ),
-
-    radial-gradient(circle,#ffd700 1px,transparent 2px),
-    radial-gradient(circle,#ffffff 1px,transparent 2px),
-    radial-gradient(circle,#8ec8ff 1px,transparent 2px);
+/* Camada Frontal: Reflexos Metálicos (Ouro/Prata) e Sombreamento */
+.theme-special_royal .profile-header::after {
+    background:
+        /* Vinheta interna para dar volume e sensação 3D à 'placa' metálica */
+        radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.7) 100%),
+        
+        /* Varredura Dourada Principal (Chanfro polido) */
+        linear-gradient(105deg, transparent 20%, rgba(255, 215, 0, 0.06) 23%, rgba(255, 255, 255, 0.15) 26%, rgba(255, 215, 0, 0.06) 29%, transparent 32%),
+        
+        /* Varredura Secundária Suave (Reflexo prata distante) */
+        linear-gradient(105deg, transparent 65%, rgba(255, 215, 0, 0.03) 68%, rgba(255, 255, 255, 0.08) 70%, rgba(255, 215, 0, 0.03) 72%, transparent 75%),
+        
+        /* Brilho ambiente sutil que pulsa */
+        radial-gradient(ellipse 150% 150% at 50% 50%, rgba(255, 215, 0, 0.04) 0%, rgba(10, 20, 50, 0.08) 40%, transparent 70%);
 
     background-size:
-        170% 170%,
-        180% 180%,
-        170% 170%,
-        260% 260%,
-        170px 170px,
-        230px 230px,
-        310px 310px;
-
-    background-repeat:
-        no-repeat,
-        no-repeat,
-        no-repeat,
-        no-repeat,
-        repeat,
-        repeat,
-        repeat;
-
-    opacity:.95;
-
-    animation:
-        royalGlow 12s ease-in-out infinite alternate,
-        royalShine 8s linear infinite,
-        royalStars 28s linear infinite,
-        royalTwinkle 4s ease-in-out infinite;
+        100% 100%,
+        300% 300%, /* Extensão para deslizar sem cortes */
+        300% 300%,
+        200% 200%;
+        
+    background-repeat: no-repeat, repeat, repeat, repeat;
+    opacity: 0.95;
+    animation: royalReflections 18s ease-in-out infinite alternate, royalPulse 8s ease-in-out infinite alternate;
 }
 
-.theme-special_royal .profile-banner,
-.theme-special_royal .profile-header{
-    position:relative;
-    z-index:2;
+/* 1. Deslocamento contínuo e orgânico da poeira (Loop Perfeito) */
+@keyframes royalDustDrift {
+    0% {
+        background-position: 0 0, 0 0, 0px 0px, 0px 0px, 0 0;
+    }
+    100% {
+        /* Deslocamento em múltiplos exatos (90 e 140) */
+        background-position: 0 0, 0 0, -180px 270px, 280px -420px, 0 0;
+    }
 }
 
-/* ===========================================
-   ANIMAÇÕES
-=========================================== */
-
-@keyframes royalGlow{
-
-0%{
-background-position:
-0% 0%,
-100% 0%,
-50% 100%,
-0% 0%,
-0 0,
-0 0,
-0 0;
-
-transform:scale(1);
+/* 2. Varredura dos reflexos metálicos */
+@keyframes royalReflections {
+    0% {
+        background-position: 0 0, 100% 50%, 100% 50%, 0% 0%;
+    }
+    100% {
+        background-position: 0 0, 0% 50%, 0% 50%, 100% 100%;
+    }
 }
 
-50%{
-background-position:
-40% 20%,
-70% 30%,
-60% 80%,
-40% 0%,
-0 300px,
-0 180px,
-0 420px;
-
-transform:scale(1.03);
-}
-
-100%{
-background-position:
-80% 60%,
-30% 50%,
-20% 100%,
-100% 0%,
-0 600px,
-0 360px,
-0 840px;
-
-transform:scale(1);
-}
-
-}
-
-@keyframes royalShine{
-
-0%{
-filter:brightness(1);
-}
-
-50%{
-filter:brightness(1.18);
-}
-
-100%{
-filter:brightness(1);
-}
-
-}
-
-@keyframes royalStars{
-
-from{
-transform:translateY(0px);
-}
-
-to{
-transform:translateY(18px);
-}
-
-}
-
-@keyframes royalTwinkle{
-
-0%,100%{
-opacity:.45;
-}
-
-50%{
-opacity:.9;
-}
-
+/* 3. Pulsação do ambiente (Luxo vivo) */
+@keyframes royalPulse {
+    0% { opacity: 0.85; filter: brightness(0.95); }
+    100% { opacity: 1; filter: brightness(1.15); }
 }
 
         /* CHAT / COMMS */
@@ -3248,4 +3190,4 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-            </html>
+</html>

@@ -1628,24 +1628,24 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             checkAndExpireVIP: async () => {
                 if (!appState.currentUserData) return;
                 const vipInfo = app.getVIPInfo(appState.currentUserData);
-                
+
                 if (appState.currentUserData.vip && appState.currentUserData.vip.active && !vipInfo.isActive) {
                     try {
                         const updates = { 'vip.active': false };
                         const user = appState.currentUserData;
                         const defaultAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${appState.firebaseUser.uid}`;
 
+                        // Reverter avatar se for GIF
                         if (user.avatar && user.avatar.includes('data:image/gif')) {
                             updates.avatar = user.staticAvatarFallback || defaultAvatar;
                         }
+                        // Reverter banner se for GIF
                         if (user.banner && user.banner.includes('data:image/gif')) {
                             updates.banner = user.staticBannerFallback || '';
                         }
-                        
-                        // Temas especiais permanecem equipados e de posse do usuário (Vitalício)
-                        
+
                         await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
-                        app.showToast("Sua assinatura VIP expirou. Benefícios e imagens restaurados.", "info");
+                        app.showToast("Sua assinatura VIP expirou. Imagens animadas foram revertidas.", "info");
                     } catch (e) {
                         console.error("Erro na expiração do VIP", e);
                     }
@@ -2200,12 +2200,31 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                 const isGif = file.type === 'image/gif';
                 const isVIP = app.getVIPInfo(appState.currentUserData).isActive;
 
+                // Verificação: apenas VIP pode usar GIFs
+                if (isGif && !isVIP) {
+                    return app.showToast("Arquivos animados (.GIF) são exclusivos do Plano VIP.", "error");
+                }
+
+                // Definir limites de tamanho
+                let maxSize;
+                if (type === 'profile') maxSize = 10 * 1024 * 1024; // 10 MB
+                else if (type === 'banner') maxSize = 20 * 1024 * 1024; // 20 MB
+                else maxSize = 10 * 1024 * 1024; // 10 MB para posts
+
+                // Verificação de tamanho
+                if (file.size > maxSize) {
+                    const sizeMB = (maxSize / (1024 * 1024)).toFixed(0);
+                    return app.showToast(`Arquivo excede o limite de ${sizeMB}MB.`, "error");
+                }
+
+                // Verificação de tipo de arquivo
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    return app.showToast("Formato não suportado. Use PNG, JPG, WEBP ou GIF.", "error");
+                }
+
+                // Para GIFs, enviar diretamente sem compressão (mantém animação)
                 if (isGif) {
-                    if (!isVIP && (type === 'profile' || type === 'banner')) {
-                        return app.showToast("Arquivos animados (.GIF) são exclusivos do Plano VIP.", "error");
-                    }
-                    if (file.size > 10 * 1024 * 1024) return app.showToast("O limite VIP é 10MB.", "error");
-                    
                     const reader = new FileReader();
                     reader.onload = (evt) => {
                         const dataUrl = evt.target.result;
@@ -2221,21 +2240,23 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                         }
                     };
                     reader.readAsDataURL(file);
-                    return; 
+                    return;
                 }
 
+                // Para imagens não-GIF, aplicar compressão normal
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         let width = img.width, height = img.height;
-                        const MAX = type === 'profile' ? 300 : (type === 'banner' ? 800 : 700);
+                        // Limites mais generosos para banners
+                        const MAX = type === 'profile' ? 500 : (type === 'banner' ? 1200 : 800);
                         if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
                         else if (height > MAX) { width *= MAX / height; height = MAX; }
                         canvas.width = width; canvas.height = height;
                         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
                         if (type === 'post') {
                             appState.tempBase64Post = dataUrl;
@@ -2252,6 +2273,7 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                 };
                 reader.readAsDataURL(file);
             },
+
             removeImagePreview: (type) => {
                 if(type==='post') {
                     appState.tempBase64Post = null; document.getElementById('image-preview').src = '';
@@ -2646,20 +2668,24 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                 if (document.querySelector('.profile-banner') && viewUser.banner) document.querySelector('.profile-banner').style.backgroundImage = `url('${viewUser.banner}')`;
             },
             
-            updateProfileImage: async (base64) => { 
-                try { 
+            updateProfileImage: async (base64) => {
+                try {
                     const isGif = base64.includes('data:image/gif');
                     const updates = { avatar: base64 };
-                    
+
+                    // Se for GIF, salvar também como fallback
                     if (!isGif) {
-                        updates.staticAvatarFallback = base64; 
+                        updates.staticAvatarFallback = base64;
                     } else if (!appState.currentUserData.staticAvatarFallback) {
-                        updates.staticAvatarFallback = appState.currentUserData.avatar; 
+                        // Se for GIF e não houver fallback, usar uma imagem padrão
+                        updates.staticAvatarFallback = appState.currentUserData.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${appState.firebaseUser.uid}`;
                     }
 
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates); 
-                    app.showToast("Foto atualizada!", "success"); 
-                } catch(e) {} 
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
+                    app.showToast("Foto atualizada!", "success");
+                } catch(e) {
+                    app.showToast("Erro ao atualizar foto: " + e.message, "error");
+                }
             },
             
             toggleFollow: async (targetUid) => {
@@ -2756,8 +2782,8 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                     const selectedFrame = document.getElementById('edit-frame').value;
                     const selectedTheme = document.getElementById('edit-theme').value;
 
-                    const updates = { 
-                        name: name, 
+                    const updates = {
+                        name: name,
                         bio: document.getElementById('edit-bio').value.trim(),
                         equippedFrame: selectedFrame,
                         profileTheme: selectedTheme
@@ -2768,21 +2794,26 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                         updates.gradientColor2 = document.getElementById('grad-color2').value;
                         updates.gradientDirection = document.getElementById('grad-direction').value;
                     }
-                    
+
                     if (appState.tempBase64Banner) {
                         updates.banner = appState.tempBase64Banner;
-                        
+
                         const isGif = appState.tempBase64Banner.includes('data:image/gif');
                         if (!isGif) {
                             updates.staticBannerFallback = appState.tempBase64Banner;
                         } else if (!appState.currentUserData.staticBannerFallback) {
+                            // Se for GIF e não houver fallback, manter o banner atual como fallback
                             updates.staticBannerFallback = appState.currentUserData.banner || '';
                         }
                     }
 
                     await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
                     app.closeSettingsModal(); app.showToast("Perfil salvo!", "success");
-                } catch (e) { app.showToast("Erro", "error"); } finally { btn.disabled = false; btn.innerHTML = "Salvar Perfil"; }
+                } catch (e) {
+                    app.showToast("Erro ao salvar: " + e.message, "error");
+                } finally {
+                    btn.disabled = false; btn.innerHTML = "Salvar Perfil";
+                }
             },
 
             performSearch: () => {

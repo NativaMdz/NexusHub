@@ -2193,11 +2193,11 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                 app.removeImagePreview('post');
             },
 
-            handleImageUpload: (e, type) => {
+            handleImageUpload: async (e, type) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
-                const isGif = file.type === 'image/gif';
+                const isGif = file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
                 const isVIP = app.getVIPInfo(appState.currentUserData).isActive;
 
                 // Verificação: apenas VIP pode usar GIFs
@@ -2205,26 +2205,46 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                     return app.showToast("Arquivos animados (.GIF) são exclusivos do Plano VIP.", "error");
                 }
 
-                // Definir limites de tamanho
+                // Definir limites de tamanho (Aumentado para GIFs para maior compatibilidade sem cortes)
                 let maxSize;
-                if (type === 'profile') maxSize = 10 * 1024 * 1024; // 10 MB
-                else if (type === 'banner') maxSize = 20 * 1024 * 1024; // 20 MB
-                else maxSize = 10 * 1024 * 1024; // 10 MB para posts
+                if (isGif) {
+                    maxSize = 25 * 1024 * 1024; // 25 MB genérico para GIFs VIP aceitarem arquivos mais pesados das plataformas
+                } else {
+                    if (type === 'profile') maxSize = 10 * 1024 * 1024; // 10 MB
+                    else if (type === 'banner') maxSize = 20 * 1024 * 1024; // 20 MB
+                    else maxSize = 10 * 1024 * 1024; // 10 MB para posts
+                }
 
                 // Verificação de tamanho
                 if (file.size > maxSize) {
                     const sizeMB = (maxSize / (1024 * 1024)).toFixed(0);
-                    return app.showToast(`Arquivo excede o limite de ${sizeMB}MB.`, "error");
+                    return app.showToast(`O arquivo excede o limite de ${sizeMB}MB.`, "error");
                 }
 
                 // Verificação de tipo de arquivo
                 const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
-                if (!allowedTypes.includes(file.type)) {
+                if (!allowedTypes.includes(file.type) && !isGif) {
                     return app.showToast("Formato não suportado. Use PNG, JPG, WEBP ou GIF.", "error");
                 }
 
-                // Para GIFs, enviar diretamente sem compressão (mantém animação)
+                // Validação aprimorada para GIFs para garantir que não esteja corrompido
                 if (isGif) {
+                    try {
+                        const arrayBuffer = await file.slice(0, 6).arrayBuffer();
+                        const uint8Array = new Uint8Array(arrayBuffer);
+                        let header = '';
+                        for (let i = 0; i < uint8Array.length; i++) {
+                            header += String.fromCharCode(uint8Array[i]);
+                        }
+                        
+                        if (header !== 'GIF87a' && header !== 'GIF89a') {
+                            return app.showToast("O arquivo GIF parece estar corrompido ou é inválido.", "error");
+                        }
+                    } catch (err) {
+                        return app.showToast("Erro ao ler o arquivo GIF. Verifique a integridade.", "error");
+                    }
+
+                    // Para GIFs, enviamos puramente em Base64 para não destruir a animação no Canvas.
                     const reader = new FileReader();
                     reader.onload = (evt) => {
                         const dataUrl = evt.target.result;
@@ -2235,22 +2255,22 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                         } else if (type === 'profile') app.updateProfileImage(dataUrl);
                         else if (type === 'banner') {
                             appState.tempBase64Banner = dataUrl;
-                            app.showToast("Banner pronto. Salve o perfil.", "info");
-                            document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-check"></i> Imagem Selecionada`;
+                            app.showToast("Banner animado carregado. Salve o perfil.", "success");
+                            document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-check"></i> GIF Selecionado`;
                         }
                     };
+                    reader.onerror = () => app.showToast("Falha ao processar o arquivo GIF.", "error");
                     reader.readAsDataURL(file);
                     return;
                 }
 
-                // Para imagens não-GIF, aplicar compressão normal
+                // Para imagens não-GIF, aplicar compressão normal via Canvas
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         let width = img.width, height = img.height;
-                        // Limites mais generosos para banners
                         const MAX = type === 'profile' ? 500 : (type === 'banner' ? 1200 : 800);
                         if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
                         else if (height > MAX) { width *= MAX / height; height = MAX; }
@@ -2269,8 +2289,10 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                             document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-check"></i> Imagem Selecionada`;
                         }
                     };
+                    img.onerror = () => app.showToast("Erro ao processar imagem.", "error");
                     img.src = evt.target.result;
                 };
+                reader.onerror = () => app.showToast("Erro ao ler o arquivo.", "error");
                 reader.readAsDataURL(file);
             },
 

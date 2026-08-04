@@ -988,11 +988,36 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-list-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; cursor: pointer; transition: background 0.2s; }
         .chat-list-item:hover { background: rgba(255,255,255,0.08); }
 
-        .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; min-height: 0; margin-bottom: 15px; scroll-behavior: smooth; overscroll-behavior-y: contain;}
+        /* Nova Estrutura para Plano de Fundo do Chat */
+        .chat-wrapper-layer {
+            position: relative; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 0; 
+            margin-bottom: 15px; 
+            border-radius: 12px; 
+            overflow: hidden;
+            background: transparent;
+        }
+        .chat-bg-image {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+            opacity: 0.25; /* Escurecido para não atrapalhar leitura */
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; min-height: 0; margin-bottom: 15px; scroll-behavior: smooth; overscroll-behavior-y: contain; position: relative; z-index: 1;}
+        .chat-wrapper-layer .chat-messages { margin-bottom: 0 !important; }
+
         .message { display: flex; gap: 10px; max-width: 88%; animation: fadeIn 0.3s ease; }
         .message.mine { align-self: flex-end; flex-direction: row-reverse; }
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid transparent; flex-shrink: 0; cursor: pointer;}
-        .msg-bubble { background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); position: relative; user-select: text; cursor: pointer; transition: background 0.2s; }
+        .msg-bubble { background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); position: relative; user-select: text; cursor: pointer; transition: background 0.2s; backdrop-filter: blur(2px); }
         .msg-bubble:active { background: rgba(255,255,255,0.1); }
         .message.mine .msg-bubble { background: rgba(0, 243, 255, 0.12); border-color: rgba(0, 243, 255, 0.3); border-bottom-right-radius: 2px; }
         .message.mine .msg-bubble:active { background: rgba(0, 243, 255, 0.18); }
@@ -1098,7 +1123,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .file-upload-btn { display: inline-block; padding: 10px; background: rgba(255,255,255,0.05); border: 1px dashed var(--cyan); border-radius: 8px; color: var(--cyan); cursor: pointer; font-size: 0.85rem; text-align: center; width: 100%; transition: background 0.3s; }
         .file-upload-btn:hover { background: rgba(0,243,255,0.1); }
         .file-upload-wrapper input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-        #image-preview-container { margin-top: 10px; display: none; position: relative; }
+        #image-preview-container, #chatbg-preview-container, #private-chatbg-preview-container { margin-top: 10px; display: none; position: relative; }
         #image-preview { width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-glass); }
         .remove-img-btn { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
 
@@ -1287,14 +1312,56 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         <option value="radial">Radial (Centro)</option>
                     </select>
                 </div>
-                <div class="file-upload-wrapper">
+                
+                <!-- FUNDO GLOBAL DE CHAT -->
+                <div class="form-group" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 8px;">FUNDO GLOBAL DO CHAT</label>
+                    <div class="file-upload-wrapper" style="margin-bottom: 0;">
+                        <label class="file-upload-btn" id="lbl-chatbg-upload">
+                            <i class="fa-solid fa-image"></i> Escolher Imagem / GIF
+                            <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'chat_bg_global')">
+                        </label>
+                    </div>
+                    <div id="chatbg-preview-container">
+                        <img id="chatbg-preview" src="" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-glass);">
+                        <button class="remove-img-btn" onclick="app.removeChatBg('global')" style="background: rgba(255,42,42,0.8);"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">Aparecerá no chat global e nos chats privados sem fundo exclusivo configurado.</p>
+                </div>
+                
+                <div class="file-upload-wrapper" style="margin-top: 15px;">
                     <label class="file-upload-btn" id="lbl-banner-upload">
                         <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
                         <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">
                     </label>
                 </div>
-                <button class="btn-primary" id="btn-save-settings" onclick="app.saveProfileSettings()" style="margin-bottom: 10px;">Salvar Perfil</button>
+                
+                <button class="btn-primary" id="btn-save-settings" onclick="app.saveProfileSettings()" style="margin-top: 10px; margin-bottom: 10px;">Salvar Perfil</button>
                 <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()"><i class="fa-solid fa-power-off"></i> Desconectar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Fundo Privado -->
+    <div class="modal-overlay" id="modal-chatbg-private">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Fundo desta Conversa</h2>
+                <button class="close-modal" onclick="app.closePrivateChatBgModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Defina um fundo exclusivo para este chat. Ele substituirá automaticamente o fundo global.</p>
+                <div class="file-upload-wrapper">
+                    <label class="file-upload-btn" id="lbl-private-chatbg-upload">
+                        <i class="fa-solid fa-image"></i> Escolher Imagem / GIF
+                        <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'chat_bg_private')">
+                    </label>
+                </div>
+                <div id="private-chatbg-preview-container">
+                    <img id="private-chatbg-preview" src="" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-glass);">
+                </div>
+                <button class="btn-primary" id="btn-save-private-bg" style="margin-top: 15px;" onclick="app.savePrivateChatBg()">Salvar Fundo Personalizado</button>
+                <button class="btn-primary btn-secondary" style="margin-top: 10px; color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.removeChatBg('private')"><i class="fa-solid fa-trash"></i> Usar Fundo Global</button>
             </div>
         </div>
     </div>
@@ -1348,7 +1415,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     <!-- Templates SPA -->
     <template id="tpl-chat">
         <div class="chat-container">
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-shrink: 0;">
                 <button id="tab-global" class="btn-primary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('global')">Global</button>
                 <button id="tab-private" class="btn-primary btn-secondary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('private_list')">Privado</button>
             </div>
@@ -1357,9 +1424,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
             </div>
             
-            <div class="chat-messages" id="chat-global-container"></div>
-            <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
-            <div class="chat-messages" id="chat-private-container" style="display:none;"></div>
+            <!-- Wrapper para suportar o Plano de Fundo sem interferir no scroll -->
+            <div class="chat-wrapper-layer">
+                <div id="chat-bg-image" class="chat-bg-image" style="display: none;"></div>
+                
+                <div class="chat-messages" id="chat-global-container"></div>
+                <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
+                <div class="chat-messages" id="chat-private-container" style="display:none;"></div>
+            </div>
 
             <div style="flex-shrink: 0; width: 100%;">
                 <div id="reply-preview-container">
@@ -1470,6 +1542,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             currentPublicProfileUid: null,
             tempBase64Post: null,
             tempBase64Banner: null,
+            tempBase64ChatBgGlobal: null,
+            tempBase64ChatBgPrivate: null,
+            activeChatBgTarget: null,
             allPosts: [],
             allUsers: [],
             globalMessages: [],
@@ -1643,6 +1718,22 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         if (user.banner && user.banner.includes('data:image/gif')) {
                             updates.banner = user.staticBannerFallback || '';
                         }
+                        // Reverter background do chat se for GIF
+                        if (user.chatBackground && user.chatBackground.includes('data:image/gif')) {
+                            updates.chatBackground = '';
+                        }
+                        // Reverter fundos privados se forem GIF
+                        if (user.privateChatBackgrounds) {
+                            let changed = false;
+                            const newPrivateBgs = { ...user.privateChatBackgrounds };
+                            for (const [uid, bg] of Object.entries(newPrivateBgs)) {
+                                if (bg && bg.includes('data:image/gif')) {
+                                    delete newPrivateBgs[uid];
+                                    changed = true;
+                                }
+                            }
+                            if (changed) updates.privateChatBackgrounds = newPrivateBgs;
+                        }
 
                         await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
                         app.showToast("Sua assinatura VIP expirou. Imagens animadas foram revertidas.", "info");
@@ -1757,6 +1848,7 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                 const newUser = {
                     uid: uid, name: nameInput, handle: handleInput.toLowerCase().replace(/\s/g, ''),
                     avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${uid}`, banner: '', bio: 'Conectado à malha neural recentemente.',
+                    chatBackground: '', privateChatBackgrounds: {},
                     xp: 50, level: 1, ncoins: 100, followers: [], following: [], role: 'user', createdAt: new Date().toISOString(),
                     ownedFrames: ['default'], equippedFrame: 'default', ownedThemes: ['default'], profileTheme: 'default',
                     gradientColor1: '#00f3ff', gradientColor2: '#b026ff', gradientDirection: 'to right',
@@ -1789,6 +1881,10 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                     if (myUpdatedProfile) {
                         appState.currentUserData = myUpdatedProfile;
                         app.checkAndExpireVIP(); 
+                        
+                        if (appState.currentView === 'chat') {
+                            app.updateChatBackground();
+                        }
                     }
 
                     if (['perfil', 'public_profile'].includes(appState.currentView)) app.updateProfileInDOM();
@@ -2208,10 +2304,10 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                 // Definir limites de tamanho (Aumentado para GIFs para maior compatibilidade sem cortes)
                 let maxSize;
                 if (isGif) {
-                    maxSize = 25 * 1024 * 1024; // 25 MB genérico para GIFs VIP aceitarem arquivos mais pesados das plataformas
+                    maxSize = 25 * 1024 * 1024; // 25 MB genérico para GIFs VIP
                 } else {
                     if (type === 'profile') maxSize = 10 * 1024 * 1024; // 10 MB
-                    else if (type === 'banner') maxSize = 20 * 1024 * 1024; // 20 MB
+                    else if (type === 'banner' || type.startsWith('chat_bg')) maxSize = 20 * 1024 * 1024; // 20 MB
                     else maxSize = 10 * 1024 * 1024; // 10 MB para posts
                 }
 
@@ -2257,6 +2353,16 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                             appState.tempBase64Banner = dataUrl;
                             app.showToast("Banner animado carregado. Salve o perfil.", "success");
                             document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-check"></i> GIF Selecionado`;
+                        } else if (type === 'chat_bg_global') {
+                            appState.tempBase64ChatBgGlobal = dataUrl;
+                            document.getElementById('chatbg-preview').src = dataUrl;
+                            document.getElementById('chatbg-preview-container').style.display = 'block';
+                            document.getElementById('lbl-chatbg-upload').innerHTML = `<i class="fa-solid fa-check"></i> GIF Selecionado`;
+                        } else if (type === 'chat_bg_private') {
+                            appState.tempBase64ChatBgPrivate = dataUrl;
+                            document.getElementById('private-chatbg-preview').src = dataUrl;
+                            document.getElementById('private-chatbg-preview-container').style.display = 'block';
+                            document.getElementById('lbl-private-chatbg-upload').innerHTML = `<i class="fa-solid fa-check"></i> GIF Selecionado`;
                         }
                     };
                     reader.onerror = () => app.showToast("Falha ao processar o arquivo GIF.", "error");
@@ -2271,12 +2377,17 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         let width = img.width, height = img.height;
-                        const MAX = type === 'profile' ? 500 : (type === 'banner' ? 1200 : 800);
+                        const MAX = type === 'profile' ? 500 : ((type === 'banner' || type.startsWith('chat_bg')) ? 1200 : 800);
                         if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
                         else if (height > MAX) { width *= MAX / height; height = MAX; }
                         canvas.width = width; canvas.height = height;
                         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                        
+                        // Otimização: Uso do WebP para Backgrounds e Banners
+                        let mimeType = 'image/jpeg';
+                        if (type.startsWith('chat_bg') || type === 'banner') mimeType = 'image/webp';
+                        
+                        const dataUrl = canvas.toDataURL(mimeType, 0.85);
 
                         if (type === 'post') {
                             appState.tempBase64Post = dataUrl;
@@ -2287,6 +2398,16 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                             appState.tempBase64Banner = dataUrl;
                             app.showToast("Banner pronto. Salve o perfil.", "info");
                             document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-check"></i> Imagem Selecionada`;
+                        } else if (type === 'chat_bg_global') {
+                            appState.tempBase64ChatBgGlobal = dataUrl;
+                            document.getElementById('chatbg-preview').src = dataUrl;
+                            document.getElementById('chatbg-preview-container').style.display = 'block';
+                            document.getElementById('lbl-chatbg-upload').innerHTML = `<i class="fa-solid fa-check"></i> Imagem Selecionada`;
+                        } else if (type === 'chat_bg_private') {
+                            appState.tempBase64ChatBgPrivate = dataUrl;
+                            document.getElementById('private-chatbg-preview').src = dataUrl;
+                            document.getElementById('private-chatbg-preview-container').style.display = 'block';
+                            document.getElementById('lbl-private-chatbg-upload').innerHTML = `<i class="fa-solid fa-check"></i> Imagem Selecionada`;
                         }
                     };
                     img.onerror = () => app.showToast("Erro ao processar imagem.", "error");
@@ -2300,6 +2421,33 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                 if(type==='post') {
                     appState.tempBase64Post = null; document.getElementById('image-preview').src = '';
                     document.getElementById('image-preview-container').style.display = 'none'; document.getElementById('post-image-input').value = '';
+                }
+            },
+            
+            removeChatBg: async (type) => {
+                if (type === 'global') {
+                    appState.tempBase64ChatBgGlobal = 'REMOVE';
+                    document.getElementById('chatbg-preview-container').style.display = 'none';
+                    document.getElementById('lbl-chatbg-upload').innerHTML = `<i class="fa-solid fa-image"></i> Escolher Imagem / GIF`;
+                    document.getElementById('chatbg-preview').src = '';
+                } else if (type === 'private') {
+                    const targetUid = appState.activeChatBgTarget;
+                    if (!targetUid) return;
+                    
+                    try {
+                        const privateBgs = appState.currentUserData.privateChatBackgrounds || {};
+                        const updatedBgs = { ...privateBgs };
+                        delete updatedBgs[targetUid];
+                        
+                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), {
+                            privateChatBackgrounds: updatedBgs
+                        });
+                        app.showToast("Fundo personalizado removido. Usando fundo global.", "success");
+                        app.closePrivateChatBgModal();
+                        app.updateChatBackground();
+                    } catch (e) {
+                        app.showToast("Erro ao remover fundo.", "error");
+                    }
                 }
             },
 
@@ -2449,11 +2597,49 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                     input.style.display = 'flex';
                     
                     const target = appState.allUsers.find(u => u.uid === mode);
-                    info.innerHTML = `<i class="fa-solid fa-lock" style="color: var(--purple);"></i> Criptografia 1x1 com <span style="color:white;">${target ? target.name : '...'}</span><br><a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab('private_list')">← Voltar a Lista</a>`;
+                    info.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div style="text-align: left;">
+                                <i class="fa-solid fa-lock" style="color: var(--purple);"></i> Criptografia 1x1 com <span style="color:white;">${target ? target.name : '...'}</span><br>
+                                <a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab('private_list')">← Voltar a Lista</a>
+                            </div>
+                            <button class="action-btn" onclick="app.openPrivateChatBgModal('${mode}')" style="color: var(--text-muted); font-size: 1.2rem; cursor: pointer;" title="Personalizar Fundo">
+                                <i class="fa-regular fa-image"></i>
+                            </button>
+                        </div>
+                    `;
 
                     const myUid = appState.firebaseUser.uid;
                     const conv = appState.privateMessages.filter(m => m.participants.includes(myUid) && m.participants.includes(mode));
                     app.updateChatInDOM(conv, 'chat-private-container');
+                }
+                
+                app.updateChatBackground();
+            },
+            
+            updateChatBackground: () => {
+                const bgImageEl = document.getElementById('chat-bg-image');
+                if (!bgImageEl) return;
+                
+                let bgUrl = '';
+                const userData = appState.currentUserData;
+                if (!userData) return;
+
+                if (appState.activeChatMode === 'global') {
+                    bgUrl = userData.chatBackground || '';
+                } else if (appState.activeChatMode === 'private_list') {
+                    bgUrl = '';
+                } else {
+                    const privateBgs = userData.privateChatBackgrounds || {};
+                    bgUrl = privateBgs[appState.activeChatMode] || userData.chatBackground || '';
+                }
+
+                if (bgUrl) {
+                    bgImageEl.style.backgroundImage = `url('${bgUrl}')`;
+                    bgImageEl.style.display = 'block';
+                } else {
+                    bgImageEl.style.backgroundImage = 'none';
+                    bgImageEl.style.display = 'none';
                 }
             },
 
@@ -2790,6 +2976,18 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                 appState.tempBase64Banner = null; 
                 document.getElementById('lbl-banner-upload').innerHTML = `<i class="fa-solid fa-image"></i> Alterar Banner de Fundo <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">`;
                 
+                appState.tempBase64ChatBgGlobal = null;
+                const currentGlobalBg = appState.currentUserData.chatBackground;
+                if (currentGlobalBg) {
+                    document.getElementById('chatbg-preview').src = currentGlobalBg;
+                    document.getElementById('chatbg-preview-container').style.display = 'block';
+                    document.getElementById('lbl-chatbg-upload').innerHTML = `<i class="fa-solid fa-image"></i> Alterar Fundo`;
+                } else {
+                    document.getElementById('chatbg-preview-container').style.display = 'none';
+                    document.getElementById('lbl-chatbg-upload').innerHTML = `<i class="fa-solid fa-image"></i> Escolher Imagem / GIF`;
+                    document.getElementById('chatbg-preview').src = '';
+                }
+                
                 document.getElementById('modal-settings').classList.add('active');
             },
 
@@ -2823,419 +3021,4 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
                         const isGif = appState.tempBase64Banner.includes('data:image/gif');
                         if (!isGif) {
                             updates.staticBannerFallback = appState.tempBase64Banner;
-                        } else if (!appState.currentUserData.staticBannerFallback) {
-                            // Se for GIF e não houver fallback, manter o banner atual como fallback
-                            updates.staticBannerFallback = appState.currentUserData.banner || '';
-                        }
-                    }
-
-                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
-                    app.closeSettingsModal(); app.showToast("Perfil salvo!", "success");
-                } catch (e) {
-                    app.showToast("Erro ao salvar: " + e.message, "error");
-                } finally {
-                    btn.disabled = false; btn.innerHTML = "Salvar Perfil";
-                }
-            },
-
-            performSearch: () => {
-                const input = document.getElementById('search-input');
-                const query = input ? input.value.trim().toLowerCase() : '';
-                const container = document.getElementById('search-results-container');
-                if(!container) return;
-                container.innerHTML = '';
-                
-                let results = appState.allUsers;
-                if (query) results = results.filter(u => u.name.toLowerCase().includes(query) || u.handle.toLowerCase().includes(query));
-
-                if (results.length === 0) return container.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Nenhum sinal detectado.</p>`;
-
-                results.forEach(u => {
-                    const div = document.createElement('div');
-                    div.className = 'rank-card';
-                    div.innerHTML = `<img src="${u.avatar}" loading="lazy" class="avatar ${app.getFrameClass(u)}" style="width: 44px; height: 44px;"><div class="rank-info"><h4>${u.name} ${app.getUserBadges(u)}</h4><span>${u.handle}</span></div><button class="btn-primary" style="width:auto; padding: 6px 12px; font-size: 0.8rem;" onclick="app.navigate('public_profile', null, '${u.uid}')">Ver Perfil</button>`;
-                    container.appendChild(div);
-                });
-            },
-            renderRanking: () => {
-                const container = document.getElementById('ranking-list-container');
-                if(!container) return;
-                container.innerHTML = '';
-                [...appState.allUsers].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 50).forEach((u, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'rank-card'; div.onclick = () => app.navigate('public_profile', null, u.uid);
-                    div.innerHTML = `<div class="rank-pos">#${idx + 1}</div><img src="${u.avatar}" loading="lazy" class="avatar ${app.getFrameClass(u)}" style="width: 38px; height: 38px;"><div class="rank-info"><h4>${u.name} ${app.getUserBadges(u)}</h4><span>${u.handle} • Nível ${u.level || 1}</span></div><div class="rank-score">${u.xp || 0} XP</div>`;
-                    container.appendChild(div);
-                });
-            },
-            addXP: async (amount) => { try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { xp: (appState.currentUserData.xp || 0) + amount, ncoins: (appState.currentUserData.ncoins || 0) + Math.floor(amount / 2) }); } catch(e) {} },
-            openAdminModal: () => { if (appState.currentUserData.role === 'admin') alert("Painel Admin Restrito.\nNível de Acesso Reconhecido."); },
-            showToast: (msg, type = 'info') => {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-xmark' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i> <span>${msg}</span>`;
-                document.getElementById('toast-container').appendChild(toast);
-                setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
-            },
-            
-            // --- SISTEMA DE LOJA & VIP ---
-            updateStoreCoins: () => {
-                const coinsEl = document.getElementById('store-user-coins');
-                if (coinsEl && appState.currentUserData) {
-                    coinsEl.innerText = appState.currentUserData.ncoins || 0;
-                }
-            },
-
-            renderStoreCategories: () => {
-                const container = document.getElementById('store-categories-container');
-                if (!container) return;
-                container.innerHTML = '';
-                appState.storeCategories.forEach(cat => {
-                    const pill = document.createElement('div');
-                    pill.className = `category-pill ${appState.activeStoreCategory === cat.id ? 'active' : ''}`;
-                    pill.innerText = cat.name;
-                    pill.onclick = () => {
-                        appState.activeStoreCategory = cat.id;
-                        app.renderStoreCategories();
-                        app.renderStoreProducts();
-                    };
-                    container.appendChild(pill);
-                });
-            },
-
-            renderStoreProducts: () => {
-                const container = document.getElementById('products-grid-container');
-                if (!container) return;
-                container.innerHTML = '';
-                
-                if (appState.activeStoreCategory === 'frames') {
-                    container.innerHTML += `
-                        <div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
-                            Destaque seu perfil com molduras exclusivas que aparecem em todo o Nexus Hub, incluindo Feed, Chats, Comentários, Ranking e Pesquisa de Usuários.
-                        </div>
-                    `;
-                }
-
-                if (appState.activeStoreCategory === 'themes') {
-                    container.innerHTML += `
-                        <div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
-                            Personalize completamente a aparência do seu perfil com temas exclusivos e gradientes premium.
-                        </div>
-                    `;
-                }
-                
-                if (appState.activeStoreCategory === 'special_themes') {
-                    container.innerHTML += `
-                        <div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
-                            O mais alto nível de personalização. Temas com iluminação sofisticada, profundidade e acabamento luxuoso para os Netrunners mais raros.
-                        </div>
-                    `;
-                }
-
-                if (appState.activeStoreCategory === 'vip') {
-                    container.innerHTML += `
-                        <div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
-                            Desbloqueie benefícios exclusivos, como GIFs para foto e banner, gradientes personalizados, badge VIP e acesso a recursos premium.
-                        </div>
-                    `;
-                }
-
-                const filtered = appState.catalog.filter(p => p.category === appState.activeStoreCategory && p.status === 'active');
-                
-                if (filtered.length === 0) {
-                    container.innerHTML += `<div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 30vh; text-align: center; color: var(--text-muted);"><i class="fa-solid fa-box-open" style="font-size: 2.5rem; margin-bottom: 12px; color: rgba(255,255,255,0.1);"></i><p>Nenhum produto disponível<br>nesta categoria no momento.</p></div>`;
-                    return;
-                }
-
-                if (appState.vipTimer) { clearInterval(appState.vipTimer); appState.vipTimer = null; }
-
-                const vipInfo = app.getVIPInfo(appState.currentUserData);
-                const ownedFrames = appState.currentUserData.ownedFrames || [];
-                const ownedThemes = appState.currentUserData.ownedThemes || [];
-
-                filtered.forEach(prod => {
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    
-                    const isFrame = prod.category === 'frames';
-                    const isTheme = prod.category === 'themes';
-                    const isSpecialTheme = prod.category === 'special_themes';
-                    const isVIP = prod.category === 'vip';
-                    
-                    let isOwned = false;
-                    if (isFrame) isOwned = ownedFrames.includes(prod.id);
-                    if (isTheme || isSpecialTheme) isOwned = ownedThemes.includes(prod.id);
-                    
-                    const isCurrentVIP = isVIP && vipInfo.isActive && vipInfo.planId === prod.id;
-
-                    let durationHtml = prod.duration ? `<div class="product-duration">${prod.duration}</div>` : '';
-                    let buttonHtml = `<button class="btn-buy" onclick="event.stopPropagation(); app.openBuyModal('${prod.id}')">Comprar</button>`;
-
-                    if (isOwned) {
-                        card.classList.add('owned');
-                        buttonHtml = `<button class="btn-buy" disabled style="background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: transparent; opacity: 1;"><i class="fa-solid fa-check"></i> Comprado</button>`;
-                    }
-
-                    if (isVIP && vipInfo.isActive) {
-                        if (isCurrentVIP) {
-                            card.style.borderColor = 'var(--cyan)';
-                            card.style.boxShadow = '0 0 15px rgba(0, 243, 255, 0.2)';
-                            
-                            if (vipInfo.expiresAt) {
-                                durationHtml = `<div id="vip-countdown-${prod.id}" class="vip-countdown product-duration" data-expires="${vipInfo.expiresAt}" style="color: var(--success); font-weight: bold; margin-bottom: 8px;">Calculando...</div>`;
-                            } else {
-                                durationHtml = `<div class="product-duration" style="color: var(--success); font-weight: bold; margin-bottom: 8px;">Vitalício</div>`;
-                            }
-                            buttonHtml = `<button class="btn-buy" disabled style="background: rgba(0, 243, 255, 0.1); color: var(--cyan); border-color: var(--cyan); cursor: default; opacity: 1;"><i class="fa-solid fa-check"></i> VIP Ativo</button>`;
-                        } else {
-                            card.classList.add('locked');
-                            buttonHtml = `<button class="btn-buy" disabled style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border-color: transparent; cursor: not-allowed; opacity: 1;"><i class="fa-solid fa-lock"></i> Bloqueado</button>`;
-                        }
-                    }
-
-                    if (!isCurrentVIP && isVIP) {
-                        card.onclick = () => {
-                            if(vipInfo.isActive) app.showToast('Você já possui um plano VIP ativo. Aguarde o término para adquirir um novo.', 'info');
-                            else app.openBuyModal(prod.id);
-                        };
-                    } else if (prod.category === 'special_themes' && !isOwned && !vipInfo.isActive) {
-                        card.classList.add('locked');
-                        buttonHtml = `<button class="btn-buy" disabled style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border-color: transparent; cursor: not-allowed; opacity: 1;"><i class="fa-solid fa-lock"></i> Bloqueado</button>`;
-                        card.onclick = () => app.showToast('Este item é exclusivo para usuários com um Plano VIP ativo.', 'error');
-                    } else if (!isOwned && !isCurrentVIP) {
-                        card.onclick = () => app.openBuyModal(prod.id);
-                    }
-                    
-                    let iconOrImg = `<i class="${prod.icon}"></i>`;
-                    let imgContainerStyle = isOwned ? 'opacity:0.5;' : '';
-
-                    if (isTheme || isSpecialTheme) {
-                        imgContainerStyle += `background: ${prod.previewColor}; border: 1px solid ${prod.previewBorder}; box-shadow: 0 0 15px ${prod.previewBorder}40 inset;`;
-                        iconOrImg = `<i class="${prod.icon}" style="color: ${prod.previewBorder}; text-shadow: 0 0 10px ${prod.previewBorder}; z-index: 2;"></i>`;
-                    } else if (prod.image) {
-                        iconOrImg = `<img src="${prod.image}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:10px; z-index: 2;">`;
-                    }
-                    
-                    let rarityHtml = '';
-                    if (prod.rarityLabel) {
-                        rarityHtml = `<div class="rarity-badge" style="color: ${prod.rarityColor}; border-color: ${prod.rarityColor};">${prod.rarityLabel}</div>`;
-                    }
-                    let vipReqHtml = '';
-                    if (prod.category === 'special_themes' && !isOwned) {
-                        vipReqHtml = `<div class="vip-req-badge"><i class="fa-solid fa-crown"></i> SOMENTE VIP</div>`;
-                    }
-                    
-                    card.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;width:100%;">
-
-        <div class="product-img-container" style="${imgContainerStyle}">
-            ${rarityHtml}
-            ${iconOrImg}
-        </div>
-
-        ${vipReqHtml}
-
-        <div class="product-name">${prod.name}</div>
-        ${durationHtml}
-        <div class="product-price">
-            <i class="fa-solid fa-coins"></i> ${prod.price}
-        </div>
-
-    </div>
-
-    <div style="width:100%;margin-top:auto;padding-top:10px;">
-        ${buttonHtml}
-    </div>
-`;
-                    container.appendChild(card);
-                });
-
-                if (container.querySelector('.vip-countdown')) {
-                    app.updateVIPCountdowns();
-                    appState.vipTimer = setInterval(app.updateVIPCountdowns, 1000);
-                }
-            },
-
-            updateVIPCountdowns: () => {
-                document.querySelectorAll('.vip-countdown').forEach(el => {
-                    const expires = new Date(el.dataset.expires).getTime();
-                    const now = new Date().getTime();
-                    const diff = expires - now;
-
-                    if (diff <= 0) {
-                        el.innerText = "Expirado";
-                        if (appState.currentUserData.vip?.active) {
-                            app.checkAndExpireVIP();
-                        }
-                        return;
-                    }
-
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                    el.innerHTML = `<i class="fa-regular fa-clock"></i> ${days}d ${hours}h ${minutes}m ${seconds}s`;
-                });
-            },
-
-            openBuyModal: (productId) => {
-                const product = appState.catalog.find(p => p.id === productId);
-                if (!product) return;
-                
-                if (product.category === 'vip' && app.getVIPInfo(appState.currentUserData).isActive) {
-                    return app.showToast("Você já possui um plano VIP ativo. Aguarde o término para adquirir um novo.", "info");
-                }
-
-                appState.selectedProduct = product;
-                
-                const iconEl = document.getElementById('buy-modal-icon');
-                if (product.category === 'themes' || product.category === 'special_themes') {
-                    iconEl.style.background = product.previewColor;
-                    iconEl.style.border = `1px solid ${product.previewBorder}`;
-                    iconEl.style.boxShadow = `0 0 15px ${product.previewBorder}40 inset, 0 0 20px rgba(0, 243, 255, 0.2)`;
-                    iconEl.innerHTML = `<i class="${product.icon}" style="color: ${product.previewBorder}; text-shadow: 0 0 10px ${product.previewBorder};"></i>`;
-                } else {
-                    iconEl.style.background = 'rgba(0,0,0,0.5)';
-                    iconEl.style.border = '1px solid var(--purple)';
-                    iconEl.style.boxShadow = '0 0 20px rgba(0, 243, 255, 0.2)';
-                    iconEl.innerHTML = product.image ? `<img src="${product.image}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : `<i class="${product.icon}"></i>`;
-                }
-                
-                const nameExtra = product.rarityLabel ? `<div style="font-size: 0.75rem; color: ${product.rarityColor}; border: 1px solid ${product.rarityColor}; display: inline-block; padding: 2px 8px; border-radius: 4px; margin-top: 6px; font-family: 'Inter';">${product.rarityLabel}</div>` : '';
-                document.getElementById('buy-modal-name').innerHTML = `${product.name} <br> ${nameExtra}`;
-                
-                document.getElementById('buy-modal-duration').innerText = product.duration ? `Duração: ${product.duration}` : 'Item Permanente';
-                
-                let descExtra = (product.category === 'special_themes') ? `<br><br><span style="color: #ffd700; font-weight: bold; padding: 6px 10px; background: rgba(255, 215, 0, 0.1); border: 1px dashed rgba(255, 215, 0, 0.5); border-radius: 6px; display: inline-block; width: 100%;"><i class="fa-solid fa-crown"></i> Este cosmético requer um Plano VIP ativo para ser adquirido.</span>` : '';
-                document.getElementById('buy-modal-desc').innerHTML = product.description + descExtra;
-                
-                document.getElementById('buy-modal-price').innerHTML = `<i class="fa-solid fa-coins"></i> ${product.price} NCoins`;
-                
-                document.getElementById('modal-buy').classList.add('active');
-            },
-
-            closeBuyModal: () => {
-                document.getElementById('modal-buy').classList.remove('active');
-                appState.selectedProduct = null;
-            },
-
-            processPurchase: async () => {
-                const product = appState.selectedProduct;
-                if (!product) return;
-
-                const btn = document.querySelector('#modal-buy .btn-primary');
-                const myCoins = appState.currentUserData.ncoins || 0;
-
-                if (myCoins < product.price) {
-                    app.showToast("NCoins insuficientes para esta transação.", "error");
-                    return;
-                }
-                
-                if (product.category === 'vip') {
-                    btn.disabled = true;
-                    btn.innerHTML = 'Ativando Ligação...';
-                    try {
-                        const now = new Date();
-                        let expiresAt = null;
-                        if (product.durationDays) {
-                            expiresAt = new Date(now.getTime() + (product.durationDays * 24 * 60 * 60 * 1000)).toISOString();
-                        }
-                        const vipData = { active: true, planId: product.id, activatedAt: now.toISOString(), expiresAt: expiresAt };
-                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), { 
-                            vip: vipData,
-                            ncoins: myCoins - product.price 
-                        });
-                        app.showToast(`Plano ${product.name} ativado com sucesso!`, "success");
-                        app.closeBuyModal();
-                    } catch (e) {
-                        app.showToast("Falha na ativação da malha neural.", "error");
-                    } finally {
-                        btn.disabled = false;
-                        btn.innerHTML = 'Confirmar Compra';
-                    }
-                } else if (product.category === 'frames' || product.category === 'themes' || product.category === 'special_themes') {
-                    
-                    if (product.category === 'special_themes' && !app.getVIPInfo(appState.currentUserData).isActive) {
-                        app.showToast("Este item é exclusivo para usuários com um Plano VIP ativo.", "error");
-                        return;
-                    }
-                    
-                    btn.disabled = true;
-                    btn.innerHTML = 'Processando...';
-                    
-                    const listKey = product.category === 'frames' ? 'ownedFrames' : 'ownedThemes';
-                    const owned = appState.currentUserData[listKey] || ['default'];
-                    
-                    if (owned.includes(product.id)) {
-                        app.showToast(`Você já possui ${product.category === 'frames' ? 'esta moldura' : 'este tema'}.`, "info");
-                        btn.disabled = false; btn.innerHTML = 'Confirmar Compra';
-                        app.closeBuyModal();
-                        return;
-                    }
-
-                    try {
-                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), { 
-                            [listKey]: arrayUnion(product.id),
-                            ncoins: myCoins - product.price
-                        });
-                        app.showToast(`Você adquiriu o item ${product.name}. Vá em configurações para equipá-lo.`, "success");
-                        app.closeBuyModal();
-                    } catch (e) {
-                        app.showToast("Erro na transação. Tente novamente.", "error");
-                    } finally {
-                        btn.disabled = false; btn.innerHTML = 'Confirmar Compra';
-                    }
-                }
-            },
-
-            initParticles: () => {
-                const canvas = document.getElementById('particles'), ctx = canvas.getContext('2d');
-                let particles = [];
-                function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; const count = Math.max(60, Math.min(Math.floor((canvas.width * canvas.height) / 6000), 140)); for (let i = 0; i < count; i++) particles.push(new Particle()); }
-                window.addEventListener('resize', resize);
-                const colors = [{ r: 0, g: 243, b: 255 }, { r: 255, g: 0, b: 255 }, { r: 176, g: 38, b: 255 }];
-                
-                class Particle {
-                    constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.z = Math.random() * 0.8 + 0.2; this.size = (Math.random() * 2.5 + 1.2) * this.z; const sf = (Math.random() * 0.5 + 0.15) * this.z; this.speedX = (Math.random() - 0.5) * sf; this.speedY = (Math.random() - 0.5) * sf; this.color = colors[Math.floor(Math.random() * colors.length)]; this.alpha = (Math.random() * 0.7 + 0.5) * this.z; this.alphaChange = (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1); }
-                    update(cw, ch) { this.x += this.speedX; this.y += this.speedY; if (this.x > cw + 10) this.x = -10; else if (this.x < -10) this.x = cw + 10; if (this.y > ch + 10) this.y = -10; else if (this.y < -10) this.y = ch + 10; this.alpha += this.alphaChange; if (this.alpha <= 0.25 || this.alpha >= (1.2 * this.z)) this.alphaChange *= -1; }
-                    draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 1.5})`; ctx.fill(); }
-                }
-
-                function animate() {
-                    const cw = canvas.width;
-                    const ch = canvas.height;
-                    
-                    ctx.clearRect(0, 0, cw, ch); 
-                    ctx.globalCompositeOperation = 'screen';
-                    
-                    for (let i = 0; i < particles.length; i++) { 
-                        for (let j = i + 1; j < particles.length; j++) { 
-                            if (Math.abs(particles[i].z - particles[j].z) > 0.3) continue; 
-                            
-                            const distSq = Math.pow(particles[i].x - particles[j].x, 2) + Math.pow(particles[i].y - particles[j].y, 2); 
-                            
-                            if (distSq < 12100) { 
-                                ctx.beginPath(); 
-                                ctx.moveTo(particles[i].x, particles[i].y); 
-                                ctx.lineTo(particles[j].x, particles[j].y); 
-                                ctx.strokeStyle = `rgba(${particles[i].color.r}, ${particles[i].color.g}, ${particles[i].color.b}, ${Math.min(1, (1 - (Math.sqrt(distSq) / 110)) * ((particles[i].alpha + particles[j].alpha) / 1.2))})`; 
-                                ctx.lineWidth = 1.4 * ((particles[i].z + particles[j].z) / 2); 
-                                ctx.stroke(); 
-                            } 
-                        } 
-                    }
-                    
-                    particles.forEach(p => { p.update(cw, ch); p.draw(); }); 
-                    ctx.globalCompositeOperation = 'source-over'; 
-                    requestAnimationFrame(animate);
-                }
-                
-                resize(); animate();
-            }
-        };
-
-        window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
-    </script>
-</body>
-</html>
+                        } else if (!appState.currentUserData.staticBannerFallback)

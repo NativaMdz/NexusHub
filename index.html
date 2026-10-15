@@ -1468,7 +1468,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1490,7 +1490,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     }
   })
   .catch((error) => {
-    app.showToast("Erro: " + error.message, "error");
+    console.error("Erro no redirect:", error);
+    if (window.app && window.app.showToast) window.app.showToast("Erro: " + error.message, "error");
   });
         const db = getFirestore(firebaseApp);
 
@@ -1770,8 +1771,16 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             },
 
             loginGoogle: async () => {
-                try { const provider = new GoogleAuthProvider();
-await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + e.message, "error"); }
+                const provider = new GoogleAuthProvider();
+                try {
+                    await signInWithPopup(auth, provider);
+                } catch (e) {
+                    if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+                        try { await signInWithRedirect(auth, provider); } catch (e2) { app.showToast("Erro: " + e2.message, "error"); }
+                    } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+                        app.showToast("Erro: " + e.message, "error");
+                    }
+                }
             },
 
             logout: async () => {
@@ -3606,4 +3615,4 @@ await signInWithRedirect(auth, provider); } catch(e) { app.showToast("Erro: " + 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-</html>
+    </html>

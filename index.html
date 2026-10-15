@@ -1007,6 +1007,22 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === FIGURINHAS === */
+        .chat-sticker-btn { background: transparent; border: none; color: var(--cyan); font-size: 1.35rem; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; transition: background 0.2s, transform 0.2s; }
+        .chat-sticker-btn:active { background: rgba(0,243,255,0.15); transform: scale(0.92); }
+        .message.sticker-msg .msg-bubble, .message.mine.sticker-msg .msg-bubble { background: transparent; border-color: transparent; padding: 2px 4px; box-shadow: none; }
+        .message.sticker-msg .msg-bubble:active { background: rgba(255,255,255,0.05); }
+        .msg-sticker { display: block; width: clamp(84px, 30vw, 116px); height: auto; aspect-ratio: 1 / 1; object-fit: contain; pointer-events: none; -webkit-user-drag: none; user-select: none; }
+        .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-height: 50dvh; overflow-y: auto; padding: 2px; overscroll-behavior: contain; }
+        .sticker-tile { position: relative; aspect-ratio: 1 / 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--cyan); font-size: 1.4rem; }
+        .sticker-tile:active { background: rgba(0,243,255,0.12); }
+        .sticker-tile img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .sticker-tile.create { border-style: dashed; border-color: rgba(0,243,255,0.45); }
+        .sticker-tile.managing { border-color: var(--danger); }
+        .sticker-tile .sticker-del { position: absolute; top: -6px; right: -6px; background: var(--danger); color: #fff; width: 20px; height: 20px; border-radius: 50%; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .sticker-empty { grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 10px 4px; }
+        #sticker-canvas { display: block; width: 100%; max-width: 260px; aspect-ratio: 1 / 1; margin: 0 auto 12px; border-radius: 14px; border: 1px solid var(--border-glass); touch-action: none; cursor: grab; background: repeating-conic-gradient(#1b1b24 0% 25%, #12121a 0% 50%) 50% / 20px 20px; }
+
         /* === SISTEMA DE LOJA === */
         .store-categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; flex-shrink: 0; }
         .store-categories::-webkit-scrollbar { display: none; }
@@ -1346,6 +1362,48 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     </div>
 
     <!-- ADD: Modal de configuração de fundo de chat -->
+    <div class="modal-overlay" id="modal-stickers" onclick="if(event.target===this) app.closeStickerPicker()">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="modal-header">
+                <h2>Figurinhas</h2>
+                <button class="close-modal" onclick="app.closeStickerPicker()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="sticker-grid" class="sticker-grid"></div>
+                <button class="btn-primary btn-secondary" id="sticker-manage-btn" style="width:100%; margin-top:12px;" onclick="app.toggleStickerManage()"><i class="fa-solid fa-pen-to-square"></i> Gerenciar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-sticker-create">
+        <div class="modal-content" style="max-width: 380px;">
+            <div class="modal-header">
+                <h2>Criar Figurinha</h2>
+                <button class="close-modal" onclick="app.closeStickerCreator()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="sticker-canvas" width="519" height="519"></canvas>
+                <div class="file-upload-wrapper">
+                    <label class="file-upload-btn">
+                        <i class="fa-solid fa-image"></i> Escolher imagem
+                        <input type="file" id="sticker-file" accept="image/*" onchange="app.stickerLoadFile(event)">
+                    </label>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="btn-primary" id="sticker-mode-contain" style="flex:1;" onclick="app.stickerSetMode('contain')">Ajustar</button>
+                    <button class="btn-primary btn-secondary" id="sticker-mode-cover" style="flex:1;" onclick="app.stickerSetMode('cover')">Preencher</button>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:12px; color:var(--text-muted); font-size:0.8rem;">
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                    <input type="range" id="sticker-zoom" min="0.5" max="3" step="0.05" value="1" style="flex:1;" oninput="app.stickerSetZoom(this.value)">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-muted); text-align:center; margin-top:8px;">Arraste a imagem para posicionar. Tamanho final: 519x519.</div>
+                <button class="btn-primary" id="btn-sticker-save" style="width:100%; margin-top:12px;" onclick="app.saveSticker()" disabled><i class="fa-solid fa-floppy-disk"></i> Salvar figurinha</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-chat-background">
         <div class="modal-content" style="max-width: 420px;">
             <div class="modal-header">
@@ -1407,6 +1465,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 </div>
                 
                 <div class="chat-input-area" id="chat-input-container">
+                    <button type="button" class="chat-sticker-btn" onclick="app.openStickerPicker()" aria-label="Figurinhas"><i class="fa-regular fa-face-smile"></i></button>
                     <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
                     <button class="chat-send-btn" onclick="app.sendChatMessage()">
                         <i class="fa-solid fa-paper-plane"></i>
@@ -1469,7 +1528,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
@@ -1499,6 +1558,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         const colUsers = collection(db, 'users');
         const colGlobalChat = collection(db, 'global_chat');
         const colPrivateChat = collection(db, 'private_chat');
+        const colStickers = collection(db, 'stickers');
 
         const appState = {
             firebaseUser: null,
@@ -1620,7 +1680,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                                 document.getElementById('auth-form-area').style.display = 'block';
                             }
                         } catch (e) {
-                            app.showToast("Erro de leitura no servidor central.", "error");
+                            console.error("Erro ao ler users/" + user.uid, e);
+                            app.showToast("Erro de leitura no servidor central (" + (e.code || e.message) + ").", "error");
+                            document.getElementById('auth-loading').style.display = 'none';
+                            document.getElementById('auth-login-area').style.display = 'block';
                         }
                     } else {
                         appState.firebaseUser = null;
@@ -1980,8 +2043,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar texto</button>`;
                 } else if (type === 'message') {
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.startReply()"><i class="fa-solid fa-reply"></i> Responder mensagem</button>`;
-                    if (isMine) menu.innerHTML += `<button class="context-menu-item" onclick="app.openEditModal()"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
-                    menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar mensagem</button>`;
+                    if (isMine && !item.sticker) menu.innerHTML += `<button class="context-menu-item" onclick="app.openEditModal()"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
+                    if (item.sticker) menu.innerHTML += `<button class="context-menu-item" onclick="app.saveReceivedSticker()"><i class="fa-solid fa-star"></i> Salvar figurinha</button>`;
+                    else menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar mensagem</button>`;
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.deleteForMe()"><i class="fa-solid fa-eye-slash"></i> Apagar para mim</button>`;
                     if (isMine) menu.innerHTML += `<button class="context-menu-item danger" onclick="app.deleteForEveryone()"><i class="fa-solid fa-trash"></i> Apagar para todos</button>`;
                 }
@@ -2547,7 +2611,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         }
 
                         const div = document.createElement('div');
-                        div.className = `message ${isMine ? 'mine' : ''}`;
+                        div.className = `message ${isMine ? 'mine' : ''}${msg.sticker ? ' sticker-msg' : ''}`;
                         div.id = `msg-${msg.id}`;
                         div.dataset.hash = msgHash;
                         div.innerHTML = `
@@ -2555,11 +2619,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                             <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
                                 ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
-                                <div class="msg-text">${msg.content}</div>
+                                ${msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${msg.content}</div>`}
                                 <span class="msg-time">${timeStr}${editedHtml}</span>
                             </div>
                         `;
                         container.appendChild(div);
+                        div.querySelectorAll('img[data-sticker]').forEach(img => app.hydrateSticker(img));
                         setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
                     }
                 });
@@ -3611,6 +3676,260 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // ============================================
         // FIM DO SISTEMA DE PLANO DE FUNDO (ADD)
         // ============================================
+
+        // ===== SISTEMA DE FIGURINHAS (chat global + privado) =====
+        (() => {
+            const SIZE = 519, MAX_BYTES = 350 * 1024, MAX_PACK = 60, WORK_MAX = 1600;
+            const stk = { pack: null, packUid: null, loading: null, manage: false, sending: false, cache: new Map(), pending: new Map() };
+            const sc = { img: null, mode: 'contain', zoom: 1, ox: 0, oy: 0, raf: 0, drag: null, saving: false };
+            const $ = (id) => document.getElementById(id);
+            const validData = (d) => typeof d === 'string' && d.startsWith('data:image/');
+
+            // --- coleção do usuário ---
+            app.loadStickerPack = async (force = false) => {
+                const uid = appState.firebaseUser.uid;
+                if (stk.pack && stk.packUid === uid && !force) return stk.pack;
+                if (stk.loading) return stk.loading;
+                stk.loading = getDocs(query(colStickers, where('ownerUid', '==', uid))).then(snap => {
+                    const arr = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(x => !x.deleted && validData(x.data));
+                    arr.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+                    arr.forEach(x => stk.cache.set(x.id, x.data));
+                    stk.pack = arr; stk.packUid = uid;
+                    return arr;
+                }).finally(() => { stk.loading = null; });
+                return stk.loading;
+            };
+
+            // --- exibição no chat (carrega a imagem por id, com cache) ---
+            app.hydrateSticker = (img) => {
+                const id = img.dataset.sticker;
+                if (!id) return;
+                const apply = (data) => {
+                    if (validData(data)) { img.src = data; return; }
+                    const span = document.createElement('span');
+                    span.className = 'msg-text'; span.textContent = '🖼️ Figurinha indisponível';
+                    img.replaceWith(span);
+                };
+                if (stk.cache.has(id)) return apply(stk.cache.get(id));
+                let pr = stk.pending.get(id);
+                if (!pr) {
+                    pr = getDoc(doc(colStickers, id)).then(snap => {
+                        const d = snap.exists() ? snap.data().data : null;
+                        if (validData(d)) stk.cache.set(id, d);
+                        return d;
+                    }).catch(() => null).finally(() => stk.pending.delete(id));
+                    stk.pending.set(id, pr);
+                }
+                pr.then(apply);
+            };
+
+            // --- seletor ---
+            app.openStickerPicker = () => {
+                if (!appState.firebaseUser || appState.activeChatMode === 'private_list') return;
+                stk.manage = false;
+                $('modal-stickers').classList.add('active');
+                app.renderStickerGrid(true);
+            };
+            app.closeStickerPicker = () => $('modal-stickers').classList.remove('active');
+            app.toggleStickerManage = () => { stk.manage = !stk.manage; app.renderStickerGrid(false); };
+
+            app.renderStickerGrid = async (showLoading) => {
+                const grid = $('sticker-grid'); if (!grid) return;
+                if (showLoading) grid.innerHTML = '<div class="sticker-empty">Carregando...</div>';
+                let pack;
+                try { pack = await app.loadStickerPack(); }
+                catch (e) { console.error(e); grid.innerHTML = '<div class="sticker-empty">Erro ao carregar figurinhas.</div>'; return; }
+                grid.innerHTML = '';
+                const add = document.createElement('button');
+                add.className = 'sticker-tile create'; add.dataset.act = 'create';
+                add.innerHTML = '<i class="fa-solid fa-plus"></i>';
+                grid.appendChild(add);
+                pack.forEach(st => {
+                    const b = document.createElement('button');
+                    b.className = 'sticker-tile' + (stk.manage ? ' managing' : '');
+                    b.dataset.act = 'sticker'; b.dataset.id = st.id;
+                    const im = document.createElement('img');
+                    im.src = st.data; im.loading = 'lazy'; im.decoding = 'async'; im.alt = 'Figurinha';
+                    b.appendChild(im);
+                    if (stk.manage) { const x = document.createElement('span'); x.className = 'sticker-del'; x.innerHTML = '<i class="fa-solid fa-xmark"></i>'; b.appendChild(x); }
+                    grid.appendChild(b);
+                });
+                if (!pack.length) {
+                    const h = document.createElement('div'); h.className = 'sticker-empty';
+                    h.textContent = 'Você ainda não tem figurinhas. Toque em + para criar a primeira.';
+                    grid.appendChild(h);
+                }
+                const mb = $('sticker-manage-btn');
+                if (mb) mb.innerHTML = stk.manage ? '<i class="fa-solid fa-check"></i> Concluir' : '<i class="fa-solid fa-pen-to-square"></i> Gerenciar';
+                grid.onclick = (e) => {
+                    const t = e.target.closest('[data-act]'); if (!t) return;
+                    if (t.dataset.act === 'create') return app.openStickerCreator();
+                    if (stk.manage) return app.deleteSticker(t.dataset.id);
+                    app.sendSticker(t.dataset.id);
+                };
+            };
+
+            app.deleteSticker = async (id) => {
+                if (!confirm('Remover esta figurinha da sua coleção? As já enviadas continuam no chat.')) return;
+                try {
+                    await updateDoc(doc(colStickers, id), { deleted: true });
+                    if (stk.pack) stk.pack = stk.pack.filter(x => x.id !== id);
+                    app.renderStickerGrid(false);
+                } catch (e) { app.showToast('Erro ao remover figurinha.', 'error'); }
+            };
+
+            // --- envio ---
+            app.sendSticker = async (id) => {
+                if (stk.sending) return;
+                const mode = appState.activeChatMode;
+                if (!mode || mode === 'private_list' || !id) return;
+                stk.sending = true;
+                try {
+                    const baseMsg = { authorUid: appState.firebaseUser.uid, content: '🖼️ Figurinha', sticker: id, createdAt: new Date().toISOString() };
+                    if (appState.replyingTo) {
+                        baseMsg.replyTo = appState.replyingTo.id;
+                        const author = appState.allUsers.find(u => u.uid === appState.replyingTo.authorUid);
+                        baseMsg.replyAuthor = author ? author.handle : '@usuario';
+                        let preview = appState.replyingTo.content || '';
+                        if (preview.length > 70) preview = preview.substring(0, 70) + '...';
+                        baseMsg.replyPreview = preview;
+                        app.cancelReply();
+                    }
+                    app.closeStickerPicker();
+                    if (mode === 'global') { await addDoc(colGlobalChat, baseMsg); app.addXP(1); }
+                    else { baseMsg.participants = [appState.firebaseUser.uid, mode]; await addDoc(colPrivateChat, baseMsg); }
+                } catch (e) { console.error(e); app.showToast('Falha de transmissão.', 'error'); }
+                finally { stk.sending = false; }
+            };
+
+            // salvar figurinha recebida (menu da mensagem)
+            app.saveReceivedSticker = async () => {
+                app.closeContextMenu();
+                const item = appState.activeContextItem;
+                if (!item || !item.sticker) return;
+                try {
+                    const pack = await app.loadStickerPack();
+                    if (pack.length >= MAX_PACK) return app.showToast('Limite de ' + MAX_PACK + ' figurinhas atingido.', 'error');
+                    let data = stk.cache.get(item.sticker);
+                    if (!data) { const snap = await getDoc(doc(colStickers, item.sticker)); data = snap.exists() ? snap.data().data : null; }
+                    if (!validData(data)) return app.showToast('Figurinha indisponível.', 'error');
+                    if (pack.some(x => x.data === data)) return app.showToast('Você já tem essa figurinha.', 'info');
+                    const createdAt = new Date().toISOString();
+                    const ref = await addDoc(colStickers, { ownerUid: appState.firebaseUser.uid, data, createdAt, deleted: false });
+                    stk.cache.set(ref.id, data); pack.unshift({ id: ref.id, ownerUid: appState.firebaseUser.uid, data, createdAt, deleted: false });
+                    app.showToast('Figurinha salva na sua coleção!', 'success');
+                } catch (e) { console.error(e); app.showToast('Erro ao salvar figurinha.', 'error'); }
+            };
+
+            // --- criador (519x519) ---
+            const paint = () => {
+                const cv = $('sticker-canvas'); if (!cv) return;
+                const ctx = cv.getContext('2d');
+                ctx.clearRect(0, 0, SIZE, SIZE);
+                const im = sc.img; if (!im) return;
+                const base = sc.mode === 'cover' ? Math.max(SIZE / im.width, SIZE / im.height) : Math.min(SIZE / im.width, SIZE / im.height);
+                const k = base * sc.zoom, dw = im.width * k, dh = im.height * k;
+                ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(im, (SIZE - dw) / 2 + sc.ox, (SIZE - dh) / 2 + sc.oy, dw, dh);
+            };
+            const schedule = () => { if (sc.raf) return; sc.raf = requestAnimationFrame(() => { sc.raf = 0; paint(); }); };
+            const clamp = (v) => Math.max(-SIZE, Math.min(SIZE, v));
+
+            app.openStickerCreator = () => {
+                app.closeStickerPicker();
+                sc.img = null; sc.mode = 'contain'; sc.zoom = 1; sc.ox = 0; sc.oy = 0; sc.saving = false;
+                $('sticker-zoom').value = 1; $('sticker-file').value = '';
+                app.stickerSetMode('contain');
+                $('btn-sticker-save').disabled = true;
+                const cv = $('sticker-canvas');
+                cv.onpointerdown = (e) => { if (!sc.img) return; sc.drag = { x: e.clientX, y: e.clientY, ox: sc.ox, oy: sc.oy }; try { cv.setPointerCapture(e.pointerId); } catch (_) {} cv.style.cursor = 'grabbing'; };
+                cv.onpointermove = (e) => {
+                    if (!sc.drag) return;
+                    const f = SIZE / cv.getBoundingClientRect().width;
+                    sc.ox = clamp(sc.drag.ox + (e.clientX - sc.drag.x) * f);
+                    sc.oy = clamp(sc.drag.oy + (e.clientY - sc.drag.y) * f);
+                    schedule();
+                };
+                cv.onpointerup = cv.onpointercancel = () => { sc.drag = null; cv.style.cursor = 'grab'; };
+                paint();
+                $('modal-sticker-create').classList.add('active');
+            };
+            app.closeStickerCreator = () => {
+                $('modal-sticker-create').classList.remove('active');
+                sc.img = null; sc.drag = null;
+                app.openStickerPicker();
+            };
+            app.stickerSetMode = (mode) => {
+                sc.mode = mode; sc.zoom = 1; sc.ox = 0; sc.oy = 0;
+                $('sticker-zoom').value = 1;
+                $('sticker-mode-contain').classList.toggle('btn-secondary', mode !== 'contain');
+                $('sticker-mode-cover').classList.toggle('btn-secondary', mode !== 'cover');
+                paint();
+            };
+            app.stickerSetZoom = (v) => { sc.zoom = parseFloat(v) || 1; schedule(); };
+
+            app.stickerLoadFile = (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) return app.showToast('Selecione um arquivo de imagem.', 'error');
+                if (file.size > 20 * 1024 * 1024) return app.showToast('Imagem muito grande (máx. 20 MB).', 'error');
+                const url = URL.createObjectURL(file);
+                const im = new Image();
+                im.onload = () => {
+                    // cópia de trabalho limitada a 1600px: deixa o arrastar fluido e economiza memória
+                    const r = Math.min(1, WORK_MAX / Math.max(im.naturalWidth, im.naturalHeight));
+                    const w = document.createElement('canvas');
+                    w.width = Math.max(1, Math.round(im.naturalWidth * r)); w.height = Math.max(1, Math.round(im.naturalHeight * r));
+                    w.getContext('2d').drawImage(im, 0, 0, w.width, w.height);
+                    URL.revokeObjectURL(url);
+                    sc.img = w; sc.ox = 0; sc.oy = 0; sc.zoom = 1; $('sticker-zoom').value = 1;
+                    $('btn-sticker-save').disabled = false;
+                    paint();
+                };
+                im.onerror = () => { URL.revokeObjectURL(url); app.showToast('Não foi possível ler essa imagem.', 'error'); };
+                im.src = url;
+            };
+
+            const encode = () => {
+                const cv = $('sticker-canvas');
+                for (const q of [0.85, 0.7, 0.55, 0.4]) {
+                    const d = cv.toDataURL('image/webp', q);
+                    if (!d.startsWith('data:image/webp')) break;
+                    if (d.length * 0.75 <= MAX_BYTES) return d;
+                }
+                for (const size of [SIZE, 400, 320]) {
+                    const t = document.createElement('canvas'); t.width = t.height = size;
+                    t.getContext('2d').drawImage(cv, 0, 0, size, size);
+                    const d = t.toDataURL('image/png');
+                    if (d.length * 0.75 <= MAX_BYTES) return d;
+                }
+                return null;
+            };
+
+            app.saveSticker = async () => {
+                if (!sc.img || sc.saving) return;
+                sc.saving = true;
+                const btn = $('btn-sticker-save'); btn.disabled = true; btn.innerHTML = 'Salvando...';
+                try {
+                    const pack = await app.loadStickerPack();
+                    if (pack.length >= MAX_PACK) throw new Error('limit');
+                    paint();
+                    const data = encode();
+                    if (!data) throw new Error('size');
+                    const createdAt = new Date().toISOString();
+                    const ref = await addDoc(colStickers, { ownerUid: appState.firebaseUser.uid, data, createdAt, deleted: false });
+                    stk.cache.set(ref.id, data);
+                    pack.unshift({ id: ref.id, ownerUid: appState.firebaseUser.uid, data, createdAt, deleted: false });
+                    app.showToast('Figurinha criada!', 'success');
+                    app.closeStickerCreator();
+                } catch (e) {
+                    console.error(e);
+                    app.showToast(e.message === 'limit' ? 'Limite de ' + MAX_PACK + ' figurinhas atingido.' : (e.message === 'size' ? 'Figurinha muito pesada, tente outra imagem.' : 'Erro ao salvar figurinha.'), 'error');
+                } finally {
+                    sc.saving = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar figurinha'; btn.disabled = !sc.img;
+                }
+            };
+        })();
 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>

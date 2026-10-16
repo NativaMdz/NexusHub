@@ -4478,6 +4478,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     ]
                     : [
                         { icon: 'fa-user', label: 'Ver perfil', run: () => app.navigate('public_profile', null, mode) },
+                        { icon: 'fa-image', label: 'Plano de fundo', run: () => app.openChatBackgroundModal(mode) },
                         { icon: 'fa-magnifying-glass', label: 'Pesquisar mensagem', run: () => app.openChatSearch() },
                         { icon: 'fa-eraser', label: 'Limpar conversa', danger: true, run: () => app.clearCurrentChat() },
                         blockedAt(mode)
@@ -4553,6 +4554,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             // o plano de fundo agora vive no menu ⋮ do chat: não reinjeta mais nas configurações
             app.addChatBackgroundToSettings = () => {};
+            // o botão de wallpaper por conversa saiu da lista privada: agora fica no menu ⋮ de cada chat
+            app.addBackgroundButtonsToPrivateChats = () => {
+                document.querySelectorAll('#private-chats-list .chat-bg-btn').forEach((b) => b.remove());
+            };
         })();
 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);

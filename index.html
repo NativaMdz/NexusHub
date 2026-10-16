@@ -1007,6 +1007,33 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === CONFIGURAÇÕES COMPACTAS COM ABAS === */
+        #modal-settings .modal-content { padding: 1rem 1.1rem; }
+        #modal-settings .modal-header { margin-bottom: 0.7rem; padding-bottom: 0.6rem; }
+        #modal-settings .modal-header h2 { font-size: 1.15rem; }
+        .set-tabs { display: flex; gap: 6px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; margin-bottom: 12px; flex-shrink: 0; }
+        .set-tab { flex: 1; padding: 7px 4px; border: none; border-radius: 8px; background: transparent; color: var(--text-muted); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; transition: all 0.2s; }
+        .set-tab.active { background: linear-gradient(90deg, var(--cyan), var(--purple)); color: #fff; box-shadow: 0 0 12px rgba(0,243,255,0.25); }
+        .set-pane { display: none; }
+        .set-pane.active { display: block; }
+        .set-label { font-size: 0.68rem; color: var(--cyan); display: block; margin-bottom: 4px; letter-spacing: 0.06em; text-transform: uppercase; font-family: 'Rajdhani', sans-serif; font-weight: 700; }
+        #modal-settings .form-group { margin-bottom: 0.8rem; }
+        #modal-settings .form-control { padding: 9px 12px; font-size: 0.9rem; }
+        #modal-settings textarea.form-control { min-height: 72px; }
+        #modal-settings select.form-control { padding-right: 28px; text-overflow: ellipsis; background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f3ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"); }
+        .set-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .music-row { display: flex; align-items: center; gap: 8px; }
+        .music-row .music-current { flex: 1; min-width: 0; padding: 8px 10px; font-size: 0.8rem; }
+        .icon-btn { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 0.85rem; cursor: pointer; padding: 0; transition: all 0.2s; }
+        .icon-btn:active { transform: scale(0.94); }
+        .icon-btn.danger { color: var(--danger); border-color: rgba(255,42,42,0.3); }
+        .icon-btn:disabled { opacity: 0.35; cursor: default; }
+        #modal-settings .file-upload-btn { padding: 8px; font-size: 0.8rem; }
+        #modal-settings .btn-primary { padding: 9px; font-size: 0.92rem; }
+        .set-footer { flex-shrink: 0; padding-top: 10px; }
+        .set-note { font-size: 0.7rem; color: var(--text-muted); margin-top: 6px; text-align: center; }
+        .set-status { font-size: 0.75rem; color: var(--success); background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.2); border-radius: 8px; padding: 7px 10px; margin-bottom: 12px; text-align: center; }
+
         /* === CHAT ESTILO WHATSAPP (wallpaper atrás de mensagens + campo de texto) === */
         .chat-stage { display: flex; flex-direction: column; flex: 1; min-height: 0; position: relative; border-radius: 16px; overflow: hidden; background-size: cover; background-position: center; background-repeat: no-repeat; }
         .chat-stage.has-wp { box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.06); }
@@ -1313,52 +1340,74 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     <div class="modal-overlay" id="modal-settings">
         <div class="modal-content">
             <div class="modal-header"><h2>Configurações do Hub</h2><button class="close-modal" onclick="app.closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="set-tabs">
+                <button type="button" class="set-tab active" data-tab="perfil" onclick="app.settingsTab('perfil')">Perfil</button>
+                <button type="button" class="set-tab" data-tab="visual" onclick="app.settingsTab('visual')">Visual</button>
+                <button type="button" class="set-tab" data-tab="conta" onclick="app.settingsTab('conta')">Conta</button>
+            </div>
             <div class="modal-body">
-                <p style="font-size: 0.82rem; color: var(--success); margin-bottom: 1rem;"><i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.</p>
-                <div class="form-group"><label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label><input type="text" id="edit-name" class="form-control"></div>
-                <div class="form-group"><label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SUA BIO</label><textarea id="edit-bio" class="form-control" placeholder="Fale sobre você..."></textarea></div>
-                <div class="form-group">
-                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">MÚSICA DO PERFIL</label>
-                    <div id="edit-music-current" class="music-current">Nenhuma música definida</div>
-                    <div style="display: flex; gap: 10px; margin-top: 8px;">
-                        <button type="button" class="btn-primary btn-secondary" style="flex: 1;" onclick="app.openMusicSearch()"><i class="fa-solid fa-magnifying-glass"></i> Buscar / Trocar</button>
-                        <button type="button" class="btn-primary btn-secondary" id="btn-music-remove" style="flex: 1;" onclick="app.removeProfileMusic()"><i class="fa-solid fa-trash"></i> Remover</button>
+                <div class="set-pane active" id="set-pane-perfil">
+                    <div class="form-group"><label class="set-label">Seu nome</label><input type="text" id="edit-name" class="form-control"></div>
+                    <div class="form-group"><label class="set-label">Sua bio</label><textarea id="edit-bio" class="form-control" placeholder="Fale sobre você..."></textarea></div>
+                    <div class="form-group">
+                        <label class="set-label">Música do perfil</label>
+                        <div class="music-row">
+                            <div id="edit-music-current" class="music-current">Nenhuma música definida</div>
+                            <button type="button" class="icon-btn" onclick="app.openMusicSearch()" aria-label="Buscar ou trocar música"><i class="fa-solid fa-magnifying-glass"></i></button>
+                            <button type="button" class="icon-btn danger" id="btn-music-remove" onclick="app.removeProfileMusic()" aria-label="Remover música"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">MOLDURA EQUIPADA</label>
-                    <select id="edit-frame" class="form-control">
-                        <!-- Populated via JS -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">TEMA DO PERFIL</label>
-                    <select id="edit-theme" class="form-control" onchange="app.toggleGradientOptions()">
-                        <!-- Populated via JS -->
-                    </select>
-                </div>
-                <div id="vip-gradient-section" style="display: none; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ffd700;">
-                    <label style="font-size: 0.75rem; color: #ffd700; display: block; margin-bottom: 8px;"><i class="fa-solid fa-crown"></i> GRADIENTE PERSONALIZADO (VIP)</label>
-                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <input type="color" id="grad-color1" class="form-control" style="padding: 2px; height: 35px; cursor: pointer;" title="Cor Primária">
-                        <input type="color" id="grad-color2" class="form-control" style="padding: 2px; height: 35px; cursor: pointer;" title="Cor Secundária">
+
+                <div class="set-pane" id="set-pane-visual">
+                    <div class="set-grid form-group">
+                        <div>
+                            <label class="set-label">Moldura</label>
+                            <select id="edit-frame" class="form-control">
+                                <!-- Populated via JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="set-label">Tema</label>
+                            <select id="edit-theme" class="form-control" onchange="app.toggleGradientOptions()">
+                                <!-- Populated via JS -->
+                            </select>
+                        </div>
                     </div>
-                    <select id="grad-direction" class="form-control">
-                        <option value="to right">Linear (Horizontal)</option>
-                        <option value="to bottom">Vertical</option>
-                        <option value="45deg">Diagonal (Cima Direita)</option>
-                        <option value="-45deg">Diagonal (Cima Esquerda)</option>
-                        <option value="radial">Radial (Centro)</option>
-                    </select>
+                    <div id="vip-gradient-section" style="display: none; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; margin-bottom: 0.8rem; border: 1px solid #ffd700;">
+                        <label style="font-size: 0.7rem; color: #ffd700; display: block; margin-bottom: 8px;"><i class="fa-solid fa-crown"></i> GRADIENTE PERSONALIZADO (VIP)</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+                            <input type="color" id="grad-color1" class="form-control" style="padding: 2px; height: 32px; cursor: pointer;" title="Cor Primária">
+                            <input type="color" id="grad-color2" class="form-control" style="padding: 2px; height: 32px; cursor: pointer;" title="Cor Secundária">
+                        </div>
+                        <select id="grad-direction" class="form-control">
+                            <option value="to right">Linear (Horizontal)</option>
+                            <option value="to bottom">Vertical</option>
+                            <option value="45deg">Diagonal (Cima Direita)</option>
+                            <option value="-45deg">Diagonal (Cima Esquerda)</option>
+                            <option value="radial">Radial (Centro)</option>
+                        </select>
+                    </div>
+                    <div class="file-upload-wrapper">
+                        <label class="file-upload-btn" id="lbl-banner-upload">
+                            <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
+                            <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">
+                        </label>
+                    </div>
                 </div>
-                <div class="file-upload-wrapper">
-                    <label class="file-upload-btn" id="lbl-banner-upload">
-                        <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
-                        <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">
-                    </label>
+
+                <div class="set-pane" id="set-pane-conta">
+                    <div class="set-status"><i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.</div>
+                    <div id="chat-bg-settings-btn" class="form-group">
+                        <label class="set-label">Chat</label>
+                        <button class="btn-primary btn-secondary" style="width: 100%;" onclick="app.openChatBackgroundModal('global')"><i class="fa-solid fa-image"></i> Plano de fundo global</button>
+                        <p class="set-note">Imagem de fundo para todos os chats. GIFs exclusivos para VIP.</p>
+                    </div>
+                    <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()"><i class="fa-solid fa-power-off"></i> Desconectar</button>
                 </div>
-                <button class="btn-primary" id="btn-save-settings" onclick="app.saveProfileSettings()" style="margin-bottom: 10px;">Salvar Perfil</button>
-                <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()"><i class="fa-solid fa-power-off"></i> Desconectar</button>
+            </div>
+            <div class="set-footer" id="set-footer">
+                <button class="btn-primary" id="btn-save-settings" onclick="app.saveProfileSettings()">Salvar Perfil</button>
             </div>
         </div>
     </div>
@@ -3775,6 +3824,22 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // FIM DO SISTEMA DE PLANO DE FUNDO (ADD)
         // ============================================
 
+        // ===== CONFIGURAÇÕES COM ABAS =====
+        (() => {
+            app.settingsTab = (name) => {
+                document.querySelectorAll('#modal-settings .set-tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+                document.querySelectorAll('#modal-settings .set-pane').forEach((p) => p.classList.toggle('active', p.id === 'set-pane-' + name));
+                const f = document.getElementById('set-footer'); if (f) f.style.display = name === 'conta' ? 'none' : '';
+                const b = document.querySelector('#modal-settings .modal-body'); if (b) b.scrollTop = 0;
+            };
+            const _openSettings = app.openSettingsModal;
+            app.openSettingsModal = function (...args) {
+                const r = _openSettings.apply(this, args);
+                app.settingsTab('perfil');
+                return r;
+            };
+        })();
+
         // ===== CHAT ESTILO WHATSAPP: wallpaper no palco inteiro + botão "ir para o fim" =====
         (() => {
             const $ = (id) => document.getElementById(id);
@@ -4255,4 +4320,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+                                                                                                                                                          </html>

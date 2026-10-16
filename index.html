@@ -1153,10 +1153,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .reply-cancel-btn:hover { color: var(--danger); }
 
         /* UI da Mensagem Respondida (Dentro do Balão) */
-        .msg-replied-block { background: rgba(0,0,0,0.3); border-left: 3px solid var(--cyan); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; cursor: pointer; transition: background 0.2s; }
+        .msg-bubble { min-width: 0; max-width: 100%; }
+        .msg-replied-block { background: rgba(0,0,0,0.3); border-left: 3px solid var(--cyan); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; cursor: pointer; transition: background 0.2s; min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; }
         .msg-replied-block:hover { background: rgba(0,243,255,0.1); }
         .msg-replied-author { font-size: 0.72rem; color: var(--cyan); font-weight: bold; margin-bottom: 3px; display:flex; align-items: center; gap: 4px;}
-        .msg-replied-text { font-size: 0.8rem; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;}
+        .msg-replied-text { font-size: 0.8rem; color: #ccc; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; text-overflow: ellipsis; white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.35; pointer-events: none;}
 
         /* Tag de Edição Discreta */
         .edited-tag { font-size: 0.65rem; color: var(--text-muted); font-style: italic; opacity: 0.8; margin-left: 6px; font-weight: normal; }
@@ -2113,7 +2114,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (previewText.length > 70) previewText = previewText.substring(0, 70) + '...';
                 if (!previewText && item.image) previewText = '📷 Foto';
                 
-                document.getElementById('reply-preview-author').innerText = `Respondendo ${author ? author.handle : '@usuario'}`;
+                document.getElementById('reply-preview-author').innerText = appState.activeChatMode === 'global' ? `Respondendo ${author ? author.handle : '@usuario'}` : 'Respondendo';
                 document.getElementById('reply-preview-text').innerText = previewText;
                 document.getElementById('reply-preview-container').style.display = 'flex';
                 document.getElementById('chat-input').focus();
@@ -2604,7 +2605,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         if (msg.replyTo) {
                             replyHtml = `
                                 <div class="msg-replied-block" onclick="app.scrollToMessage('${msg.replyTo}', event)">
-                                    <div class="msg-replied-author"><i class="fa-solid fa-reply" style="font-size:0.6rem;"></i> Respondendo ${msg.replyAuthor || ''}</div>
+                                    <div class="msg-replied-author"><i class="fa-solid fa-reply" style="font-size:0.6rem;"></i> Respondendo${containerId === 'chat-private-container' ? '' : ' ' + (msg.replyAuthor || '')}</div>
                                     <div class="msg-replied-text">${msg.replyPreview || ''}</div>
                                 </div>
                             `;

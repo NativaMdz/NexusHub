@@ -1007,6 +1007,27 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === MENU DO CHAT (⋮), PESQUISA E BLOQUEIO === */
+        .chat-info-row { position: relative; flex-shrink: 0; margin-bottom: 12px; min-height: 34px; display: flex; align-items: center; justify-content: center; }
+        .chat-info-row .chat-header-info { margin-bottom: 0; padding: 0 42px; flex: 1; }
+        .chat-menu-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; padding: 0; transition: background 0.2s; }
+        .chat-menu-btn:active { background: rgba(0,243,255,0.15); }
+        .chat-menu-backdrop { position: fixed; inset: 0; z-index: 999; background: transparent; }
+        .chat-menu-pop { position: fixed; z-index: 1000; min-width: 220px; max-width: 86vw; background: rgba(12,12,18,0.97); border: 1px solid rgba(176,38,255,0.45); border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 0 18px rgba(176,38,255,0.18); padding: 6px; backdrop-filter: blur(10px); animation: chatMenuIn 0.15s ease-out; transform-origin: top right; }
+        @keyframes chatMenuIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        .chat-menu-item { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: none; background: transparent; color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 0.9rem; border-radius: 10px; cursor: pointer; text-align: left; }
+        .chat-menu-item i { width: 18px; text-align: center; color: var(--cyan); font-size: 0.9rem; }
+        .chat-menu-item:active { background: rgba(255,255,255,0.08); }
+        .chat-menu-item.danger, .chat-menu-item.danger i { color: var(--danger); }
+        .chat-search-bar { display: none; align-items: center; gap: 6px; padding: 5px 8px; margin-bottom: 10px; border-radius: 12px; background: rgba(20,22,30,0.92); border: 1px solid rgba(0,243,255,0.3); flex-shrink: 0; }
+        .chat-search-bar > i { color: var(--cyan); font-size: 0.85rem; }
+        .chat-search-bar input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.88rem; user-select: text; -webkit-user-select: text; }
+        .chat-search-bar #chat-search-count { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; min-width: 34px; text-align: center; }
+        .chat-search-bar .icon-btn { width: 30px; height: 30px; font-size: 0.75rem; }
+        .message.search-hit .msg-bubble { box-shadow: 0 0 0 1px rgba(255,214,0,0.5); }
+        .message.search-current .msg-bubble { box-shadow: 0 0 0 2px #ffd700, 0 0 14px rgba(255,215,0,0.45); }
+        .message.sticker-msg.search-hit .msg-bubble, .message.sticker-msg.search-current .msg-bubble { box-shadow: none; }
+
         /* === CONFIGURAÇÕES COMPACTAS COM ABAS === */
         #modal-settings .modal-content { padding: 1rem 1.1rem; }
         #modal-settings .modal-header { margin-bottom: 0.7rem; padding-bottom: 0.6rem; }
@@ -1398,11 +1419,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
                 <div class="set-pane" id="set-pane-conta">
                     <div class="set-status"><i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.</div>
-                    <div id="chat-bg-settings-btn" class="form-group">
-                        <label class="set-label">Chat</label>
-                        <button class="btn-primary btn-secondary" style="width: 100%;" onclick="app.openChatBackgroundModal('global')"><i class="fa-solid fa-image"></i> Plano de fundo global</button>
-                        <p class="set-note">Imagem de fundo para todos os chats. GIFs exclusivos para VIP.</p>
-                    </div>
+                    <div id="chat-bg-settings-btn" style="display: none;"></div>
+                    <p class="set-note" style="margin: 0 0 12px;"><i class="fa-solid fa-ellipsis-vertical"></i> O plano de fundo do chat agora fica no menu do próprio chat.</p>
                     <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()"><i class="fa-solid fa-power-off"></i> Desconectar</button>
                 </div>
             </div>
@@ -1560,8 +1578,19 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 <button id="tab-private" class="btn-primary btn-secondary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('private_list')">Privado</button>
             </div>
             
-            <div class="chat-header-info" id="chat-status-info">
-                <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
+            <div class="chat-info-row">
+                <div class="chat-header-info" id="chat-status-info">
+                    <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
+                </div>
+                <button type="button" id="chat-menu-btn" class="chat-menu-btn" onclick="app.openChatMenu(event)" aria-label="Opções do chat"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            </div>
+            <div class="chat-search-bar" id="chat-search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="chat-search-input" placeholder="Pesquisar mensagem..." autocomplete="off" oninput="app.chatSearchInput()" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); app.chatSearchStep(-1); }">
+                <span id="chat-search-count"></span>
+                <button type="button" class="icon-btn" onclick="app.chatSearchStep(-1)" aria-label="Mensagem anterior"><i class="fa-solid fa-chevron-up"></i></button>
+                <button type="button" class="icon-btn" onclick="app.chatSearchStep(1)" aria-label="Próxima mensagem"><i class="fa-solid fa-chevron-down"></i></button>
+                <button type="button" class="icon-btn" onclick="app.closeChatSearch()" aria-label="Fechar pesquisa"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
             <div class="chat-stage" id="chat-stage">
@@ -1646,7 +1675,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove, getDocs, query, where, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
@@ -4317,7 +4346,216 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
         })();
 
+        // ===== MENU DO CHAT (⋮): global e privado =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const ids = ['chat-global-container', 'chat-private-container'];
+            const visibleContainer = () => ids.map($).find((c) => c && c.style.display !== 'none');
+            const me = () => appState.currentUserData || {};
+            const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            const clearedAt = (key) => (me().chatClears || {})[key] || null;
+            const blockedAt = (uid) => (me().blockedUsers || {})[uid] || null;
+            const modeKey = () => appState.activeChatMode;
+            const isPrivateMode = () => { const m = modeKey(); return !!m && m !== 'global' && m !== 'private_list'; };
+            const otherUser = (uid) => appState.allUsers.find((u) => u.uid === uid);
+
+            // ---------- bloqueio ----------
+            app.isChatBlocked = () => {
+                if (!isPrivateMode()) return false;
+                const uid = modeKey(), o = otherUser(uid);
+                return !!(blockedAt(uid) || (o && o.blockedUsers && o.blockedUsers[appState.firebaseUser.uid]));
+            };
+            app.refreshChatBlockUI = () => {
+                const input = $('chat-input'); if (!input) return;
+                const sticker = document.querySelector('.chat-sticker-btn');
+                const send = document.querySelector('.chat-send-btn');
+                const blocked = isPrivateMode() && app.isChatBlocked();
+                const byMe = isPrivateMode() && !!blockedAt(modeKey());
+                input.disabled = blocked;
+                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Não é possível enviar mensagens') : 'Transmitir mensagem...';
+                if (sticker) { sticker.disabled = blocked; sticker.style.opacity = blocked ? '0.4' : ''; }
+                if (send) { send.disabled = blocked; send.style.opacity = blocked ? '0.4' : ''; }
+            };
+            app.toggleBlockCurrent = async () => {
+                if (!isPrivateMode()) return;
+                const uid = modeKey(), u = otherUser(uid), name = u ? u.name : 'este usuário';
+                const myRef = doc(colUsers, appState.firebaseUser.uid);
+                try {
+                    if (!blockedAt(uid)) {
+                        if (!confirm('Bloquear ' + name + '? Ele não poderá mais enviar mensagens para você.')) return;
+                        const iso = new Date().toISOString();
+                        await updateDoc(myRef, { ['blockedUsers.' + uid]: iso });
+                        appState.currentUserData.blockedUsers = { ...(me().blockedUsers || {}), [uid]: iso };
+                        app.showToast(name + ' foi bloqueado.', 'success');
+                    } else {
+                        await updateDoc(myRef, { ['blockedUsers.' + uid]: deleteField() });
+                        const nb = { ...(me().blockedUsers || {}) }; delete nb[uid];
+                        appState.currentUserData.blockedUsers = nb;
+                        app.showToast(name + ' foi desbloqueado.', 'success');
+                    }
+                    app.refreshChatBlockUI();
+                    app.refreshCurrentChat();
+                } catch (e) { console.error(e); app.showToast('Erro ao atualizar o bloqueio.', 'error'); }
+            };
+
+            // ---------- limpar conversa (só para você) ----------
+            const currentSource = () => {
+                if (modeKey() === 'global') return { list: appState.globalMessages, id: 'chat-global-container' };
+                const my = appState.firebaseUser.uid, o = modeKey();
+                return { list: appState.privateMessages.filter((m) => m.participants.includes(my) && m.participants.includes(o)), id: 'chat-private-container' };
+            };
+            app.refreshCurrentChat = () => { const s = currentSource(); app.updateChatInDOM(s.list, s.id); };
+            app.clearCurrentChat = async () => {
+                const key = modeKey();
+                if (!key || key === 'private_list') return;
+                const txt = key === 'global' ? 'Limpar todas as mensagens do chat global? Isso só afeta você.' : 'Limpar todas as mensagens desta conversa? Isso só afeta você.';
+                if (!confirm(txt)) return;
+                try {
+                    const iso = new Date().toISOString();
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { ['chatClears.' + key]: iso });
+                    appState.currentUserData.chatClears = { ...(me().chatClears || {}), [key]: iso };
+                    app.closeChatSearch();
+                    app.refreshCurrentChat();
+                    app.showToast('Mensagens limpas.', 'success');
+                } catch (e) { console.error(e); app.showToast('Erro ao limpar as mensagens.', 'error'); }
+            };
+
+            // ---------- pesquisa ----------
+            const sch = { hits: [], idx: -1, timer: 0 };
+            const clearMarks = () => document.querySelectorAll('.message.search-hit, .message.search-current').forEach((el) => el.classList.remove('search-hit', 'search-current'));
+            const focusHit = () => {
+                document.querySelectorAll('.message.search-current').forEach((el) => el.classList.remove('search-current'));
+                const el = sch.hits[sch.idx];
+                if (el) { el.classList.add('search-current'); el.scrollIntoView({ block: 'center' }); }
+                const cnt = $('chat-search-count');
+                if (cnt) cnt.textContent = sch.hits.length ? (sch.idx + 1) + '/' + sch.hits.length : ($('chat-search-input').value.trim() ? '0' : '');
+            };
+            app.runChatSearch = (keepIdx) => {
+                clearMarks();
+                const input = $('chat-search-input'), c = visibleContainer();
+                const q = input ? norm(input.value.trim()) : '';
+                sch.hits = [];
+                if (!c || !q) { sch.idx = -1; focusHit(); return; }
+                sch.hits = Array.from(c.querySelectorAll('.message')).filter((m) => {
+                    const t = m.querySelector('.msg-text');
+                    return t && norm(t.textContent).includes(q);
+                });
+                sch.hits.forEach((el) => el.classList.add('search-hit'));
+                sch.idx = sch.hits.length ? (keepIdx && sch.idx >= 0 && sch.idx < sch.hits.length ? sch.idx : sch.hits.length - 1) : -1;
+                focusHit();
+            };
+            app.chatSearchInput = () => { clearTimeout(sch.timer); sch.timer = setTimeout(() => app.runChatSearch(false), 150); };
+            app.chatSearchStep = (dir) => {
+                if (!sch.hits.length) return;
+                sch.idx = (sch.idx + dir + sch.hits.length) % sch.hits.length;
+                focusHit();
+            };
+            app.openChatSearch = () => {
+                const bar = $('chat-search-bar'); if (!bar) return;
+                bar.style.display = 'flex';
+                const i = $('chat-search-input'); i.value = '';
+                $('chat-search-count').textContent = '';
+                setTimeout(() => { try { i.focus(); } catch (_) {} }, 80);
+            };
+            app.closeChatSearch = () => {
+                const bar = $('chat-search-bar'); if (bar) bar.style.display = 'none';
+                clearTimeout(sch.timer); sch.hits = []; sch.idx = -1;
+                clearMarks();
+            };
+
+            // ---------- menu ⋮ ----------
+            app.closeChatMenu = () => { const p = $('chat-menu-pop'), b = $('chat-menu-backdrop'); if (p) p.remove(); if (b) b.remove(); };
+            app.openChatMenu = (ev) => {
+                if (ev) ev.stopPropagation();
+                app.closeChatMenu();
+                const mode = modeKey(), btn = $('chat-menu-btn');
+                if (!btn || !mode || mode === 'private_list') return;
+                const items = mode === 'global'
+                    ? [
+                        { icon: 'fa-image', label: 'Plano de fundo', run: () => app.openChatBackgroundModal('global') },
+                        { icon: 'fa-magnifying-glass', label: 'Pesquisar mensagem', run: () => app.openChatSearch() },
+                        { icon: 'fa-eraser', label: 'Limpar mensagens', danger: true, run: () => app.clearCurrentChat() }
+                    ]
+                    : [
+                        { icon: 'fa-user', label: 'Ver perfil', run: () => app.navigate('public_profile', null, mode) },
+                        { icon: 'fa-magnifying-glass', label: 'Pesquisar mensagem', run: () => app.openChatSearch() },
+                        { icon: 'fa-eraser', label: 'Limpar conversa', danger: true, run: () => app.clearCurrentChat() },
+                        blockedAt(mode)
+                            ? { icon: 'fa-circle-check', label: 'Desbloquear', run: () => app.toggleBlockCurrent() }
+                            : { icon: 'fa-ban', label: 'Bloquear', danger: true, run: () => app.toggleBlockCurrent() }
+                    ];
+                const back = document.createElement('div'); back.id = 'chat-menu-backdrop'; back.className = 'chat-menu-backdrop'; back.onclick = app.closeChatMenu;
+                const pop = document.createElement('div'); pop.id = 'chat-menu-pop'; pop.className = 'chat-menu-pop';
+                items.forEach((it) => {
+                    const b = document.createElement('button'); b.type = 'button';
+                    b.className = 'chat-menu-item' + (it.danger ? ' danger' : '');
+                    b.innerHTML = '<i class="fa-solid ' + it.icon + '"></i><span>' + it.label + '</span>';
+                    b.onclick = () => { app.closeChatMenu(); it.run(); };
+                    pop.appendChild(b);
+                });
+                document.body.append(back, pop);
+                const r = btn.getBoundingClientRect();
+                pop.style.top = (r.bottom + 6) + 'px';
+                pop.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
+            };
+
+            // ---------- integração com o chat existente ----------
+            const _prevUpdate = app.updateChatInDOM;
+            app.updateChatInDOM = function (arr, containerId) {
+                let list = arr;
+                if (containerId === 'chat-global-container') {
+                    const c = clearedAt('global');
+                    if (c) list = list.filter((m) => m.createdAt > c);
+                } else if (containerId === 'chat-private-container' && isPrivateMode()) {
+                    const k = modeKey(), c = clearedAt(k), b = blockedAt(k);
+                    if (c) list = list.filter((m) => m.createdAt > c);
+                    if (b) list = list.filter((m) => m.authorUid !== k || m.createdAt <= b);
+                }
+                const r = _prevUpdate.call(this, list, containerId);
+                if (containerId === 'chat-private-container') app.refreshChatBlockUI();
+                if ($('chat-search-bar') && $('chat-search-bar').style.display === 'flex') app.runChatSearch(true);
+                return r;
+            };
+
+            const _prevList = app.renderPrivateChatList;
+            app.renderPrivateChatList = function () {
+                const orig = appState.privateMessages, my = appState.firebaseUser.uid;
+                appState.privateMessages = orig.filter((m) => {
+                    const o = (m.participants || []).find((p) => p !== my);
+                    const c = clearedAt(o), b = blockedAt(o);
+                    if (c && m.createdAt <= c) return false;
+                    if (b && m.authorUid === o && m.createdAt > b) return false;
+                    return true;
+                });
+                try { return _prevList.apply(this, arguments); }
+                finally { appState.privateMessages = orig; }
+            };
+
+            const _prevSwitch = app.switchChatTab;
+            app.switchChatTab = function (mode) {
+                app.closeChatSearch(); app.closeChatMenu();
+                const r = _prevSwitch.call(this, mode);
+                const btn = $('chat-menu-btn'); if (btn) btn.style.display = mode === 'private_list' ? 'none' : 'flex';
+                app.refreshChatBlockUI();
+                return r;
+            };
+
+            const _prevSend = app.sendChatMessage;
+            app.sendChatMessage = function (...a) {
+                if (app.isChatBlocked()) return app.showToast('Não é possível enviar mensagens para este usuário.', 'error');
+                return _prevSend.apply(this, a);
+            };
+            const _prevSticker = app.sendSticker;
+            app.sendSticker = function (...a) {
+                if (app.isChatBlocked()) { app.closeStickerPicker(); return app.showToast('Não é possível enviar mensagens para este usuário.', 'error'); }
+                return _prevSticker.apply(this, a);
+            };
+
+            // o plano de fundo agora vive no menu ⋮ do chat: não reinjeta mais nas configurações
+            app.addChatBackgroundToSettings = () => {};
+        })();
+
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                                                                                                                                                          </html>
+    </html>

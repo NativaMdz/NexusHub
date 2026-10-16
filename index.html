@@ -1007,6 +1007,26 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === CHAT ESTILO WHATSAPP (wallpaper atrás de mensagens + campo de texto) === */
+        .chat-stage { display: flex; flex-direction: column; flex: 1; min-height: 0; position: relative; border-radius: 16px; overflow: hidden; background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .chat-stage.has-wp { box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.06); }
+        .chat-msgs-wrap { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+        .chat-stage .chat-messages { padding: 10px 10px 6px; margin-bottom: 0; }
+        .chat-stage .chat-input-block { flex-shrink: 0; width: 100%; padding: 6px 10px 10px; box-sizing: border-box; }
+        .chat-stage .chat-input-area { background: rgba(20,22,30,0.92); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+        .chat-stage.has-wp .msg-bubble { background: rgba(24,27,36,0.94); border-color: rgba(255,255,255,0.08); }
+        .chat-stage.has-wp .msg-bubble:active { background: rgba(38,42,54,0.96); }
+        .chat-stage.has-wp .message.mine .msg-bubble { background: rgba(0,66,110,0.95); border-color: rgba(0,243,255,0.35); }
+        .chat-stage.has-wp .message.mine .msg-bubble:active { background: rgba(0,82,134,0.97); }
+        .chat-stage.has-wp .message.sticker-msg .msg-bubble, .chat-stage.has-wp .message.mine.sticker-msg .msg-bubble { background: transparent; border-color: transparent; }
+        /* horário na mesma linha do texto, como no WhatsApp */
+        .msg-bubble { display: flow-root; }
+        .msg-bubble .msg-text { display: inline; }
+        .msg-bubble .msg-time { float: right; margin: 7px 0 -2px 12px; line-height: 1; }
+        .message.sticker-msg .msg-bubble .msg-time { float: none; display: block; margin: 2px 0 0; }
+        .chat-scroll-down { position: absolute; right: 12px; bottom: 10px; width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(30,33,42,0.95); color: #fff; display: none; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; z-index: 5; box-shadow: 0 2px 8px rgba(0,0,0,0.5); padding: 0; }
+        .chat-scroll-down.show { display: flex; }
+
         /* === MÚSICA DO PERFIL === */
         .profile-music-slot { display: flex; justify-content: center; width: 100%; }
         .profile-music-slot:empty { display: none; }
@@ -1495,11 +1515,15 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
             </div>
             
+            <div class="chat-stage" id="chat-stage">
+            <div class="chat-msgs-wrap">
             <div class="chat-messages" id="chat-global-container"></div>
             <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
             <div class="chat-messages" id="chat-private-container" style="display:none;"></div>
+            <button type="button" id="chat-scroll-down" class="chat-scroll-down" onclick="app.chatScrollToBottom()" aria-label="Ir para a última mensagem"><i class="fa-solid fa-angles-down"></i></button>
+            </div>
 
-            <div style="flex-shrink: 0; width: 100%;">
+            <div class="chat-input-block">
                 <div id="reply-preview-container">
                     <div class="reply-preview-content">
                         <span class="reply-preview-author" id="reply-preview-author"></span>
@@ -1515,6 +1539,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </div>
+            </div>
             </div>
         </div>
     </template>
@@ -3750,6 +3775,61 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // FIM DO SISTEMA DE PLANO DE FUNDO (ADD)
         // ============================================
 
+        // ===== CHAT ESTILO WHATSAPP: wallpaper no palco inteiro + botão "ir para o fim" =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const ids = ['chat-global-container', 'chat-private-container'];
+            const visibleContainer = () => ids.map($).find((c) => c && c.style.display !== 'none');
+
+            app.clearChatStageBg = () => {
+                const st = $('chat-stage'); if (!st) return;
+                st.style.backgroundImage = 'none';
+                st.classList.remove('has-wp');
+            };
+
+            // o wallpaper agora cobre mensagens + campo de texto (o "palco"); o fallback antigo continua valendo
+            const _origApplyBg = app.applyChatBackground;
+            app.applyChatBackground = (containerId, targetUid = null) => {
+                const stage = $('chat-stage'), container = $(containerId);
+                if (!stage || !container) return _origApplyBg(containerId, targetUid);
+                const bgUrl = app.getChatBackground(targetUid);
+                if (bgUrl) {
+                    stage.style.backgroundImage = `url('${bgUrl}')`;
+                    stage.style.backgroundSize = 'cover';
+                    stage.style.backgroundPosition = 'center';
+                    stage.style.backgroundRepeat = 'no-repeat';
+                    stage.classList.add('has-wp');
+                } else app.clearChatStageBg();
+                container.style.backgroundImage = 'none';
+                container.style.backgroundColor = 'transparent';
+            };
+
+            app.bindChatScrollBtn = () => {
+                const btn = $('chat-scroll-down'); if (!btn) return;
+                ids.forEach((id) => {
+                    const c = $(id); if (!c || c._sdBound) return;
+                    c._sdBound = true;
+                    c.addEventListener('scroll', () => {
+                        if (c.style.display === 'none') return;
+                        btn.classList.toggle('show', c.scrollHeight - c.scrollTop - c.clientHeight > 220);
+                    }, { passive: true });
+                });
+                btn.classList.remove('show');
+            };
+            app.chatScrollToBottom = () => {
+                const c = visibleContainer();
+                if (c) c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' });
+            };
+
+            const _prevSwitch = app.switchChatTab;
+            app.switchChatTab = function (mode) {
+                _prevSwitch.call(this, mode);
+                if (mode === 'private_list') app.clearChatStageBg();
+                else app.applyBackgroundToCurrentChat();
+                app.bindChatScrollBtn();
+            };
+        })();
+
         // ===== MÚSICA DO PERFIL (prévia de 30s via iTunes Search API) =====
         (() => {
             const mus = { audio: null, key: null, results: [], saving: false };
@@ -4175,4 +4255,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                                                                                                       </html>
+    </html>

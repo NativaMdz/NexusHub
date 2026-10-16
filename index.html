@@ -4542,12 +4542,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             const _prevSend = app.sendChatMessage;
             app.sendChatMessage = function (...a) {
-                if (app.isChatBlocked()) return app.showToast('Não é possível enviar mensagens para este usuário.', 'error');
+                if (app.isChatBlocked()) return app.showToast('Você está bloqueado.', 'error');
                 return _prevSend.apply(this, a);
             };
             const _prevSticker = app.sendSticker;
             app.sendSticker = function (...a) {
-                if (app.isChatBlocked()) { app.closeStickerPicker(); return app.showToast('Não é possível enviar mensagens para este usuário.', 'error'); }
+                if (app.isChatBlocked()) { app.closeStickerPicker(); return app.showToast('Você está bloqueado.', 'error'); }
                 return _prevSticker.apply(this, a);
             };
 

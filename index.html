@@ -403,7 +403,7 @@
 
         .profile-name { font-size: 1.4rem; color: var(--text-main); margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 8px;}
         .profile-handle { color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.5rem; }
-        .profile-bio { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; max-width: 90%; }
+        .profile-bio { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; max-width: 90%; white-space: pre-line; overflow-wrap: anywhere; word-break: break-word; }
         
         .stats-container { display: flex; width: 100%; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 0.9rem; border-radius: 12px; border: 1px solid var(--theme-border); margin-bottom: 10px;}
         .stat-item { display: flex; flex-direction: column; align-items: center; }
@@ -3631,9 +3631,35 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         };
 
         const _origSwitchChatTab = app.switchChatTab;
+        // Fixa o chat na última mensagem ao abrir (sem animação de rolagem do topo)
+        app.stickChatToBottom = (container) => {
+            if (!container) return;
+            container._userMoved = false;
+            if (!container._stickBound) {
+                container._stickBound = true;
+                ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => container.addEventListener(ev, () => { container._userMoved = true; }, { passive: true }));
+            }
+            const jump = () => { if (container._userMoved) return; container.style.scrollBehavior = 'auto'; container.scrollTop = container.scrollHeight; };
+            jump();
+            requestAnimationFrame(jump);
+            [80, 250, 600].forEach(t => setTimeout(jump, t));
+            clearTimeout(container._stickReset);
+            container._stickReset = setTimeout(() => { container.style.scrollBehavior = ''; }, 750);
+        };
+
+        const _origUpdateChatInDOM = app.updateChatInDOM;
+        app.updateChatInDOM = function(messagesArray, containerId) {
+            const c = document.getElementById(containerId);
+            const wasEmpty = !!c && !c.querySelector('.message');
+            _origUpdateChatInDOM.call(this, messagesArray, containerId);
+            if (wasEmpty && c && c.querySelector('.message')) app.stickChatToBottom(c);
+        };
+
         app.switchChatTab = function(mode) {
             _origSwitchChatTab.call(this, mode);
             setTimeout(() => app.applyBackgroundToCurrentChat(), 50);
+            if (mode === 'global') app.stickChatToBottom(document.getElementById('chat-global-container'));
+            else if (mode && mode !== 'private_list') app.stickChatToBottom(document.getElementById('chat-private-container'));
         };
 
         const _origStartPrivateChat = app.startPrivateChat;

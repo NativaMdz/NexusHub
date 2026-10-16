@@ -1007,6 +1007,25 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === MÚSICA DO PERFIL === */
+        .profile-music-slot { display: flex; justify-content: center; width: 100%; }
+        .profile-music-slot:empty { display: none; }
+        .profile-music { display: inline-flex; align-items: center; gap: 8px; max-width: 88%; margin-bottom: 1.2rem; padding: 4px 12px 4px 4px; border-radius: 999px; background: rgba(0,0,0,0.35); border: 1px solid rgba(0,243,255,0.3); font-size: 0.78rem; color: var(--text-main); }
+        .profile-music .pm-note { color: var(--cyan); font-size: 0.7rem; flex-shrink: 0; }
+        .profile-music .pm-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; max-width: 210px; }
+        .music-play-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; cursor: pointer; flex-shrink: 0; padding: 0; }
+        .music-play-btn:active { transform: scale(0.92); }
+        .music-current { font-size: 0.85rem; color: var(--text-muted); padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .music-results { display: flex; flex-direction: column; gap: 8px; max-height: 55dvh; overflow-y: auto; overscroll-behavior: contain; }
+        .music-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
+        .music-cover { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: rgba(255,255,255,0.06); }
+        .music-info { flex: 1; min-width: 0; }
+        .music-info .mi-title { font-size: 0.85rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .music-info .mi-artist { font-size: 0.72rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .music-use-btn { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); border-radius: 999px; padding: 5px 12px; font-size: 0.75rem; cursor: pointer; flex-shrink: 0; font-family: 'Inter', sans-serif; }
+        .music-use-btn:active { background: rgba(0,243,255,0.15); }
+        .music-msg { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 14px 4px; }
+
         /* === FIGURINHAS === */
         .chat-sticker-btn { background: transparent; border: none; color: var(--cyan); font-size: 1.35rem; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; transition: background 0.2s, transform 0.2s; }
         .chat-sticker-btn:active { background: rgba(0,243,255,0.15); transform: scale(0.92); }
@@ -1279,6 +1298,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 <div class="form-group"><label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SEU NOME</label><input type="text" id="edit-name" class="form-control"></div>
                 <div class="form-group"><label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">SUA BIO</label><textarea id="edit-bio" class="form-control" placeholder="Fale sobre você..."></textarea></div>
                 <div class="form-group">
+                    <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">MÚSICA DO PERFIL</label>
+                    <div id="edit-music-current" class="music-current">Nenhuma música definida</div>
+                    <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <button type="button" class="btn-primary btn-secondary" style="flex: 1;" onclick="app.openMusicSearch()"><i class="fa-solid fa-magnifying-glass"></i> Buscar / Trocar</button>
+                        <button type="button" class="btn-primary btn-secondary" id="btn-music-remove" style="flex: 1;" onclick="app.removeProfileMusic()"><i class="fa-solid fa-trash"></i> Remover</button>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label style="font-size: 0.75rem; color: var(--cyan); display: block; margin-bottom: 5px;">MOLDURA EQUIPADA</label>
                     <select id="edit-frame" class="form-control">
                         <!-- Populated via JS -->
@@ -1363,6 +1390,22 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     </div>
 
     <!-- ADD: Modal de configuração de fundo de chat -->
+    <div class="modal-overlay" id="modal-music" onclick="if(event.target===this) app.closeMusicSearch()">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="modal-header">
+                <h2>Música do Perfil</h2>
+                <button class="close-modal" onclick="app.closeMusicSearch()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="chat-input-area" style="padding: 5px 10px; border-radius: 12px; margin-bottom: 10px;">
+                    <input type="text" id="music-query" class="chat-input" placeholder="Nome da música ou artista..." onkeypress="if(event.key === 'Enter') app.searchMusic()">
+                    <button class="chat-send-btn" style="width: 32px; height: 32px;" onclick="app.searchMusic()"><i class="fa-solid fa-magnifying-glass" style="font-size: 0.8rem;"></i></button>
+                </div>
+                <div id="music-results" class="music-results"><div class="music-msg">Busque uma música e toque no play para ouvir a prévia antes de escolher.</div></div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-stickers" onclick="if(event.target===this) app.closeStickerPicker()">
         <div class="modal-content" style="max-width: 420px;">
             <div class="modal-header">
@@ -2737,6 +2780,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                             <span class="profile-handle">${userData.handle}</span>
                             ${vipStatusDisplay}
                             <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
+                            <div class="profile-music-slot" data-sig="${String(app.profileMusicSig(userData)).replace(/"/g, '&quot;')}">${app.profileMusicHtml(userData)}</div>
                             
                             <div class="stats-container">
                                 <div class="stat-item"><span class="stat-value neon-purple" id="stat-level">LVL ${userData.level || 1}</span><span class="stat-label">Nível</span></div>
@@ -2791,6 +2835,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 }
 
                 if (document.querySelector('.profile-bio')) document.querySelector('.profile-bio').innerText = viewUser.bio || 'Sem biografia...';
+                app.refreshProfileMusic(viewUser);
                 
                 const avatarEl = document.querySelector('.profile-avatar');
                 if (avatarEl) {
@@ -2851,6 +2896,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             openSettingsModal: () => {
                 document.getElementById('edit-name').value = appState.currentUserData.name; 
                 document.getElementById('edit-bio').value = appState.currentUserData.bio || '';
+                app.refreshMusicSettings();
                 
                 const frameSelect = document.getElementById('edit-frame');
                 frameSelect.innerHTML = '<option value="default">Nenhuma / Padrão</option>';
@@ -3704,6 +3750,174 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // FIM DO SISTEMA DE PLANO DE FUNDO (ADD)
         // ============================================
 
+        // ===== MÚSICA DO PERFIL (prévia de 30s via iTunes Search API) =====
+        (() => {
+            const mus = { audio: null, key: null, results: [], saving: false };
+            const $ = (id) => document.getElementById(id);
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const cap = (s, n) => String(s || '').trim().slice(0, n);
+            const safeUid = (u) => String(u).replace(/[^A-Za-z0-9_-]/g, '');
+            const okUrl = (u) => typeof u === 'string' && u.startsWith('https://');
+
+            const isPlaying = (key) => !!mus.audio && mus.key === key && !mus.audio.paused;
+            const sync = () => document.querySelectorAll('.music-play-btn').forEach((b) => {
+                const i = b.querySelector('i');
+                if (i) i.className = 'fa-solid ' + (isPlaying(b.dataset.key) ? 'fa-pause' : 'fa-play');
+            });
+            const getAudio = () => {
+                if (!mus.audio) {
+                    const a = new Audio();
+                    a.preload = 'none';
+                    a.addEventListener('ended', () => { mus.key = null; sync(); });
+                    a.addEventListener('play', sync);
+                    a.addEventListener('pause', sync);
+                    a.addEventListener('error', () => { if (mus.key) app.showToast('Não foi possível tocar essa prévia.', 'error'); mus.key = null; sync(); });
+                    mus.audio = a;
+                }
+                return mus.audio;
+            };
+            const playKey = (key, url) => {
+                if (!okUrl(url)) return;
+                const a = getAudio();
+                if (mus.key === key) {
+                    if (a.paused) a.play().catch(() => { mus.key = null; sync(); });
+                    else a.pause();
+                    return;
+                }
+                mus.key = key;
+                a.src = url;
+                a.play().catch(() => { app.showToast('Não foi possível tocar essa prévia.', 'error'); mus.key = null; sync(); });
+            };
+            app.stopMusic = () => { if (mus.audio) mus.audio.pause(); mus.key = null; sync(); };
+
+            // --- pílula no perfil (nome truncado com "..." + botão de play) ---
+            app.profileMusicSig = (u) => { const m = u && u.profileMusic; return m && m.title && okUrl(m.previewUrl) ? m.id + '|' + m.previewUrl : ''; };
+            app.profileMusicHtml = (u) => {
+                if (!app.profileMusicSig(u)) return '';
+                const key = 'u:' + safeUid(u.uid);
+                return `<div class="profile-music"><button type="button" class="music-play-btn" data-key="${key}" onclick="app.toggleProfileMusic('${safeUid(u.uid)}')" aria-label="Tocar música"><i class="fa-solid ${isPlaying(key) ? 'fa-pause' : 'fa-play'}"></i></button><i class="fa-solid fa-music pm-note"></i><span class="pm-title">${esc(u.profileMusic.title)}</span></div>`;
+            };
+            app.refreshProfileMusic = (u) => {
+                const slot = document.querySelector('.profile-music-slot');
+                if (!slot || !u) return;
+                const sig = app.profileMusicSig(u);
+                if (slot.dataset.sig === sig) return;
+                slot.dataset.sig = sig;
+                slot.innerHTML = app.profileMusicHtml(u);
+                if (mus.key === 'u:' + safeUid(u.uid) && !sig) app.stopMusic();
+            };
+            app.toggleProfileMusic = (uid) => {
+                const me = appState.currentUserData;
+                const u = (me && me.uid === uid) ? me : appState.allUsers.find((x) => x.uid === uid);
+                if (u && u.profileMusic) playKey('u:' + safeUid(uid), u.profileMusic.previewUrl);
+            };
+
+            // --- configurações ---
+            app.refreshMusicSettings = () => {
+                const el = $('edit-music-current'); if (!el) return;
+                const m = appState.currentUserData && appState.currentUserData.profileMusic;
+                el.textContent = m && m.title ? '🎵 ' + m.title + (m.artist ? ' — ' + m.artist : '') : 'Nenhuma música definida';
+                const rb = $('btn-music-remove'); if (rb) rb.disabled = !(m && m.title);
+            };
+
+            // --- busca (iTunes Search API: grátis e sem chave) ---
+            const jsonp = (url) => new Promise((resolve, reject) => {
+                const cb = '_itn_' + Date.now();
+                const s = document.createElement('script');
+                const cleanup = () => { clearTimeout(t); delete window[cb]; s.remove(); };
+                const t = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 8000);
+                window[cb] = (d) => { cleanup(); resolve((d && d.results) || []); };
+                s.onerror = () => { cleanup(); reject(new Error('jsonp')); };
+                s.src = url + '&callback=' + cb;
+                document.head.appendChild(s);
+            });
+            const itunesSearch = async (term) => {
+                const url = 'https://itunes.apple.com/search?media=music&entity=song&limit=25&country=BR&term=' + encodeURIComponent(term);
+                try {
+                    const r = await fetch(url);
+                    if (!r.ok) throw new Error('http');
+                    return (await r.json()).results || [];
+                } catch (e) { return jsonp(url); }
+            };
+
+            app.openMusicSearch = () => {
+                mus.results = [];
+                $('music-query').value = '';
+                $('music-results').innerHTML = '<div class="music-msg">Busque uma música e toque no play para ouvir a prévia antes de escolher.</div>';
+                $('modal-music').classList.add('active');
+                setTimeout(() => { try { $('music-query').focus(); } catch (_) {} }, 150);
+            };
+            app.closeMusicSearch = () => { app.stopMusic(); $('modal-music').classList.remove('active'); };
+
+            app.searchMusic = async () => {
+                const term = $('music-query').value.trim();
+                const box = $('music-results');
+                if (term.length < 2) return app.showToast('Digite pelo menos 2 letras.', 'info');
+                app.stopMusic();
+                box.innerHTML = '<div class="music-msg">Buscando...</div>';
+                let raw;
+                try { raw = await itunesSearch(term); }
+                catch (e) { console.error(e); box.innerHTML = '<div class="music-msg">Erro ao buscar. Verifique a conexão e tente de novo.</div>'; return; }
+                const seen = new Set();
+                mus.results = raw
+                    .filter((r) => r && r.trackName && r.trackId && okUrl(r.previewUrl))
+                    .map((r) => ({ id: String(r.trackId), title: r.trackName, artist: r.artistName || '', cover: okUrl(r.artworkUrl60) ? r.artworkUrl60 : '', previewUrl: r.previewUrl }))
+                    .filter((m) => { const k = (m.title + '|' + m.artist).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+                    .slice(0, 10);
+                box.innerHTML = '';
+                if (!mus.results.length) { box.innerHTML = '<div class="music-msg">Nenhum resultado com prévia. Tente outro nome.</div>'; return; }
+                mus.results.forEach((m, i) => {
+                    const row = document.createElement('div'); row.className = 'music-item';
+                    const img = document.createElement('img'); img.className = 'music-cover'; img.loading = 'lazy'; img.alt = ''; if (m.cover) img.src = m.cover;
+                    const info = document.createElement('div'); info.className = 'music-info';
+                    const t = document.createElement('div'); t.className = 'mi-title'; t.textContent = m.title;
+                    const a = document.createElement('div'); a.className = 'mi-artist'; a.textContent = m.artist;
+                    info.append(t, a);
+                    const play = document.createElement('button'); play.type = 'button'; play.className = 'music-play-btn'; play.dataset.key = 't:' + m.id; play.dataset.act = 'play'; play.dataset.i = i; play.setAttribute('aria-label', 'Ouvir prévia');
+                    play.innerHTML = '<i class="fa-solid fa-play"></i>';
+                    const use = document.createElement('button'); use.type = 'button'; use.className = 'music-use-btn'; use.dataset.act = 'use'; use.dataset.i = i; use.textContent = 'Usar';
+                    row.append(img, info, play, use);
+                    box.appendChild(row);
+                });
+                box.onclick = (e) => {
+                    const b = e.target.closest('[data-act]'); if (!b) return;
+                    const m = mus.results[parseInt(b.dataset.i, 10)]; if (!m) return;
+                    if (b.dataset.act === 'play') playKey('t:' + m.id, m.previewUrl);
+                    else app.selectMusic(m);
+                };
+            };
+
+            app.selectMusic = async (m) => {
+                if (mus.saving) return;
+                mus.saving = true;
+                try {
+                    const data = { id: m.id, title: cap(m.title, 120), artist: cap(m.artist, 80), previewUrl: m.previewUrl };
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { profileMusic: data });
+                    if (appState.currentUserData) appState.currentUserData.profileMusic = data;
+                    app.closeMusicSearch();
+                    app.refreshMusicSettings();
+                    app.refreshProfileMusic(appState.currentUserData);
+                    app.showToast('Música do perfil atualizada!', 'success');
+                } catch (e) { console.error(e); app.showToast('Erro ao salvar a música.', 'error'); }
+                finally { mus.saving = false; }
+            };
+
+            app.removeProfileMusic = async () => {
+                try {
+                    await updateDoc(doc(colUsers, appState.firebaseUser.uid), { profileMusic: null });
+                    if (appState.currentUserData) appState.currentUserData.profileMusic = null;
+                    app.stopMusic();
+                    app.refreshMusicSettings();
+                    app.refreshProfileMusic(appState.currentUserData);
+                    app.showToast('Música removida do perfil.', 'success');
+                } catch (e) { console.error(e); app.showToast('Erro ao remover a música.', 'error'); }
+            };
+
+            // para o áudio ao trocar de tela
+            const _navMusic = app.navigate;
+            app.navigate = function (...args) { app.stopMusic(); return _navMusic.apply(this, args); };
+        })();
+
         // ===== SISTEMA DE FIGURINHAS (chat global + privado) =====
         (() => {
             const SIZE = 519, MAX_BYTES = 350 * 1024, MAX_PACK = 60, WORK_MAX = 1600;
@@ -3961,4 +4175,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+                                                                                                       </html>

@@ -4371,7 +4371,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const blocked = isPrivateMode() && app.isChatBlocked();
                 const byMe = isPrivateMode() && !!blockedAt(modeKey());
                 input.disabled = blocked;
-                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Não é possível enviar mensagens') : 'Transmitir mensagem...';
+                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Você foi bloqueado.') : 'Transmitir mensagem...';
                 if (sticker) { sticker.disabled = blocked; sticker.style.opacity = blocked ? '0.4' : ''; }
                 if (send) { send.disabled = blocked; send.style.opacity = blocked ? '0.4' : ''; }
             };

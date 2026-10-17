@@ -1007,6 +1007,23 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === REAÇÕES EM MENSAGENS === */
+        .message.has-rx { padding-bottom: 14px; }
+        .msg-rx { position: absolute; bottom: -13px; left: 10px; display: flex; align-items: center; gap: 3px; background: rgba(24,27,36,0.98); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 1px 7px; font-size: 0.8rem; line-height: 1.5; color: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.5); font-family: inherit; z-index: 2; }
+        .message.mine .msg-rx { left: auto; right: 10px; }
+        .msg-rx:active { transform: scale(0.94); }
+        .rx-row { display: flex; gap: 6px; padding: 4px 0 12px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .rx-btn { flex: 1; min-width: 0; background: rgba(255,255,255,0.06); border: 1px solid transparent; border-radius: 12px; font-size: 1.45rem; padding: 7px 0; cursor: pointer; transition: transform 0.15s; }
+        .rx-btn.active { background: rgba(0,243,255,0.18); border-color: var(--cyan); }
+        .rx-btn:active { transform: scale(0.88); }
+        .rx-list { display: flex; flex-direction: column; gap: 6px; max-height: 50dvh; overflow-y: auto; }
+        .rx-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
+        .rx-user img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .rx-user .rx-name { flex: 1; min-width: 0; font-size: 0.88rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rx-user .rx-name small { display: block; font-size: 0.68rem; color: var(--text-muted); }
+        .rx-user .rx-emoji { font-size: 1.3rem; }
+        .rx-user.mine { cursor: pointer; border-color: rgba(0,243,255,0.3); }
+
         /* === MENU DO CHAT (⋮), PESQUISA E BLOQUEIO === */
         .chat-info-row { position: relative; flex-shrink: 0; margin-bottom: 12px; min-height: 34px; display: flex; align-items: center; justify-content: center; }
         .chat-info-row .chat-header-info { margin-bottom: 0; padding: 0 42px; flex: 1; }
@@ -1476,6 +1493,16 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     </div>
 
     <!-- ADD: Modal de configuração de fundo de chat -->
+    <div class="modal-overlay" id="modal-reactions" onclick="if(event.target===this) app.closeReactions()">
+        <div class="modal-content" style="max-width: 360px;">
+            <div class="modal-header">
+                <h2>Reações</h2>
+                <button class="close-modal" onclick="app.closeReactions()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body"><div id="reactions-list" class="rx-list"></div></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-music" onclick="if(event.target===this) app.closeMusicSearch()">
         <div class="modal-content" style="max-width: 420px;">
             <div class="modal-header">
@@ -4556,6 +4583,132 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             // o botão de wallpaper por conversa saiu da lista privada: agora fica no menu ⋮ de cada chat
             app.addBackgroundButtonsToPrivateChats = () => {
                 document.querySelectorAll('#private-chats-list .chat-bg-btn').forEach((b) => b.remove());
+            };
+        })();
+
+        // ===== REAÇÕES EM MENSAGENS (global + privado) =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const EMOJIS = ['❤️', '👍', '😂', '😮', '😢', '🙏'];
+            const me = () => appState.currentUserData || {};
+            const myUid = () => appState.firebaseUser.uid;
+            const findMsg = (id) => appState.globalMessages.find((m) => m.id === id) || appState.privateMessages.find((m) => m.id === id);
+            const rxOf = (m) => (m && m.reactions) || {};
+            const sigOf = (m) => { const r = rxOf(m); return Object.keys(r).filter((u) => r[u] && r[u].e).sort().map((u) => u + ':' + r[u].e).join('|'); };
+
+            // linha de emojis no topo do menu da mensagem (só em mensagens dos outros)
+            const _prevCtx = app.openContextMenu;
+            app.openContextMenu = function (itemId, type) {
+                const res = _prevCtx.call(this, itemId, type);
+                const item = appState.activeContextItem;
+                if (type === 'message' && item && item.id === itemId && item.authorUid !== myUid() && !app.isChatBlocked()) {
+                    const menu = $('context-menu-content'); if (!menu) return res;
+                    const cur = rxOf(item)[myUid()] && rxOf(item)[myUid()].e;
+                    const row = document.createElement('div'); row.className = 'rx-row';
+                    EMOJIS.forEach((e) => {
+                        const b = document.createElement('button'); b.type = 'button';
+                        b.className = 'rx-btn' + (cur === e ? ' active' : ''); b.textContent = e;
+                        b.onclick = () => app.reactToMessage(e);
+                        row.appendChild(b);
+                    });
+                    menu.insertBefore(row, menu.firstChild);
+                }
+                return res;
+            };
+
+            const setReaction = async (col, id, emoji) => {
+                const ref = doc(db, col, id), uid = myUid();
+                const m = findMsg(id), cur = rxOf(m)[uid] && rxOf(m)[uid].e;
+                if (cur === emoji) await updateDoc(ref, { ['reactions.' + uid]: deleteField() });
+                else await updateDoc(ref, { ['reactions.' + uid]: { e: emoji, t: new Date().toISOString() } });
+            };
+            app.reactToMessage = async (emoji) => {
+                const item = appState.activeContextItem, col = appState.activeContextCollection;
+                app.closeContextMenu();
+                if (!item || !col || !EMOJIS.includes(emoji)) return;
+                try { await setReaction(col, item.id, emoji); }
+                catch (e) { console.error(e); app.showToast('Erro ao reagir à mensagem.', 'error'); }
+            };
+
+            // pílula com as reações embaixo da bolha
+            app.syncReactions = (list, containerId) => {
+                const c = $(containerId); if (!c) return;
+                list.forEach((msg) => {
+                    const el = document.getElementById('msg-' + msg.id); if (!el || !c.contains(el)) return;
+                    const bubble = el.querySelector('.msg-bubble'); if (!bubble) return;
+                    const sig = sigOf(msg);
+                    const has = !!bubble.querySelector('.msg-rx');
+                    if ((el.dataset.rx || '') === sig && has === !!sig) return;
+                    el.dataset.rx = sig;
+                    const old = bubble.querySelector('.msg-rx'); if (old) old.remove();
+                    el.classList.toggle('has-rx', !!sig);
+                    if (!sig) return;
+                    const counts = {}; let total = 0;
+                    Object.values(rxOf(msg)).forEach((x) => { if (x && x.e) { counts[x.e] = (counts[x.e] || 0) + 1; total++; } });
+                    const top = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 3);
+                    const pill = document.createElement('button'); pill.type = 'button'; pill.className = 'msg-rx';
+                    pill.textContent = top.join('') + (total > 1 ? ' ' + total : '');
+                    pill.addEventListener('click', (e) => { e.stopPropagation(); app.openReactions(msg.id); });
+                    bubble.appendChild(pill);
+                });
+            };
+            const _prevUpd = app.updateChatInDOM;
+            app.updateChatInDOM = function (arr, containerId) {
+                const r = _prevUpd.call(this, arr, containerId);
+                try { app.syncReactions(arr, containerId); } catch (e) { console.error(e); }
+                return r;
+            };
+
+            // quem reagiu
+            app.closeReactions = () => $('modal-reactions').classList.remove('active');
+            app.openReactions = (msgId) => {
+                const msg = findMsg(msgId); if (!msg) return;
+                const col = appState.globalMessages.some((m) => m.id === msgId) ? 'global_chat' : 'private_chat';
+                const list = $('reactions-list'); list.innerHTML = '';
+                const entries = Object.entries(rxOf(msg)).filter(([, x]) => x && x.e)
+                    .sort((a, b) => (a[0] === myUid() ? -1 : b[0] === myUid() ? 1 : String(b[1].t).localeCompare(String(a[1].t))));
+                entries.forEach(([uid, x]) => {
+                    const u = appState.allUsers.find((y) => y.uid === uid) || { name: 'Usuário', avatar: '' };
+                    const isMe = uid === myUid();
+                    const row = document.createElement('div'); row.className = 'rx-user' + (isMe ? ' mine' : '');
+                    const img = document.createElement('img'); img.alt = ''; if (u.avatar) img.src = u.avatar;
+                    const nm = document.createElement('div'); nm.className = 'rx-name'; nm.textContent = isMe ? 'Você' : u.name;
+                    if (isMe) { const s = document.createElement('small'); s.textContent = 'Toque para remover'; nm.appendChild(s); }
+                    const em = document.createElement('div'); em.className = 'rx-emoji'; em.textContent = x.e;
+                    row.append(img, nm, em);
+                    if (isMe) row.onclick = async () => {
+                        try { await updateDoc(doc(db, col, msgId), { ['reactions.' + uid]: deleteField() }); app.closeReactions(); }
+                        catch (e) { console.error(e); app.showToast('Erro ao remover a reação.', 'error'); }
+                    };
+                    list.appendChild(row);
+                });
+                if (!entries.length) return;
+                $('modal-reactions').classList.add('active');
+            };
+
+            // lista privada: "Fulano reagiu com ❤️ a: "Oii"" como última atividade
+            const _prevList = app.renderPrivateChatList;
+            app.renderPrivateChatList = function () {
+                const orig = appState.privateMessages, my = myUid(), extra = [];
+                orig.forEach((m) => {
+                    if (!m.reactions || !(m.participants || []).includes(my)) return;
+                    const other = m.participants.find((p) => p !== my); if (!other) return;
+                    const cutoff = (me().chatClears || {})[other], blk = (me().blockedUsers || {})[other];
+                    let snip = m.sticker ? 'Figurinha' : String(m.content || 'mensagem');
+                    if (snip.length > 12) snip = snip.slice(0, 12) + '…';
+                    Object.keys(m.reactions).forEach((u) => {
+                        const rx = m.reactions[u];
+                        if (!rx || !rx.e || !rx.t) return;
+                        if (cutoff && rx.t <= cutoff) return;
+                        if (blk && u === other && rx.t > blk) return;
+                        const usr = appState.allUsers.find((x) => x.uid === u);
+                        const who = u === my ? 'Você' : (((usr && usr.name) || '').trim().split(/\s+/)[0] || 'Alguém');
+                        extra.push({ id: 'rx|' + m.id + '|' + u, participants: m.participants, authorUid: u, content: who + ' reagiu com ' + rx.e + ' a: "' + snip + '"', createdAt: rx.t, synthetic: true });
+                    });
+                });
+                appState.privateMessages = orig.concat(extra);
+                try { return _prevList.apply(this, arguments); }
+                finally { appState.privateMessages = orig; }
             };
         })();
 

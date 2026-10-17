@@ -2761,7 +2761,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         div.id = `msg-${msg.id}`;
                         div.dataset.hash = msgHash;
                         div.innerHTML = `
-                            ${!isMine ? `<img src="${author.avatar}" loading="lazy" decoding="async" class="msg-avatar ${app.getFrameClass(author)}" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
+                            ${!isMine && containerId !== 'chat-private-container' ? `<img src="${author.avatar}" loading="lazy" decoding="async" class="msg-avatar ${app.getFrameClass(author)}" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
                             <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
                                 ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
@@ -4371,7 +4371,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const blocked = isPrivateMode() && app.isChatBlocked();
                 const byMe = isPrivateMode() && !!blockedAt(modeKey());
                 input.disabled = blocked;
-                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Você foi bloqueado.') : 'Transmitir mensagem...';
+                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Não é possível enviar mensagens') : 'Transmitir mensagem...';
                 if (sticker) { sticker.disabled = blocked; sticker.style.opacity = blocked ? '0.4' : ''; }
                 if (send) { send.disabled = blocked; send.style.opacity = blocked ? '0.4' : ''; }
             };
@@ -4542,12 +4542,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             const _prevSend = app.sendChatMessage;
             app.sendChatMessage = function (...a) {
-                if (app.isChatBlocked()) return app.showToast('Você está bloqueado.', 'error');
+                if (app.isChatBlocked()) return app.showToast('Não é possível enviar mensagens para este usuário.', 'error');
                 return _prevSend.apply(this, a);
             };
             const _prevSticker = app.sendSticker;
             app.sendSticker = function (...a) {
-                if (app.isChatBlocked()) { app.closeStickerPicker(); return app.showToast('Você está bloqueado.', 'error'); }
+                if (app.isChatBlocked()) { app.closeStickerPicker(); return app.showToast('Não é possível enviar mensagens para este usuário.', 'error'); }
                 return _prevSticker.apply(this, a);
             };
 
@@ -4562,4 +4562,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                                            </html>
+    </html>

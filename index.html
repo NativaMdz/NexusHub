@@ -998,6 +998,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .message.mine .msg-bubble:active { background: rgba(0, 243, 255, 0.18); }
         .message:not(.mine) .msg-bubble { border-bottom-left-radius: 2px; }
         .msg-author { font-size: 0.72rem; color: var(--cyan); margin-bottom: 3px; font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;}
+        .msg-author:not(.linked) { cursor: inherit; }
         .msg-text { font-size: 0.88rem; line-height: 1.4; word-break: break-word; pointer-events: none;}
         .msg-time { font-size: 0.62rem; color: var(--text-muted); text-align: right; margin-top: 4px; display: block; }
 
@@ -1012,8 +1013,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .msg-rx { position: absolute; bottom: -17px; left: 12px; display: flex; align-items: center; gap: 3px; background: rgba(24,27,36,0.98); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 2px 8px; font-size: 0.85rem; line-height: 1.4; color: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.5); font-family: inherit; z-index: 2; }
         .message.mine .msg-rx { left: auto; right: 12px; }
         .msg-rx:active { transform: scale(0.94); }
-        .rx-row { display: flex; gap: 6px; padding: 4px 0 12px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .rx-btn { flex: 1; min-width: 0; background: rgba(255,255,255,0.06); border: 1px solid transparent; border-radius: 12px; font-size: 1.45rem; padding: 7px 0; cursor: pointer; transition: transform 0.15s; }
+        .rx-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 2px 16px 14px; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .rx-btn { flex: 0 1 52px; min-width: 0; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border: 1px solid transparent; border-radius: 16px; font-size: 1.5rem; line-height: 1; padding: 0; cursor: pointer; transition: transform 0.15s, background 0.2s; }
         .rx-btn.active { background: rgba(0,243,255,0.18); border-color: var(--cyan); }
         .rx-btn:active { transform: scale(0.88); }
         .rx-list { display: flex; flex-direction: column; gap: 6px; max-height: 50dvh; overflow-y: auto; }
@@ -1023,6 +1024,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .rx-user .rx-name small { display: block; font-size: 0.68rem; color: var(--text-muted); }
         .rx-user .rx-emoji { font-size: 1.3rem; }
         .rx-user.mine { cursor: pointer; border-color: rgba(0,243,255,0.3); }
+
+
+        /* menu da mensagem: itens compactos, alinhados e sem vazar do layout */
+        #context-menu-content { padding: 0 0 6px; overflow: hidden; }
+        #context-menu-content .context-menu-item { width: calc(100% - 24px); margin: 2px 12px; padding: 11px 12px; border: none; border-radius: 14px; font-size: 0.98rem; gap: 14px; box-sizing: border-box; }
+        #context-menu-content .context-menu-item:active { background: rgba(255,255,255,0.08); }
+        #context-menu-content .context-menu-item i { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(0,243,255,0.1); font-size: 0.95rem; flex-shrink: 0; }
+        #context-menu-content .context-menu-item.danger i { background: rgba(255,42,42,0.12); }
 
         /* === MENU DO CHAT (⋮), PESQUISA E BLOQUEIO === */
         .chat-info-row { position: relative; flex-shrink: 0; margin-bottom: 12px; min-height: 34px; display: flex; align-items: center; justify-content: center; }
@@ -2790,7 +2799,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         div.innerHTML = `
                             ${!isMine && containerId !== 'chat-private-container' ? `<img src="${author.avatar}" loading="lazy" decoding="async" class="msg-avatar ${app.getFrameClass(author)}" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
                             <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
-                                ${!isMine ? `<div class="msg-author" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">${author.name} ${app.getUserBadges(author)}</div>` : ''}
+                                ${!isMine ? `<div class="msg-author${containerId === 'chat-private-container' ? '' : ' linked'}" data-uid="${author.uid}" ${containerId === 'chat-private-container' ? '' : `onclick="app.navigate('public_profile', null, '${author.uid}')"`}>${author.name} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
                                 ${msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${msg.content}</div>`}
                                 <span class="msg-time">${timeStr}${editedHtml}</span>
@@ -4715,4 +4724,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+</html>

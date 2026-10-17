@@ -1027,6 +1027,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .bub-slider input[type=range] { width: 100%; accent-color: var(--cyan); }
         .bub-section .btn-primary:disabled { opacity: 0.4; cursor: default; }
 
+        .set-row-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-top: 12px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(0,243,255,0.25); color: var(--text-main); font-family: 'Inter', sans-serif; cursor: pointer; text-align: left; }
+        .set-row-btn .sr-ico { width: 34px; height: 34px; border-radius: 10px; background: rgba(0,243,255,0.1); color: var(--cyan); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .set-row-btn .sr-txt { flex: 1; min-width: 0; font-size: 0.9rem; }
+        .set-row-btn .sr-txt small { display: block; font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; }
+        .set-row-btn .sr-arrow { color: var(--text-muted); font-size: 0.8rem; }
+        .set-row-btn:active { background: rgba(0,243,255,0.1); }
+        #modal-bubbles .bub-section { margin-top: 0; padding-top: 0; border-top: none; }
+
         /* === REAÇÕES EM MENSAGENS === */
         .message.has-rx { padding-bottom: 20px; }
         .msg-rx { position: absolute; bottom: -17px; left: 5px; display: flex; align-items: center; gap: 3px; background: rgba(24,27,36,0.98); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 2px 8px; font-size: 0.85rem; line-height: 1.4; color: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.5); font-family: inherit; z-index: 2; }
@@ -1460,27 +1468,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                             <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">
                         </label>
                     </div>
-                    <div class="bub-section">
-                        <label class="set-label">Balões do chat</label>
-                        <div class="bub-preview" id="bub-preview">
-                            <div class="bub-row"><div class="bub-sample other" id="bub-sample-other">Oi! Tudo bem? <span>14:25</span></div></div>
-                            <div class="bub-row mine"><div class="bub-sample mine" id="bub-sample-mine">Tudo ótimo 😎 <span>14:26</span></div></div>
-                        </div>
-                        <div class="bub-presets" id="bub-presets"></div>
-                        <div class="set-grid">
-                            <div><label class="set-label">Recebidas</label><input type="color" id="bub-color-other" class="bub-color" oninput="app.bubbleDraft()"></div>
-                            <div><label class="set-label">Enviadas</label><input type="color" id="bub-color-mine" class="bub-color" oninput="app.bubbleDraft()"></div>
-                        </div>
-                        <div class="bub-slider">
-                            <label class="set-label">Transparência<span id="bub-op-val">5%</span></label>
-                            <input type="range" id="bub-op" min="0" max="70" step="5" value="5" oninput="app.bubbleDraft()">
-                        </div>
-                        <div class="set-grid" style="margin-top: 12px;">
-                            <button type="button" class="btn-primary btn-secondary" onclick="app.bubbleReset()"><i class="fa-solid fa-rotate-left"></i> Padrão</button>
-                            <button type="button" class="btn-primary" id="bub-apply" onclick="app.bubbleApply()" disabled><i class="fa-solid fa-check"></i> Aplicar</button>
-                        </div>
-                        <p class="set-note">Vale para todos os chats. Veja a prévia antes de aplicar.</p>
-                    </div>
+                    <button type="button" class="set-row-btn" onclick="app.openBubbleEditor()">
+                        <span class="sr-ico"><i class="fa-solid fa-comment-dots"></i></span>
+                        <span class="sr-txt">Editar bolhas de conversa<small>Cores e transparência dos balões</small></span>
+                        <i class="fa-solid fa-chevron-right sr-arrow"></i>
+                    </button>
                 </div>
 
                 <div class="set-pane" id="set-pane-conta">
@@ -1542,6 +1534,37 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     </div>
 
     <!-- ADD: Modal de configuração de fundo de chat -->
+    <div class="modal-overlay" id="modal-bubbles" onclick="if(event.target===this) app.closeBubbleEditor()">
+        <div class="modal-content" style="max-width: 420px; max-height: 90dvh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>Bolhas de conversa</h2>
+                <button class="close-modal" onclick="app.closeBubbleEditor()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                    <div class="bub-section">
+                        <div class="bub-preview" id="bub-preview">
+                            <div class="bub-row"><div class="bub-sample other" id="bub-sample-other">Oi! Tudo bem? <span>14:25</span></div></div>
+                            <div class="bub-row mine"><div class="bub-sample mine" id="bub-sample-mine">Tudo ótimo 😎 <span>14:26</span></div></div>
+                        </div>
+                        <div class="bub-presets" id="bub-presets"></div>
+                        <div class="set-grid">
+                            <div><label class="set-label">Recebidas</label><input type="color" id="bub-color-other" class="bub-color" oninput="app.bubbleDraft()"></div>
+                            <div><label class="set-label">Enviadas</label><input type="color" id="bub-color-mine" class="bub-color" oninput="app.bubbleDraft()"></div>
+                        </div>
+                        <div class="bub-slider">
+                            <label class="set-label">Transparência<span id="bub-op-val">5%</span></label>
+                            <input type="range" id="bub-op" min="0" max="70" step="5" value="5" oninput="app.bubbleDraft()">
+                        </div>
+                        <div class="set-grid" style="margin-top: 12px;">
+                            <button type="button" class="btn-primary btn-secondary" onclick="app.bubbleReset()"><i class="fa-solid fa-rotate-left"></i> Padrão</button>
+                            <button type="button" class="btn-primary" id="bub-apply" onclick="app.bubbleApply()" disabled><i class="fa-solid fa-check"></i> Aplicar</button>
+                        </div>
+                        <p class="set-note">Vale para todos os chats. Veja a prévia antes de aplicar.</p>
+                    </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-reactions" onclick="if(event.target===this) app.closeReactions()">
         <div class="modal-content" style="max-width: 360px;">
             <div class="modal-header">
@@ -4868,8 +4891,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
 
             // integração: abre a aba Visual -> carrega; chat renderizado -> garante estilo atualizado
-            const _prevTab = app.settingsTab;
-            app.settingsTab = function (name) { const r = _prevTab.call(this, name); if (name === 'visual') app.bubbleLoadInputs(); return r; };
+            app.openBubbleEditor = () => { app.bubbleLoadInputs(); $('modal-bubbles').classList.add('active'); };
+            app.closeBubbleEditor = () => $('modal-bubbles').classList.remove('active');
             const _prevUpd = app.updateChatInDOM;
             app.updateChatInDOM = function (arr, containerId) { app.syncBubbles(); return _prevUpd.call(this, arr, containerId); };
         })();

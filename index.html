@@ -1008,6 +1008,25 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === CORES DOS BALÕES DO CHAT === */
+        .bub-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+        .bub-preview { border-radius: 12px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255,255,255,0.08); background: radial-gradient(circle at 18% 30%, rgba(0,243,255,0.4), transparent 42%), radial-gradient(circle at 85% 75%, rgba(176,38,255,0.4), transparent 46%), #0a0a12; }
+        .bub-row { display: flex; }
+        .bub-row.mine { justify-content: flex-end; }
+        .bub-sample { display: inline-block; max-width: 82%; padding: 7px 11px; border-radius: 14px; border: 1px solid transparent; font-size: 0.84rem; line-height: 1.35; color: #fff; }
+        .bub-sample.other { border-bottom-left-radius: 3px; }
+        .bub-sample.mine { border-bottom-right-radius: 3px; }
+        .bub-sample span { font-size: 0.6rem; opacity: 0.65; margin-left: 8px; }
+        .bub-presets { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+        .bub-swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); cursor: pointer; padding: 0; transition: transform 0.15s, border-color 0.2s; }
+        .bub-swatch:active { transform: scale(0.9); }
+        .bub-swatch.active { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,243,255,0.5); }
+        .bub-color { width: 100%; height: 36px; padding: 2px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.4); cursor: pointer; }
+        .bub-slider { margin-top: 12px; }
+        .bub-slider .set-label span { color: var(--text-muted); font-weight: 400; margin-left: 4px; }
+        .bub-slider input[type=range] { width: 100%; accent-color: var(--cyan); }
+        .bub-section .btn-primary:disabled { opacity: 0.4; cursor: default; }
+
         /* === REAÇÕES EM MENSAGENS === */
         .message.has-rx { padding-bottom: 20px; }
         .msg-rx { position: absolute; bottom: -17px; left: 5px; display: flex; align-items: center; gap: 3px; background: rgba(24,27,36,0.98); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 2px 8px; font-size: 0.85rem; line-height: 1.4; color: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.5); font-family: inherit; z-index: 2; }
@@ -1440,6 +1459,27 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                             <i class="fa-solid fa-image"></i> Alterar Banner de Fundo
                             <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">
                         </label>
+                    </div>
+                    <div class="bub-section">
+                        <label class="set-label">Balões do chat</label>
+                        <div class="bub-preview" id="bub-preview">
+                            <div class="bub-row"><div class="bub-sample other" id="bub-sample-other">Oi! Tudo bem? <span>14:25</span></div></div>
+                            <div class="bub-row mine"><div class="bub-sample mine" id="bub-sample-mine">Tudo ótimo 😎 <span>14:26</span></div></div>
+                        </div>
+                        <div class="bub-presets" id="bub-presets"></div>
+                        <div class="set-grid">
+                            <div><label class="set-label">Recebidas</label><input type="color" id="bub-color-other" class="bub-color" oninput="app.bubbleDraft()"></div>
+                            <div><label class="set-label">Enviadas</label><input type="color" id="bub-color-mine" class="bub-color" oninput="app.bubbleDraft()"></div>
+                        </div>
+                        <div class="bub-slider">
+                            <label class="set-label">Transparência<span id="bub-op-val">5%</span></label>
+                            <input type="range" id="bub-op" min="0" max="70" step="5" value="5" oninput="app.bubbleDraft()">
+                        </div>
+                        <div class="set-grid" style="margin-top: 12px;">
+                            <button type="button" class="btn-primary btn-secondary" onclick="app.bubbleReset()"><i class="fa-solid fa-rotate-left"></i> Padrão</button>
+                            <button type="button" class="btn-primary" id="bub-apply" onclick="app.bubbleApply()" disabled><i class="fa-solid fa-check"></i> Aplicar</button>
+                        </div>
+                        <p class="set-note">Vale para todos os chats. Veja a prévia antes de aplicar.</p>
                     </div>
                 </div>
 
@@ -4719,6 +4759,119 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 try { return _prevList.apply(this, arguments); }
                 finally { appState.privateMessages = orig; }
             };
+        })();
+
+        // ===== CORES E TRANSPARÊNCIA DOS BALÕES (global) =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const LS = 'nexus_chat_bubbles';
+            const DEFAULT = { other: '#181b24', mine: '#00426e', op: 0.95 };
+            const PRESETS = [
+                { n: 'Clássico', other: '#181b24', mine: '#00426e' },
+                { n: 'Neon', other: '#1b1030', mine: '#5b1fa8' },
+                { n: 'Oceano', other: '#0f2430', mine: '#0a5a78' },
+                { n: 'Rosa', other: '#2a1220', mine: '#a3245f' },
+                { n: 'Matrix', other: '#0d1f14', mine: '#136b32' },
+                { n: 'Âmbar', other: '#2a1f0e', mine: '#8a5a00' }
+            ];
+            const HEX = /^#[0-9a-f]{6}$/i;
+            const sanitize = (x) => (x && HEX.test(x.other) && HEX.test(x.mine) && typeof x.op === 'number')
+                ? { other: x.other.toLowerCase(), mine: x.mine.toLowerCase(), op: Math.min(1, Math.max(0.3, x.op)) } : null;
+            const sig = (c) => JSON.stringify(c);
+            const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+            const mix = (c, t) => c.map((v) => Math.round(v + (255 - v) * t));
+            const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+            // cores derivadas de um balão (fundo, borda, texto legível)
+            const side = (hex, op) => {
+                const c = rgb(hex), L = (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
+                const light = (L * op + (1 - op) * 0.05) > 0.5;
+                return { bg: rgba(c, op), border: rgba(mix(c, 0.35), Math.min(1, op + 0.15)), text: light ? '#10121a' : '#ffffff', time: light ? 'rgba(16,18,26,0.6)' : '', author: light ? '#006b78' : '', light };
+            };
+            let applied = null; // config em uso (null = visual original)
+
+            const readLocal = () => { try { return sanitize(JSON.parse(localStorage.getItem(LS))); } catch (_) { return null; } };
+            const writeLocal = (c) => { try { if (c) localStorage.setItem(LS, sig(c)); else localStorage.removeItem(LS); } catch (_) {} };
+
+            const applyStyle = (cfg) => {
+                applied = cfg;
+                let tag = $('bubble-custom-style');
+                if (!cfg) { if (tag) tag.remove(); return; }
+                if (!tag) { tag = document.createElement('style'); tag.id = 'bubble-custom-style'; document.head.appendChild(tag); }
+                const o = side(cfg.other, cfg.op), m = side(cfg.mine, cfg.op);
+                const rule = (sel, s) => sel + ' .msg-bubble { background: ' + s.bg + '; border-color: ' + s.border + '; }\n'
+                    + sel + ' .msg-bubble .msg-text { color: ' + s.text + '; }\n'
+                    + (s.time ? sel + ' .msg-bubble .msg-time { color: ' + s.time + '; }\n' : '')
+                    + (s.author ? sel + ' .msg-bubble .msg-author { color: ' + s.author + '; }\n' : '');
+                tag.textContent = rule('#chat-stage .message:not(.mine):not(.sticker-msg)', o) + rule('#chat-stage .message.mine:not(.sticker-msg)', m);
+            };
+
+            // sincroniza com o perfil do usuário (fonte da verdade) sem piscar
+            app.syncBubbles = () => {
+                const u = appState.currentUserData;
+                if (!u || !u.uid) return;
+                const remote = sanitize(u.chatBubbles);
+                if (sig(remote) === sig(applied)) return;
+                applyStyle(remote); writeLocal(remote);
+            };
+            applyStyle(readLocal());
+
+            // ---------- prévia e edição ----------
+            const readInputs = () => ({ other: $('bub-color-other').value.toLowerCase(), mine: $('bub-color-mine').value.toLowerCase(), op: Math.round((100 - parseInt($('bub-op').value, 10)) ) / 100 });
+            const paintSample = (el, s) => { el.style.background = s.bg; el.style.borderColor = s.border; el.style.color = s.text; };
+            app.bubbleDraft = () => {
+                if (!$('bub-color-other')) return;
+                const d = readInputs();
+                paintSample($('bub-sample-other'), side(d.other, d.op));
+                paintSample($('bub-sample-mine'), side(d.mine, d.op));
+                $('bub-op-val').textContent = Math.round((1 - d.op) * 100) + '%';
+                const base = applied || DEFAULT;
+                $('bub-apply').disabled = sig(d) === sig(base);
+                document.querySelectorAll('#bub-presets .bub-swatch').forEach((b) => b.classList.toggle('active', b.dataset.other === d.other && b.dataset.mine === d.mine));
+            };
+            const fillInputs = (c) => {
+                $('bub-color-other').value = c.other; $('bub-color-mine').value = c.mine;
+                $('bub-op').value = Math.round((1 - c.op) * 100);
+                app.bubbleDraft();
+            };
+            app.bubbleLoadInputs = () => {
+                if (!$('bub-presets')) return;
+                app.syncBubbles();
+                const box = $('bub-presets');
+                if (!box.children.length) {
+                    PRESETS.forEach((p) => {
+                        const b = document.createElement('button'); b.type = 'button'; b.className = 'bub-swatch'; b.title = p.n; b.setAttribute('aria-label', p.n);
+                        b.dataset.other = p.other; b.dataset.mine = p.mine;
+                        b.style.background = 'linear-gradient(135deg, ' + p.other + ' 50%, ' + p.mine + ' 50%)';
+                        b.onclick = () => { $('bub-color-other').value = p.other; $('bub-color-mine').value = p.mine; app.bubbleDraft(); };
+                        box.appendChild(b);
+                    });
+                }
+                fillInputs(applied || DEFAULT);
+            };
+
+            app.bubbleApply = async () => {
+                const cfg = sanitize(readInputs()); if (!cfg) return;
+                applyStyle(cfg); writeLocal(cfg);
+                if (appState.currentUserData) appState.currentUserData.chatBubbles = cfg;
+                app.bubbleDraft();
+                app.showToast('Balões atualizados!', 'success');
+                try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { chatBubbles: cfg }); }
+                catch (e) { console.error(e); app.showToast('Aplicado só neste aparelho (erro ao salvar na nuvem).', 'error'); }
+            };
+            app.bubbleReset = async () => {
+                applyStyle(null); writeLocal(null);
+                if (appState.currentUserData) appState.currentUserData.chatBubbles = null;
+                fillInputs(DEFAULT);
+                app.showToast('Balões restaurados ao padrão.', 'success');
+                try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { chatBubbles: deleteField() }); }
+                catch (e) { console.error(e); }
+            };
+
+            // integração: abre a aba Visual -> carrega; chat renderizado -> garante estilo atualizado
+            const _prevTab = app.settingsTab;
+            app.settingsTab = function (name) { const r = _prevTab.call(this, name); if (name === 'visual') app.bubbleLoadInputs(); return r; };
+            const _prevUpd = app.updateChatInDOM;
+            app.updateChatInDOM = function (arr, containerId) { app.syncBubbles(); return _prevUpd.call(this, arr, containerId); };
         })();
 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);

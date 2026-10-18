@@ -1045,6 +1045,15 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === NOTIFICAÇÕES === */
+        .notif-banner { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 8px); left: 10px; right: 10px; z-index: 1200; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(14,14,20,0.97); border: 1px solid rgba(0,243,255,0.35); box-shadow: 0 8px 28px rgba(0,0,0,0.6), 0 0 16px rgba(0,243,255,0.15); transform: translateY(-140%); transition: transform 0.25s ease-out; cursor: pointer; max-width: 460px; margin: 0 auto; }
+        .notif-banner.show { transform: translateY(0); }
+        .notif-banner img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: rgba(255,255,255,0.08); }
+        .notif-banner .nb-txt { flex: 1; min-width: 0; }
+        .notif-banner .nb-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--cyan); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .notif-banner .nb-body { font-size: 0.8rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .notif-banner .nb-close { background: transparent; border: none; color: var(--text-muted); font-size: 0.9rem; padding: 6px; cursor: pointer; flex-shrink: 0; }
+
         /* === VISTOS (LEITURA) E INSTALAÇÃO PWA === */
         .msg-tick { font-size: 0.62rem; margin-left: 4px; opacity: 0.7; }
         .msg-tick.read { color: #00e5ff; opacity: 1; }
@@ -1576,6 +1585,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         <div class="ssr-txt">Confirmação de leitura<small>Mostra e envia os "vistos" nas conversas privadas</small></div>
                         <label class="nx-switch"><input type="checkbox" id="set-read-receipts" checked onchange="app.toggleReadReceipts(this.checked)"><span class="nx-slider"></span></label>
                     </div>
+                    <div class="set-switch-row">
+                        <div class="ssr-txt">Notificações de mensagens<small id="notif-status">Desativadas neste aparelho</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-notif" onchange="app.toggleNotifications(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
+                    <button type="button" class="btn-primary btn-secondary" id="notif-test-btn" style="margin: 0 0 12px; padding: 8px; font-size: 0.85rem;" onclick="app.testNotification()"><i class="fa-solid fa-bell"></i> Testar notificação</button>
                     <button type="button" class="set-row-btn" id="pwa-install-btn" style="display: none; margin: 0 0 12px;" onclick="app.installPwa()">
                         <span class="sr-ico"><i class="fa-solid fa-mobile-screen-button"></i></span>
                         <span class="sr-txt">Instalar aplicativo<small>Abra o Nexus Hub direto da tela inicial</small></span>
@@ -5398,6 +5412,145 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
         })();
 
+        // ===== NOTIFICAÇÕES DE MENSAGENS PRIVADAS (avisos dentro do app + do sistema com o app em segundo plano) =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const KEY = 'nexus_notif';
+            const me = () => appState.currentUserData || {};
+            const enabled = () => { try { return localStorage.getItem(KEY) === '1'; } catch (_) { return false; } };
+            const setEnabled = (v) => { try { localStorage.setItem(KEY, v ? '1' : '0'); } catch (_) {} };
+            const supported = () => ('Notification' in window) && ('serviceWorker' in navigator);
+            const perm = () => supported() ? Notification.permission : 'unsupported';
+            const clean = (s) => String(s || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+            const snippet = (m) => m.audio ? '🎤 Mensagem de voz' : m.sticker ? '🖼️ Figurinha' : (clean(m.content).slice(0, 120) || 'Nova mensagem');
+
+            const openChat = (uid) => {
+                if (!uid || !appState.firebaseUser || !appState.allUsers.some((u) => u.uid === uid)) return;
+                app.startPrivateChat(uid);
+            };
+
+            // ---------- aviso dentro do app ----------
+            let bannerT = 0;
+            const hideBanner = () => { const b = $('notif-banner'); if (b) b.classList.remove('show'); };
+            const showBanner = (uid, title, body, avatar) => {
+                let b = $('notif-banner');
+                if (!b) { b = document.createElement('div'); b.id = 'notif-banner'; b.className = 'notif-banner'; document.body.appendChild(b); }
+                b.innerHTML = '';
+                const img = document.createElement('img'); img.alt = ''; if (avatar) img.src = avatar;
+                const txt = document.createElement('div'); txt.className = 'nb-txt';
+                const t = document.createElement('div'); t.className = 'nb-title'; t.textContent = title;
+                const s = document.createElement('div'); s.className = 'nb-body'; s.textContent = body;
+                txt.append(t, s);
+                const x = document.createElement('button'); x.type = 'button'; x.className = 'nb-close'; x.setAttribute('aria-label', 'Fechar');
+                x.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                x.onclick = (e) => { e.stopPropagation(); hideBanner(); };
+                b.append(img, txt, x);
+                b.onclick = () => { hideBanner(); openChat(uid); };
+                requestAnimationFrame(() => b.classList.add('show'));
+                clearTimeout(bannerT); bannerT = setTimeout(hideBanner, 4500);
+            };
+
+            // ---------- aviso do sistema (via service worker) ----------
+            const showSystem = async (uid, title, body) => {
+                try {
+                    const reg = await navigator.serviceWorker.ready;
+                    const dir = new URL('.', location.href).href, icon = new URL('icon-192.png', dir).href;
+                    await reg.showNotification(title, {
+                        body, icon, badge: icon, tag: 'chat-' + (uid || 'teste'), renotify: true, vibrate: [120, 60, 120],
+                        data: { uid: uid || null, url: location.href.split('#')[0].split('?')[0] }
+                    });
+                } catch (e) { console.warn('Notificação do sistema falhou:', e); }
+            };
+
+            const notify = (uid, title, body) => {
+                if (document.visibilityState === 'hidden') { if (perm() === 'granted') showSystem(uid, title, body); return; }
+                const u = appState.allUsers.find((x) => x.uid === uid);
+                showBanner(uid, title, body, u && u.avatar);
+            };
+
+            // ---------- detecção de mensagens novas ----------
+            const seen = new Set();
+            let inited = false, lastRef = null, lastLen = -1, seenFor = null;
+            const qualifies = (m, my) => {
+                const c = (me().chatClears || {})[m.authorUid], b = (me().blockedUsers || {})[m.authorUid];
+                if (!(m.participants || []).includes(my) || m.authorUid === my) return false;
+                if (m.deletedFor && m.deletedFor.includes(my)) return false;
+                if (c && m.createdAt <= c) return false;
+                if (b && m.createdAt > b) return false;
+                if (appState.currentView === 'chat' && appState.activeChatMode === m.authorUid && document.visibilityState === 'visible') return false;
+                return true;
+            };
+            const check = () => {
+                const fu = appState.firebaseUser, list = appState.privateMessages;
+                if (!fu || !list) return;
+                if (seenFor !== fu.uid) { seenFor = fu.uid; seen.clear(); inited = false; lastRef = null; lastLen = -1; }
+                if (list === lastRef && list.length === lastLen) return;
+                lastRef = list; lastLen = list.length;
+                if (!inited) { if (!list.length) return; list.forEach((m) => seen.add(m.id)); inited = true; return; }
+                const fresh = [];
+                list.forEach((m) => { if (!seen.has(m.id)) { seen.add(m.id); fresh.push(m); } });
+                if (!fresh.length || !enabled()) return;
+                const byAuthor = {};
+                fresh.filter((m) => qualifies(m, fu.uid)).forEach((m) => { (byAuthor[m.authorUid] = byAuthor[m.authorUid] || []).push(m); });
+                Object.keys(byAuthor).forEach((uid) => {
+                    const arr = byAuthor[uid].sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+                    const u = appState.allUsers.find((x) => x.uid === uid);
+                    const name = (u && u.name) || 'Nova mensagem';
+                    notify(uid, arr.length > 1 ? name + ' (' + arr.length + ')' : name, snippet(arr[arr.length - 1]));
+                });
+            };
+            setInterval(check, 1200);
+            document.addEventListener('visibilitychange', check);
+
+            // ---------- abrir a conversa pelo toque na notificação ----------
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.type === 'open-chat') openChat(e.data.uid); });
+            }
+            const wanted = new URLSearchParams(location.search).get('chat');
+            if (wanted) {
+                const t = setInterval(() => {
+                    if (appState.firebaseUser && appState.currentUserData && appState.allUsers.length) {
+                        clearInterval(t);
+                        try { history.replaceState(null, '', location.pathname); } catch (_) {}
+                        openChat(wanted);
+                    }
+                }, 500);
+                setTimeout(() => clearInterval(t), 20000);
+            }
+
+            // ---------- configurações ----------
+            const refreshRow = () => {
+                const cb = $('set-notif'), st = $('notif-status'); if (!cb || !st) return;
+                cb.checked = enabled();
+                const p = perm();
+                st.textContent = !enabled() ? 'Desativadas neste aparelho'
+                    : p === 'granted' ? 'Ativadas: avisos do sistema e dentro do app'
+                    : p === 'denied' ? 'Sistema bloqueado no navegador; só avisos dentro do app'
+                    : p === 'unsupported' ? 'Só avisos dentro do app (navegador sem suporte)'
+                    : 'Avisos dentro do app; permissão do sistema pendente';
+            };
+            app.toggleNotifications = async (on) => {
+                setEnabled(on);
+                if (!on) { refreshRow(); return app.showToast('Notificações desativadas.', 'success'); }
+                if (supported() && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch (_) {} }
+                refreshRow();
+                const p = perm();
+                if (p === 'granted') app.showToast('Notificações ativadas!', 'success');
+                else if (p === 'denied') app.showToast('Avisos do sistema bloqueados no navegador. Você ainda recebe avisos dentro do app.', 'info');
+                else app.showToast('Avisos dentro do app ativados.', 'info');
+            };
+            app.testNotification = () => {
+                if (!enabled()) return app.showToast('Ative as notificações primeiro.', 'info');
+                app.showToast('Teste em 5 segundos. Minimize o app para ver o aviso do sistema.', 'info');
+                setTimeout(() => {
+                    if (document.visibilityState === 'hidden') { if (perm() === 'granted') showSystem(null, 'Nexus Hub', 'Notificações funcionando! 🎉'); }
+                    else showBanner(null, 'Nexus Hub', 'Notificações funcionando! 🎉', null);
+                }, 5000);
+            };
+            const _prevTab = app.settingsTab;
+            app.settingsTab = function (name) { const r = _prevTab.call(this, name); if (name === 'conta') refreshRow(); return r; };
+        })();
+
         // ===== CORES E TRANSPARÊNCIA DOS BALÕES (global) =====
         (() => {
             const $ = (id) => document.getElementById(id);
@@ -5514,4 +5667,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+                    </html>

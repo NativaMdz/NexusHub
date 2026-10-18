@@ -1008,6 +1008,42 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === DIGITANDO / GRAVANDO + MENSAGENS DE VOZ === */
+        #chat-input-container .chat-input:placeholder-shown ~ .chat-send-btn:not(.chat-mic-btn) { display: none; }
+        #chat-input-container .chat-input:not(:placeholder-shown) ~ .chat-mic-btn { display: none; }
+        .chat-input-block.rec-active #chat-input-container { display: none !important; }
+        .chat-rec-bar { display: none; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 24px; background: rgba(20,22,30,0.92); border: 1px solid rgba(255,42,42,0.4); box-shadow: 0 2px 10px rgba(0,0,0,0.4); flex-shrink: 0; }
+        .chat-input-block.rec-active .chat-rec-bar { display: flex; }
+        .rec-cancel { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,42,42,0.4); background: rgba(255,42,42,0.1); color: var(--danger); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; }
+        .rec-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; color: #fff; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+        .rec-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); flex-shrink: 0; animation: recPulse 1s infinite; }
+        @keyframes recPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
+        .rec-wave { flex: 1; min-width: 0; display: flex; align-items: center; gap: 3px; height: 24px; overflow: hidden; }
+        .rec-wave i { flex: 0 0 3px; height: 100%; border-radius: 2px; background: rgba(255,255,255,0.55); animation: recBar 0.9s ease-in-out infinite; }
+        .rec-wave i:nth-child(3n) { animation-delay: 0.15s; }
+        .rec-wave i:nth-child(3n+1) { animation-delay: 0.3s; animation-duration: 1.1s; }
+        .rec-wave i:nth-child(5n) { animation-duration: 1.3s; }
+        @keyframes recBar { 0%, 100% { transform: scaleY(0.2); } 50% { transform: scaleY(1); } }
+        .rec-info.is-stopped .rec-dot, .rec-info.is-stopped .rec-wave i { animation: none; }
+        .chat-typing { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.2s, opacity 0.2s; padding: 0 14px; flex-shrink: 0; }
+        .chat-typing.show { max-height: 32px; opacity: 1; padding-top: 4px; }
+        .tp-pill { display: inline-flex; align-items: center; gap: 8px; background: rgba(20,22,30,0.92); border: 1px solid rgba(0,243,255,0.25); border-radius: 999px; padding: 3px 12px; font-size: 0.74rem; color: var(--cyan); }
+        .tp-dots i { display: inline-block; width: 4px; height: 4px; margin: 0 1px; border-radius: 50%; background: currentColor; animation: tpBounce 1.2s infinite; }
+        .tp-dots i:nth-child(2) { animation-delay: 0.15s; }
+        .tp-dots i:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes tpBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-3px); opacity: 1; } }
+        .tp-mic { display: none; font-size: 0.72rem; }
+        .chat-typing.is-rec .tp-mic { display: inline; color: var(--danger); }
+        .chat-typing.is-rec .tp-dots { display: none; }
+        .msg-voice { display: flex; align-items: center; gap: 10px; width: min(240px, 64vw); padding: 2px 0; }
+        .vp-play { width: 38px; height: 38px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; font-size: 0.8rem; padding: 0; }
+        .vp-wave { flex: 1; min-width: 0; height: 28px; display: flex; align-items: center; gap: 2px; }
+        .vp-wave i { flex: 1; min-width: 2px; max-width: 4px; border-radius: 2px; background: currentColor; opacity: 0.35; }
+        .vp-wave i.on { opacity: 1; background: var(--cyan); }
+        .vp-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+        .vp-time { font-size: 0.68rem; opacity: 0.85; font-variant-numeric: tabular-nums; }
+        .vp-speed { background: rgba(255,255,255,0.14); border: none; color: inherit; border-radius: 999px; font-size: 0.62rem; padding: 2px 7px; cursor: pointer; font-family: inherit; }
+
         /* === CORES DOS BALÕES DO CHAT === */
         .bub-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); }
         .bub-preview { border-radius: 12px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255,255,255,0.08); background: radial-gradient(circle at 18% 30%, rgba(0,243,255,0.4), transparent 42%), radial-gradient(circle at 85% 75%, rgba(176,38,255,0.4), transparent 46%), #0a0a12; }
@@ -1699,6 +1735,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             <button type="button" id="chat-scroll-down" class="chat-scroll-down" onclick="app.chatScrollToBottom()" aria-label="Ir para a última mensagem"><i class="fa-solid fa-angles-down"></i></button>
             </div>
 
+            <div class="chat-typing" id="chat-typing"><span class="tp-pill"><span class="tp-dots"><i></i><i></i><i></i></span><i class="fa-solid fa-microphone tp-mic"></i><span id="chat-typing-text"></span></span></div>
             <div class="chat-input-block">
                 <div id="reply-preview-container">
                     <div class="reply-preview-content">
@@ -1711,9 +1748,15 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 <div class="chat-input-area" id="chat-input-container">
                     <button type="button" class="chat-sticker-btn" onclick="app.openStickerPicker()" aria-label="Figurinhas"><i class="fa-regular fa-face-smile"></i></button>
                     <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
+                    <button type="button" class="chat-send-btn chat-mic-btn" onclick="app.startVoiceRecord()" aria-label="Gravar áudio"><i class="fa-solid fa-microphone"></i></button>
                     <button class="chat-send-btn" onclick="app.sendChatMessage()">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
+                </div>
+                <div class="chat-rec-bar" id="chat-rec-bar">
+                    <button type="button" class="rec-cancel" onclick="app.cancelVoiceRecord()" aria-label="Cancelar gravação"><i class="fa-solid fa-trash"></i></button>
+                    <div class="rec-info"><span class="rec-dot"></span><span id="rec-time">0:00</span><span class="rec-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+                    <button type="button" class="chat-send-btn" onclick="app.sendVoiceRecord()" aria-label="Enviar áudio"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
             </div>
@@ -1804,6 +1847,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         const colGlobalChat = collection(db, 'global_chat');
         const colPrivateChat = collection(db, 'private_chat');
         const colStickers = collection(db, 'stickers');
+        const colTyping = collection(db, 'typing');
+        const colVoice = collection(db, 'voice');
 
         const appState = {
             firebaseUser: null,
@@ -2288,9 +2333,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar texto</button>`;
                 } else if (type === 'message') {
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.startReply()"><i class="fa-solid fa-reply"></i> Responder mensagem</button>`;
-                    if (isMine && !item.sticker) menu.innerHTML += `<button class="context-menu-item" onclick="app.openEditModal()"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
+                    if (isMine && !item.sticker && !item.audio) menu.innerHTML += `<button class="context-menu-item" onclick="app.openEditModal()"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
                     if (item.sticker) menu.innerHTML += `<button class="context-menu-item" onclick="app.saveReceivedSticker()"><i class="fa-solid fa-star"></i> Salvar figurinha</button>`;
-                    else menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar mensagem</button>`;
+                    else if (!item.audio) menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar mensagem</button>`;
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.deleteForMe()"><i class="fa-solid fa-eye-slash"></i> Apagar para mim</button>`;
                     if (isMine) menu.innerHTML += `<button class="context-menu-item danger" onclick="app.deleteForEveryone()"><i class="fa-solid fa-trash"></i> Apagar para todos</button>`;
                 }
@@ -2864,7 +2909,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                             <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
                                 ${!isMine ? `<div class="msg-author${containerId === 'chat-private-container' ? '' : ' linked'}" data-uid="${author.uid}" ${containerId === 'chat-private-container' ? '' : `onclick="app.navigate('public_profile', null, '${author.uid}')"`}>${author.name} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
-                                ${msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${msg.content}</div>`}
+                                ${msg.audio ? app.voiceBubbleHtml(msg) : msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${msg.content}</div>`}
                                 <span class="msg-time">${timeStr}${editedHtml}</span>
                             </div>
                         `;
@@ -4466,13 +4511,13 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.refreshChatBlockUI = () => {
                 const input = $('chat-input'); if (!input) return;
                 const sticker = document.querySelector('.chat-sticker-btn');
-                const send = document.querySelector('.chat-send-btn');
+                const sends = document.querySelectorAll('#chat-input-container .chat-send-btn');
                 const blocked = isPrivateMode() && app.isChatBlocked();
                 const byMe = isPrivateMode() && !!blockedAt(modeKey());
                 input.disabled = blocked;
                 input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Não é possível enviar mensagens') : 'Transmitir mensagem...';
                 if (sticker) { sticker.disabled = blocked; sticker.style.opacity = blocked ? '0.4' : ''; }
-                if (send) { send.disabled = blocked; send.style.opacity = blocked ? '0.4' : ''; }
+                sends.forEach((send) => { send.disabled = blocked; send.style.opacity = blocked ? '0.4' : ''; });
             };
             app.toggleBlockCurrent = async () => {
                 if (!isPrivateMode()) return;
@@ -4784,6 +4829,281 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
         })();
 
+        // ===== DIGITANDO / GRAVANDO ÁUDIO + MENSAGENS DE VOZ =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const me = () => appState.firebaseUser.uid;
+            const toast = (m, t) => app.showToast(m, t || 'error');
+            const fmt = (s) => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+            const partner = () => { const m = appState.activeChatMode; return (m && m !== 'global' && m !== 'private_list') ? m : null; };
+            const MAX_SEC = 60;
+
+            // ---------- presença: "digitando..." / "gravando áudio..." (só chats privados) ----------
+            const tp = { uid: null, unsub: null, first: true, from: {}, to: null, state: 'idle', sent: 0, idleT: 0, hideT: 0 };
+            app.typingPing = (state) => {
+                const to = partner();
+                if (!to || app.isChatBlocked()) return;
+                const now = Date.now();
+                if (state === tp.state && tp.to === to && now - tp.sent < 3000) return;
+                tp.state = state; tp.sent = now; tp.to = to;
+                setDoc(doc(colTyping, me() + '_' + to), { from: me(), to, state, n: now }).catch(() => {});
+            };
+            app.typingStop = () => {
+                clearTimeout(tp.idleT);
+                if (tp.state === 'idle' || !tp.to) { tp.state = 'idle'; return; }
+                const to = tp.to; tp.state = 'idle'; tp.sent = 0;
+                setDoc(doc(colTyping, me() + '_' + to), { from: me(), to, state: 'idle', n: Date.now() }).catch(() => {});
+            };
+            document.addEventListener('input', (e) => {
+                if (!e.target || e.target.id !== 'chat-input') return;
+                if (e.target.value.trim()) { app.typingPing('typing'); clearTimeout(tp.idleT); tp.idleT = setTimeout(app.typingStop, 4000); }
+                else app.typingStop();
+            });
+            document.addEventListener('focusout', (e) => { if (e.target && e.target.id === 'chat-input') app.typingStop(); });
+
+            const renderTyping = () => {
+                const el = $('chat-typing'); if (!el) return;
+                const p = partner(), info = p && tp.from[p];
+                const blockedByMe = p && ((appState.currentUserData || {}).blockedUsers || {})[p];
+                const active = !!info && info.state !== 'idle' && (Date.now() - info.seen) < 6000 && !blockedByMe;
+                const c = $('chat-private-container');
+                const near = c ? (c.scrollHeight - c.scrollTop - c.clientHeight) < 140 : false;
+                if (active) {
+                    const u = appState.allUsers.find((x) => x.uid === p);
+                    const first = ((u && u.name) || '').trim().split(/\s+/)[0] || 'Alguém';
+                    $('chat-typing-text').textContent = first + (info.state === 'recording' ? ' está gravando áudio' : ' está digitando');
+                    el.classList.toggle('is-rec', info.state === 'recording');
+                }
+                const was = el.classList.contains('show');
+                el.classList.toggle('show', active);
+                clearTimeout(tp.hideT);
+                if (active) tp.hideT = setTimeout(renderTyping, Math.max(100, 6100 - (Date.now() - info.seen)));
+                if (active && !was && near && c) setTimeout(() => { c.scrollTop = c.scrollHeight; }, 230);
+            };
+            const ensureListener = () => {
+                if (!appState.firebaseUser) return;
+                const uid = me();
+                if (tp.uid === uid && tp.unsub) return;
+                if (tp.unsub) tp.unsub();
+                tp.uid = uid; tp.first = true; tp.from = {};
+                tp.unsub = onSnapshot(query(colTyping, where('to', '==', uid)), (snap) => {
+                    if (tp.first) { tp.first = false; return; }
+                    snap.docChanges().forEach((ch) => {
+                        if (ch.type === 'removed') return;
+                        const d = ch.doc.data();
+                        tp.from[d.from] = { state: d.state, seen: Date.now() };
+                    });
+                    renderTyping();
+                }, (e) => console.error('typing', e));
+            };
+
+            // ---------- gravação ----------
+            const rec = { stream: null, mr: null, chunks: [], mime: '', t0: 0, timer: 0, state: 'idle', dur: 0, busy: false, token: 0 };
+            const pickMime = () => ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus'].find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+            const stopTracks = () => { if (rec.stream) { rec.stream.getTracks().forEach((t) => t.stop()); rec.stream = null; } };
+            const stopRecorder = () => new Promise((res) => {
+                const mr = rec.mr;
+                if (!mr || mr.state === 'inactive') return res();
+                mr.onstop = () => res();
+                try { mr.stop(); } catch (_) { res(); }
+            });
+            const resetRec = () => {
+                clearInterval(rec.timer); stopTracks();
+                rec.mr = null; rec.chunks = []; rec.state = 'idle';
+                const blk = document.querySelector('.chat-input-block'); if (blk) blk.classList.remove('rec-active');
+                const t = $('rec-time'); if (t) t.textContent = '0:00';
+                const inf = document.querySelector('.rec-info'); if (inf) inf.classList.remove('is-stopped');
+                app.typingStop();
+            };
+            app.startVoiceRecord = async () => {
+                if (rec.state !== 'idle') return;
+                const mode = appState.activeChatMode;
+                if (!mode || mode === 'private_list') return;
+                if (app.isChatBlocked()) return toast('Não é possível enviar mensagens para este usuário.');
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) return toast('Seu navegador não suporta gravação de áudio.');
+                const token = ++rec.token;
+                rec.state = 'starting';
+                let stream;
+                try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+                catch (e) { rec.state = 'idle'; return toast('Permita o acesso ao microfone para gravar áudio.'); }
+                if (token !== rec.token) { stream.getTracks().forEach((t) => t.stop()); return; }
+                rec.stream = stream;
+                const mime = pickMime();
+                try { rec.mr = new MediaRecorder(stream, mime ? { mimeType: mime, audioBitsPerSecond: 32000 } : { audioBitsPerSecond: 32000 }); }
+                catch (_) { try { rec.mr = new MediaRecorder(stream); } catch (e2) { stopTracks(); rec.state = 'idle'; return toast('Não foi possível iniciar a gravação.'); } }
+                rec.mime = rec.mr.mimeType || mime || 'audio/webm';
+                rec.chunks = [];
+                rec.mr.ondataavailable = (ev) => { if (ev.data && ev.data.size) rec.chunks.push(ev.data); };
+                rec.mr.start();
+                rec.state = 'recording'; rec.t0 = Date.now(); rec.dur = 0;
+                const blk = document.querySelector('.chat-input-block'); if (blk) blk.classList.add('rec-active');
+                $('rec-time').textContent = '0:00';
+                app.typingPing('recording');
+                rec.timer = setInterval(() => {
+                    const s = (Date.now() - rec.t0) / 1000;
+                    $('rec-time').textContent = fmt(s);
+                    app.typingPing('recording');
+                    if (s >= MAX_SEC) onLimit();
+                }, 250);
+            };
+            const onLimit = async () => {
+                clearInterval(rec.timer);
+                rec.dur = MAX_SEC;
+                await stopRecorder();
+                stopTracks();
+                rec.state = 'stopped';
+                $('rec-time').textContent = fmt(MAX_SEC);
+                const inf = document.querySelector('.rec-info'); if (inf) inf.classList.add('is-stopped');
+                app.typingStop();
+                toast('Limite de 1 minuto atingido: envie ou cancele.', 'info');
+            };
+            app.cancelVoiceRecord = () => {
+                rec.token++;
+                if (rec.state === 'idle') return;
+                try { if (rec.mr && rec.mr.state !== 'inactive') { rec.mr.onstop = null; rec.mr.stop(); } } catch (_) {}
+                resetRec();
+            };
+            const baseMsg = (extra) => {
+                const m = Object.assign({ authorUid: me(), createdAt: new Date().toISOString() }, extra);
+                if (appState.replyingTo) {
+                    m.replyTo = appState.replyingTo.id;
+                    const author = appState.allUsers.find((u) => u.uid === appState.replyingTo.authorUid);
+                    m.replyAuthor = author ? author.handle : '@usuario';
+                    let pv = appState.replyingTo.content || '';
+                    if (pv.length > 70) pv = pv.substring(0, 70) + '...';
+                    m.replyPreview = pv;
+                    app.cancelReply();
+                }
+                return m;
+            };
+            app.sendVoiceRecord = async () => {
+                if (rec.busy || (rec.state !== 'recording' && rec.state !== 'stopped')) return;
+                rec.busy = true;
+                const mode = appState.activeChatMode;
+                const dur = rec.state === 'recording' ? Math.round((Date.now() - rec.t0) / 1000) : rec.dur;
+                try {
+                    if (rec.state === 'recording') await stopRecorder();
+                    const chunks = rec.chunks, mime = rec.mime;
+                    resetRec();
+                    if (dur < 1 || !chunks.length) return toast('Áudio muito curto.', 'info');
+                    if (app.isChatBlocked()) return toast('Não é possível enviar mensagens para este usuário.');
+                    const blob = new Blob(chunks, { type: mime || 'audio/webm' });
+                    const data = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(blob); });
+                    if (data.length > 900000) return toast('Áudio muito longo para enviar.');
+                    const vref = await addDoc(colVoice, { ownerUid: me(), data, mime: blob.type || mime, dur, createdAt: new Date().toISOString() });
+                    vp.put(vref.id, data);
+                    const msg = baseMsg({ content: '🎤 Mensagem de voz', audio: vref.id, audioDur: dur });
+                    if (mode === 'global') { await addDoc(colGlobalChat, msg); app.addXP(1); }
+                    else { msg.participants = [me(), mode]; await addDoc(colPrivateChat, msg); }
+                } catch (e) { console.error(e); toast('Falha ao enviar o áudio.'); }
+                finally { rec.busy = false; }
+            };
+
+            // ---------- reprodução ----------
+            const vp = {
+                audio: null, id: null, speed: 1, cache: new Map(), pending: new Map(),
+                put(id, data) { this.cache.set(id, data); if (this.cache.size > 8) this.cache.delete(this.cache.keys().next().value); }
+            };
+            const BARS = 30;
+            app.voiceBubbleHtml = (msg) => {
+                const id = String(msg.audio).replace(/[^A-Za-z0-9_-]/g, '');
+                const dur = Math.max(1, Math.min(600, parseInt(msg.audioDur, 10) || 1));
+                let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+                let bars = '';
+                for (let i = 0; i < BARS; i++) { h = (h * 1103515245 + 12345) >>> 0; bars += '<i style="height:' + Math.round((25 + (h >>> 16) % 75) * 0.28) + 'px"></i>'; }
+                return '<div class="msg-voice" data-audio="' + id + '" data-dur="' + dur + '"><button type="button" class="vp-play" aria-label="Tocar áudio"><i class="fa-solid fa-play"></i></button><div class="vp-wave">' + bars + '</div><div class="vp-meta"><span class="vp-time">' + fmt(dur) + '</span><button type="button" class="vp-speed">' + vp.speed + 'x</button></div></div>';
+            };
+            const boxOf = (id) => document.querySelector('.msg-voice[data-audio="' + id + '"]');
+            const paintBox = (box, playing, ratio, elapsed) => {
+                if (!box) return;
+                const ic = box.querySelector('.vp-play i'); if (ic) ic.className = 'fa-solid ' + (playing ? 'fa-pause' : 'fa-play');
+                const bars = box.querySelectorAll('.vp-wave i'), n = Math.round(ratio * bars.length);
+                bars.forEach((b, i) => b.classList.toggle('on', i < n));
+                const t = box.querySelector('.vp-time');
+                if (t) t.textContent = fmt(ratio > 0 || playing ? elapsed : parseInt(box.dataset.dur, 10));
+            };
+            const getAudio = () => {
+                if (!vp.audio) {
+                    const a = new Audio(); a.preload = 'auto';
+                    a.addEventListener('timeupdate', () => {
+                        const box = boxOf(vp.id); if (!box) return;
+                        const dur = parseInt(box.dataset.dur, 10) || 1;
+                        paintBox(box, !a.paused, Math.min(1, a.currentTime / dur), a.currentTime);
+                    });
+                    a.addEventListener('play', () => paintBox(boxOf(vp.id), true, Math.min(1, a.currentTime / (parseInt((boxOf(vp.id) || { dataset: {} }).dataset.dur, 10) || 1)), a.currentTime));
+                    a.addEventListener('pause', () => { const b = boxOf(vp.id); if (b) { const ic = b.querySelector('.vp-play i'); if (ic) ic.className = 'fa-solid fa-play'; } });
+                    a.addEventListener('ended', () => { const id = vp.id; vp.id = null; paintBox(boxOf(id), false, 0, 0); });
+                    a.addEventListener('error', () => { if (vp.id) toast('Não foi possível tocar o áudio.'); const id = vp.id; vp.id = null; paintBox(boxOf(id), false, 0, 0); });
+                    vp.audio = a;
+                }
+                return vp.audio;
+            };
+            const loadVoice = (id) => {
+                if (vp.cache.has(id)) return Promise.resolve(vp.cache.get(id));
+                let p = vp.pending.get(id);
+                if (!p) {
+                    p = getDoc(doc(colVoice, id)).then((s) => {
+                        const d = s.exists() ? s.data().data : null;
+                        if (typeof d === 'string' && d.startsWith('data:audio/')) { vp.put(id, d); return d; }
+                        return null;
+                    }).catch(() => null).finally(() => vp.pending.delete(id));
+                    vp.pending.set(id, p);
+                }
+                return p;
+            };
+            const stopVoice = () => {
+                if (vp.audio) vp.audio.pause();
+                const id = vp.id; vp.id = null;
+                if (id) paintBox(boxOf(id), false, 0, 0);
+            };
+            app.stopVoice = stopVoice;
+            const toggleVoice = async (box) => {
+                const id = box.dataset.audio, a = getAudio();
+                if (app.stopMusic) app.stopMusic();
+                if (vp.id === id) { if (a.paused) a.play().catch(() => {}); else a.pause(); return; }
+                stopVoice();
+                vp.id = id;
+                const ic = box.querySelector('.vp-play i'); if (ic) ic.className = 'fa-solid fa-spinner fa-spin';
+                const data = await loadVoice(id);
+                if (vp.id !== id) return;
+                if (!data) { vp.id = null; paintBox(box, false, 0, 0); return toast('Áudio indisponível.'); }
+                a.src = data; a.playbackRate = vp.speed;
+                a.play().catch(() => { vp.id = null; paintBox(box, false, 0, 0); toast('Não foi possível tocar o áudio.'); });
+            };
+            document.addEventListener('click', (e) => {
+                const t = e.target; if (!t || !t.closest) return;
+                const play = t.closest('.vp-play'), speed = t.closest('.vp-speed');
+                if (!play && !speed) return;
+                e.stopPropagation(); e.preventDefault();
+                if (speed) {
+                    vp.speed = vp.speed === 1 ? 1.5 : vp.speed === 1.5 ? 2 : 1;
+                    if (vp.audio) vp.audio.playbackRate = vp.speed;
+                    document.querySelectorAll('.vp-speed').forEach((b) => { b.textContent = vp.speed + 'x'; });
+                } else toggleVoice(t.closest('.msg-voice'));
+            }, true);
+
+            // ---------- integração ----------
+            const _prevSwitch = app.switchChatTab;
+            app.switchChatTab = function (mode) {
+                if (rec.state !== 'idle') app.cancelVoiceRecord();
+                app.typingStop(); stopVoice();
+                const r = _prevSwitch.call(this, mode);
+                if (partner()) ensureListener();
+                renderTyping();
+                return r;
+            };
+            const _prevNav = app.navigate;
+            app.navigate = function (...args) {
+                if (rec.state !== 'idle') app.cancelVoiceRecord();
+                app.typingStop(); stopVoice();
+                return _prevNav.apply(this, args);
+            };
+            const _prevSend = app.sendChatMessage;
+            app.sendChatMessage = function (...a) { app.typingStop(); return _prevSend.apply(this, a); };
+            const _prevSticker = app.sendSticker;
+            app.sendSticker = function (...a) { app.typingStop(); return _prevSticker.apply(this, a); };
+        })();
+
         // ===== CORES E TRANSPARÊNCIA DOS BALÕES (global) =====
         (() => {
             const $ = (id) => document.getElementById(id);
@@ -4822,7 +5142,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (!tag) { tag = document.createElement('style'); tag.id = 'bubble-custom-style'; document.head.appendChild(tag); }
                 const o = side(cfg.other, cfg.op), m = side(cfg.mine, cfg.op);
                 const rule = (sel, s) => sel + ' .msg-bubble { background: ' + s.bg + '; border-color: ' + s.border + '; }\n'
-                    + sel + ' .msg-bubble .msg-text { color: ' + s.text + '; }\n'
+                    + sel + ' .msg-bubble .msg-text, ' + sel + ' .msg-bubble .msg-voice { color: ' + s.text + '; }\n'
                     + (s.time ? sel + ' .msg-bubble .msg-time { color: ' + s.time + '; }\n' : '')
                     + (s.author ? sel + ' .msg-bubble .msg-author { color: ' + s.author + '; }\n' : '');
                 tag.textContent = rule('#chat-stage .message:not(.mine):not(.sticker-msg)', o) + rule('#chat-stage .message.mine:not(.sticker-msg)', m);

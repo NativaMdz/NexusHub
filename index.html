@@ -4,6 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nexus Hub - Cyberpunk Social</title>
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#050507">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Nexus Hub">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <script>
+        /* Manifest gerado na hora com a URL real da página (funciona em qualquer pasta/nome de arquivo do GitHub Pages)
+           + captura do convite de instalação do navegador. */
+        (function () {
+            try {
+                var base = location.href.split('#')[0].split('?')[0];
+                var dir = base.slice(0, base.lastIndexOf('/') + 1);
+                var abs = function (f) { return new URL(f, dir).href; };
+                var manifest = {
+                    id: base, name: 'Nexus Hub', short_name: 'Nexus Hub',
+                    description: 'Rede social cyberpunk: feed, chats, ranking e loja.',
+                    start_url: base, scope: dir, display: 'standalone', orientation: 'portrait',
+                    background_color: '#050507', theme_color: '#050507', lang: 'pt-BR',
+                    icons: [
+                        { src: abs('icon-192.png'), sizes: '192x192', type: 'image/png', purpose: 'any' },
+                        { src: abs('icon-512.png'), sizes: '512x512', type: 'image/png', purpose: 'any' },
+                        { src: abs('icon-maskable-512.png'), sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+                    ]
+                };
+                var link = document.createElement('link');
+                link.rel = 'manifest';
+                link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+                document.head.appendChild(link);
+            } catch (e) { /* sem manifest: o site continua normal */ }
+            window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__pwaPrompt = e; window.dispatchEvent(new Event('pwa-ready')); });
+            window.addEventListener('appinstalled', function () { window.__pwaPrompt = null; window.dispatchEvent(new Event('pwa-installed')); });
+        })();
+    </script>
     
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1008,6 +1045,22 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === VISTOS (LEITURA) E INSTALAÇÃO PWA === */
+        .msg-tick { font-size: 0.62rem; margin-left: 4px; opacity: 0.7; }
+        .msg-tick.read { color: #00e5ff; opacity: 1; }
+        .set-switch-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px; }
+        .set-switch-row .ssr-txt { flex: 1; min-width: 0; font-size: 0.9rem; color: var(--text-main); }
+        .set-switch-row .ssr-txt small { display: block; font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; }
+        .nx-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .nx-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .nx-slider { position: absolute; inset: 0; border-radius: 999px; background: rgba(255,255,255,0.15); transition: 0.2s; cursor: pointer; }
+        .nx-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: 0.2s; }
+        .nx-switch input:checked + .nx-slider { background: linear-gradient(90deg, var(--cyan), var(--purple)); }
+        .nx-switch input:checked + .nx-slider::before { transform: translateX(20px); }
+        .pwa-steps { display: flex; flex-direction: column; gap: 10px; font-size: 0.88rem; color: var(--text-main); }
+        .pwa-step { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); line-height: 1.4; }
+        .pwa-step b { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #000; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+
         /* === LISTA PRIVADA: NÃO LIDAS E DIGITANDO === */
         .cl-badge { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(0,243,255,0.45); box-sizing: border-box; }
         .chat-list-item.has-unread .cl-preview { color: var(--text-main) !important; }
@@ -1519,6 +1572,15 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
                 <div class="set-pane" id="set-pane-conta">
                     <div class="set-status"><i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.</div>
+                    <div class="set-switch-row">
+                        <div class="ssr-txt">Confirmação de leitura<small>Mostra e envia os "vistos" nas conversas privadas</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-read-receipts" checked onchange="app.toggleReadReceipts(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
+                    <button type="button" class="set-row-btn" id="pwa-install-btn" style="display: none; margin: 0 0 12px;" onclick="app.installPwa()">
+                        <span class="sr-ico"><i class="fa-solid fa-mobile-screen-button"></i></span>
+                        <span class="sr-txt">Instalar aplicativo<small>Abra o Nexus Hub direto da tela inicial</small></span>
+                        <i class="fa-solid fa-chevron-right sr-arrow"></i>
+                    </button>
                     <div id="chat-bg-settings-btn" style="display: none;"></div>
                     <button class="btn-primary btn-secondary" style="color: var(--danger); border-color: rgba(255,42,42,0.3);" onclick="app.logout()"><i class="fa-solid fa-power-off"></i> Desconectar</button>
                 </div>
@@ -1576,6 +1638,16 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     </div>
 
     <!-- ADD: Modal de configuração de fundo de chat -->
+    <div class="modal-overlay" id="modal-pwa" onclick="if(event.target===this) app.closePwaHelp()">
+        <div class="modal-content" style="max-width: 380px;">
+            <div class="modal-header">
+                <h2>Instalar o Nexus Hub</h2>
+                <button class="close-modal" onclick="app.closePwaHelp()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body"><div id="pwa-help-body" class="pwa-steps"></div></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-bubbles" onclick="if(event.target===this) app.closeBubbleEditor()">
         <div class="modal-content" style="max-width: 420px; max-height: 90dvh; overflow-y: auto;">
             <div class="modal-header">
@@ -5207,6 +5279,123 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 return r;
             };
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') app.markChatRead(appState.activeChatMode); });
+        })();
+
+        // ===== VISTOS (CONFIRMAÇÃO DE LEITURA) + INSTALAÇÃO DO APP (PWA) =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const me = () => appState.currentUserData || {};
+            const myUid = () => appState.firebaseUser.uid;
+            const otherUser = (uid) => appState.allUsers.find((u) => u.uid === uid);
+            const privateUid = () => { const m = appState.activeChatMode; return (m && m !== 'global' && m !== 'private_list') ? m : null; };
+
+            // ---------- vistos ----------
+            const receiptsOn = (uid) => { const o = otherUser(uid); return me().readReceipts !== false && !(o && o.readReceipts === false); };
+            const partnerRead = (uid) => { const o = otherUser(uid); return (o && o.chatReads && o.chatReads[myUid()]) || null; };
+            const paintTick = (tick, read) => {
+                const cls = 'fa-solid msg-tick ' + (read ? 'fa-check-double read' : 'fa-check');
+                if (tick.className !== cls) tick.className = cls;
+            };
+            app.syncReceipts = (list, containerId) => {
+                if (containerId !== 'chat-private-container') return;
+                const uid = privateUid(); if (!uid) return;
+                const lr = receiptsOn(uid) ? partnerRead(uid) : null, my = myUid();
+                list.forEach((msg) => {
+                    if (msg.authorUid !== my) return;
+                    const el = document.getElementById('msg-' + msg.id); if (!el) return;
+                    const t = el.querySelector('.msg-time'); if (!t) return;
+                    let tick = t.querySelector('.msg-tick');
+                    if (!tick) { tick = document.createElement('i'); t.appendChild(tick); }
+                    el.dataset.ts = msg.createdAt;
+                    paintTick(tick, !!(lr && msg.createdAt <= lr));
+                });
+            };
+            app.refreshReceipts = () => {
+                const uid = privateUid(); if (!uid) return;
+                const my = myUid();
+                app.syncReceipts(appState.privateMessages.filter((m) => (m.participants || []).includes(my) && m.participants.includes(uid)), 'chat-private-container');
+            };
+            // o parceiro leu depois que a conversa já estava aberta: verifica de tempos em tempos (só marcas ainda cinzas)
+            let pollT = 0;
+            const poll = () => {
+                const uid = privateUid();
+                if (!uid || document.visibilityState !== 'visible' || !receiptsOn(uid)) return;
+                const lr = partnerRead(uid); if (!lr) return;
+                document.querySelectorAll('#chat-private-container .msg-tick:not(.read)').forEach((tick) => {
+                    const el = tick.closest('.message');
+                    if (el && el.dataset.ts && el.dataset.ts <= lr) paintTick(tick, true);
+                });
+            };
+            const stopPoll = () => clearInterval(pollT);
+            app.toggleReadReceipts = async (on) => {
+                const prev = me().readReceipts !== false;
+                try {
+                    appState.currentUserData.readReceipts = on;
+                    await updateDoc(doc(colUsers, myUid()), { readReceipts: on });
+                    app.refreshReceipts();
+                    app.showToast(on ? 'Confirmação de leitura ativada.' : 'Confirmação de leitura desativada.', 'success');
+                } catch (e) {
+                    console.error(e);
+                    appState.currentUserData.readReceipts = prev;
+                    const cb = $('set-read-receipts'); if (cb) cb.checked = prev;
+                    app.showToast('Erro ao salvar a configuração.', 'error');
+                }
+            };
+
+            const _prevUpd = app.updateChatInDOM;
+            app.updateChatInDOM = function (arr, containerId) {
+                const r = _prevUpd.call(this, arr, containerId);
+                try { app.syncReceipts(arr, containerId); } catch (e) { console.error(e); }
+                return r;
+            };
+            const _prevSwitch = app.switchChatTab;
+            app.switchChatTab = function (mode) {
+                stopPoll();
+                const r = _prevSwitch.call(this, mode);
+                if (privateUid()) pollT = setInterval(poll, 2500);
+                return r;
+            };
+            const _prevNav = app.navigate;
+            app.navigate = function (...args) { stopPoll(); return _prevNav.apply(this, args); };
+
+            // ---------- PWA ----------
+            const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+            const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const registerSW = () => { navigator.serviceWorker.register('sw.js').catch((e) => console.warn('Service worker não registrado:', e)); };
+            if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+                if (document.readyState === 'complete') registerSW(); else window.addEventListener('load', registerSW);
+            }
+            app.refreshInstallRow = () => { const b = $('pwa-install-btn'); if (b) b.style.display = isStandalone() ? 'none' : 'flex'; };
+            app.openPwaHelp = () => {
+                const steps = isIOS()
+                    ? ['Abra o Nexus Hub no <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Safari</b> (em outros navegadores do iPhone a opção não aparece).', 'Toque no botão <i class="fa-solid fa-arrow-up-from-bracket" style="color:var(--cyan)"></i> <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Compartilhar</b>, na barra do navegador.', 'Role e toque em <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Adicionar à Tela de Início</b> e confirme.']
+                    : ['Abra o menu <i class="fa-solid fa-ellipsis-vertical" style="color:var(--cyan)"></i> do navegador.', 'Toque em <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Instalar aplicativo</b> ou <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Adicionar à tela inicial</b>.', 'Confirme e abra o Nexus Hub pelo novo ícone.'];
+                $('pwa-help-body').innerHTML = steps.map((t, i) => '<div class="pwa-step"><b>' + (i + 1) + '</b><span>' + t + '</span></div>').join('');
+                $('modal-pwa').classList.add('active');
+            };
+            app.closePwaHelp = () => $('modal-pwa').classList.remove('active');
+            app.installPwa = async () => {
+                const ev = window.__pwaPrompt;
+                if (!ev) return app.openPwaHelp();
+                window.__pwaPrompt = null;
+                try {
+                    ev.prompt();
+                    const choice = await ev.userChoice;
+                    if (choice && choice.outcome === 'accepted') app.showToast('Instalando o Nexus Hub...', 'success');
+                } catch (e) { app.openPwaHelp(); }
+            };
+            window.addEventListener('pwa-installed', () => { app.refreshInstallRow(); app.showToast('Nexus Hub instalado!', 'success'); });
+
+            // aba Conta: mostra o estado atual das opções
+            const _prevTab = app.settingsTab;
+            app.settingsTab = function (name) {
+                const r = _prevTab.call(this, name);
+                if (name === 'conta') {
+                    const cb = $('set-read-receipts'); if (cb) cb.checked = me().readReceipts !== false;
+                    app.refreshInstallRow();
+                }
+                return r;
+            };
         })();
 
         // ===== CORES E TRANSPARÊNCIA DOS BALÕES (global) =====

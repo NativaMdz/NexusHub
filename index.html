@@ -1008,6 +1008,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === LISTA PRIVADA: NÃO LIDAS E DIGITANDO === */
+        .cl-badge { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(0,243,255,0.45); box-sizing: border-box; }
+        .chat-list-item.has-unread .cl-preview { color: var(--text-main) !important; }
+        .cl-typing { color: var(--cyan); font-style: italic; }
+        .cl-typing.rec i { color: var(--danger); margin-right: 3px; font-size: 0.8em; }
+
         /* === DIGITANDO / GRAVANDO + MENSAGENS DE VOZ === */
         #chat-input-container .chat-input:placeholder-shown ~ .chat-send-btn:not(.chat-mic-btn) { display: none; }
         #chat-input-container .chat-input:not(:placeholder-shown) ~ .chat-mic-btn { display: none; }
@@ -2946,15 +2952,15 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     const lastMsg = chatMap[uid].content || '';
                     
                     const div = document.createElement('div');
-                    div.className = 'chat-list-item';
+                    div.className = 'chat-list-item'; div.dataset.uid = uid;
                     div.onclick = () => app.startPrivateChat(uid);
                     div.innerHTML = `
                         <img src="${user.avatar}" loading="lazy" decoding="async" class="avatar ${app.getFrameClass(user)}" style="width: 44px; height: 44px;">
                         <div class="user-info">
                             <h3>${user.name} ${app.getUserBadges(user)}</h3>
-                            <span style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span>
+                            <span class="cl-preview" style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right" style="color:var(--border-glass);"></i>
+                        <i class="fa-solid fa-chevron-right cl-arrow" style="color:var(--border-glass);"></i>
                     `;
                     container.appendChild(div);
                 });
@@ -4894,8 +4900,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         tp.from[d.from] = { state: d.state, seen: Date.now() };
                     });
                     renderTyping();
+                    if (app.decorateChatList) { app.decorateChatList(); clearTimeout(tp.listT); tp.listT = setTimeout(() => app.decorateChatList(), 6200); }
                 }, (e) => console.error('typing', e));
             };
+
+            app.typingActiveFor = (uid) => { const i = tp.from[uid]; return (i && i.state !== 'idle' && (Date.now() - i.seen) < 6000) ? i.state : null; };
 
             // ---------- gravação ----------
             const rec = { stream: null, mr: null, chunks: [], mime: '', t0: 0, timer: 0, state: 'idle', dur: 0, busy: false, token: 0 };
@@ -5088,7 +5097,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (rec.state !== 'idle') app.cancelVoiceRecord();
                 app.typingStop(); stopVoice();
                 const r = _prevSwitch.call(this, mode);
-                if (partner()) ensureListener();
+                if (partner() || appState.activeChatMode === 'private_list') ensureListener();
                 renderTyping();
                 return r;
             };
@@ -5102,6 +5111,102 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.sendChatMessage = function (...a) { app.typingStop(); return _prevSend.apply(this, a); };
             const _prevSticker = app.sendSticker;
             app.sendSticker = function (...a) { app.typingStop(); return _prevSticker.apply(this, a); };
+        })();
+
+        // ===== LISTA PRIVADA: CONTADOR DE NÃO LIDAS + DIGITANDO =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const me = () => appState.currentUserData || {};
+            const myUid = () => appState.firebaseUser.uid;
+            const lastRead = (uid) => (me().chatReads || {})[uid] || null;
+            const cutoff = (uid) => (me().chatClears || {})[uid] || null;
+            const blockedAt = (uid) => (me().blockedUsers || {})[uid] || null;
+            const incoming = (uid) => {
+                const my = myUid(), c = cutoff(uid), b = blockedAt(uid);
+                return appState.privateMessages.filter((m) => (m.participants || []).includes(my) && m.participants.includes(uid)
+                    && m.authorUid === uid && !(m.deletedFor && m.deletedFor.includes(my)) && !(c && m.createdAt <= c) && !(b && m.createdAt > b));
+            };
+            const unreadCount = (uid) => { const lr = lastRead(uid); return incoming(uid).filter((m) => !lr || m.createdAt > lr).length; };
+
+            // na primeira vez, tudo que já existe conta como lido (evita contadores gigantes)
+            let baseDone = false;
+            const ensureBaseline = () => {
+                const u = appState.currentUserData;
+                if (baseDone || !u || !appState.privateMessages.length) return;
+                baseDone = true;
+                if (u.chatReads !== undefined && u.chatReads !== null) return;
+                const my = myUid(), map = {};
+                appState.privateMessages.forEach((m) => {
+                    if (!(m.participants || []).includes(my)) return;
+                    const o = m.participants.find((p) => p !== my); if (!o) return;
+                    if (!map[o] || m.createdAt > map[o]) map[o] = m.createdAt;
+                });
+                appState.currentUserData.chatReads = map;
+                updateDoc(doc(colUsers, my), { chatReads: map }).catch(() => {});
+            };
+
+            const pend = {};
+            app.markChatRead = (uid) => {
+                if (!uid || uid === 'global' || uid === 'private_list' || appState.activeChatMode !== uid || document.visibilityState !== 'visible') return;
+                ensureBaseline();
+                const msgs = incoming(uid); if (!msgs.length) return;
+                const latest = msgs.reduce((a, m) => (m.createdAt > a ? m.createdAt : a), '');
+                const lr = lastRead(uid);
+                if (lr && latest <= lr) return;
+                appState.currentUserData.chatReads = Object.assign({}, me().chatReads || {}, { [uid]: latest });
+                clearTimeout(pend[uid]);
+                pend[uid] = setTimeout(() => { updateDoc(doc(colUsers, myUid()), { ['chatReads.' + uid]: latest }).catch(() => {}); }, 600);
+            };
+
+            app.decorateChatList = () => {
+                const list = $('private-chats-list'); if (!list) return;
+                ensureBaseline();
+                list.querySelectorAll('.chat-list-item[data-uid]').forEach((item) => {
+                    const uid = item.dataset.uid, n = unreadCount(uid);
+                    const arrow = item.querySelector('.cl-arrow');
+                    let badge = item.querySelector('.cl-badge');
+                    if (n > 0) {
+                        if (!badge) { badge = document.createElement('span'); badge.className = 'cl-badge'; item.appendChild(badge); }
+                        badge.textContent = n > 99 ? '99+' : String(n);
+                        if (arrow) arrow.style.display = 'none';
+                    } else {
+                        if (badge) badge.remove();
+                        if (arrow) arrow.style.display = '';
+                    }
+                    item.classList.toggle('has-unread', n > 0);
+                    const pv = item.querySelector('.cl-preview');
+                    if (!pv) return;
+                    const st = (!blockedAt(uid) && app.typingActiveFor) ? app.typingActiveFor(uid) : null;
+                    if (st) {
+                        if (pv.dataset.orig === undefined) pv.dataset.orig = pv.innerHTML;
+                        pv.innerHTML = st === 'recording'
+                            ? '<span class="cl-typing rec"><i class="fa-solid fa-microphone"></i>gravando áudio...</span>'
+                            : '<span class="cl-typing">digitando...</span>';
+                    } else if (pv.dataset.orig !== undefined) {
+                        pv.innerHTML = pv.dataset.orig; delete pv.dataset.orig;
+                    }
+                });
+            };
+
+            const _prevList = app.renderPrivateChatList;
+            app.renderPrivateChatList = function () {
+                const r = _prevList.apply(this, arguments);
+                try { app.decorateChatList(); } catch (e) { console.error(e); }
+                return r;
+            };
+            const _prevUpd = app.updateChatInDOM;
+            app.updateChatInDOM = function (arr, containerId) {
+                const r = _prevUpd.call(this, arr, containerId);
+                if (containerId === 'chat-private-container') app.markChatRead(appState.activeChatMode);
+                return r;
+            };
+            const _prevSwitch = app.switchChatTab;
+            app.switchChatTab = function (mode) {
+                const r = _prevSwitch.call(this, mode);
+                app.markChatRead(mode);
+                return r;
+            };
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') app.markChatRead(appState.activeChatMode); });
         })();
 
         // ===== CORES E TRANSPARÊNCIA DOS BALÕES (global) =====

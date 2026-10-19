@@ -3064,7 +3064,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         if (msg.replyTo) {
                             replyHtml = `
                                 <div class="msg-replied-block" onclick="app.scrollToMessage('${msg.replyTo}', event)">
-                                    <div class="msg-replied-author"><i class="fa-solid fa-reply" style="font-size:0.6rem;"></i> Respondendo${containerId === 'chat-private-container' ? '' : ' ' + (msg.replyAuthor || '')}</div>
+                                    <div class="msg-replied-author">${msg.replyAuthor || '@usuario'}</div>
                                     <div class="msg-replied-text">${msg.replyPreview || ''}</div>
                                 </div>
                             `;
@@ -5761,16 +5761,60 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
 
             // ---------- lido / não lido ----------
-            let readT = 0;
+            let readT = 0, pendingRead = {}, pollT = 0;
+            const latestMsgAt = (gid) => appState.groupMessages.reduce((a, m) => (m.groupId === gid && m.createdAt > a ? m.createdAt : a), '');
             const markGroupRead = () => {
                 const g = activeGroup();
                 if (!g || appState.activeChatMode !== 'group' || document.visibilityState !== 'visible') return;
-                const count = g.msgCount || 0;
-                if (((meDoc().groupReads || {})[g.id] || 0) >= count) return;
-                appState.currentUserData.groupReads = Object.assign({}, meDoc().groupReads || {}, { [g.id]: count });
-                updateTabBadge();
+                const count = g.msgCount || 0, latest = latestMsgAt(g.id);
+                if (((meDoc().groupReads || {})[g.id] || 0) < count) {
+                    appState.currentUserData.groupReads = Object.assign({}, meDoc().groupReads || {}, { [g.id]: count });
+                    pendingRead['groupReads.' + g.id] = count; updateTabBadge();
+                }
+                if (latest && latest > ((meDoc().groupSeen || {})[g.id] || '')) {
+                    appState.currentUserData.groupSeen = Object.assign({}, meDoc().groupSeen || {}, { [g.id]: latest });
+                    pendingRead['groupSeen.' + g.id] = latest;
+                }
+                if (!Object.keys(pendingRead).length) return;
                 clearTimeout(readT);
-                readT = setTimeout(() => { updateDoc(doc(colUsers, me()), { ['groupReads.' + g.id]: count }).catch(() => {}); }, 600);
+                readT = setTimeout(() => { const upd = pendingRead; pendingRead = {}; updateDoc(doc(colUsers, me()), upd).catch(() => {}); }, 600);
+            };
+
+            // ---------- vistos no grupo: ✓✓ azul só quando todos os membros (com vistos ativos) leram ----------
+            const receiptsOn = () => meDoc().readReceipts !== false && !meDoc().anonymous;
+            const minSeen = (g) => {
+                if (!receiptsOn()) return null;
+                const tracked = (g.members || []).filter((u) => u !== me()).map(userOf).filter((u) => u && u.readReceipts !== false && !u.anonymous);
+                if (!tracked.length) return null;
+                let min = null;
+                for (const u of tracked) { const v = (u.groupSeen || {})[g.id]; if (!v) return null; if (min === null || v < min) min = v; }
+                return min;
+            };
+            const paintTick = (tick, read) => {
+                const cls = 'fa-solid msg-tick ' + (read ? 'fa-check-double read' : 'fa-check');
+                if (tick.className !== cls) tick.className = cls;
+            };
+            const syncGroupReceipts = (list) => {
+                const g = activeGroup(); if (!g) return;
+                const ms = minSeen(g), my = me();
+                list.forEach((msg) => {
+                    if (msg.authorUid !== my) return;
+                    const el = document.getElementById('msg-' + msg.id); if (!el) return;
+                    const t = el.querySelector('.msg-time'); if (!t) return;
+                    let tick = t.querySelector('.msg-tick');
+                    if (!tick) { tick = document.createElement('i'); t.appendChild(tick); }
+                    el.dataset.ts = msg.createdAt;
+                    paintTick(tick, !!(ms && msg.createdAt <= ms));
+                });
+            };
+            const pollGroup = () => {
+                const g = activeGroup();
+                if (!g || appState.activeChatMode !== 'group' || document.visibilityState !== 'visible') return;
+                const ms = minSeen(g); if (!ms) return;
+                document.querySelectorAll('#chat-group-container .msg-tick:not(.read)').forEach((tick) => {
+                    const el = tick.closest('.message');
+                    if (el && el.dataset.ts && el.dataset.ts <= ms) paintTick(tick, true);
+                });
             };
             document.addEventListener('visibilitychange', markGroupRead);
 
@@ -5832,7 +5876,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (mode === 'group_list') {
                     list.style.display = 'flex'; chat.style.display = 'none'; input.style.display = 'none'; if (mb) mb.style.display = 'none';
                     if (info) info.innerHTML = '<i class="fa-solid fa-user-group" style="color: var(--purple);"></i> Grupos';
-                    stopMessages(); appState.activeGroupId = null;
+                    stopMessages(); appState.activeGroupId = null; clearInterval(pollT);
                     if (app.clearChatStageBg) app.clearChatStageBg();
                     renderGroupList();
                 } else {
@@ -5847,13 +5891,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     app.updateChatInDOM(appState.groupMessages, 'chat-group-container');
                     if (app.stickChatToBottom) app.stickChatToBottom(chat);
                     markGroupRead();
+                    clearInterval(pollT); pollT = setInterval(pollGroup, 2500);
                 }
             };
             const _prevSwitch = app.switchChatTab;
             app.switchChatTab = function (mode) {
                 ensureGroupsListener();
                 if (mode === 'group_list' || mode === 'group') { showMode(mode); return; }
-                stopMessages(); appState.activeGroupId = null;
+                stopMessages(); appState.activeGroupId = null; clearInterval(pollT);
                 ['group-list-container', 'chat-group-container'].forEach((id) => { const e = $(id); if (e) e.style.display = 'none'; });
                 const r = _prevSwitch.call(this, mode);
                 const tg = $('tab-groups'); if (tg) tg.classList.add('btn-secondary');
@@ -5862,7 +5907,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
             app.openGroup = (gid) => { appState.activeGroupId = gid; app.switchChatTab('group'); };
             const _prevNav = app.navigate;
-            app.navigate = function (...args) { stopMessages(); return _prevNav.apply(this, args); };
+            app.navigate = function (...args) { stopMessages(); clearInterval(pollT); return _prevNav.apply(this, args); };
+            const _prevRR = app.refreshReceipts;
+            app.refreshReceipts = function (...a) { if (_prevRR) _prevRR.apply(this, a); if (appState.activeChatMode === 'group') syncGroupReceipts(appState.groupMessages); };
 
             // ---------- filtro: limpar conversa e histórico de quem entrou depois ----------
             const _prevUpd = app.updateChatInDOM;
@@ -5873,7 +5920,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     const j = g && g.joined && g.joined[me()];
                     arr = arr.filter((m) => !(c && m.createdAt <= c) && !(j && m.createdAt < j));
                 }
-                return _prevUpd.call(this, arr, containerId);
+                const r = _prevUpd.call(this, arr, containerId);
+                if (containerId === 'chat-group-container') { try { syncGroupReceipts(arr); } catch (e) { console.error(e); } }
+                return r;
             };
 
             // ---------- envio ----------
@@ -6226,4 +6275,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                                                                       </html>
+    </html>

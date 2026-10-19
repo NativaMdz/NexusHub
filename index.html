@@ -125,9 +125,7 @@
 
         header {
             padding: 1.2rem 1rem 0.9rem;
-            background: var(--bg-glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(15, 15, 20, 0.88);
             border-bottom: 1px solid var(--border-glass);
             display: flex;
             justify-content: space-between;
@@ -188,9 +186,7 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 600px;
-            background: rgba(10, 10, 15, 0.9);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(10, 10, 15, 0.96);
             border-top: 1px solid var(--border-glass);
             display: flex;
             justify-content: space-around;
@@ -245,16 +241,18 @@
 
         /* POST CARDS */
         .post-card {
-            background: var(--bg-glass);
+            background: rgba(15, 15, 20, 0.88);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 1rem;
             margin-bottom: 1.2rem;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            animation: fadeIn 0.4s ease forwards;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+            animation: fadeIn 0.25s ease;
             cursor: pointer;
             transition: border-color 0.3s;
+            flex-shrink: 0;
+            content-visibility: auto;
+            contain-intrinsic-size: auto 320px;
         }
         .post-card:active { border-color: rgba(0,243,255,0.3); }
 
@@ -1045,6 +1043,35 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === GRUPOS === */
+        .tab-badge { position: absolute; top: -6px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; box-shadow: 0 0 8px rgba(0,243,255,0.5); }
+        .group-new-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px; margin-bottom: 10px; border-radius: 12px; border: 1px dashed rgba(0,243,255,0.45); background: rgba(0,243,255,0.06); color: var(--cyan); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; flex-shrink: 0; }
+        .group-new-btn:active { background: rgba(0,243,255,0.14); }
+        .group-avatar { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.3rem; text-transform: uppercase; box-shadow: 0 0 10px rgba(0,0,0,0.4); }
+        .chat-list-item.group-item .user-info { flex: 1; min-width: 0; }
+        .chat-list-item.group-item .user-info h3, .chat-list-item.group-item .user-info span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .gp-list { flex: 1; min-height: 120px; max-height: 38dvh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; overscroll-behavior: contain; }
+        .gp-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); cursor: pointer; }
+        .gp-row img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+        .gp-row .gp-name { flex: 1; min-width: 0; font-size: 0.88rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .gp-row .gp-name small { display: block; font-size: 0.7rem; color: var(--text-muted); }
+        .gp-row .gp-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: transparent; flex-shrink: 0; }
+        .gp-row.sel { border-color: rgba(0,243,255,0.5); background: rgba(0,243,255,0.08); }
+        .gp-row.sel .gp-check { background: linear-gradient(135deg, var(--cyan), #0088ff); border-color: transparent; color: #000; }
+        .gp-foot { font-size: 0.75rem; color: var(--text-muted); text-align: right; margin-top: 6px; }
+        .gi-name { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+        .gi-name input { flex: 1; min-width: 0; }
+        .gi-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.2rem; color: #fff; margin-bottom: 12px; word-break: break-word; }
+        .gi-member { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); margin-bottom: 6px; }
+        .gi-member img { width: 34px; height: 34px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+        .gi-member .gi-mname { flex: 1; min-width: 0; font-size: 0.86rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .gi-member .gi-mname small { display: block; font-size: 0.68rem; color: var(--cyan); }
+        .gi-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+
+        /* === DESEMPENHO === */
+        main { overscroll-behavior-y: contain; }
+        html.is-scrolling .avatar, html.is-scrolling .profile-header::before, html.is-scrolling .profile-header::after { animation-play-state: paused !important; }
+
         /* === PRIVACIDADE === */
         .set-switch-row.anon { border-color: rgba(176,38,255,0.45); background: rgba(176,38,255,0.08); }
         .set-switch-row.is-locked { opacity: 0.45; }
@@ -1669,6 +1696,33 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     </div>
 
     <!-- ADD: Modal de configuração de fundo de chat -->
+    <div class="modal-overlay" id="modal-group-info" onclick="if(event.target===this) app.closeGroupInfo()">
+        <div class="modal-content" style="max-width: 420px; max-height: 90dvh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>Info do grupo</h2>
+                <button class="close-modal" onclick="app.closeGroupInfo()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body"><div id="group-info-body"></div></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-group-new" onclick="if(event.target===this) app.closeGroupNew()">
+        <div class="modal-content" style="max-width: 420px; max-height: 90dvh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h2 id="group-new-title">Novo grupo</h2>
+                <button class="close-modal" onclick="app.closeGroupNew()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; min-height: 0; flex: 1;">
+                <div id="group-name-wrap" class="form-group"><label class="set-label">Nome do grupo</label><input type="text" id="group-name" class="form-control" maxlength="30" placeholder="Ex.: Amigos do Nexus"></div>
+                <label class="set-label">Membros</label>
+                <input type="text" id="group-search" class="form-control" placeholder="Buscar por nome ou @usuário..." oninput="app.groupPickerSearch()" style="margin-bottom: 8px;">
+                <div id="group-pick-list" class="gp-list"></div>
+                <div class="gp-foot"><span id="group-sel-count">0 selecionados</span></div>
+                <button class="btn-primary" id="group-new-submit" style="width: 100%; margin-top: 8px;" onclick="app.groupSubmit()">Criar grupo</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-pwa" onclick="if(event.target===this) app.closePwaHelp()">
         <div class="modal-content" style="max-width: 380px;">
             <div class="modal-header">
@@ -1819,6 +1873,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <button id="tab-global" class="btn-primary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('global')">Global</button>
                 <button id="tab-private" class="btn-primary btn-secondary" style="flex: 1; padding: 8px; font-size: 0.9rem;" onclick="app.switchChatTab('private_list')">Privado</button>
+                <button id="tab-groups" class="btn-primary btn-secondary" style="flex: 1; padding: 8px; font-size: 0.9rem; position: relative;" onclick="app.switchChatTab('group_list')">Grupos<span id="tab-groups-badge" class="tab-badge" style="display: none;"></span></button>
             </div>
             
             <div class="chat-info-row">
@@ -1841,6 +1896,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             <div class="chat-messages" id="chat-global-container"></div>
             <div class="chat-messages" id="private-chats-list" style="display:none; overflow-y:auto;"></div>
             <div class="chat-messages" id="chat-private-container" style="display:none;"></div>
+            <div class="chat-messages" id="group-list-container" style="display:none; overflow-y:auto;"></div>
+            <div class="chat-messages" id="chat-group-container" style="display:none;"></div>
             <button type="button" id="chat-scroll-down" class="chat-scroll-down" onclick="app.chatScrollToBottom()" aria-label="Ir para a última mensagem"><i class="fa-solid fa-angles-down"></i></button>
             </div>
 
@@ -1925,7 +1982,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove, getDocs, query, where, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove, getDocs, query, where, deleteField, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
@@ -1958,6 +2015,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         const colStickers = collection(db, 'stickers');
         const colTyping = collection(db, 'typing');
         const colVoice = collection(db, 'voice');
+        const colGroups = collection(db, 'groups');
+        const colGroupChat = collection(db, 'group_chat');
 
         const appState = {
             firebaseUser: null,
@@ -2418,7 +2477,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     item = appState.allPosts.find(p => p.id === itemId);
                     contextCollection = 'posts';
                 } else {
-                    if (appState.activeChatMode === 'global') {
+                    if (appState.activeChatMode === 'group') {
+                        item = (appState.groupMessages || []).find(m => m.id === itemId);
+                        contextCollection = 'group_chat';
+                    } else if (appState.activeChatMode === 'global') {
                         item = appState.globalMessages.find(m => m.id === itemId);
                         contextCollection = 'global_chat';
                     } else {
@@ -2486,8 +2548,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 
                 let collectionRef;
                 if (appState.activeContextCollection === 'posts') collectionRef = colPosts;
-                else if (appState.activeContextCollection === 'global_chat') collectionRef = colGlobalChat;
-                else collectionRef = colPrivateChat;
+                else collectionRef = app.chatColRef(appState.activeContextCollection);
                 
                 const btn = document.querySelector('#modal-edit-text .btn-primary');
                 btn.innerHTML = "Salvando..."; btn.disabled = true;
@@ -2527,7 +2588,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             deleteForMe: async () => {
                 app.closeContextMenu();
                 const item = appState.activeContextItem;
-                const collectionRef = appState.activeContextCollection === 'global_chat' ? colGlobalChat : colPrivateChat;
+                const collectionRef = app.chatColRef(appState.activeContextCollection);
                 try { await updateDoc(doc(collectionRef, item.id), { deletedFor: arrayUnion(appState.firebaseUser.uid) }); } 
                 catch(e) { app.showToast("Erro ao ocultar.", "error"); }
             },
@@ -2536,7 +2597,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if(confirm("Apagar esta mensagem para todos da rede?")) {
                     app.closeContextMenu();
                     const item = appState.activeContextItem;
-                    const collectionRef = appState.activeContextCollection === 'global_chat' ? colGlobalChat : colPrivateChat;
+                    const collectionRef = app.chatColRef(appState.activeContextCollection);
                     try { await deleteDoc(doc(collectionRef, item.id)); } 
                     catch(e) { app.showToast("Erro ao apagar.", "error"); }
                 }
@@ -2585,16 +2646,16 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
                 const currentCards = Array.from(container.querySelectorAll('.post-card'));
                 
-                currentCards.forEach(card => {
-                    if (!expectedPosts.find(p => p.id === card.dataset.id)) {
-                        card.remove();
-                    }
-                });
+                const expectedIds = new Set(expectedPosts.map(p => p.id));
+                currentCards.forEach(card => { if (!expectedIds.has(card.dataset.id)) card.remove(); });
+                const cardById = new Map();
+                container.querySelectorAll('.post-card').forEach(c => cardById.set(c.dataset.id, c));
+                const userByUid = new Map(appState.allUsers.map(u => [u.uid, u]));
 
                 expectedPosts.forEach((post, index) => {
-                    const authorData = appState.allUsers.find(u => u.uid === post.authorUid) || post;
+                    const authorData = userByUid.get(post.authorUid) || post;
                     const currentHash = app.generatePostHash(post, authorData);
-                    const existingEl = container.querySelector(`.post-card[data-id="${post.id}"]`);
+                    const existingEl = cardById.get(post.id) || null;
 
                     if (existingEl) {
                         if (existingEl.dataset.hash === currentHash) {
@@ -3704,7 +3765,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             initParticles: () => {
                 const canvas = document.getElementById('particles'), ctx = canvas.getContext('2d');
                 let particles = [];
-                function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; const count = Math.max(60, Math.min(Math.floor((canvas.width * canvas.height) / 6000), 140)); for (let i = 0; i < count; i++) particles.push(new Particle()); }
+                function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; const count = Math.max(48, Math.min(Math.floor((canvas.width * canvas.height) / 8000), 100)); for (let i = 0; i < count; i++) particles.push(new Particle()); }
                 window.addEventListener('resize', resize);
                 const colors = [{ r: 0, g: 243, b: 255 }, { r: 255, g: 0, b: 255 }, { r: 176, g: 38, b: 255 }];
                 
@@ -3714,7 +3775,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha * 1.5})`; ctx.fill(); }
                 }
 
-                function animate() {
+                let lastTs = 0;
+                function animate(ts) {
+                    if (document.hidden || window.__nxScrolling) { requestAnimationFrame(animate); return; }
+                    if (ts && ts - lastTs < 32) { requestAnimationFrame(animate); return; }
+                    lastTs = ts || 0;
                     const cw = canvas.width;
                     const ch = canvas.height;
                     
@@ -3738,7 +3803,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         } 
                     }
                     
-                    particles.forEach(p => { p.update(cw, ch); p.draw(); }); 
+                    particles.forEach(p => { p.update(cw, ch); p.update(cw, ch); p.draw(); }); 
                     ctx.globalCompositeOperation = 'source-over'; 
                     requestAnimationFrame(animate);
                 }
@@ -4124,7 +4189,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // ===== CHAT ESTILO WHATSAPP: wallpaper no palco inteiro + botão "ir para o fim" =====
         (() => {
             const $ = (id) => document.getElementById(id);
-            const ids = ['chat-global-container', 'chat-private-container'];
+            const ids = ['chat-global-container', 'chat-private-container', 'chat-group-container'];
             const visibleContainer = () => ids.map($).find((c) => c && c.style.display !== 'none');
 
             app.clearChatStageBg = () => {
@@ -4463,7 +4528,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         app.cancelReply();
                     }
                     app.closeStickerPicker();
-                    if (mode === 'global') { await addDoc(colGlobalChat, baseMsg); app.addXP(1); }
+                    if (mode === 'group') { await app.sendGroupRaw(baseMsg, '🖼️ Figurinha'); }
+                    else if (mode === 'global') { await addDoc(colGlobalChat, baseMsg); app.addXP(1); }
                     else { baseMsg.participants = [appState.firebaseUser.uid, mode]; await addDoc(colPrivateChat, baseMsg); }
                 } catch (e) { console.error(e); app.showToast('Falha de transmissão.', 'error'); }
                 finally { stk.sending = false; }
@@ -4601,14 +4667,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // ===== MENU DO CHAT (⋮): global e privado =====
         (() => {
             const $ = (id) => document.getElementById(id);
-            const ids = ['chat-global-container', 'chat-private-container'];
+            const ids = ['chat-global-container', 'chat-private-container', 'chat-group-container'];
             const visibleContainer = () => ids.map($).find((c) => c && c.style.display !== 'none');
             const me = () => appState.currentUserData || {};
             const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const clearedAt = (key) => (me().chatClears || {})[key] || null;
             const blockedAt = (uid) => (me().blockedUsers || {})[uid] || null;
             const modeKey = () => appState.activeChatMode;
-            const isPrivateMode = () => { const m = modeKey(); return !!m && m !== 'global' && m !== 'private_list'; };
+            const isPrivateMode = () => { const m = modeKey(); return !!m && m !== 'global' && m !== 'private_list' && m !== 'group' && m !== 'group_list'; };
             const otherUser = (uid) => appState.allUsers.find((u) => u.uid === uid);
 
             // ---------- bloqueio ----------
@@ -4818,7 +4884,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const EMOJIS = ['❤️', '👍', '😂', '😮', '😢', '🙏'];
             const me = () => appState.currentUserData || {};
             const myUid = () => appState.firebaseUser.uid;
-            const findMsg = (id) => appState.globalMessages.find((m) => m.id === id) || appState.privateMessages.find((m) => m.id === id);
+            const findMsg = (id) => appState.globalMessages.find((m) => m.id === id) || appState.privateMessages.find((m) => m.id === id) || (appState.groupMessages || []).find((m) => m.id === id);
             const rxOf = (m) => (m && m.reactions) || {};
             const sigOf = (m) => { const r = rxOf(m); return Object.keys(r).filter((u) => r[u] && r[u].e).sort().map((u) => u + ':' + r[u].e).join('|'); };
 
@@ -4889,7 +4955,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.closeReactions = () => $('modal-reactions').classList.remove('active');
             app.openReactions = (msgId) => {
                 const msg = findMsg(msgId); if (!msg) return;
-                const col = appState.globalMessages.some((m) => m.id === msgId) ? 'global_chat' : 'private_chat';
+                const col = appState.globalMessages.some((m) => m.id === msgId) ? 'global_chat' : (appState.groupMessages || []).some((m) => m.id === msgId) ? 'group_chat' : 'private_chat';
                 const list = $('reactions-list'); list.innerHTML = '';
                 const entries = Object.entries(rxOf(msg)).filter(([, x]) => x && x.e)
                     .sort((a, b) => (a[0] === myUid() ? -1 : b[0] === myUid() ? 1 : String(b[1].t).localeCompare(String(a[1].t))));
@@ -4944,7 +5010,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const me = () => appState.firebaseUser.uid;
             const toast = (m, t) => app.showToast(m, t || 'error');
             const fmt = (s) => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
-            const partner = () => { const m = appState.activeChatMode; return (m && m !== 'global' && m !== 'private_list') ? m : null; };
+            const partner = () => { const m = appState.activeChatMode; return (m && m !== 'global' && m !== 'private_list' && m !== 'group' && m !== 'group_list') ? m : null; };
             const MAX_SEC = 60;
 
             // ---------- presença: "digitando..." / "gravando áudio..." (só chats privados) ----------
@@ -5105,7 +5171,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     const vref = await addDoc(colVoice, { ownerUid: me(), data, mime: blob.type || mime, dur, createdAt: new Date().toISOString() });
                     vp.put(vref.id, data);
                     const msg = baseMsg({ content: '🎤 Mensagem de voz', audio: vref.id, audioDur: dur });
-                    if (mode === 'global') { await addDoc(colGlobalChat, msg); app.addXP(1); }
+                    if (mode === 'group') { await app.sendGroupRaw(msg, '🎤 Mensagem de voz'); }
+                    else if (mode === 'global') { await addDoc(colGlobalChat, msg); app.addXP(1); }
                     else { msg.participants = [me(), mode]; await addDoc(colPrivateChat, msg); }
                 } catch (e) { console.error(e); toast('Falha ao enviar o áudio.'); }
                 finally { rec.busy = false; }
@@ -5250,7 +5317,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             const pend = {};
             app.markChatRead = (uid) => {
-                if (!uid || uid === 'global' || uid === 'private_list' || appState.activeChatMode !== uid || document.visibilityState !== 'visible') return;
+                if (!uid || uid === 'global' || uid === 'private_list' || uid === 'group' || uid === 'group_list' || appState.activeChatMode !== uid || document.visibilityState !== 'visible') return;
                 ensureBaseline();
                 const msgs = incoming(uid); if (!msgs.length) return;
                 const latest = msgs.reduce((a, m) => (m.createdAt > a ? m.createdAt : a), '');
@@ -5318,7 +5385,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const me = () => appState.currentUserData || {};
             const myUid = () => appState.firebaseUser.uid;
             const otherUser = (uid) => appState.allUsers.find((u) => u.uid === uid);
-            const privateUid = () => { const m = appState.activeChatMode; return (m && m !== 'global' && m !== 'private_list') ? m : null; };
+            const privateUid = () => { const m = appState.activeChatMode; return (m && m !== 'global' && m !== 'private_list' && m !== 'group' && m !== 'group_list') ? m : null; };
 
             // ---------- vistos ----------
             const receiptsOn = (uid) => { const o = otherUser(uid); return me().readReceipts !== false && !me().anonymous && !(o && (o.readReceipts === false || o.anonymous === true)); };
@@ -5632,6 +5699,417 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.settingsTab = function (name) { const r = _prevTab.call(this, name); if (name === 'conta') app.refreshPrivacyRows(); return r; };
         })();
 
+        // ===== GRUPOS =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const me = () => appState.firebaseUser.uid;
+            const meDoc = () => appState.currentUserData || {};
+            const toast = (m, t) => app.showToast(m, t || 'error');
+            const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const MAX_MEMBERS = 50;
+            appState.groupMessages = []; appState.myGroups = []; appState.activeGroupId = null;
+            const activeGroup = () => appState.myGroups.find((g) => g.id === appState.activeGroupId) || null;
+            const userOf = (uid) => appState.allUsers.find((u) => u.uid === uid);
+            const isAdmin = (g, uid) => !!g && (g.ownerUid === uid || (g.admins || []).includes(uid));
+            const unreadOf = (g) => Math.max(0, (g.msgCount || 0) - ((meDoc().groupReads || {})[g.id] || 0));
+            const gRef = (id) => doc(colGroups, id);
+            const hueOf = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 360; };
+            const gradOf = (s) => { const h = hueOf(s); return 'linear-gradient(135deg, hsl(' + h + ' 80% 45%), hsl(' + ((h + 60) % 360) + ' 80% 32%))'; };
+            const firstName = (u) => ((u && u.name) || '').trim().split(/\s+/)[0] || 'Alguém';
+            let leaving = false;
+
+            // ---------- grupos do usuário ----------
+            let gUnsub = null, gUid = null;
+            const updateTabBadge = () => {
+                const b = $('tab-groups-badge'); if (!b) return;
+                const t = appState.myGroups.reduce((a, g) => a + unreadOf(g), 0);
+                b.style.display = t > 0 ? 'flex' : 'none';
+                b.textContent = t > 99 ? '99+' : String(t);
+            };
+            const ensureGroupsListener = () => {
+                if (!appState.firebaseUser) return;
+                const uid = me();
+                if (gUnsub && gUid === uid) return;
+                if (gUnsub) gUnsub();
+                gUid = uid;
+                gUnsub = onSnapshot(query(colGroups, where('members', 'array-contains', uid)), (snap) => {
+                    appState.myGroups = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    updateTabBadge();
+                    if (appState.activeChatMode === 'group_list') renderGroupList();
+                    if (appState.activeChatMode === 'group') {
+                        if (!activeGroup()) { if (!leaving) toast('Você não faz parte deste grupo.', 'info'); showMode('group_list'); }
+                        else { refreshHeader(); markGroupRead(); if ($('modal-group-info') && $('modal-group-info').classList.contains('active')) renderGroupInfo(); }
+                    }
+                }, (e) => console.error('grupos', e));
+            };
+
+            // ---------- mensagens do grupo aberto ----------
+            let mUnsub = null, mFor = null;
+            const stopMessages = () => { if (mUnsub) { mUnsub(); mUnsub = null; } mFor = null; };
+            const startMessages = (gid) => {
+                if (mUnsub && mFor === gid) return;
+                stopMessages();
+                mFor = gid; appState.groupMessages = [];
+                mUnsub = onSnapshot(query(colGroupChat, where('groupId', '==', gid)), (snap) => {
+                    appState.groupMessages = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    if (appState.activeChatMode === 'group' && appState.activeGroupId === gid) {
+                        app.updateChatInDOM(appState.groupMessages, 'chat-group-container');
+                        markGroupRead();
+                    }
+                }, (e) => console.error('mensagens do grupo', e));
+            };
+
+            // ---------- lido / não lido ----------
+            let readT = 0;
+            const markGroupRead = () => {
+                const g = activeGroup();
+                if (!g || appState.activeChatMode !== 'group' || document.visibilityState !== 'visible') return;
+                const count = g.msgCount || 0;
+                if (((meDoc().groupReads || {})[g.id] || 0) >= count) return;
+                appState.currentUserData.groupReads = Object.assign({}, meDoc().groupReads || {}, { [g.id]: count });
+                updateTabBadge();
+                clearTimeout(readT);
+                readT = setTimeout(() => { updateDoc(doc(colUsers, me()), { ['groupReads.' + g.id]: count }).catch(() => {}); }, 600);
+            };
+            document.addEventListener('visibilitychange', markGroupRead);
+
+            // ---------- lista de grupos ----------
+            const previewOf = (g) => {
+                const lm = g.lastMsg; if (!lm) return 'Sem mensagens ainda';
+                const who = lm.authorUid === me() ? 'Você' : firstName(userOf(lm.authorUid));
+                const t = String(lm.text || '');
+                return who + ': ' + t.slice(0, 28) + (t.length > 28 ? '…' : '');
+            };
+            const renderGroupList = () => {
+                const box = $('group-list-container'); if (!box) return;
+                box.innerHTML = '';
+                const add = document.createElement('button'); add.type = 'button'; add.className = 'group-new-btn';
+                add.innerHTML = '<i class="fa-solid fa-plus"></i> Novo grupo'; add.onclick = () => app.openGroupNew();
+                box.appendChild(add);
+                const list = [...appState.myGroups].sort((a, b) => String((b.lastMsg && b.lastMsg.createdAt) || b.createdAt).localeCompare(String((a.lastMsg && a.lastMsg.createdAt) || a.createdAt)));
+                if (!list.length) {
+                    const h = document.createElement('div'); h.className = 'music-msg';
+                    h.textContent = 'Você ainda não está em nenhum grupo. Crie um e convide os amigos!';
+                    box.appendChild(h); return;
+                }
+                list.forEach((g) => {
+                    const n = unreadOf(g);
+                    const div = document.createElement('div'); div.className = 'chat-list-item group-item' + (n > 0 ? ' has-unread' : '');
+                    div.onclick = () => app.openGroup(g.id);
+                    const av = document.createElement('div'); av.className = 'group-avatar'; av.style.background = gradOf(g.name + g.id); av.textContent = (g.name || '?').trim().charAt(0);
+                    const info = document.createElement('div'); info.className = 'user-info';
+                    const h3 = document.createElement('h3'); h3.textContent = g.name;
+                    const sp = document.createElement('span'); sp.className = 'cl-preview'; sp.style.color = 'var(--text-muted)'; sp.textContent = previewOf(g);
+                    info.append(h3, sp);
+                    div.append(av, info);
+                    if (n > 0) { const b = document.createElement('span'); b.className = 'cl-badge'; b.textContent = n > 99 ? '99+' : String(n); div.appendChild(b); }
+                    else { const a = document.createElement('i'); a.className = 'fa-solid fa-chevron-right cl-arrow'; a.style.color = 'var(--border-glass)'; div.appendChild(a); }
+                    box.appendChild(div);
+                });
+            };
+
+            // ---------- troca de aba ----------
+            const refreshHeader = () => {
+                const g = activeGroup(), info = $('chat-status-info'); if (!g || !info) return;
+                info.innerHTML = '<i class="fa-solid fa-user-group" style="color: var(--purple);"></i> <span class="gh-name" style="color:white;"></span> <span style="color:var(--text-muted);font-size:0.75rem;">• ' + (g.members || []).length + ' membros</span><br><a href="#" style="color:var(--cyan);font-size:0.7rem;text-decoration:none;" onclick="app.switchChatTab(\'group_list\'); return false;">← Voltar a Lista</a>';
+                info.querySelector('.gh-name').textContent = g.name;
+            };
+            const showMode = (mode) => {
+                if (app.closeChatSearch) app.closeChatSearch();
+                if (app.closeChatMenu) app.closeChatMenu();
+                app.cancelReply();
+                if (app.cancelVoiceRecord) app.cancelVoiceRecord();
+                if (app.typingStop) app.typingStop();
+                if (app.stopVoice) app.stopVoice();
+                appState.activeChatMode = mode;
+                ['tab-global', 'tab-private'].forEach((id) => { const b = $(id); if (b) b.classList.add('btn-secondary'); });
+                const tg = $('tab-groups'); if (tg) tg.classList.remove('btn-secondary');
+                ['chat-global-container', 'private-chats-list', 'chat-private-container'].forEach((id) => { const e = $(id); if (e) e.style.display = 'none'; });
+                const list = $('group-list-container'), chat = $('chat-group-container'), input = $('chat-input-container'), info = $('chat-status-info'), mb = $('chat-menu-btn'), tp = $('chat-typing');
+                if (!list || !chat) return;
+                if (tp) tp.classList.remove('show');
+                if (mode === 'group_list') {
+                    list.style.display = 'flex'; chat.style.display = 'none'; input.style.display = 'none'; if (mb) mb.style.display = 'none';
+                    if (info) info.innerHTML = '<i class="fa-solid fa-user-group" style="color: var(--purple);"></i> Grupos';
+                    stopMessages(); appState.activeGroupId = null;
+                    if (app.clearChatStageBg) app.clearChatStageBg();
+                    renderGroupList();
+                } else {
+                    const g = activeGroup();
+                    if (!g) { showMode('group_list'); return; }
+                    list.style.display = 'none'; chat.style.display = 'flex'; input.style.display = 'flex'; if (mb) mb.style.display = 'flex';
+                    if (chat.dataset.gid !== g.id) { chat.innerHTML = ''; chat.dataset.gid = g.id; }
+                    refreshHeader();
+                    startMessages(g.id);
+                    if (app.refreshChatBlockUI) app.refreshChatBlockUI();
+                    if (app.applyChatBackground) app.applyChatBackground('chat-group-container', null);
+                    app.updateChatInDOM(appState.groupMessages, 'chat-group-container');
+                    if (app.stickChatToBottom) app.stickChatToBottom(chat);
+                    markGroupRead();
+                }
+            };
+            const _prevSwitch = app.switchChatTab;
+            app.switchChatTab = function (mode) {
+                ensureGroupsListener();
+                if (mode === 'group_list' || mode === 'group') { showMode(mode); return; }
+                stopMessages(); appState.activeGroupId = null;
+                ['group-list-container', 'chat-group-container'].forEach((id) => { const e = $(id); if (e) e.style.display = 'none'; });
+                const r = _prevSwitch.call(this, mode);
+                const tg = $('tab-groups'); if (tg) tg.classList.add('btn-secondary');
+                updateTabBadge();
+                return r;
+            };
+            app.openGroup = (gid) => { appState.activeGroupId = gid; app.switchChatTab('group'); };
+            const _prevNav = app.navigate;
+            app.navigate = function (...args) { stopMessages(); return _prevNav.apply(this, args); };
+
+            // ---------- filtro: limpar conversa e histórico de quem entrou depois ----------
+            const _prevUpd = app.updateChatInDOM;
+            app.updateChatInDOM = function (arr, containerId) {
+                if (containerId === 'chat-group-container') {
+                    const g = activeGroup();
+                    const c = (meDoc().chatClears || {})['g_' + appState.activeGroupId];
+                    const j = g && g.joined && g.joined[me()];
+                    arr = arr.filter((m) => !(c && m.createdAt <= c) && !(j && m.createdAt < j));
+                }
+                return _prevUpd.call(this, arr, containerId);
+            };
+
+            // ---------- envio ----------
+            app.chatColRef = (c) => c === 'global_chat' ? colGlobalChat : c === 'group_chat' ? colGroupChat : colPrivateChat;
+            app.sendGroupRaw = async (msg, previewText) => {
+                const gid = appState.activeGroupId; if (!gid || !activeGroup()) throw new Error('sem grupo');
+                msg.groupId = gid;
+                await addDoc(colGroupChat, msg);
+                await updateDoc(gRef(gid), { lastMsg: { text: String(previewText || '').slice(0, 60), authorUid: me(), createdAt: msg.createdAt }, msgCount: increment(1) });
+            };
+            const _prevSend = app.sendChatMessage;
+            app.sendChatMessage = async function (...a) {
+                if (appState.activeChatMode !== 'group') return _prevSend.apply(this, a);
+                const input = $('chat-input'), content = input.value.trim();
+                if (!content || !activeGroup()) return;
+                input.value = '';
+                const msg = { authorUid: me(), content: esc(content), createdAt: new Date().toISOString() };
+                if (appState.replyingTo) {
+                    msg.replyTo = appState.replyingTo.id;
+                    const author = userOf(appState.replyingTo.authorUid);
+                    msg.replyAuthor = author ? author.handle : '@usuario';
+                    let pv = appState.replyingTo.content || '';
+                    if (pv.length > 70) pv = pv.substring(0, 70) + '...';
+                    msg.replyPreview = pv;
+                    app.cancelReply();
+                }
+                try { await app.sendGroupRaw(msg, content); }
+                catch (e) { console.error(e); toast('Falha de transmissão.'); }
+            };
+
+            // ---------- menu ⋮ do grupo ----------
+            const _prevMenu = app.openChatMenu;
+            app.openChatMenu = function (ev) {
+                if (appState.activeChatMode !== 'group') return _prevMenu.call(this, ev);
+                if (ev) ev.stopPropagation();
+                app.closeChatMenu();
+                const btn = $('chat-menu-btn'); if (!btn) return;
+                const items = [
+                    { icon: 'fa-circle-info', label: 'Info do grupo', run: () => app.openGroupInfo() },
+                    { icon: 'fa-magnifying-glass', label: 'Pesquisar mensagem', run: () => app.openChatSearch() },
+                    { icon: 'fa-eraser', label: 'Limpar mensagens', danger: true, run: () => app.clearGroupChat() },
+                    { icon: 'fa-right-from-bracket', label: 'Sair do grupo', danger: true, run: () => app.leaveGroup() }
+                ];
+                const back = document.createElement('div'); back.id = 'chat-menu-backdrop'; back.className = 'chat-menu-backdrop'; back.onclick = app.closeChatMenu;
+                const pop = document.createElement('div'); pop.id = 'chat-menu-pop'; pop.className = 'chat-menu-pop';
+                items.forEach((it) => {
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'chat-menu-item' + (it.danger ? ' danger' : '');
+                    b.innerHTML = '<i class="fa-solid ' + it.icon + '"></i><span>' + it.label + '</span>';
+                    b.onclick = () => { app.closeChatMenu(); it.run(); };
+                    pop.appendChild(b);
+                });
+                document.body.append(back, pop);
+                const r = btn.getBoundingClientRect();
+                pop.style.top = (r.bottom + 6) + 'px';
+                pop.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
+            };
+            app.clearGroupChat = async () => {
+                const gid = appState.activeGroupId; if (!gid) return;
+                if (!confirm('Limpar todas as mensagens deste grupo? Isso só afeta você.')) return;
+                try {
+                    const iso = new Date().toISOString();
+                    await updateDoc(doc(colUsers, me()), { ['chatClears.g_' + gid]: iso });
+                    appState.currentUserData.chatClears = Object.assign({}, meDoc().chatClears || {}, { ['g_' + gid]: iso });
+                    if (app.closeChatSearch) app.closeChatSearch();
+                    app.updateChatInDOM(appState.groupMessages, 'chat-group-container');
+                    toast('Mensagens limpas.', 'success');
+                } catch (e) { console.error(e); toast('Erro ao limpar as mensagens.'); }
+            };
+
+            // ---------- criar grupo / adicionar membros ----------
+            const pk = { mode: 'new', sel: new Set(), exclude: new Set() };
+            const updateCount = () => { const n = pk.sel.size; $('group-sel-count').textContent = n + ' selecionado' + (n === 1 ? '' : 's'); };
+            const renderPicker = () => {
+                const list = $('group-pick-list'), q = norm($('group-search').value.trim());
+                const users = appState.allUsers.filter((u) => u.uid !== me() && !pk.exclude.has(u.uid) && (!q || norm(u.name).includes(q) || norm(u.handle).includes(q))).slice(0, 80);
+                list.innerHTML = '';
+                if (!users.length) { const h = document.createElement('div'); h.className = 'music-msg'; h.textContent = 'Nenhum usuário encontrado.'; list.appendChild(h); }
+                users.forEach((u) => {
+                    const row = document.createElement('div'); row.className = 'gp-row' + (pk.sel.has(u.uid) ? ' sel' : '');
+                    const img = document.createElement('img'); img.alt = ''; img.loading = 'lazy'; if (u.avatar) img.src = u.avatar;
+                    const nm = document.createElement('div'); nm.className = 'gp-name'; nm.textContent = u.name;
+                    const sm = document.createElement('small'); sm.textContent = u.handle || ''; nm.appendChild(sm);
+                    const ck = document.createElement('span'); ck.className = 'gp-check'; ck.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    row.append(img, nm, ck);
+                    row.onclick = () => { if (pk.sel.has(u.uid)) pk.sel.delete(u.uid); else pk.sel.add(u.uid); row.classList.toggle('sel', pk.sel.has(u.uid)); updateCount(); };
+                    list.appendChild(row);
+                });
+                updateCount();
+            };
+            app.groupPickerSearch = () => renderPicker();
+            app.openGroupNew = () => {
+                pk.mode = 'new'; pk.sel = new Set(); pk.exclude = new Set();
+                $('group-name-wrap').style.display = 'block'; $('group-name').value = ''; $('group-search').value = '';
+                $('group-new-title').textContent = 'Novo grupo'; $('group-new-submit').textContent = 'Criar grupo';
+                renderPicker(); $('modal-group-new').classList.add('active');
+            };
+            app.openGroupAdd = () => {
+                const g = activeGroup(); if (!g) return;
+                pk.mode = 'add'; pk.sel = new Set(); pk.exclude = new Set(g.members || []);
+                $('group-name-wrap').style.display = 'none'; $('group-search').value = '';
+                $('group-new-title').textContent = 'Adicionar membros'; $('group-new-submit').textContent = 'Adicionar';
+                renderPicker(); $('modal-group-new').classList.add('active');
+            };
+            app.closeGroupNew = () => $('modal-group-new').classList.remove('active');
+            app.groupSubmit = async () => {
+                const btn = $('group-new-submit'); if (btn.disabled) return;
+                const iso = new Date().toISOString();
+                if (pk.mode === 'new') {
+                    const name = $('group-name').value.trim().slice(0, 30);
+                    if (!name) return toast('Dê um nome ao grupo.');
+                    if (!pk.sel.size) return toast('Escolha pelo menos 1 membro.');
+                    if (pk.sel.size + 1 > MAX_MEMBERS) return toast('Máximo de ' + MAX_MEMBERS + ' membros.');
+                    btn.disabled = true;
+                    try {
+                        const members = [me(), ...pk.sel], joined = {};
+                        members.forEach((u) => { joined[u] = iso; });
+                        const ref = await addDoc(colGroups, { name, ownerUid: me(), admins: [me()], members, joined, createdAt: iso, lastMsg: null, msgCount: 0 });
+                        app.closeGroupNew(); toast('Grupo criado!', 'success');
+                        app.openGroup(ref.id);
+                    } catch (e) { console.error(e); toast('Erro ao criar o grupo.'); }
+                    finally { btn.disabled = false; }
+                } else {
+                    const g = activeGroup(); if (!g) return;
+                    if (!pk.sel.size) return toast('Escolha alguém para adicionar.');
+                    if ((g.members || []).length + pk.sel.size > MAX_MEMBERS) return toast('Máximo de ' + MAX_MEMBERS + ' membros.');
+                    btn.disabled = true;
+                    try {
+                        const upd = { members: arrayUnion(...pk.sel) };
+                        pk.sel.forEach((u) => { upd['joined.' + u] = iso; });
+                        await updateDoc(gRef(g.id), upd);
+                        app.closeGroupNew(); toast('Membros adicionados.', 'success');
+                    } catch (e) { console.error(e); toast('Erro ao adicionar membros.'); }
+                    finally { btn.disabled = false; }
+                }
+            };
+
+            // ---------- informações e administração ----------
+            const renderGroupInfo = () => {
+                const g = activeGroup(), body = $('group-info-body'); if (!g || !body) return;
+                const admin = isAdmin(g, me()), owner = g.ownerUid === me();
+                body.innerHTML = '';
+                if (admin) {
+                    const row = document.createElement('div'); row.className = 'gi-name';
+                    const inp = document.createElement('input'); inp.type = 'text'; inp.id = 'group-rename-input'; inp.className = 'form-control'; inp.maxLength = 30; inp.value = g.name;
+                    const sv = document.createElement('button'); sv.type = 'button'; sv.className = 'icon-btn'; sv.setAttribute('aria-label', 'Salvar nome'); sv.innerHTML = '<i class="fa-solid fa-check"></i>'; sv.onclick = () => app.groupRename();
+                    row.append(inp, sv); body.appendChild(row);
+                } else {
+                    const t = document.createElement('div'); t.className = 'gi-title'; t.textContent = g.name; body.appendChild(t);
+                }
+                const lb = document.createElement('label'); lb.className = 'set-label'; lb.textContent = 'Membros (' + (g.members || []).length + ')'; body.appendChild(lb);
+                const members = [...(g.members || [])].sort((a, b) => (b === g.ownerUid) - (a === g.ownerUid) || (isAdmin(g, b) - isAdmin(g, a)) || norm((userOf(a) || {}).name).localeCompare(norm((userOf(b) || {}).name)));
+                members.forEach((uid) => {
+                    const u = userOf(uid) || { name: 'Usuário', avatar: '' };
+                    const row = document.createElement('div'); row.className = 'gi-member';
+                    const img = document.createElement('img'); img.alt = ''; if (u.avatar) img.src = u.avatar;
+                    const nm = document.createElement('div'); nm.className = 'gi-mname'; nm.textContent = uid === me() ? 'Você' : u.name;
+                    if (uid === g.ownerUid || isAdmin(g, uid)) { const s = document.createElement('small'); s.textContent = uid === g.ownerUid ? 'Dono' : 'Admin'; nm.appendChild(s); }
+                    row.append(img, nm);
+                    if (owner && uid !== me()) {
+                        const b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn'; b.setAttribute('aria-label', 'Alternar admin');
+                        b.innerHTML = '<i class="fa-solid fa-user-shield"></i>'; b.onclick = () => app.groupToggleAdmin(uid); row.appendChild(b);
+                    }
+                    if (admin && uid !== g.ownerUid && uid !== me() && (owner || !isAdmin(g, uid))) {
+                        const b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn danger'; b.setAttribute('aria-label', 'Remover do grupo');
+                        b.innerHTML = '<i class="fa-solid fa-user-minus"></i>'; b.onclick = () => app.groupRemoveMember(uid); row.appendChild(b);
+                    }
+                    body.appendChild(row);
+                });
+                const acts = document.createElement('div'); acts.className = 'gi-actions';
+                if (admin && (g.members || []).length < MAX_MEMBERS) {
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-primary'; b.innerHTML = '<i class="fa-solid fa-user-plus"></i> Adicionar membros'; b.onclick = () => app.openGroupAdd(); acts.appendChild(b);
+                }
+                const lv = document.createElement('button'); lv.type = 'button'; lv.className = 'btn-primary btn-secondary'; lv.style.color = 'var(--danger)'; lv.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Sair do grupo'; lv.onclick = () => app.leaveGroup(); acts.appendChild(lv);
+                if (owner) {
+                    const dl = document.createElement('button'); dl.type = 'button'; dl.className = 'btn-primary btn-secondary'; dl.style.color = 'var(--danger)'; dl.innerHTML = '<i class="fa-solid fa-trash"></i> Excluir grupo'; dl.onclick = () => app.deleteGroup(); acts.appendChild(dl);
+                }
+                body.appendChild(acts);
+            };
+            app.openGroupInfo = () => { if (!activeGroup()) return; renderGroupInfo(); $('modal-group-info').classList.add('active'); };
+            app.closeGroupInfo = () => $('modal-group-info').classList.remove('active');
+            app.groupRename = async () => {
+                const g = activeGroup(); if (!g) return;
+                const v = $('group-rename-input').value.trim().slice(0, 30);
+                if (!v) return toast('Dê um nome ao grupo.');
+                try { await updateDoc(gRef(g.id), { name: v }); toast('Nome atualizado.', 'success'); } catch (e) { console.error(e); toast('Erro ao renomear.'); }
+            };
+            app.groupToggleAdmin = async (uid) => {
+                const g = activeGroup(); if (!g || g.ownerUid !== me()) return;
+                try { await updateDoc(gRef(g.id), { admins: (g.admins || []).includes(uid) ? arrayRemove(uid) : arrayUnion(uid) }); }
+                catch (e) { console.error(e); toast('Erro ao atualizar administradores.'); }
+            };
+            app.groupRemoveMember = async (uid) => {
+                const g = activeGroup(); if (!g) return;
+                const u = userOf(uid);
+                if (!confirm('Remover ' + ((u && u.name) || 'este membro') + ' do grupo?')) return;
+                try { await updateDoc(gRef(g.id), { members: arrayRemove(uid), admins: arrayRemove(uid) }); toast('Membro removido.', 'success'); }
+                catch (e) { console.error(e); toast('Erro ao remover o membro.'); }
+            };
+            app.leaveGroup = async () => {
+                const g = activeGroup(); if (!g) return;
+                if (!confirm('Sair do grupo "' + g.name + '"?')) return;
+                const rest = (g.members || []).filter((u) => u !== me());
+                leaving = true;
+                try {
+                    if (!rest.length) await deleteDoc(gRef(g.id));
+                    else {
+                        if (g.ownerUid === me()) {
+                            const next = (g.admins || []).find((u) => u !== me() && rest.includes(u)) || rest[0];
+                            await updateDoc(gRef(g.id), { ownerUid: next, admins: arrayUnion(next) });
+                        }
+                        await updateDoc(gRef(g.id), { members: arrayRemove(me()), admins: arrayRemove(me()) });
+                    }
+                    app.closeGroupInfo(); showMode('group_list'); toast('Você saiu do grupo.', 'success');
+                } catch (e) { console.error(e); toast('Erro ao sair do grupo.'); }
+                finally { setTimeout(() => { leaving = false; }, 1500); }
+            };
+            app.deleteGroup = async () => {
+                const g = activeGroup(); if (!g || g.ownerUid !== me()) return;
+                if (!confirm('Excluir o grupo "' + g.name + '" para todos? Isso não pode ser desfeito.')) return;
+                leaving = true;
+                try { await deleteDoc(gRef(g.id)); app.closeGroupInfo(); showMode('group_list'); toast('Grupo excluído.', 'success'); }
+                catch (e) { console.error(e); toast('Erro ao excluir o grupo.'); }
+                finally { setTimeout(() => { leaving = false; }, 1500); }
+            };
+        })();
+
+        // ===== DESEMPENHO: PAUSA FUNDO ANIMADO ENQUANTO ROLA =====
+        (() => {
+            const root = document.documentElement; let t = 0;
+            document.addEventListener('scroll', () => {
+                if (!window.__nxScrolling) { window.__nxScrolling = true; root.classList.add('is-scrolling'); }
+                clearTimeout(t);
+                t = setTimeout(() => { window.__nxScrolling = false; root.classList.remove('is-scrolling'); }, 140);
+            }, { capture: true, passive: true });
+        })();
+
         // ===== CORES E TRANSPARÊNCIA DOS BALÕES (global) =====
         (() => {
             const $ = (id) => document.getElementById(id);
@@ -5748,4 +6226,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                    </html>
+                                                                       </html>

@@ -1048,6 +1048,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .group-new-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px; margin-bottom: 10px; border-radius: 12px; border: 1px dashed rgba(0,243,255,0.45); background: rgba(0,243,255,0.06); color: var(--cyan); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; flex-shrink: 0; }
         .group-new-btn:active { background: rgba(0,243,255,0.14); }
         .group-avatar { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.3rem; text-transform: uppercase; box-shadow: 0 0 10px rgba(0,0,0,0.4); }
+        .group-avatar { overflow: hidden; }
+        .group-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .gi-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+        .gi-avatar { width: 72px; height: 72px; border-radius: 18px; font-size: 2rem; }
+        .gi-img-actions { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+        .gi-img-actions .btn-primary { padding: 7px; font-size: 0.82rem; }
+        .gi-desc { font-size: 0.86rem; color: var(--text-main); line-height: 1.45; white-space: pre-line; overflow-wrap: anywhere; margin-bottom: 12px; padding: 9px 11px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
+        .gi-desc.empty { color: var(--text-muted); font-style: italic; }
         .chat-list-item.group-item .user-info { flex: 1; min-width: 0; }
         .chat-list-item.group-item .user-info h3, .chat-list-item.group-item .user-info span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .gp-list { flex: 1; min-height: 120px; max-height: 38dvh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; overscroll-behavior: contain; }
@@ -1702,7 +1710,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 <h2>Info do grupo</h2>
                 <button class="close-modal" onclick="app.closeGroupInfo()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="modal-body"><div id="group-info-body"></div></div>
+            <div class="modal-body"><div id="group-info-body"></div><input type="file" id="group-img-file" accept="image/png,image/jpeg,image/webp,image/gif" style="display: none;" onchange="app.groupImageSelected(event)"></div>
         </div>
     </div>
 
@@ -1714,6 +1722,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             </div>
             <div class="modal-body" style="display: flex; flex-direction: column; min-height: 0; flex: 1;">
                 <div id="group-name-wrap" class="form-group"><label class="set-label">Nome do grupo</label><input type="text" id="group-name" class="form-control" maxlength="30" placeholder="Ex.: Amigos do Nexus"></div>
+                <div id="group-desc-wrap" class="form-group"><label class="set-label">Descrição (opcional)</label><textarea id="group-desc" class="form-control" maxlength="200" rows="2" placeholder="Sobre o que é este grupo?" style="min-height: 56px;"></textarea></div>
                 <label class="set-label">Membros</label>
                 <input type="text" id="group-search" class="form-control" placeholder="Buscar por nome ou @usuário..." oninput="app.groupPickerSearch()" style="margin-bottom: 8px;">
                 <div id="group-pick-list" class="gp-list"></div>
@@ -2017,6 +2026,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         const colVoice = collection(db, 'voice');
         const colGroups = collection(db, 'groups');
         const colGroupChat = collection(db, 'group_chat');
+        const colGroupImages = collection(db, 'group_images');
+        const colGroupTyping = collection(db, 'group_typing');
 
         const appState = {
             firebaseUser: null,
@@ -5038,6 +5049,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             const renderTyping = () => {
                 const el = $('chat-typing'); if (!el) return;
+                if (appState.activeChatMode === 'group') return;
                 const p = partner(), info = p && tp.from[p];
                 const blockedByMe = p && ((appState.currentUserData || {}).blockedUsers || {})[p];
                 const active = !!info && info.state !== 'idle' && (Date.now() - info.seen) < 6000 && !blockedByMe;
@@ -5718,6 +5730,133 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const gradOf = (s) => { const h = hueOf(s); return 'linear-gradient(135deg, hsl(' + h + ' 80% 45%), hsl(' + ((h + 60) % 360) + ' 80% 32%))'; };
             const firstName = (u) => ((u && u.name) || '').trim().split(/\s+/)[0] || 'Alguém';
             let leaving = false;
+            const unesc = (s) => String(s).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+            const previewTextOf = (m) => m.audio ? '🎤 Mensagem de voz' : m.sticker ? '🖼️ Figurinha' : m.image ? '📷 Foto' : unesc(m.content || '').slice(0, 60);
+
+            // ---------- imagem do grupo (guardada à parte; carregada só quando precisa) ----------
+            const imgCache = new Map(), imgPending = new Map();
+            const loadGroupImage = (g) => {
+                if (!g || !g.imgV) return Promise.resolve(null);
+                const key = g.id + ':' + g.imgV;
+                if (imgCache.has(key)) return Promise.resolve(imgCache.get(key));
+                let p = imgPending.get(key);
+                if (!p) {
+                    p = getDoc(doc(colGroupImages, g.id)).then((sn) => {
+                        const d = sn.exists() ? sn.data().data : null;
+                        if (typeof d === 'string' && d.startsWith('data:image/')) { imgCache.set(key, d); return d; }
+                        return null;
+                    }).catch(() => null).finally(() => imgPending.delete(key));
+                    imgPending.set(key, p);
+                }
+                return p;
+            };
+            const paintAvatar = (el, g) => {
+                el.innerHTML = ''; el.style.background = gradOf(g.name + g.id); el.textContent = (g.name || '?').trim().charAt(0);
+                if (!g.imgV) return;
+                const key = g.id + ':' + g.imgV; el.dataset.key = key;
+                const apply = (d) => {
+                    if (!d || el.dataset.key !== key) return;
+                    el.textContent = '';
+                    const img = document.createElement('img'); img.alt = ''; img.src = d; el.appendChild(img);
+                };
+                if (imgCache.has(key)) apply(imgCache.get(key)); else loadGroupImage(g).then(apply);
+            };
+
+
+            // ---------- "digitando" / "gravando áudio" nos grupos ----------
+            const gp = { state: 'idle', sent: 0, gid: null };
+            const groupPing = (state) => {
+                const gid = appState.activeGroupId;
+                if (!gid || !activeGroup()) return;
+                if (app.canSignal && !app.canSignal(state)) return;
+                const now = Date.now();
+                if (state === gp.state && gp.gid === gid && now - gp.sent < 3000) return;
+                gp.state = state; gp.sent = now; gp.gid = gid;
+                setDoc(doc(colGroupTyping, gid + '_' + me()), { gid, from: me(), state, n: now }).catch(() => {});
+            };
+            const groupStop = () => {
+                if (gp.state === 'idle' || !gp.gid) { gp.state = 'idle'; return; }
+                const gid = gp.gid; gp.state = 'idle'; gp.sent = 0;
+                setDoc(doc(colGroupTyping, gid + '_' + me()), { gid, from: me(), state: 'idle', n: Date.now() }).catch(() => {});
+            };
+            const _prevPing = app.typingPing, _prevStop = app.typingStop;
+            app.typingPing = function (state) { if (appState.activeChatMode === 'group') return groupPing(state); return _prevPing ? _prevPing.apply(this, arguments) : undefined; };
+            app.typingStop = function () { groupStop(); return _prevStop ? _prevStop.apply(this, arguments) : undefined; };
+
+            const tg = { unsub: null, key: '', by: {}, order: {}, timer: 0 };
+            const orderFor = (key, actives) => {
+                const set = new Set(actives), kept = (tg.order[key] || []).filter((u) => set.has(u));
+                actives.forEach((u) => { if (!kept.includes(u)) kept.push(u); });
+                tg.order[key] = kept; return kept;
+            };
+            // quem está agora digitando/gravando no grupo (ordem estável; gravando tem prioridade)
+            const computeActive = (gid) => {
+                const g = appState.myGroups.find((x) => x.id === gid); if (!g) return null;
+                const members = new Set(g.members || []), blocked = meDoc().blockedUsers || {}, rec = tg.by[gid] || {}, now = Date.now();
+                const typing = [], recording = [];
+                Object.keys(rec).forEach((uid) => {
+                    const r = rec[uid];
+                    if (!r || r.state === 'idle' || now - r.seen > 6000 || !members.has(uid) || blocked[uid] || uid === me()) return;
+                    (r.state === 'recording' ? recording : typing).push(uid);
+                });
+                const state = recording.length ? 'recording' : typing.length ? 'typing' : null;
+                if (!state) { tg.order[gid + ':typing'] = []; tg.order[gid + ':recording'] = []; return null; }
+                const uids = orderFor(gid + ':' + state, state === 'recording' ? recording : typing);
+                const extra = uids.length - 1, name = firstName(userOf(uids[0]));
+                const who = extra > 0 ? name + ' +' + extra : name;
+                return { state, text: who + (extra > 0 ? ' estão ' : ' está ') + (state === 'recording' ? 'gravando áudio' : 'digitando') };
+            };
+            const applyListTyping = () => {
+                const box = $('group-list-container'); if (!box) return;
+                Array.from(box.children).forEach((item) => {
+                    if (!item.dataset || !item.dataset.gid) return;
+                    const pv = item.querySelector('.cl-preview'); if (!pv) return;
+                    const a = computeActive(item.dataset.gid);
+                    if (a) {
+                        if (pv.dataset.orig === undefined) pv.dataset.orig = pv.textContent;
+                        pv.innerHTML = '';
+                        const sp = document.createElement('span'); sp.className = 'cl-typing' + (a.state === 'recording' ? ' rec' : '');
+                        if (a.state === 'recording') { const ic = document.createElement('i'); ic.className = 'fa-solid fa-microphone'; sp.appendChild(ic); }
+                        sp.appendChild(document.createTextNode(a.text + '...'));
+                        pv.appendChild(sp);
+                    } else if (pv.dataset.orig !== undefined) { pv.textContent = pv.dataset.orig; delete pv.dataset.orig; }
+                });
+            };
+            const renderChatTyping = () => {
+                const el = $('chat-typing'); if (!el || appState.activeChatMode !== 'group') return;
+                const a = appState.activeGroupId ? computeActive(appState.activeGroupId) : null;
+                const c = $('chat-group-container');
+                const near = c ? (c.scrollHeight - c.scrollTop - c.clientHeight) < 140 : false;
+                const was = el.classList.contains('show');
+                if (a) { $('chat-typing-text').textContent = a.text; el.classList.toggle('is-rec', a.state === 'recording'); }
+                el.classList.toggle('show', !!a);
+                if (a && !was && near && c) setTimeout(() => { c.scrollTop = c.scrollHeight; }, 230);
+            };
+            const refreshGroupTyping = () => {
+                clearTimeout(tg.timer);
+                renderChatTyping(); applyListTyping();
+                const any = appState.myGroups.some((g) => computeActive(g.id));
+                if (any) tg.timer = setTimeout(refreshGroupTyping, 1000);
+            };
+            const ensureTypingListener = () => {
+                if (!appState.firebaseUser) return;
+                const ids = appState.myGroups.map((g) => g.id).slice(0, 30), key = me() + '|' + ids.join(',');
+                if (key === tg.key) return;
+                if (tg.unsub) { tg.unsub(); tg.unsub = null; }
+                tg.key = key;
+                if (!ids.length) return;
+                let first = true;
+                tg.unsub = onSnapshot(query(colGroupTyping, where('gid', 'in', ids)), (snap) => {
+                    if (first) { first = false; return; }
+                    snap.docChanges().forEach((ch) => {
+                        if (ch.type === 'removed') return;
+                        const d = ch.doc.data();
+                        if (!d || !d.gid || d.from === me()) return;
+                        (tg.by[d.gid] = tg.by[d.gid] || {})[d.from] = { state: d.state, seen: Date.now() };
+                    });
+                    refreshGroupTyping();
+                }, (e) => console.error('digitando no grupo', e));
+            };
 
             // ---------- grupos do usuário ----------
             let gUnsub = null, gUid = null;
@@ -5736,6 +5875,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 gUnsub = onSnapshot(query(colGroups, where('members', 'array-contains', uid)), (snap) => {
                     appState.myGroups = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
                     updateTabBadge();
+                    ensureTypingListener();
                     if (appState.activeChatMode === 'group_list') renderGroupList();
                     if (appState.activeChatMode === 'group') {
                         if (!activeGroup()) { if (!leaving) toast('Você não faz parte deste grupo.', 'info'); showMode('group_list'); }
@@ -5753,6 +5893,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 mFor = gid; appState.groupMessages = [];
                 mUnsub = onSnapshot(query(colGroupChat, where('groupId', '==', gid)), (snap) => {
                     appState.groupMessages = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    if (!(snap.metadata && snap.metadata.fromCache) && !healed[gid]) { healed[gid] = true; healLastMsg(gid); }
                     if (appState.activeChatMode === 'group' && appState.activeGroupId === gid) {
                         app.updateChatInDOM(appState.groupMessages, 'chat-group-container');
                         markGroupRead();
@@ -5839,9 +5980,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 }
                 list.forEach((g) => {
                     const n = unreadOf(g);
-                    const div = document.createElement('div'); div.className = 'chat-list-item group-item' + (n > 0 ? ' has-unread' : '');
+                    const div = document.createElement('div'); div.className = 'chat-list-item group-item' + (n > 0 ? ' has-unread' : ''); div.dataset.gid = g.id;
                     div.onclick = () => app.openGroup(g.id);
-                    const av = document.createElement('div'); av.className = 'group-avatar'; av.style.background = gradOf(g.name + g.id); av.textContent = (g.name || '?').trim().charAt(0);
+                    const av = document.createElement('div'); av.className = 'group-avatar'; paintAvatar(av, g);
                     const info = document.createElement('div'); info.className = 'user-info';
                     const h3 = document.createElement('h3'); h3.textContent = g.name;
                     const sp = document.createElement('span'); sp.className = 'cl-preview'; sp.style.color = 'var(--text-muted)'; sp.textContent = previewOf(g);
@@ -5851,6 +5992,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     else { const a = document.createElement('i'); a.className = 'fa-solid fa-chevron-right cl-arrow'; a.style.color = 'var(--border-glass)'; div.appendChild(a); }
                     box.appendChild(div);
                 });
+                applyListTyping();
             };
 
             // ---------- troca de aba ----------
@@ -5892,6 +6034,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     if (app.stickChatToBottom) app.stickChatToBottom(chat);
                     markGroupRead();
                     clearInterval(pollT); pollT = setInterval(pollGroup, 2500);
+                    renderChatTyping();
                 }
             };
             const _prevSwitch = app.switchChatTab;
@@ -5926,6 +6069,33 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
 
             // ---------- envio ----------
+            const fixGroupAfterDelete = async (item) => {
+                const g = appState.myGroups.find((x) => x.id === item.groupId); if (!g) return;
+                const rest = appState.groupMessages.filter((m) => m.id !== item.id);
+                const last = rest.reduce((a, m) => (!a || m.createdAt > a.createdAt) ? m : a, null);
+                const upd = { msgCount: increment(-1) };
+                if (!g.lastMsg || g.lastMsg.createdAt === item.createdAt) upd.lastMsg = last ? { text: previewTextOf(last), authorUid: last.authorUid, createdAt: last.createdAt } : null;
+                await updateDoc(gRef(g.id), upd);
+            };
+            app.deleteForEveryone = async () => {
+                if (!confirm('Apagar esta mensagem para todos da rede?')) return;
+                app.closeContextMenu();
+                const item = appState.activeContextItem, col = appState.activeContextCollection;
+                if (!item) return;
+                try {
+                    await deleteDoc(doc(app.chatColRef(col), item.id));
+                    if (item.audio) deleteDoc(doc(colVoice, item.audio)).catch(() => {});
+                    if (col === 'group_chat') await fixGroupAfterDelete(item);
+                } catch (e) { console.error(e); toast('Erro ao apagar.'); }
+            };
+            const healed = {};
+            const healLastMsg = (gid) => {
+                const g = activeGroup(); if (!g || g.id !== gid || !g.lastMsg) return;
+                const latest = appState.groupMessages.reduce((a, m) => (!a || m.createdAt > a.createdAt) ? m : a, null);
+                const lm = g.lastMsg;
+                if ((latest && latest.createdAt >= lm.createdAt) || Date.now() - Date.parse(lm.createdAt) < 120000) return;
+                updateDoc(gRef(gid), { lastMsg: latest ? { text: previewTextOf(latest), authorUid: latest.authorUid, createdAt: latest.createdAt } : null }).catch(() => {});
+            };
             app.chatColRef = (c) => c === 'global_chat' ? colGlobalChat : c === 'group_chat' ? colGroupChat : colPrivateChat;
             app.sendGroupRaw = async (msg, previewText) => {
                 const gid = appState.activeGroupId; if (!gid || !activeGroup()) throw new Error('sem grupo');
@@ -5939,6 +6109,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const input = $('chat-input'), content = input.value.trim();
                 if (!content || !activeGroup()) return;
                 input.value = '';
+                app.typingStop();
                 const msg = { authorUid: me(), content: esc(content), createdAt: new Date().toISOString() };
                 if (appState.replyingTo) {
                     msg.replyTo = appState.replyingTo.id;
@@ -6016,13 +6187,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.openGroupNew = () => {
                 pk.mode = 'new'; pk.sel = new Set(); pk.exclude = new Set();
                 $('group-name-wrap').style.display = 'block'; $('group-name').value = ''; $('group-search').value = '';
+                $('group-desc-wrap').style.display = 'block'; $('group-desc').value = '';
                 $('group-new-title').textContent = 'Novo grupo'; $('group-new-submit').textContent = 'Criar grupo';
                 renderPicker(); $('modal-group-new').classList.add('active');
             };
             app.openGroupAdd = () => {
                 const g = activeGroup(); if (!g) return;
                 pk.mode = 'add'; pk.sel = new Set(); pk.exclude = new Set(g.members || []);
-                $('group-name-wrap').style.display = 'none'; $('group-search').value = '';
+                $('group-name-wrap').style.display = 'none'; $('group-desc-wrap').style.display = 'none'; $('group-search').value = '';
                 $('group-new-title').textContent = 'Adicionar membros'; $('group-new-submit').textContent = 'Adicionar';
                 renderPicker(); $('modal-group-new').classList.add('active');
             };
@@ -6039,7 +6211,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     try {
                         const members = [me(), ...pk.sel], joined = {};
                         members.forEach((u) => { joined[u] = iso; });
-                        const ref = await addDoc(colGroups, { name, ownerUid: me(), admins: [me()], members, joined, createdAt: iso, lastMsg: null, msgCount: 0 });
+                        const ref = await addDoc(colGroups, { name, ownerUid: me(), admins: [me()], members, joined, createdAt: iso, lastMsg: null, msgCount: 0, desc: ($('group-desc').value || '').trim().slice(0, 200) });
                         app.closeGroupNew(); toast('Grupo criado!', 'success');
                         app.openGroup(ref.id);
                     } catch (e) { console.error(e); toast('Erro ao criar o grupo.'); }
@@ -6064,6 +6236,17 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const g = activeGroup(), body = $('group-info-body'); if (!g || !body) return;
                 const admin = isAdmin(g, me()), owner = g.ownerUid === me();
                 body.innerHTML = '';
+                const top = document.createElement('div'); top.className = 'gi-top';
+                const big = document.createElement('div'); big.className = 'group-avatar gi-avatar'; paintAvatar(big, g); top.appendChild(big);
+                if (admin) {
+                    const ac = document.createElement('div'); ac.className = 'gi-img-actions';
+                    const pick = document.createElement('button'); pick.type = 'button'; pick.className = 'btn-primary btn-secondary';
+                    pick.innerHTML = '<i class="fa-solid fa-camera"></i> ' + (g.imgV ? 'Trocar imagem' : 'Adicionar imagem') + ' <i class="fa-solid fa-crown" style="color:#ffd700;font-size:0.75em;"></i>';
+                    pick.onclick = () => app.groupPickImage(); ac.appendChild(pick);
+                    if (g.imgV) { const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'btn-primary btn-secondary'; rm.style.color = 'var(--danger)'; rm.innerHTML = '<i class="fa-solid fa-trash"></i> Remover imagem'; rm.onclick = () => app.groupRemoveImage(); ac.appendChild(rm); }
+                    top.appendChild(ac);
+                }
+                body.appendChild(top);
                 if (admin) {
                     const row = document.createElement('div'); row.className = 'gi-name';
                     const inp = document.createElement('input'); inp.type = 'text'; inp.id = 'group-rename-input'; inp.className = 'form-control'; inp.maxLength = 30; inp.value = g.name;
@@ -6071,6 +6254,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     row.append(inp, sv); body.appendChild(row);
                 } else {
                     const t = document.createElement('div'); t.className = 'gi-title'; t.textContent = g.name; body.appendChild(t);
+                }
+                const dlb = document.createElement('label'); dlb.className = 'set-label'; dlb.textContent = 'Descrição'; body.appendChild(dlb);
+                if (admin) {
+                    const ta = document.createElement('textarea'); ta.id = 'group-desc-input'; ta.className = 'form-control'; ta.maxLength = 200; ta.rows = 3; ta.style.minHeight = '64px'; ta.value = g.desc || ''; ta.placeholder = 'Sobre o que é este grupo?';
+                    body.appendChild(ta);
+                    const sv = document.createElement('button'); sv.type = 'button'; sv.className = 'btn-primary btn-secondary'; sv.style.cssText = 'margin: 8px 0 14px; padding: 8px; font-size: 0.85rem;'; sv.textContent = 'Salvar descrição'; sv.onclick = () => app.groupSaveDesc(); body.appendChild(sv);
+                } else {
+                    const d = document.createElement('div'); d.className = 'gi-desc' + (g.desc ? '' : ' empty'); d.textContent = g.desc || 'Sem descrição'; body.appendChild(d);
                 }
                 const lb = document.createElement('label'); lb.className = 'set-label'; lb.textContent = 'Membros (' + (g.members || []).length + ')'; body.appendChild(lb);
                 const members = [...(g.members || [])].sort((a, b) => (b === g.ownerUid) - (a === g.ownerUid) || (isAdmin(g, b) - isAdmin(g, a)) || norm((userOf(a) || {}).name).localeCompare(norm((userOf(b) || {}).name)));
@@ -6103,6 +6294,55 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
             app.openGroupInfo = () => { if (!activeGroup()) return; renderGroupInfo(); $('modal-group-info').classList.add('active'); };
             app.closeGroupInfo = () => $('modal-group-info').classList.remove('active');
+            app.groupSaveDesc = async () => {
+                const g = activeGroup(); if (!g) return;
+                try { await updateDoc(gRef(g.id), { desc: ($('group-desc-input').value || '').trim().slice(0, 200) }); toast('Descrição salva.', 'success'); }
+                catch (e) { console.error(e); toast('Erro ao salvar a descrição.'); }
+            };
+            const saveGroupImage = async (gid, data) => {
+                if (data.length > 800000) return toast('Imagem muito pesada para o grupo.');
+                try {
+                    await setDoc(doc(colGroupImages, gid), { data, by: me(), createdAt: new Date().toISOString() });
+                    const v = Date.now();
+                    imgCache.set(gid + ':' + v, data);
+                    await updateDoc(gRef(gid), { imgV: v });
+                    toast('Imagem do grupo atualizada!', 'success');
+                } catch (e) { console.error(e); toast('Erro ao salvar a imagem.'); }
+            };
+            app.groupPickImage = () => {
+                const g = activeGroup(); if (!g || !isAdmin(g, me())) return;
+                if (!app.getVIPInfo(meDoc()).isActive) return toast('A imagem do grupo é exclusiva do Plano VIP.');
+                const f = $('group-img-file'); f.value = ''; f.click();
+            };
+            app.groupImageSelected = (e) => {
+                const file = e.target.files && e.target.files[0]; if (!file) return;
+                const g = activeGroup(); if (!g || !isAdmin(g, me())) return;
+                if (!app.getVIPInfo(meDoc()).isActive) return toast('A imagem do grupo é exclusiva do Plano VIP.');
+                const isGif = file.type === 'image/gif' || /\.gif$/i.test(file.name);
+                if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) && !isGif) return toast('Formato não suportado. Use PNG, JPG, WEBP ou GIF.');
+                if (file.size > 15 * 1024 * 1024) return toast('O arquivo excede 15 MB.');
+                if (isGif) {
+                    if (file.size > 500 * 1024) return toast('GIF muito grande para o grupo (máx. 500 KB).');
+                    const r = new FileReader(); r.onload = () => saveGroupImage(g.id, r.result); r.onerror = () => toast('Falha ao ler o GIF.'); r.readAsDataURL(file); return;
+                }
+                const url = URL.createObjectURL(file), im = new Image();
+                im.onload = () => {
+                    const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S;
+                    const sc = Math.max(S / im.naturalWidth, S / im.naturalHeight), w = im.naturalWidth * sc, h = im.naturalHeight * sc;
+                    cv.getContext('2d').drawImage(im, (S - w) / 2, (S - h) / 2, w, h);
+                    URL.revokeObjectURL(url);
+                    let d = cv.toDataURL('image/webp', 0.82);
+                    if (!d.startsWith('data:image/webp')) d = cv.toDataURL('image/jpeg', 0.85);
+                    saveGroupImage(g.id, d);
+                };
+                im.onerror = () => { URL.revokeObjectURL(url); toast('Não foi possível ler a imagem.'); };
+                im.src = url;
+            };
+            app.groupRemoveImage = async () => {
+                const g = activeGroup(); if (!g || !isAdmin(g, me())) return;
+                try { await updateDoc(gRef(g.id), { imgV: deleteField() }); deleteDoc(doc(colGroupImages, g.id)).catch(() => {}); toast('Imagem removida.', 'success'); }
+                catch (e) { console.error(e); toast('Erro ao remover a imagem.'); }
+            };
             app.groupRename = async () => {
                 const g = activeGroup(); if (!g) return;
                 const v = $('group-rename-input').value.trim().slice(0, 30);
@@ -6275,4 +6515,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+                        </html>

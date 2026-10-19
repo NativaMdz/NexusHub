@@ -1045,6 +1045,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === PRIVACIDADE === */
+        .set-switch-row.anon { border-color: rgba(176,38,255,0.45); background: rgba(176,38,255,0.08); }
+        .set-switch-row.is-locked { opacity: 0.45; }
+        .set-switch-row.is-locked .nx-slider { cursor: default; }
+
         /* === NOTIFICAÇÕES === */
         .notif-banner { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 8px); left: 10px; right: 10px; z-index: 1200; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(14,14,20,0.97); border: 1px solid rgba(0,243,255,0.35); box-shadow: 0 8px 28px rgba(0,0,0,0.6), 0 0 16px rgba(0,243,255,0.15); transform: translateY(-140%); transition: transform 0.25s ease-out; cursor: pointer; max-width: 460px; margin: 0 auto; }
         .notif-banner.show { transform: translateY(0); }
@@ -1581,15 +1586,27 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
                 <div class="set-pane" id="set-pane-conta">
                     <div class="set-status"><i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.</div>
+                    <label class="set-label">Privacidade e avisos</label>
+                    <div class="set-switch-row anon">
+                        <div class="ssr-txt"><i class="fa-solid fa-user-secret" style="color: var(--purple);"></i> Modo anônimo<small>Não envia "digitando", "gravando" nem vistos, e silencia as notificações</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-anon" onchange="app.toggleAnonymous(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
+                    <div class="set-switch-row">
+                        <div class="ssr-txt">Mostrar "digitando..."<small>Quem conversa com você vê quando você está digitando</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-show-typing" checked onchange="app.toggleShowTyping(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
+                    <div class="set-switch-row">
+                        <div class="ssr-txt">Mostrar "gravando áudio..."<small>Quem conversa com você vê quando você está gravando</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-show-rec" checked onchange="app.toggleShowRecording(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
                     <div class="set-switch-row">
                         <div class="ssr-txt">Confirmação de leitura<small>Mostra e envia os "vistos" nas conversas privadas</small></div>
                         <label class="nx-switch"><input type="checkbox" id="set-read-receipts" checked onchange="app.toggleReadReceipts(this.checked)"><span class="nx-slider"></span></label>
                     </div>
                     <div class="set-switch-row">
-                        <div class="ssr-txt">Notificações de mensagens<small id="notif-status">Desativadas neste aparelho</small></div>
-                        <label class="nx-switch"><input type="checkbox" id="set-notif" onchange="app.toggleNotifications(this.checked)"><span class="nx-slider"></span></label>
+                        <div class="ssr-txt">Notificações de mensagens<small id="notif-status">Ativadas</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-notif" checked onchange="app.toggleNotifications(this.checked)"><span class="nx-slider"></span></label>
                     </div>
-                    <button type="button" class="btn-primary btn-secondary" id="notif-test-btn" style="margin: 0 0 12px; padding: 8px; font-size: 0.85rem;" onclick="app.testNotification()"><i class="fa-solid fa-bell"></i> Testar notificação</button>
                     <button type="button" class="set-row-btn" id="pwa-install-btn" style="display: none; margin: 0 0 12px;" onclick="app.installPwa()">
                         <span class="sr-ico"><i class="fa-solid fa-mobile-screen-button"></i></span>
                         <span class="sr-txt">Instalar aplicativo<small>Abra o Nexus Hub direto da tela inicial</small></span>
@@ -4934,7 +4951,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const tp = { uid: null, unsub: null, first: true, from: {}, to: null, state: 'idle', sent: 0, idleT: 0, hideT: 0 };
             app.typingPing = (state) => {
                 const to = partner();
-                if (!to || app.isChatBlocked()) return;
+                if (!to || app.isChatBlocked() || (app.canSignal && !app.canSignal(state))) return;
                 const now = Date.now();
                 if (state === tp.state && tp.to === to && now - tp.sent < 3000) return;
                 tp.state = state; tp.sent = now; tp.to = to;
@@ -5304,7 +5321,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const privateUid = () => { const m = appState.activeChatMode; return (m && m !== 'global' && m !== 'private_list') ? m : null; };
 
             // ---------- vistos ----------
-            const receiptsOn = (uid) => { const o = otherUser(uid); return me().readReceipts !== false && !(o && o.readReceipts === false); };
+            const receiptsOn = (uid) => { const o = otherUser(uid); return me().readReceipts !== false && !me().anonymous && !(o && (o.readReceipts === false || o.anonymous === true)); };
             const partnerRead = (uid) => { const o = otherUser(uid); return (o && o.chatReads && o.chatReads[myUid()]) || null; };
             const paintTick = (tick, read) => {
                 const cls = 'fa-solid msg-tick ' + (read ? 'fa-check-double read' : 'fa-check');
@@ -5417,7 +5434,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const $ = (id) => document.getElementById(id);
             const KEY = 'nexus_notif';
             const me = () => appState.currentUserData || {};
-            const enabled = () => { try { return localStorage.getItem(KEY) === '1'; } catch (_) { return false; } };
+            const userPref = () => { try { return localStorage.getItem(KEY) !== '0'; } catch (_) { return true; } };
+            const enabled = () => userPref() && !me().anonymous;
             const setEnabled = (v) => { try { localStorage.setItem(KEY, v ? '1' : '0'); } catch (_) {} };
             const supported = () => ('Notification' in window) && ('serviceWorker' in navigator);
             const perm = () => supported() ? Notification.permission : 'unsupported';
@@ -5521,14 +5539,16 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             // ---------- configurações ----------
             const refreshRow = () => {
                 const cb = $('set-notif'), st = $('notif-status'); if (!cb || !st) return;
-                cb.checked = enabled();
+                cb.checked = userPref() && !me().anonymous;
                 const p = perm();
-                st.textContent = !enabled() ? 'Desativadas neste aparelho'
+                st.textContent = me().anonymous ? 'Silenciadas pelo modo anônimo'
+                    : !userPref() ? 'Desativadas neste aparelho'
                     : p === 'granted' ? 'Ativadas: avisos do sistema e dentro do app'
                     : p === 'denied' ? 'Sistema bloqueado no navegador; só avisos dentro do app'
                     : p === 'unsupported' ? 'Só avisos dentro do app (navegador sem suporte)'
                     : 'Avisos dentro do app; permissão do sistema pendente';
             };
+            app.refreshNotifRow = refreshRow;
             app.toggleNotifications = async (on) => {
                 setEnabled(on);
                 if (!on) { refreshRow(); return app.showToast('Notificações desativadas.', 'success'); }
@@ -5539,16 +5559,77 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 else if (p === 'denied') app.showToast('Avisos do sistema bloqueados no navegador. Você ainda recebe avisos dentro do app.', 'info');
                 else app.showToast('Avisos dentro do app ativados.', 'info');
             };
-            app.testNotification = () => {
-                if (!enabled()) return app.showToast('Ative as notificações primeiro.', 'info');
-                app.showToast('Teste em 5 segundos. Minimize o app para ver o aviso do sistema.', 'info');
-                setTimeout(() => {
-                    if (document.visibilityState === 'hidden') { if (perm() === 'granted') showSystem(null, 'Nexus Hub', 'Notificações funcionando! 🎉'); }
-                    else showBanner(null, 'Nexus Hub', 'Notificações funcionando! 🎉', null);
-                }, 5000);
+// ativa por padrão: na primeira interação depois do login, pede a permissão do sistema uma única vez
+            const askOnce = () => {
+                if (!supported() || Notification.permission !== 'default' || !userPref() || me().anonymous) return;
+                try { if (localStorage.getItem('nexus_notif_asked')) return; localStorage.setItem('nexus_notif_asked', '1'); } catch (_) { return; }
+                Notification.requestPermission().then(refreshRow).catch(() => {});
             };
+            const onFirstTap = () => {
+                if (!appState.firebaseUser || !appState.currentUserData) return;
+                document.removeEventListener('click', onFirstTap, true);
+                askOnce();
+            };
+            document.addEventListener('click', onFirstTap, true);
             const _prevTab = app.settingsTab;
             app.settingsTab = function (name) { const r = _prevTab.call(this, name); if (name === 'conta') refreshRow(); return r; };
+        })();
+
+        // ===== PRIVACIDADE: DIGITANDO, GRAVANDO, VISTOS, NOTIFICAÇÕES E MODO ANÔNIMO =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const me = () => appState.currentUserData || {};
+            const myUid = () => appState.firebaseUser.uid;
+
+            // usado por quem envia "digitando"/"gravando": se estiver desligado (ou anônimo), nada é enviado
+            app.canSignal = (state) => {
+                const u = me();
+                if (u.anonymous) return false;
+                if (state === 'typing') return u.showTyping !== false;
+                if (state === 'recording') return u.showRecording !== false;
+                return true;
+            };
+            const rows = {
+                'set-show-typing': () => me().showTyping !== false,
+                'set-show-rec': () => me().showRecording !== false,
+                'set-read-receipts': () => me().readReceipts !== false
+            };
+            app.refreshPrivacyRows = () => {
+                const anon = !!me().anonymous;
+                const a = $('set-anon'); if (a) a.checked = anon;
+                const lock = (cb) => { cb.disabled = anon; const row = cb.closest('.set-switch-row'); if (row) row.classList.toggle('is-locked', anon); };
+                Object.keys(rows).forEach((id) => { const cb = $(id); if (!cb) return; cb.checked = anon ? false : rows[id](); lock(cb); });
+                const n = $('set-notif'); if (n) lock(n);
+                if (app.refreshNotifRow) app.refreshNotifRow();
+            };
+            const save = async (field, value, okMsg) => {
+                const prev = me()[field];
+                try {
+                    appState.currentUserData[field] = value;
+                    await updateDoc(doc(colUsers, myUid()), { [field]: value });
+                    app.showToast(okMsg, 'success');
+                } catch (e) {
+                    console.error(e);
+                    appState.currentUserData[field] = prev;
+                    app.showToast('Erro ao salvar a configuração.', 'error');
+                }
+                app.refreshPrivacyRows();
+            };
+            app.toggleAnonymous = async (on) => {
+                if (on) app.typingStop();
+                await save('anonymous', on, on ? 'Modo anônimo ativado.' : 'Modo anônimo desativado.');
+                if (app.refreshReceipts) app.refreshReceipts();
+            };
+            app.toggleShowTyping = async (on) => {
+                if (!on) app.typingStop();
+                await save('showTyping', on, on ? '"Digitando..." visível para os outros.' : '"Digitando..." oculto.');
+            };
+            app.toggleShowRecording = async (on) => {
+                if (!on) app.typingStop();
+                await save('showRecording', on, on ? '"Gravando áudio..." visível para os outros.' : '"Gravando áudio..." oculto.');
+            };
+            const _prevTab = app.settingsTab;
+            app.settingsTab = function (name) { const r = _prevTab.call(this, name); if (name === 'conta') app.refreshPrivacyRows(); return r; };
         })();
 
         // ===== CORES E TRANSPARÊNCIA DOS BALÕES (global) =====

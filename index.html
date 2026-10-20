@@ -1045,6 +1045,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
+        /* === MARCAR COMO NÃO LIDO (pressionar e segurar) === */
+        .chat-list-item { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        .cl-dot { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), #0088ff); flex-shrink: 0; box-shadow: 0 0 8px rgba(0,243,255,0.55); animation: clDotPulse 2s ease-in-out infinite; }
+        @keyframes clDotPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.65; transform: scale(0.85); } }
+        .cl-hold-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: transparent; border: none; width: 100%; text-align: left; color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; }
+        .cl-hold-item:hover, .cl-hold-item:active { background: rgba(255,255,255,0.08); }
+        .cl-hold-item i { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(0,243,255,0.1); color: var(--cyan); font-size: 0.95rem; flex-shrink: 0; }
+
         /* === GRUPOS === */
         .tab-badge { position: absolute; top: -6px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: linear-gradient(135deg, var(--cyan), #0088ff); color: #000; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; box-shadow: 0 0 8px rgba(0,243,255,0.5); }
         .group-new-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px; margin-bottom: 10px; border-radius: 12px; border: 1px dashed rgba(0,243,255,0.45); background: rgba(0,243,255,0.06); color: var(--cyan); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; flex-shrink: 0; }
@@ -1714,6 +1722,13 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     </div>
 
     <!-- ADD: Modal de configuração de fundo de chat -->
+    <div class="modal-overlay" id="modal-chat-hold" onclick="if(event.target===this) app.closeChatHold()">
+        <div class="bottom-sheet">
+            <div style="width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 10px auto 15px;"></div>
+            <div id="chat-hold-content"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-group-info" onclick="if(event.target===this) app.closeGroupInfo()">
         <div class="modal-content" style="max-width: 420px; max-height: 90dvh; overflow-y: auto;">
             <div class="modal-header">
@@ -2377,6 +2392,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         appState.currentUserData = myUpdatedProfile;
                         app.checkAndExpireVIP(); 
                     }
+                    if (app.refreshChatListBadges) app.refreshChatListBadges();
 
                     if (['perfil', 'public_profile'].includes(appState.currentView)) app.updateProfileInDOM();
                     else if (appState.currentView === 'ranking') app.renderRanking();
@@ -6003,6 +6019,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     box.appendChild(div);
                 });
                 applyListTyping();
+                if (app.refreshChatListBadges) app.refreshChatListBadges();
             };
 
             // ---------- troca de aba ----------
@@ -6396,6 +6413,150 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 try { await deleteDoc(gRef(g.id)); app.closeGroupInfo(); showMode('group_list'); toast('Grupo excluído.', 'success'); }
                 catch (e) { console.error(e); toast('Erro ao excluir o grupo.'); }
                 finally { setTimeout(() => { leaving = false; }, 1500); }
+            };
+        })();
+
+        // ===== MARCAR CONVERSA/GRUPO COMO NÃO LIDO (pressionar e segurar 2 s) =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const me = () => appState.currentUserData || {};
+            const toast = (m, t) => app.showToast(m, t || 'error');
+            const HOLD_MS = 2000, MOVE_PX = 10;
+            const ready = () => !!(appState.firebaseUser && appState.currentUserData);
+
+            // ---------- marcação (espelho local + Firestore) ----------
+            app.getManualUnread = (key) => (me().manualUnread || {})[key] || null;
+            const setManual = async (key) => {
+                const prev = me().manualUnread || {};
+                appState.currentUserData.manualUnread = Object.assign({}, prev, { [key]: new Date().toISOString() });
+                try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { ['manualUnread.' + key]: appState.currentUserData.manualUnread[key] }); }
+                catch (e) { appState.currentUserData.manualUnread = prev; throw e; }
+            };
+            app.clearManualUnread = async (key) => {
+                if (!ready() || !app.getManualUnread(key)) return;
+                const prev = me().manualUnread || {}, next = Object.assign({}, prev);
+                delete next[key];
+                appState.currentUserData.manualUnread = next;
+                try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { ['manualUnread.' + key]: deleteField() }); }
+                catch (e) { console.error(e); appState.currentUserData.manualUnread = prev; }
+            };
+
+            // ---------- aparência: número tem prioridade sobre a bolinha ----------
+            const applyBadgeState = (item, n, manual) => {
+                const arrow = item.querySelector('.cl-arrow');
+                let dot = item.querySelector('.cl-dot');
+                if (n > 0) {
+                    if (dot) dot.remove();
+                    if (arrow) arrow.style.display = 'none';
+                } else if (manual) {
+                    if (!dot) { dot = document.createElement('span'); dot.className = 'cl-dot'; item.appendChild(dot); }
+                    if (arrow) arrow.style.display = 'none';
+                } else {
+                    if (dot) dot.remove();
+                    if (arrow) arrow.style.display = '';
+                }
+                item.classList.toggle('has-unread', n > 0 || !!manual);
+            };
+
+            // ---------- pressionar e segurar ----------
+            app.bindChatHold = (el, onHold) => {
+                if (!el || el._holdBound) return;
+                el._holdBound = true;
+                let timer = 0, sx = 0, sy = 0, fired = false;
+                const cancel = () => { clearTimeout(timer); timer = 0; };
+                el.addEventListener('pointerdown', (e) => {
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    fired = false; sx = e.clientX; sy = e.clientY; cancel();
+                    timer = setTimeout(() => {
+                        timer = 0;
+                        if (el.querySelector('.cl-typing')) return;
+                        fired = true;
+                        if (navigator.vibrate) { try { navigator.vibrate(30); } catch (_) {} }
+                        onHold();
+                    }, HOLD_MS);
+                });
+                el.addEventListener('pointermove', (e) => { if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > MOVE_PX) cancel(); });
+                ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => el.addEventListener(ev, (e) => {
+                    cancel();
+                    if (fired && ev === 'pointerup') { e.preventDefault(); e.stopPropagation(); }
+                }));
+                // o clique que vem depois do long-press não pode abrir a conversa
+                el.addEventListener('click', (e) => {
+                    if (!fired) return;
+                    fired = false;
+                    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+                }, true);
+                el.addEventListener('contextmenu', (e) => e.preventDefault());
+            };
+
+            // ---------- bottom sheet ----------
+            app.closeChatHold = () => { const m = $('modal-chat-hold'); if (m) m.classList.remove('active'); };
+            app.openChatHold = (key, title, isGroup) => {
+                const box = $('chat-hold-content'), modal = $('modal-chat-hold');
+                if (!box || !modal || !ready()) return;
+                const marked = !!app.getManualUnread(key);
+                box.innerHTML = '';
+                if (title) {
+                    const t = document.createElement('div');
+                    t.style.cssText = 'padding: 0 16px 8px; font-size: 0.8rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                    t.textContent = title; box.appendChild(t);
+                }
+                const b = document.createElement('button'); b.type = 'button'; b.className = 'cl-hold-item';
+                b.innerHTML = '<i class="fa-solid ' + (marked ? 'fa-envelope-open' : 'fa-envelope') + '"></i><span></span>';
+                b.querySelector('span').textContent = marked ? 'Desmarcar não lido' : 'Marcar ' + (isGroup ? 'grupo' : 'conversa') + ' como não lido';
+                b.onclick = async () => {
+                    app.closeChatHold();
+                    try {
+                        const p = marked ? app.clearManualUnread(key) : setManual(key);
+                        app.refreshChatListBadges();               // aparece na hora (o espelho local já mudou)
+                        await p;
+                        toast(marked ? 'Marcação removida.' : (isGroup ? 'Grupo marcado como não lido.' : 'Conversa marcada como não lida.'), 'success');
+                    } catch (e) { console.error(e); toast('Erro ao atualizar a marcação.'); }
+                    app.refreshChatListBadges();
+                };
+                box.appendChild(b);
+                modal.classList.add('active');
+            };
+
+            // ---------- reaplica nas duas listas ----------
+            const titleOf = (it) => { const h = it.querySelector('h3'); return h ? h.textContent.trim() : ''; };
+            const applyTo = (it, key, isGroup) => {
+                const badge = it.querySelector('.cl-badge');
+                const n = badge ? (parseInt(badge.textContent, 10) || 1) : 0;
+                applyBadgeState(it, n, !!app.getManualUnread(key));
+                app.bindChatHold(it, () => app.openChatHold(key, titleOf(it), isGroup));
+            };
+            app.refreshChatListBadges = () => {
+                if (!ready()) return;
+                const pl = $('private-chats-list');
+                if (pl) pl.querySelectorAll('.chat-list-item[data-uid]').forEach((it) => applyTo(it, 'p_' + it.dataset.uid, false));
+                const gl = $('group-list-container');
+                if (gl) gl.querySelectorAll('.chat-list-item.group-item[data-gid]').forEach((it) => applyTo(it, 'g_' + it.dataset.gid, true));
+            };
+
+            // lista privada: depois do cálculo normal de não lidas / digitando
+            const _prevDecorate = app.decorateChatList;
+            app.decorateChatList = function () {
+                const r = _prevDecorate ? _prevDecorate.apply(this, arguments) : undefined;
+                try { app.refreshChatListBadges(); } catch (e) { console.error(e); }
+                return r;
+            };
+
+            // abrir o chat limpa a marcação manual
+            const _prevSwitch = app.switchChatTab;
+            app.switchChatTab = function (mode) {
+                const r = _prevSwitch.call(this, mode);
+                try {
+                    if (mode === 'group') { if (appState.activeGroupId) app.clearManualUnread('g_' + appState.activeGroupId); }
+                    else if (mode && mode !== 'global' && mode !== 'private_list' && mode !== 'group_list') app.clearManualUnread('p_' + mode);
+                    app.refreshChatListBadges();
+                } catch (e) { console.error(e); }
+                return r;
+            };
+            const _prevOpenGroup = app.openGroup;
+            app.openGroup = function (gid) {
+                try { app.clearManualUnread('g_' + gid); app.refreshChatListBadges(); } catch (e) { console.error(e); }
+                return _prevOpenGroup.apply(this, arguments);
             };
         })();
 

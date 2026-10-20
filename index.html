@@ -1029,6 +1029,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid transparent; flex-shrink: 0; cursor: pointer;}
         .msg-bubble { background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); position: relative; user-select: text; cursor: pointer; transition: background 0.2s; }
         .msg-bubble:active { background: rgba(255,255,255,0.1); }
+        .msg-bubble { --bbg: rgba(255,255,255,0.06); --bbd: rgba(255,255,255,0.08); }
+        .message.mine .msg-bubble { --bbg: rgba(0, 243, 255, 0.12); --bbd: rgba(0, 243, 255, 0.3); }
         .message.mine .msg-bubble { background: rgba(0, 243, 255, 0.12); border-color: rgba(0, 243, 255, 0.3); border-bottom-right-radius: 2px; }
         .message.mine .msg-bubble:active { background: rgba(0, 243, 255, 0.18); }
         .message:not(.mine) .msg-bubble { border-bottom-left-radius: 2px; }
@@ -1183,9 +1185,13 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .message.has-rx { padding-bottom: 20px; }
         .msg-rx { position: absolute; bottom: -17px; left: 5px; display: flex; align-items: center; gap: 3px; background: rgba(24,27,36,0.98); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 2px 8px; font-size: 0.85rem; line-height: 1.4; color: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.5); font-family: inherit; z-index: 2; }
         .message.mine .msg-rx { left: auto; right: 5px; }
-        /* figurinha não tem balão: o horário fica embaixo dela, então a reação desce para ficar abaixo do horário */
-        .message.sticker-msg .msg-rx { bottom: -27px; }
-        .message.sticker-msg.has-rx { padding-bottom: 32px; }
+        /* figurinha sem menção: sem balão; o horário vira um "chip" colado na base da figurinha e a reação fica logo abaixo dele */
+        .message.sticker-plain .msg-sticker { border-radius: 10px 10px 0 10px; }
+        .message.sticker-plain .msg-author { padding-left: 2px; }
+        .message.sticker-plain.sticker-msg .msg-bubble .msg-time { float: none; display: block; width: fit-content; margin: 0 0 0 auto; padding: 2px 9px 3px; background: var(--bbg); border: 1px solid var(--bbd); border-top: none; border-radius: 0 0 10px 10px; line-height: 1.3; }
+        .message.sticker-plain .msg-rx, .message.mine.sticker-plain .msg-rx { left: auto; right: 18px; }
+        /* figurinha com menção: balão normal com a citação, a figurinha e o horário dentro */
+        .message.sticker-reply .msg-sticker { margin-top: 4px; border-radius: 8px; }
         .msg-rx:active { transform: scale(0.94); }
         .rx-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 2px 16px 14px; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
         .rx-btn { flex: 0 1 52px; min-width: 0; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border: 1px solid transparent; border-radius: 16px; font-size: 1.5rem; line-height: 1; padding: 0; cursor: pointer; transition: transform 0.15s, background 0.2s; }
@@ -1226,7 +1232,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-search-bar .icon-btn { width: 30px; height: 30px; font-size: 0.75rem; }
         .message.search-hit .msg-bubble { box-shadow: 0 0 0 1px rgba(255,214,0,0.5); }
         .message.search-current .msg-bubble { box-shadow: 0 0 0 2px #ffd700, 0 0 14px rgba(255,215,0,0.45); }
-        .message.sticker-msg.search-hit .msg-bubble, .message.sticker-msg.search-current .msg-bubble { box-shadow: none; }
+        .message.sticker-plain.search-hit .msg-bubble, .message.sticker-plain.search-current .msg-bubble { box-shadow: none; }
 
         /* === CONFIGURAÇÕES COMPACTAS COM ABAS === */
         #modal-settings .modal-content { padding: 1rem 1.1rem; }
@@ -1262,11 +1268,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-stage .chat-messages { padding: 10px 10px 6px; margin-bottom: 0; }
         .chat-stage .chat-input-block { flex-shrink: 0; width: 100%; padding: 6px 10px 10px; box-sizing: border-box; }
         .chat-stage .chat-input-area { background: rgba(20,22,30,0.92); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
-        .chat-stage.has-wp .msg-bubble { background: rgba(24,27,36,0.94); border-color: rgba(255,255,255,0.08); }
+        .chat-stage.has-wp .msg-bubble { background: rgba(24,27,36,0.94); border-color: rgba(255,255,255,0.08); --bbg: rgba(24,27,36,0.94); --bbd: rgba(255,255,255,0.08); }
         .chat-stage.has-wp .msg-bubble:active { background: rgba(38,42,54,0.96); }
-        .chat-stage.has-wp .message.mine .msg-bubble { background: rgba(0,66,110,0.95); border-color: rgba(0,243,255,0.35); }
+        .chat-stage.has-wp .message.mine .msg-bubble { background: rgba(0,66,110,0.95); border-color: rgba(0,243,255,0.35); --bbg: rgba(0,66,110,0.95); --bbd: rgba(0,243,255,0.35); }
         .chat-stage.has-wp .message.mine .msg-bubble:active { background: rgba(0,82,134,0.97); }
-        .chat-stage.has-wp .message.sticker-msg .msg-bubble, .chat-stage.has-wp .message.mine.sticker-msg .msg-bubble { background: transparent; border-color: transparent; }
+        .chat-stage.has-wp .message.sticker-plain .msg-bubble, .chat-stage.has-wp .message.mine.sticker-plain .msg-bubble { background: transparent; border-color: transparent; }
         /* horário na mesma linha do texto, como no WhatsApp */
         .msg-bubble { display: flow-root; }
         .msg-bubble .msg-text { display: inline; }
@@ -1297,8 +1303,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         /* === FIGURINHAS === */
         .chat-sticker-btn { background: transparent; border: none; color: var(--cyan); font-size: 1.35rem; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; transition: background 0.2s, transform 0.2s; }
         .chat-sticker-btn:active { background: rgba(0,243,255,0.15); transform: scale(0.92); }
-        .message.sticker-msg .msg-bubble, .message.mine.sticker-msg .msg-bubble { background: transparent; border-color: transparent; padding: 2px 4px; box-shadow: none; }
-        .message.sticker-msg .msg-bubble:active { background: rgba(255,255,255,0.05); }
+        .message.sticker-plain .msg-bubble, .message.mine.sticker-plain .msg-bubble { background: transparent; border-color: transparent; padding: 0; box-shadow: none; }
+        .message.sticker-plain .msg-bubble:active { background: transparent; }
         .msg-sticker { display: block; width: clamp(84px, 30vw, 116px); height: auto; aspect-ratio: 1 / 1; object-fit: contain; pointer-events: none; -webkit-user-drag: none; user-select: none; }
         .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-height: 50dvh; overflow-y: auto; padding: 2px; overscroll-behavior: contain; }
         .sticker-tile { position: relative; aspect-ratio: 1 / 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--cyan); font-size: 1.4rem; }
@@ -3085,7 +3091,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         }
 
                         const div = document.createElement('div');
-                        div.className = `message ${isMine ? 'mine' : ''}${msg.sticker ? ' sticker-msg' : ''}`;
+                        div.className = `message ${isMine ? 'mine' : ''}${msg.sticker ? ' sticker-msg' + (msg.replyTo ? '' : ' sticker-plain') : ''}`;
                         div.id = `msg-${msg.id}`;
                         div.dataset.hash = msgHash;
                         div.innerHTML = `
@@ -6443,7 +6449,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     + sel + ' .msg-bubble .msg-text, ' + sel + ' .msg-bubble .msg-voice { color: ' + s.text + '; }\n'
                     + (s.time ? sel + ' .msg-bubble .msg-time { color: ' + s.time + '; }\n' : '')
                     + (s.author ? sel + ' .msg-bubble .msg-author { color: ' + s.author + '; }\n' : '');
-                tag.textContent = rule('#chat-stage .message:not(.mine):not(.sticker-msg)', o) + rule('#chat-stage .message.mine:not(.sticker-msg)', m);
+                const vars = (sel, s) => sel + ' .msg-bubble { --bbg: ' + s.bg + '; --bbd: ' + s.border + '; }\n'
+                    + (s.time ? sel + ' .msg-bubble .msg-time { color: ' + s.time + '; }\n' : '');
+                tag.textContent = rule('#chat-stage .message:not(.mine):not(.sticker-plain)', o) + rule('#chat-stage .message.mine:not(.sticker-plain)', m)
+                    + vars('#chat-stage .message.sticker-plain:not(.mine)', o) + vars('#chat-stage .message.mine.sticker-plain', m);
             };
 
             // sincroniza com o perfil do usuário (fonte da verdade) sem piscar
@@ -6518,4 +6527,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-    </html>
+                    </html>

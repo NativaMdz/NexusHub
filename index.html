@@ -1047,8 +1047,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
         /* === MARCAR COMO NÃO LIDO (pressionar e segurar) === */
         .chat-list-item { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
-        .cl-dot { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), #0088ff); flex-shrink: 0; box-shadow: 0 0 8px rgba(0,243,255,0.55); animation: clDotPulse 2s ease-in-out infinite; }
-        @keyframes clDotPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.65; transform: scale(0.85); } }
+        .cl-dot { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), #0088ff); flex-shrink: 0; box-shadow: 0 0 10px rgba(0,243,255,0.45); box-sizing: border-box; }
         .cl-hold-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: transparent; border: none; width: 100%; text-align: left; color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; }
         .cl-hold-item:hover, .cl-hold-item:active { background: rgba(255,255,255,0.08); }
         .cl-hold-item i { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(0,243,255,0.1); color: var(--cyan); font-size: 0.95rem; flex-shrink: 0; }
@@ -6416,12 +6415,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
         })();
 
-        // ===== MARCAR CONVERSA/GRUPO COMO NÃO LIDO (pressionar e segurar 2 s) =====
+        // ===== MARCAR CONVERSA/GRUPO COMO NÃO LIDO (pressionar e segurar) =====
         (() => {
             const $ = (id) => document.getElementById(id);
             const me = () => appState.currentUserData || {};
             const toast = (m, t) => app.showToast(m, t || 'error');
-            const HOLD_MS = 2000, MOVE_PX = 10;
+            const HOLD_MS = 450, MOVE_PX = 10;
             const ready = () => !!(appState.firebaseUser && appState.currentUserData);
 
             // ---------- marcação (espelho local + Firestore) ----------

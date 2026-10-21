@@ -2018,19 +2018,18 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove, getDocs, query, where, deleteField, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =====================================================================
-        // CATBOX — avatar e banner de perfil (bloco único; posts/chat/grupos NÃO usam isto)
-        // CATBOX_PROXY_URL vazio = envio direto do navegador ao Catbox. Se houver bloqueio CORS,
-        // publique catbox-proxy-worker.js e coloque a URL dele aqui.
+        // IMGBB — avatar e banner de perfil (bloco único; posts/chat/grupos NÃO usam isto)
+        // Cole sua chave de API do ImgBB abaixo (https://api.imgbb.com/). Atenção: a chave fica visível no código.
         // =====================================================================
-        const CATBOX_PROXY_URL = '';
-        const CATBOX_URL_RE = /^https:\/\/files\.catbox\.moe\/[A-Za-z0-9_-]+\.(png|jpe?g|webp|gif)$/i;
+        const IMGBB_KEY = '856fd524dc7d2fff8f6464dadeac0494';
+        const IMGBB_URL_RE = /^https:\/\/i\.ibb\.co(\.com)?\/[A-Za-z0-9_\/.-]+\.(png|jpe?g|webp|gif)$/i;
         const GIF_RE = /^data:image\/gif|^https?:\/\/[^?#]+\.gif(?:[?#].*)?$/i; // GIF antigo (Base64) ou URL .gif
 
-        async function catboxProfileUpload(e, type) { // type: 'profile' | 'banner'
+        async function imgbbProfileUpload(e, type) { // type: 'profile' | 'banner'
             const input = e.target, file = input.files[0];
             if (!file) return;
             const toast = (m, t) => window.app.showToast(m, t);
-            const st = (catboxProfileUpload.st = catboxProfileUpload.st || { busy: {}, cache: {} });
+            const st = (imgbbProfileUpload.st = imgbbProfileUpload.st || { busy: {}, cache: {} });
             if (st.busy[type]) { input.value = ''; return toast("Envio em andamento. Aguarde.", "info"); }
 
             // 1) tipo real pelos bytes iniciais (não confia em nome/MIME)
@@ -2049,6 +2048,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const maxMB = isGif ? 25 : (type === 'banner' ? 20 : 10);
             if (file.size > maxMB * 1048576) { input.value = ''; return toast(`O arquivo excede o limite de ${maxMB}MB.`, "error"); }
 
+            if (!IMGBB_KEY) { input.value = ''; return toast("Chave do ImgBB não configurada no código.", "error"); }
+
             // 3) estado de "enviando"
             st.busy[type] = true;
             const lbl = document.getElementById('lbl-banner-upload');
@@ -2064,21 +2065,19 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 let url = st.cache[key];
                 if (!url) {
                     const fd = new FormData();
-                    fd.append('reqtype', 'fileupload');
-                    fd.append('fileToUpload', new File([file], 'upload.' + ext, { type: mime })); // sem Content-Type manual
-                    const headers = {};
-                    if (CATBOX_PROXY_URL) headers['Authorization'] = 'Bearer ' + await auth.currentUser.getIdToken();
+                    fd.append('image', new File([file], 'upload.' + ext, { type: mime })); // arquivo binário, sem Base64 e sem Content-Type manual
                     const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 90000);
-                    let res, text;
+                    let res, json;
                     try {
-                        res = await fetch(CATBOX_PROXY_URL || 'https://catbox.moe/user/api.php', { method: 'POST', body: fd, headers, signal: ctrl.signal });
-                        text = (await res.text()).trim();
+                        res = await fetch('https://api.imgbb.com/1/upload?key=' + encodeURIComponent(IMGBB_KEY), { method: 'POST', body: fd, signal: ctrl.signal });
+                        json = await res.json().catch(() => null);
                     } catch (err) {
-                        throw new Error(err.name === 'AbortError' ? 'Tempo esgotado ao enviar a imagem. Tente novamente.' : 'Não foi possível contactar o Catbox (rede ou bloqueio CORS). Tente novamente.');
+                        throw new Error(err.name === 'AbortError' ? 'Tempo esgotado ao enviar a imagem. Tente novamente.' : 'Não foi possível contactar o ImgBB (rede ou bloqueio CORS). Tente novamente.');
                     } finally { clearTimeout(timer); }
-                    if (!res.ok) throw new Error('O Catbox recusou o envio (HTTP ' + res.status + '). Tente novamente.');
-                    if (!CATBOX_URL_RE.test(text)) throw new Error('Resposta inválida do Catbox. Tente novamente.');
-                    url = st.cache[key] = text;
+                    if (!res.ok || !json || !json.success) throw new Error('O ImgBB recusou o envio' + (json && json.error && json.error.message ? ': ' + json.error.message : ' (HTTP ' + res.status + ')') + '. Tente novamente.');
+                    const out = json.data && json.data.url;
+                    if (typeof out !== 'string' || !IMGBB_URL_RE.test(out)) throw new Error('Resposta inválida do ImgBB. Tente novamente.');
+                    url = st.cache[key] = out;
                 }
 
                 // 5) salvar só o campo necessário
@@ -2891,7 +2890,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             },
 
             handleImageUpload: async (e, type) => {
-                if (type === 'profile' || type === 'banner') return catboxProfileUpload(e, type);
+                if (type === 'profile' || type === 'banner') return imgbbProfileUpload(e, type);
                 const file = e.target.files[0];
                 if (!file) return;
 

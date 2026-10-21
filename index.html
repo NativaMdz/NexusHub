@@ -2017,6 +2017,98 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove, getDocs, query, where, deleteField, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // =====================================================================
+        // CATBOX — avatar e banner de perfil (bloco único; posts/chat/grupos NÃO usam isto)
+        // CATBOX_PROXY_URL vazio = envio direto do navegador ao Catbox. Se houver bloqueio CORS,
+        // publique catbox-proxy-worker.js e coloque a URL dele aqui.
+        // =====================================================================
+        const CATBOX_PROXY_URL = '';
+        const CATBOX_URL_RE = /^https:\/\/files\.catbox\.moe\/[A-Za-z0-9_-]+\.(png|jpe?g|webp|gif)$/i;
+        const GIF_RE = /^data:image\/gif|^https?:\/\/[^?#]+\.gif(?:[?#].*)?$/i; // GIF antigo (Base64) ou URL .gif
+
+        async function catboxProfileUpload(e, type) { // type: 'profile' | 'banner'
+            const input = e.target, file = input.files[0];
+            if (!file) return;
+            const toast = (m, t) => window.app.showToast(m, t);
+            const st = (catboxProfileUpload.st = catboxProfileUpload.st || { busy: {}, cache: {} });
+            if (st.busy[type]) { input.value = ''; return toast("Envio em andamento. Aguarde.", "info"); }
+
+            // 1) tipo real pelos bytes iniciais (não confia em nome/MIME)
+            const b = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+            const str = (i, n) => String.fromCharCode(...b.slice(i, i + n));
+            let mime = null, ext = null;
+            if (b[0] === 0x89 && str(1, 3) === 'PNG') { mime = 'image/png'; ext = 'png'; }
+            else if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) { mime = 'image/jpeg'; ext = 'jpg'; }
+            else if (str(0, 6) === 'GIF87a' || str(0, 6) === 'GIF89a') { mime = 'image/gif'; ext = 'gif'; }
+            else if (str(0, 4) === 'RIFF' && str(8, 4) === 'WEBP') { mime = 'image/webp'; ext = 'webp'; }
+            if (!mime) { input.value = ''; return toast("Formato não suportado. Use PNG, JPG, WEBP ou GIF.", "error"); }
+
+            // 2) regras existentes: GIF só VIP + limites de tamanho
+            const isGif = mime === 'image/gif';
+            if (isGif && !window.app.getVIPInfo(appState.currentUserData).isActive) { input.value = ''; return toast("Arquivos animados (.GIF) são exclusivos do Plano VIP.", "error"); }
+            const maxMB = isGif ? 25 : (type === 'banner' ? 20 : 10);
+            if (file.size > maxMB * 1048576) { input.value = ''; return toast(`O arquivo excede o limite de ${maxMB}MB.`, "error"); }
+
+            // 3) estado de "enviando"
+            st.busy[type] = true;
+            const lbl = document.getElementById('lbl-banner-upload');
+            const lblHtml = (t, i) => `<i class="fa-solid ${i}"></i> ${t} <input type="file" accept="image/*" onchange="app.handleImageUpload(event, 'banner')">`;
+            const avatarEl = document.querySelector('.profile-avatar');
+            if (type === 'profile') { if (avatarEl) avatarEl.style.opacity = '0.4'; }
+            else lbl.innerHTML = lblHtml('Enviando...', 'fa-spinner fa-spin');
+            toast("Enviando imagem...", "info");
+
+            const key = `${type}:${file.name}:${file.size}:${file.lastModified}`;
+            try {
+                // 4) upload (reaproveita a URL se o upload já deu certo e só o salvamento falhou)
+                let url = st.cache[key];
+                if (!url) {
+                    const fd = new FormData();
+                    fd.append('reqtype', 'fileupload');
+                    fd.append('fileToUpload', new File([file], 'upload.' + ext, { type: mime })); // sem Content-Type manual
+                    const headers = {};
+                    if (CATBOX_PROXY_URL) headers['Authorization'] = 'Bearer ' + await auth.currentUser.getIdToken();
+                    const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 90000);
+                    let res, text;
+                    try {
+                        res = await fetch(CATBOX_PROXY_URL || 'https://catbox.moe/user/api.php', { method: 'POST', body: fd, headers, signal: ctrl.signal });
+                        text = (await res.text()).trim();
+                    } catch (err) {
+                        throw new Error(err.name === 'AbortError' ? 'Tempo esgotado ao enviar a imagem. Tente novamente.' : 'Não foi possível contactar o Catbox (rede ou bloqueio CORS). Tente novamente.');
+                    } finally { clearTimeout(timer); }
+                    if (!res.ok) throw new Error('O Catbox recusou o envio (HTTP ' + res.status + '). Tente novamente.');
+                    if (!CATBOX_URL_RE.test(text)) throw new Error('Resposta inválida do Catbox. Tente novamente.');
+                    url = st.cache[key] = text;
+                }
+
+                // 5) salvar só o campo necessário
+                if (type === 'profile') {
+                    const u = appState.currentUserData, updates = { avatar: url };
+                    if (!isGif) updates.staticAvatarFallback = url;
+                    else if (!u.staticAvatarFallback) updates.staticAvatarFallback = u.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${appState.firebaseUser.uid}`;
+                    try {
+                        await updateDoc(doc(colUsers, appState.firebaseUser.uid), updates);
+                        delete st.cache[key];
+                        toast("Foto atualizada!", "success");
+                    } catch (dbErr) {
+                        toast("Imagem enviada, mas não foi possível salvar: " + dbErr.message + ". Selecione o mesmo arquivo para tentar salvar de novo (sem reenviar).", "error");
+                    }
+                } else {
+                    appState.tempBase64Banner = url; // campo existente, agora guarda a URL; gravado em "Salvar Perfil"
+                    lbl.innerHTML = lblHtml(isGif ? 'GIF Enviado' : 'Imagem Enviada', 'fa-check');
+                    toast("Banner enviado. Salve o perfil.", "success");
+                }
+            } catch (err) {
+                if (type === 'banner') lbl.innerHTML = appState.tempBase64Banner ? lblHtml('Imagem Enviada', 'fa-check') : lblHtml('Alterar Banner de Fundo', 'fa-image');
+                toast(err.message, "error");
+            } finally {
+                st.busy[type] = false;
+                const el = document.querySelector('.profile-avatar');
+                if (type === 'profile' && el) el.style.opacity = '';
+                input.value = '';
+            }
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyAXQeUDL5c1iW3FiinUfDiCJAfyP0r-sd4",
             authDomain: "nexushub-50e4a.firebaseapp.com",
@@ -2229,11 +2321,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         const defaultAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${appState.firebaseUser.uid}`;
 
                         // Reverter avatar se for GIF
-                        if (user.avatar && user.avatar.includes('data:image/gif')) {
+                        if (user.avatar && GIF_RE.test(user.avatar)) {
                             updates.avatar = user.staticAvatarFallback || defaultAvatar;
                         }
                         // Reverter banner se for GIF
-                        if (user.banner && user.banner.includes('data:image/gif')) {
+                        if (user.banner && GIF_RE.test(user.banner)) {
                             updates.banner = user.staticBannerFallback || '';
                         }
 
@@ -2799,6 +2891,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             },
 
             handleImageUpload: async (e, type) => {
+                if (type === 'profile' || type === 'banner') return catboxProfileUpload(e, type);
                 const file = e.target.files[0];
                 if (!file) return;
 
@@ -3429,7 +3522,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     if (appState.tempBase64Banner) {
                         updates.banner = appState.tempBase64Banner;
 
-                        const isGif = appState.tempBase64Banner.includes('data:image/gif');
+                        const isGif = GIF_RE.test(appState.tempBase64Banner);
                         if (!isGif) {
                             updates.staticBannerFallback = appState.tempBase64Banner;
                         } else if (!appState.currentUserData.staticBannerFallback) {

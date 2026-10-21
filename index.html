@@ -455,7 +455,8 @@
         .theme-special_glacial .profile-header::after,
         .theme-special_aurora .profile-header::after,
         .theme-special_eclipse .profile-header::after,
-        .theme-special_royal .profile-header::after {
+        .theme-special_royal .profile-header::after,
+        .theme-special_crimson .profile-header::after {
             content: "";
             position: absolute;
             inset: 0;
@@ -1015,6 +1016,92 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 @keyframes royalPulse {
     0% { opacity: 0.85; filter: brightness(0.95); }
     100% { opacity: 1; filter: brightness(1.15); }
+}
+
+/* ==========================
+   TEMA ESPECIAL - CRIMSON ABYSS (Red Dark)
+========================== */
+
+/* Camada Base: abismo, fumaça à deriva em 2 direções e brasas subindo com balanço lateral */
+.theme-special_crimson .profile-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    background:
+        radial-gradient(ellipse 120% 70% at 50% -10%, rgba(255, 30, 50, 0.20) 0%, rgba(120, 0, 15, 0.06) 45%, transparent 75%),
+        radial-gradient(ellipse 150% 80% at 50% 120%, rgba(150, 0, 20, 0.40) 0%, rgba(60, 0, 8, 0.12) 50%, transparent 80%),
+        /* Fumaça A (sobe para a direita) */
+        radial-gradient(ellipse 60% 50% at 30% 60%, rgba(130, 0, 22, 0.32) 0%, transparent 70%),
+        /* Fumaça B (desce para a esquerda) */
+        radial-gradient(ellipse 50% 60% at 70% 40%, rgba(190, 10, 32, 0.22) 0%, transparent 70%),
+        /* Brasas grandes */
+        radial-gradient(circle, rgba(255, 90, 60, 0.8) 1px, transparent 1.5px),
+        /* Faíscas finas */
+        radial-gradient(circle, rgba(255, 160, 120, 0.4) 1px, transparent 1.2px),
+        linear-gradient(to bottom, #12030a 0%, #060103 100%);
+    background-size: 100% 100%, 100% 100%, 400px 320px, 520px 360px, 90px 90px, 140px 140px, 100% 100%;
+    background-repeat: no-repeat, no-repeat, repeat, repeat, repeat, repeat, no-repeat;
+    animation: crimsonDrift 22s linear infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 30, 50, 0.18));
+}
+
+/* Camada Frontal: vinheta, ondas de batimento, brilho e falhas elétricas */
+.theme-special_crimson .profile-header::after {
+    background:
+        radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.75) 100%),
+        /* Onda de batimento 1 */
+        radial-gradient(circle, transparent 0 34%, rgba(255, 40, 60, 0.24) 40%, transparent 48%),
+        /* Onda de batimento 2 (segundo "tum") */
+        radial-gradient(circle, transparent 0 34%, rgba(255, 40, 60, 0.18) 40%, transparent 48%),
+        radial-gradient(ellipse 150% 150% at 50% 50%, rgba(255, 30, 50, 0.05) 0%, rgba(80, 0, 10, 0.10) 40%, transparent 70%);
+    background-size: 100% 100%, 0% 0%, 0% 0%, 200% 200%;
+    background-position: 0 0, 50% 40%, 50% 40%, 0 0;
+    background-repeat: no-repeat;
+    opacity: 0.95;
+    animation:
+        crimsonGlow 18s ease-in-out infinite alternate,
+        crimsonBeat 5s linear infinite,
+        crimsonHeart 5s ease-out infinite,
+        crimsonFlicker 9s linear infinite;
+}
+
+/* Fumaça + brasas: todas terminam em múltiplos exatos do tile (loop sem corte) */
+@keyframes crimsonDrift {
+    0%   { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+    25%  { background-position: 0 0, 0 0, 100px -80px, -130px 90px, 14px -67.5px, -22px -105px, 0 0; }
+    50%  { background-position: 0 0, 0 0, 200px -160px, -260px 180px, 0 -135px, 0 -210px, 0 0; }
+    75%  { background-position: 0 0, 0 0, 300px -240px, -390px 270px, -14px -202.5px, 22px -315px, 0 0; }
+    100% { background-position: 0 0, 0 0, 400px -320px, -520px 360px, 0 -270px, 0 -420px, 0 0; }
+}
+@keyframes crimsonGlow {
+    0%   { background-position: 0 0, 50% 40%, 50% 40%, 0 0; }
+    100% { background-position: 0 0, 50% 40%, 50% 40%, 100% 100%; }
+}
+/* Duas ondas expandindo do centro, como um coração batendo (tum-tum) */
+@keyframes crimsonBeat {
+    0%, 6% { background-size: 100% 100%, 0% 0%, 0% 0%, 200% 200%; }
+    26%    { background-size: 100% 100%, 170% 170%, 0% 0%, 200% 200%; }
+    46%    { background-size: 100% 100%, 340% 340%, 170% 170%, 200% 200%; }
+    66%, 100% { background-size: 100% 100%, 340% 340%, 340% 340%, 200% 200%; }
+}
+/* Brilho em batida dupla, sincronizado com as ondas */
+@keyframes crimsonHeart {
+    0%, 40%, 100% { filter: brightness(1); }
+    8%  { filter: brightness(1.4); }
+    18% { filter: brightness(1.05); }
+    28% { filter: brightness(1.3); }
+}
+/* Falhas elétricas rápidas e irregulares */
+@keyframes crimsonFlicker {
+    0%, 86%, 100% { opacity: 0.95; }
+    87% { opacity: 0.55; }
+    88% { opacity: 1; }
+    89% { opacity: 0.5; }
+    90.5% { opacity: 0.95; }
+    95% { opacity: 0.8; }
+    95.6% { opacity: 1; }
 }
 
         /* CHAT / COMMS */
@@ -2021,7 +2108,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // IMGBB — avatar e banner de perfil (bloco único; posts/chat/grupos NÃO usam isto)
         // Cole sua chave de API do ImgBB abaixo (https://api.imgbb.com/). Atenção: a chave fica visível no código.
         // =====================================================================
-        const IMGBB_KEY = '856fd524dc7d2fff8f6464dadeac0494';
+        const IMGBB_KEY = '';
         const IMGBB_URL_RE = /^https:\/\/i\.ibb\.co(\.com)?\/[A-Za-z0-9_\/.-]+\.(png|jpe?g|webp|gif)$/i;
         const GIF_RE = /^data:image\/gif|^https?:\/\/[^?#]+\.gif(?:[?#].*)?$/i; // GIF antigo (Base64) ou URL .gif
 
@@ -2205,6 +2292,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 { id: 'special_aurora', name: 'Aurora', description: 'Inspirado na Aurora Boreal. Faixas luminosas suaves entre verde, azul e roxo. Iluminação delicada.', category: 'special_themes', icon: 'fa-solid fa-smog', price: 20000, status: 'active', rarityColor: '#00f3ff', rarityLabel: '🌈 Exclusivo', previewColor: 'linear-gradient(to bottom, #050a0f, #050a0f), radial-gradient(ellipse at 50% 0%, rgba(0, 255, 150, 0.4), transparent)', previewBorder: '#00ff96' },
                 { id: 'special_eclipse', name: 'Eclipse', description: 'Preto premium com reflexos em roxo escuro e sombras suaves. Luxuoso e minimalista.', category: 'special_themes', icon: 'fa-solid fa-moon', price: 30000, status: 'active', rarityColor: '#ff2a2a', rarityLabel: '🔴 Mítico', previewColor: 'radial-gradient(circle at 50% 50%, #0f0a14, #000000)', previewBorder: '#28143c' },
                 { id: 'special_royal', name: 'Royal Prestige', description: 'Azul-marinho profundo com detalhes dourados metálicos e reflexos elegantes. Realeza corporativa.', category: 'special_themes', icon: 'fa-solid fa-chess-king', price: 22000, status: 'active', rarityColor: '#00f3ff', rarityLabel: '🌈 Exclusivo', previewColor: 'linear-gradient(135deg, #0a0f28, #05050f)', previewBorder: '#ffd700' },
+                { id: 'special_crimson', name: 'Crimson Abyss', description: 'Red Dark premium. Preto profundo com brasas carmesim subindo, reflexos de sangue e brilho pulsante.', category: 'special_themes', icon: 'fa-solid fa-fire-flame-curved', price: 20000, status: 'active', rarityColor: '#ff1a3c', rarityLabel: '🔴 Lendário', previewColor: 'linear-gradient(135deg, #12030a, #060103)', previewBorder: '#ff1a3c' },
 
                 { id: 'frame_neon_cyan', name: 'Neon Ciano', description: 'Borda brilhante com assinatura cibernética clássica.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 1500, duration: '', status: 'active' },
                 { id: 'frame_cyber_purple', name: 'Cyber Roxo', description: 'Aura roxa pulsante da malha profunda.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2000, duration: '', status: 'active' },
@@ -2368,7 +2456,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     'special_glacial': { bg: 'linear-gradient(135deg, rgba(20, 40, 60, 0.9) 0%, rgba(5, 15, 25, 0.98) 100%), radial-gradient(circle at 0% 0%, rgba(150, 220, 255, 0.15) 0%, transparent 50%)', border: 'rgba(180, 230, 255, 0.7)', glow: 'rgba(150, 200, 255, 0.4)' },
                     'special_aurora': { bg: 'radial-gradient(ellipse at 50% -20%, rgba(0, 255, 150, 0.25) 0%, rgba(0, 100, 255, 0.15) 40%, transparent 70%), linear-gradient(to bottom, rgba(5, 10, 15, 0.95), rgba(5, 10, 15, 0.98))', border: 'rgba(0, 255, 150, 0.6)', glow: 'rgba(0, 255, 150, 0.3)' },
                     'special_eclipse': { bg: 'radial-gradient(circle at 50% -30%, rgba(80, 30, 120, 0.35) 0%, transparent 60%), rgba(5, 5, 7, 0.98)', border: 'rgba(60, 20, 80, 0.8)', glow: 'rgba(80, 30, 120, 0.4)' },
-                    'special_royal': { bg: 'linear-gradient(135deg, rgba(10, 15, 40, 0.95) 0%, rgba(5, 5, 15, 0.98) 100%), radial-gradient(circle at 100% 0%, rgba(255, 215, 0, 0.12) 0%, transparent 50%), radial-gradient(circle at 0% 100%, rgba(255, 215, 0, 0.08) 0%, transparent 50%)', border: 'rgba(255, 215, 0, 0.7)', glow: 'rgba(255, 215, 0, 0.3)' }
+                    'special_royal': { bg: 'linear-gradient(135deg, rgba(10, 15, 40, 0.95) 0%, rgba(5, 5, 15, 0.98) 100%), radial-gradient(circle at 100% 0%, rgba(255, 215, 0, 0.12) 0%, transparent 50%), radial-gradient(circle at 0% 100%, rgba(255, 215, 0, 0.08) 0%, transparent 50%)', border: 'rgba(255, 215, 0, 0.7)', glow: 'rgba(255, 215, 0, 0.3)' },
+                    'special_crimson': { bg: 'radial-gradient(circle at 50% -30%, rgba(255, 30, 50, 0.22) 0%, transparent 60%), linear-gradient(135deg, rgba(25, 3, 10, 0.95) 0%, rgba(6, 1, 3, 0.98) 100%)', border: 'rgba(255, 30, 60, 0.75)', glow: 'rgba(255, 30, 60, 0.35)' }
                 };
 
                 const isVIP = app.getVIPInfo(userData).isActive;

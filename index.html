@@ -1059,25 +1059,41 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     filter: drop-shadow(0 0 8px rgba(255, 30, 50, 0.18));
 }
 
-/* Camada Frontal: vinheta, ondas de batimento, brilho e falhas elétricas */
+/* Camada Frontal: só vinheta, brilho suave e falhas elétricas (animação apenas de opacidade = leve) */
 .theme-special_crimson .profile-header::after {
     background:
         radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.75) 100%),
-        /* Onda de batimento 1 */
-        radial-gradient(circle, transparent 0 34%, rgba(255, 40, 60, 0.24) 40%, transparent 48%),
-        /* Onda de batimento 2 (segundo "tum") */
-        radial-gradient(circle, transparent 0 34%, rgba(255, 40, 60, 0.18) 40%, transparent 48%),
         radial-gradient(ellipse 150% 150% at 50% 50%, rgba(255, 30, 50, 0.05) 0%, rgba(80, 0, 10, 0.10) 40%, transparent 70%);
-    background-size: 100% 100%, 0% 0%, 0% 0%, 200% 200%;
-    background-position: 0 0, 50% 40%, 50% 40%, 0 0;
-    background-repeat: no-repeat;
     opacity: 0.95;
-    animation:
-        crimsonGlow 18s ease-in-out infinite alternate,
-        crimsonBeat 5s linear infinite,
-        crimsonHeart 5s ease-out infinite,
-        crimsonFlicker 9s linear infinite;
+    animation: crimsonFlicker 9s linear infinite;
 }
+
+/* Anéis de batimento: elementos próprios animados só com transform + opacity (rodam na GPU, sem repintar) */
+.profile-header .crimson-fx { display: none; }
+.theme-special_crimson .profile-header .crimson-fx {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+    contain: layout paint;
+}
+.theme-special_crimson .crimson-fx i {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    width: 260%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle closest-side, transparent 0 56%, rgba(255, 40, 60, 0.30) 62%, rgba(255, 40, 60, 0.12) 66%, transparent 72%);
+    transform: translate3d(-50%, -50%, 0) scale(0.1);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: crimsonRing 5s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+.theme-special_crimson .crimson-fx i:nth-child(2) { --ring-max: 0.7; animation-delay: 0.9s; }
 
 /* Fumaça + brasas: todas terminam em múltiplos exatos do tile (loop sem corte) */
 @keyframes crimsonDrift {
@@ -1087,23 +1103,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     75%  { background-position: 0 0, 0 0, 300px -240px, -390px 270px, -14px -202.5px, 22px -315px, 0 0; }
     100% { background-position: 0 0, 0 0, 400px -320px, -520px 360px, 0 -270px, 0 -420px, 0 0; }
 }
-@keyframes crimsonGlow {
-    0%   { background-position: 0 0, 50% 40%, 50% 40%, 0 0; }
-    100% { background-position: 0 0, 50% 40%, 50% 40%, 100% 100%; }
-}
-/* Duas ondas expandindo do centro, como um coração batendo (tum-tum) */
-@keyframes crimsonBeat {
-    0%, 6% { background-size: 100% 100%, 0% 0%, 0% 0%, 200% 200%; }
-    26%    { background-size: 100% 100%, 170% 170%, 0% 0%, 200% 200%; }
-    46%    { background-size: 100% 100%, 340% 340%, 170% 170%, 200% 200%; }
-    66%, 100% { background-size: 100% 100%, 340% 340%, 340% 340%, 200% 200%; }
-}
-/* Brilho em batida dupla, sincronizado com as ondas */
-@keyframes crimsonHeart {
-    0%, 40%, 100% { filter: brightness(1); }
-    8%  { filter: brightness(1.4); }
-    18% { filter: brightness(1.05); }
-    28% { filter: brightness(1.3); }
+@keyframes crimsonRing {
+    0%, 3% { transform: translate3d(-50%, -50%, 0) scale(0.1); opacity: 0; }
+    8%     { opacity: var(--ring-max, 1); }
+    48%, 100% { transform: translate3d(-50%, -50%, 0) scale(1.25); opacity: 0; }
 }
 /* Falhas elétricas rápidas e irregulares */
 @keyframes crimsonFlicker {
@@ -3477,6 +3480,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     <section class="profile-top-section theme-${userData.profileTheme || 'default'}" style="${themeStyle}">
                         <div class="profile-banner" style="background-image: url('${bannerImg}');"></div>
                         <div class="profile-header">
+                            ${userData.profileTheme === 'special_crimson' ? '<span class="crimson-fx" aria-hidden="true"><i></i><i></i></span>' : ''}
                             <div class="profile-avatar-container">
                                 <img src="${userData.avatar}" loading="lazy" decoding="async" alt="Avatar" class="profile-avatar ${app.getFrameClass(userData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                                 ${isMe && !isPublic ? `<div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto"><i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i></div><input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">` : ''}
@@ -7076,4 +7080,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                                                                                                                                            </html>
+    </html>

@@ -1296,6 +1296,43 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .sc-send { width: 38px; height: 38px; border-radius: 50%; color: #000; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .sc-chip { padding: 5px 12px; border-radius: 999px; border: 1px solid; font-size: 0.8rem; font-weight: 600; }
 
+        /* === MÍDIA E ARQUIVOS NO CHAT === */
+        .chat-attach-btn { background: transparent; border: none; color: var(--cyan); font-size: 1.1rem; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .chat-attach-btn:active { background: rgba(var(--cyan-rgb), 0.15); transform: scale(0.92); }
+        .msg-media { position: relative; display: block; width: clamp(170px, 64vw, 300px); max-height: 380px; border-radius: 10px 10px 0 10px; overflow: hidden; background: #0b0b10; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .msg-media > img { display: block; width: 100%; height: 100%; object-fit: cover; -webkit-user-drag: none; user-select: none; }
+        .message.media-framed .msg-media { margin-top: 4px; border-radius: 8px; }
+        .message.media-framed .msg-media + .msg-text, .message.media-framed .msg-file + .msg-text { margin-top: 6px; }
+        .mm-play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .mm-play i { width: 46px; height: 46px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding-left: 3px; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.35); }
+        .mm-dur { position: absolute; left: 6px; bottom: 6px; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.68rem; padding: 1px 6px; border-radius: 6px; }
+        .mm-more { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border: none; border-radius: 50%; background: rgba(0,0,0,0.5); color: #fff; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .msg-file { display: flex; align-items: center; gap: 10px; width: min(260px, 68vw); box-sizing: border-box; padding: 8px 10px; margin: 2px 0 4px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; text-align: left; }
+        .msg-file .mf-ico { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .msg-file .mf-txt { min-width: 0; flex: 1; }
+        .msg-file .mf-name { color: var(--text-main); font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .msg-file .mf-meta { color: var(--text-muted); font-size: 0.72rem; margin-top: 1px; text-transform: uppercase; }
+        .msg-file > .fa-download { color: var(--cyan); font-size: 0.95rem; }
+        .att-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .att-tile { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-main); cursor: pointer; text-align: center; font-family: inherit; }
+        .att-tile:active { background: rgba(var(--cyan-rgb), 0.12); }
+        .att-ico { width: 52px; height: 52px; border-radius: 14px; background: rgba(var(--cyan-rgb), 0.12); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .att-tile b { font-size: 0.95rem; }
+        .att-tile small { font-size: 0.68rem; color: var(--text-muted); line-height: 1.3; }
+        .mm-prev { background: #050507; border: 1px solid var(--border-glass); border-radius: 12px; padding: 8px; display: flex; justify-content: center; align-items: center; margin-bottom: 12px; max-height: 46dvh; overflow: hidden; }
+        .mm-prev img, .mm-prev video { max-width: 100%; max-height: 42dvh; border-radius: 8px; display: block; }
+        .mm-prev .msg-file { margin: 0; cursor: default; }
+        .mm-reply { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
+        .mm-reply:empty { display: none; }
+        .mm-caption { width: 100%; box-sizing: border-box; min-height: 44px; max-height: 110px; resize: none; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: 10px; color: var(--text-main); padding: 10px 12px; font-family: inherit; font-size: 0.95rem; }
+        .mm-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 10px; display: none; }
+        .mm-bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--cyan), var(--purple)); transition: width 0.15s linear; }
+        #modal-mediaview { background: #000; backdrop-filter: none; z-index: 120; }
+        #mv-body { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        #mv-body img, #mv-body video { max-width: 100vw; max-height: 100dvh; object-fit: contain; }
+        .mv-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px; z-index: 3; background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); }
+        .mv-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: rgba(255,255,255,0.14); color: #fff; font-size: 1.05rem; cursor: pointer; }
+
         /* === REAÇÕES EM MENSAGENS === */
         .message.has-rx { padding-bottom: 20px; }
         .msg-rx { position: absolute; bottom: -17px; left: 5px; display: flex; align-items: center; gap: 3px; background: rgba(24,27,36,0.98); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 2px 8px; font-size: 0.85rem; line-height: 1.4; color: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.5); font-family: inherit; z-index: 2; }
@@ -1960,6 +1997,52 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         </div>
     </div>
 
+    <input type="file" id="mm-input-media" accept="image/jpeg,image/png,image/gif,image/webp,video/*" onchange="app.mediaPicked(event)" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;" tabindex="-1" aria-hidden="true">
+    <input type="file" id="mm-input-file" accept=".pdf,.txt,.doc,.docx,.js,.json,.zip,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json,text/javascript,application/javascript,application/zip,application/x-zip-compressed" onchange="app.mediaPicked(event)" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-overlay" id="modal-attach" onclick="if(event.target===this) app.closeAttachMenu()">
+        <div class="modal-content" style="max-width: 360px;">
+            <div class="modal-header">
+                <h2>Enviar</h2>
+                <button class="close-modal" onclick="app.closeAttachMenu()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="att-grid">
+                    <button type="button" class="att-tile" onclick="app.attachPick('media')"><span class="att-ico"><i class="fa-solid fa-image"></i></span><b>Foto ou vídeo</b><small>JPG, PNG, WEBP, GIF, MP4</small></button>
+                    <button type="button" class="att-tile" onclick="app.attachPick('file')"><span class="att-ico"><i class="fa-solid fa-file-lines"></i></span><b>Arquivo</b><small>PDF, TXT, DOC, JS, JSON, ZIP</small></button>
+                </div>
+                <p class="set-note">Fotos e arquivos até 10 MB. Vídeos até 100 MB.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-mediasend">
+        <div class="modal-content" style="max-width: 420px; max-height: 92dvh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>Enviar</h2>
+                <button class="close-modal" onclick="app.mediaCancel()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="mm-prev" id="mm-prev"></div>
+                <div class="mm-reply" id="mm-reply"></div>
+                <textarea id="mm-caption" class="mm-caption" rows="1" maxlength="500" placeholder="Adicionar legenda..."></textarea>
+                <div class="mm-bar" id="mm-bar"><i id="mm-bar-fill"></i></div>
+                <div class="set-grid" style="margin-top: 12px;">
+                    <button type="button" class="btn-primary btn-secondary" id="mm-cancel" onclick="app.mediaCancel()">Cancelar</button>
+                    <button type="button" class="btn-primary" id="mm-send" onclick="app.mediaSend()"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-mediaview" onclick="if(event.target===this || event.target.id==='mv-body') app.closeMediaView()">
+        <div class="mv-top">
+            <button type="button" class="mv-btn" onclick="app.closeMediaView()" aria-label="Fechar"><i class="fa-solid fa-arrow-left"></i></button>
+            <button type="button" class="mv-btn" onclick="app.mediaViewDownload()" aria-label="Baixar"><i class="fa-solid fa-download"></i></button>
+        </div>
+        <div id="mv-body"></div>
+    </div>
+
     <div class="modal-overlay" id="modal-reactions" onclick="if(event.target===this) app.closeReactions()">
         <div class="modal-content" style="max-width: 360px;">
             <div class="modal-header">
@@ -2110,6 +2193,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 <div class="chat-input-area" id="chat-input-container">
                     <button type="button" class="chat-sticker-btn" onclick="app.openStickerPicker()" aria-label="Figurinhas"><i class="fa-regular fa-face-smile"></i></button>
                     <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
+                    <button type="button" class="chat-attach-btn" onclick="app.openAttachMenu()" aria-label="Enviar foto, vídeo ou arquivo"><i class="fa-solid fa-paperclip"></i></button>
                     <button type="button" class="chat-send-btn chat-mic-btn" onclick="app.startVoiceRecord()" aria-label="Gravar áudio"><i class="fa-solid fa-microphone"></i></button>
                     <button class="chat-send-btn" onclick="app.sendChatMessage()">
                         <i class="fa-solid fa-paper-plane"></i>
@@ -2185,6 +2269,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // Cole sua chave de API do ImgBB abaixo (https://api.imgbb.com/). Atenção: a chave fica visível no código.
         // =====================================================================
         const IMGBB_KEY = '856fd524dc7d2fff8f6464dadeac0494';
+        // Chat (fotos, vídeos e arquivos) via Cloudinary: crie uma conta grátis, copie o "Cloud name" e
+        // crie um Upload preset do tipo "Unsigned". Veja também: Settings > Security > "Allow delivery of PDF and ZIP files".
+        const CLOUDINARY_CLOUD = '';
+        const CLOUDINARY_PRESET = '';
         const IMGBB_URL_RE = /^https:\/\/i\.ibb\.co(\.com)?\/[A-Za-z0-9_\/.-]+\.(png|jpe?g|webp|gif)$/i;
         const GIF_RE = /^data:image\/gif|^https?:\/\/[^?#]+\.gif(?:[?#].*)?$/i; // GIF antigo (Base64) ou URL .gif
 
@@ -2798,9 +2886,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar texto</button>`;
                 } else if (type === 'message') {
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.startReply()"><i class="fa-solid fa-reply"></i> Responder mensagem</button>`;
-                    if (isMine && !item.sticker && !item.audio) menu.innerHTML += `<button class="context-menu-item" onclick="app.openEditModal()"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
+                    if (isMine && !item.sticker && !item.audio && !item.media) menu.innerHTML += `<button class="context-menu-item" onclick="app.openEditModal()"><i class="fa-solid fa-pen"></i> Editar mensagem</button>`;
                     if (item.sticker) menu.innerHTML += `<button class="context-menu-item" onclick="app.saveReceivedSticker()"><i class="fa-solid fa-star"></i> Salvar figurinha</button>`;
-                    else if (!item.audio) menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar mensagem</button>`;
+                    else if (!item.audio && !(item.media && !item.mcap)) menu.innerHTML += `<button class="context-menu-item" onclick="app.handleCopyText()"><i class="fa-solid fa-copy"></i> Copiar mensagem</button>`;
+                    if (item.media) menu.innerHTML += `<button class="context-menu-item" onclick="app.mediaDownloadActive()"><i class="fa-solid fa-download"></i> Baixar</button>`;
                     menu.innerHTML += `<button class="context-menu-item" onclick="app.deleteForMe()"><i class="fa-solid fa-eye-slash"></i> Apagar para mim</button>`;
                     if (isMine) menu.innerHTML += `<button class="context-menu-item danger" onclick="app.deleteForEveryone()"><i class="fa-solid fa-trash"></i> Apagar para todos</button>`;
                 }
@@ -3366,7 +3455,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         }
 
                         const div = document.createElement('div');
-                        div.className = `message ${isMine ? 'mine' : ''}${msg.sticker ? ' sticker-msg' + (msg.replyTo ? '' : ' sticker-plain') : ''}`;
+                        div.className = `message ${isMine ? 'mine' : ''}${msg.sticker ? ' sticker-msg' + (msg.replyTo ? '' : ' sticker-plain') : (msg.media ? app.mediaMsgClass(msg) : '')}`;
                         div.id = `msg-${msg.id}`;
                         div.dataset.hash = msgHash;
                         div.innerHTML = `
@@ -3374,7 +3463,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                             <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
                                 ${!isMine ? `<div class="msg-author${containerId === 'chat-private-container' ? '' : ' linked'}" data-uid="${author.uid}" ${containerId === 'chat-private-container' ? '' : `onclick="app.navigate('public_profile', null, '${author.uid}')"`}>${author.name} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
-                                ${msg.audio ? app.voiceBubbleHtml(msg) : msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${msg.content}</div>`}
+                                ${msg.audio ? app.voiceBubbleHtml(msg) : msg.media ? app.mediaBubbleHtml(msg) : msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${msg.content}</div>`}
                                 <span class="msg-time">${timeStr}${editedHtml}</span>
                             </div>
                         `;
@@ -7083,6 +7172,221 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.closePrivacy = () => document.getElementById('modal-privacy').classList.remove('active');
             app.openSiteColors = () => { app.siteColorsLoad(); $('modal-sitecolors').classList.add('active'); };
             app.closeSiteColors = () => $('modal-sitecolors').classList.remove('active');
+        })();
+
+        // ===== MÍDIAS E ARQUIVOS NO CHAT (fotos, vídeos, PDF/TXT/DOC/JS/JSON/ZIP) =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const EXT = { image: ['jpg', 'jpeg', 'png', 'gif', 'webp'], video: ['mp4', 'webm', 'mov', 'm4v', '3gp'], file: ['pdf', 'txt', 'doc', 'docx', 'js', 'json', 'zip'] };
+            const MAX_MB = { image: 10, video: 100, file: 10 }; // limites do plano grátis do Cloudinary
+            const FILE_ICON = { pdf: ['fa-file-pdf', '#ff5c6c'], doc: ['fa-file-word', '#5aa9ff'], docx: ['fa-file-word', '#5aa9ff'], txt: ['fa-file-lines', '#b8bccb'], js: ['fa-file-code', '#f7df1e'], json: ['fa-file-code', '#ffb454'], zip: ['fa-file-zipper', '#b070ff'] };
+            const URL_RE = /^https:\/\/res\.cloudinary\.com\/[A-Za-z0-9_-]+\/(image|video|raw)\/upload\/[A-Za-z0-9_\-./%~:,]+$/;
+            // só renderiza/baixa mídia do Cloudinary configurado (mensagens vêm de outros usuários)
+            const okUrl = (u) => typeof u === 'string' && URL_RE.test(u) && (!CLOUDINARY_CLOUD || u.startsWith('https://res.cloudinary.com/' + CLOUDINARY_CLOUD + '/'));
+            const safeId = (id) => String(id).replace(/[^A-Za-z0-9_-]/g, '');
+            const fmtSize = (b) => b >= 1048576 ? (b / 1048576).toFixed(1).replace('.0', '') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+            const fmtDur = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+            const extOf = (name) => (String(name).split('.').pop() || '').toLowerCase();
+            const poster = (u) => u.replace('/video/upload/', '/video/upload/so_0,w_480,f_jpg,q_auto/').replace(/\.[A-Za-z0-9]+$/, '.jpg');
+
+            const fileCardHtml = (m, attrs) => {
+                const ext = extOf(m.name), ic = FILE_ICON[ext] || ['fa-file', '#b8bccb'];
+                return '<div class="msg-file" ' + (attrs || '') + '><span class="mf-ico" style="color:' + ic[1] + ';background:' + ic[1] + '22;"><i class="fa-solid ' + ic[0] + '"></i></span>'
+                    + '<span class="mf-txt"><div class="mf-name">' + esc(m.name) + '</div><div class="mf-meta">' + esc(ext) + (m.size ? ' · ' + fmtSize(m.size) : '') + '</div></span>'
+                    + (attrs ? '<i class="fa-solid fa-download"></i>' : '') + '</div>';
+            };
+
+            // ---------- renderização no chat ----------
+            app.mediaMsgClass = (msg) => {
+                const m = msg.media || {};
+                if (!okUrl(m.url)) return ' media-msg media-framed';
+                if (m.kind === 'file') return ' media-msg media-framed' + (msg.mcap ? '' : ' sticker-msg');
+                if (msg.replyTo || msg.mcap) return ' media-msg media-framed' + (msg.mcap ? '' : ' sticker-msg');
+                return ' media-msg sticker-msg sticker-plain'; // sem menção/legenda: solta, igual figurinha
+            };
+            app.mediaBubbleHtml = (msg) => {
+                const m = msg.media;
+                if (!m || !okUrl(m.url)) return '<div class="msg-text">⚠️ Mídia indisponível</div>';
+                const id = safeId(msg.id), cap = msg.mcap ? '<div class="msg-text">' + msg.content + '</div>' : '';
+                const data = 'data-kind="' + esc(m.kind) + '" data-url="' + esc(m.url) + '" data-name="' + esc(m.name || '') + '"';
+                if (m.kind === 'file') return fileCardHtml(m, data + ' onclick="event.stopPropagation(); app.mediaDownload(this.dataset.url, this.dataset.name)"') + cap;
+                const w = Number(m.w) || 0, h = Number(m.h) || 0;
+                const ar = w && h ? Math.min(1.8, Math.max(0.6, w / h)) : (m.kind === 'video' ? 1.78 : 1.33);
+                const more = '<button type="button" class="mm-more" aria-label="Opções" onclick="event.stopPropagation(); app.openContextMenu(\'' + id + '\', \'message\')"><i class="fa-solid fa-ellipsis-vertical"></i></button>';
+                const click = 'onclick="event.stopPropagation(); app.mediaView(this)"';
+                if (m.kind === 'video') {
+                    return '<div class="msg-media" ' + data + ' ' + click + ' style="aspect-ratio:' + ar.toFixed(3) + ';"><img src="' + esc(poster(m.url)) + '" loading="lazy" decoding="async" alt="Vídeo" draggable="false" onerror="this.style.display=\'none\'">'
+                        + '<span class="mm-play"><i class="fa-solid fa-play"></i></span>' + (m.dur ? '<span class="mm-dur">' + fmtDur(Number(m.dur) || 0) + '</span>' : '') + more + '</div>' + cap;
+                }
+                return '<div class="msg-media" ' + data + ' ' + click + ' style="aspect-ratio:' + ar.toFixed(3) + ';"><img src="' + esc(m.url) + '" loading="lazy" decoding="async" alt="Imagem" draggable="false">' + more + '</div>' + cap;
+            };
+
+            // ---------- visualizador / download ----------
+            const mv = { url: null, name: '' };
+            app.mediaView = (el) => {
+                const url = el.dataset.url, kind = el.dataset.kind;
+                if (!okUrl(url)) return;
+                const box = $('mv-body'); box.innerHTML = '';
+                let node;
+                if (kind === 'video') { node = document.createElement('video'); node.src = url; node.controls = true; node.autoplay = true; node.playsInline = true; }
+                else { node = document.createElement('img'); node.src = url; node.alt = ''; }
+                box.appendChild(node);
+                mv.url = url; mv.name = el.dataset.name || '';
+                $('modal-mediaview').classList.add('active');
+            };
+            app.closeMediaView = () => {
+                const box = $('mv-body'), v = box.querySelector('video');
+                if (v) { v.pause(); v.removeAttribute('src'); v.load(); }
+                box.innerHTML = ''; $('modal-mediaview').classList.remove('active');
+            };
+            app.mediaViewDownload = () => app.mediaDownload(mv.url, mv.name);
+            app.mediaDownload = async (url, name) => {
+                if (!okUrl(url)) return;
+                try {
+                    app.showToast('Baixando...', 'info');
+                    const r = await fetch(url); if (!r.ok) throw new Error('HTTP ' + r.status);
+                    const blob = await r.blob(), a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob); a.download = String(name || 'arquivo').replace(/[\\/:*?"<>|]/g, '_');
+                    document.body.appendChild(a); a.click(); a.remove();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+                } catch (_) { window.open(url, '_blank', 'noopener'); }
+            };
+            app.mediaDownloadActive = () => {
+                const it = appState.activeContextItem; app.closeContextMenu();
+                if (it && it.media) app.mediaDownload(it.media.url, it.media.name);
+            };
+
+            // ---------- escolha do arquivo ----------
+            const mm = { file: null, kind: null, objUrl: null, xhr: null, busy: false, uploaded: null };
+            const kindOf = (f) => {
+                const ext = extOf(f.name);
+                for (const k of ['image', 'video', 'file']) {
+                    if (!EXT[k].includes(ext)) continue;
+                    if (k === 'image' && f.type && !f.type.startsWith('image/')) return null;
+                    if (k === 'video' && f.type && !f.type.startsWith('video/')) return null;
+                    return { kind: k, ext };
+                }
+                return null;
+            };
+            // fotos JPEG/WEBP grandes são reduzidas (até 1920px) para enviar mais rápido; GIF/PNG ficam intactos
+            const compress = async (f, ext) => {
+                if (!['jpg', 'jpeg', 'webp'].includes(ext) || f.size < 1.5 * 1048576) return f;
+                try {
+                    const bmp = await createImageBitmap(f), sc = Math.min(1, 1920 / Math.max(bmp.width, bmp.height));
+                    const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width * sc); cv.height = Math.round(bmp.height * sc);
+                    cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height); if (bmp.close) bmp.close();
+                    const blob = await new Promise((r) => cv.toBlob(r, 'image/jpeg', 0.85));
+                    if (!blob || blob.size >= f.size) return f;
+                    return new File([blob], f.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+                } catch (_) { return f; }
+            };
+
+            app.openAttachMenu = () => {
+                const m = appState.activeChatMode;
+                if (!m || m === 'private_list' || m === 'group_list') return;
+                if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) return app.showToast('Envio de mídia não configurado (CLOUDINARY_CLOUD e CLOUDINARY_PRESET no início do código).', 'error');
+                $('modal-attach').classList.add('active');
+            };
+            app.closeAttachMenu = () => $('modal-attach').classList.remove('active');
+            app.attachPick = (type) => { app.closeAttachMenu(); const i = $(type === 'media' ? 'mm-input-media' : 'mm-input-file'); i.value = ''; i.click(); };
+
+            const setBusy = (b) => {
+                mm.busy = b;
+                $('mm-send').disabled = b; $('mm-caption').disabled = b;
+                $('mm-send').innerHTML = b ? '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...' : '<i class="fa-solid fa-paper-plane"></i> Enviar';
+                $('mm-bar').style.display = b ? 'block' : 'none';
+                if (!b) $('mm-bar-fill').style.width = '0%';
+            };
+            const reset = () => {
+                if (mm.objUrl) URL.revokeObjectURL(mm.objUrl);
+                mm.file = null; mm.kind = null; mm.objUrl = null; mm.xhr = null; mm.uploaded = null;
+                $('mm-prev').innerHTML = ''; $('mm-caption').value = '';
+            };
+            app.mediaPicked = async (e) => {
+                const f0 = e.target.files && e.target.files[0]; e.target.value = '';
+                if (!f0 || mm.busy) return;
+                const k = kindOf(f0);
+                if (!k) return app.showToast('Formato não suportado. Envie imagem, vídeo, PDF, TXT, DOC, JS, JSON ou ZIP.', 'error');
+                const file = k.kind === 'image' ? await compress(f0, k.ext) : f0;
+                if (file.size > MAX_MB[k.kind] * 1048576) return app.showToast('O arquivo excede o limite de ' + MAX_MB[k.kind] + ' MB.', 'error');
+                reset();
+                mm.file = file; mm.kind = k.kind; mm.objUrl = URL.createObjectURL(file);
+                const pv = $('mm-prev');
+                if (k.kind === 'image') { const im = new Image(); im.src = mm.objUrl; im.alt = ''; pv.appendChild(im); }
+                else if (k.kind === 'video') { const v = document.createElement('video'); v.src = mm.objUrl; v.controls = true; v.muted = true; v.playsInline = true; v.preload = 'metadata'; pv.appendChild(v); }
+                else pv.innerHTML = fileCardHtml({ name: file.name, size: file.size }, '').replace('<i class="fa-solid fa-download"></i>', '');
+                const rp = appState.replyingTo, au = rp && appState.allUsers.find((u) => u.uid === rp.authorUid);
+                $('mm-reply').textContent = rp ? 'Respondendo a ' + (au ? au.handle : '@usuario') : '';
+                setBusy(false);
+                $('modal-mediasend').classList.add('active');
+            };
+            app.mediaCancel = () => {
+                if (mm.busy && mm.xhr) { mm.xhr.abort(); return; }
+                $('modal-mediasend').classList.remove('active'); reset();
+            };
+
+            // ---------- envio ----------
+            const upload = (file) => new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest(), fd = new FormData();
+                mm.xhr = xhr;
+                fd.append('file', file); fd.append('upload_preset', CLOUDINARY_PRESET);
+                xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(CLOUDINARY_CLOUD) + '/auto/upload');
+                xhr.upload.onprogress = (ev) => { if (ev.lengthComputable) $('mm-bar-fill').style.width = Math.round(ev.loaded / ev.total * 100) + '%'; };
+                xhr.onload = () => {
+                    let j = null; try { j = JSON.parse(xhr.responseText); } catch (_) {}
+                    if (xhr.status >= 200 && xhr.status < 300 && j && j.secure_url) resolve(j);
+                    else reject(new Error(j && j.error && j.error.message ? j.error.message : 'HTTP ' + xhr.status));
+                };
+                xhr.onerror = () => reject(new Error('Falha de rede ao enviar.'));
+                xhr.ontimeout = () => reject(new Error('Tempo esgotado ao enviar.'));
+                xhr.onabort = () => { const er = new Error('cancelado'); er.aborted = true; reject(er); };
+                xhr.timeout = 10 * 60 * 1000;
+                xhr.send(fd);
+            });
+            app.mediaSend = async () => {
+                if (mm.busy || !mm.file) return;
+                const mode = appState.activeChatMode;
+                if (!mode || mode === 'private_list' || mode === 'group_list') return;
+                setBusy(true);
+                let up = mm.uploaded;
+                try {
+                    if (!up) { up = await upload(mm.file); mm.uploaded = up; }
+                    if (!okUrl(up.secure_url)) throw new Error('Resposta inesperada do servidor de mídia.');
+                    const cap = $('mm-caption').value.trim().slice(0, 500), name = mm.file.name.slice(0, 80);
+                    const media = { kind: mm.kind, url: up.secure_url, name: name, size: mm.file.size };
+                    if (mm.file.type) media.mime = mm.file.type;
+                    if (up.width && up.height) { media.w = up.width; media.h = up.height; }
+                    if (up.duration) media.dur = Math.round(up.duration);
+                    const label = mm.kind === 'image' ? '📷 Foto' : mm.kind === 'video' ? '🎬 Vídeo' : '📎 ' + name.slice(0, 40);
+                    const msg = { authorUid: appState.firebaseUser.uid, content: esc(cap || label), media: media, createdAt: new Date().toISOString() };
+                    if (cap) msg.mcap = true;
+                    const rp = appState.replyingTo;
+                    if (rp) {
+                        msg.replyTo = rp.id;
+                        const au = appState.allUsers.find((u) => u.uid === rp.authorUid);
+                        msg.replyAuthor = au ? au.handle : '@usuario';
+                        let pv = rp.content || ''; if (pv.length > 70) pv = pv.substring(0, 70) + '...';
+                        msg.replyPreview = pv;
+                    }
+                    try {
+                        if (mode === 'group') await app.sendGroupRaw(msg, label);
+                        else if (mode === 'global') { await addDoc(colGlobalChat, msg); app.addXP(1); }
+                        else { msg.participants = [appState.firebaseUser.uid, mode]; await addDoc(colPrivateChat, msg); }
+                    } catch (we) {
+                        console.error(we);
+                        setBusy(false);
+                        return app.showToast('O arquivo foi enviado, mas a mensagem não foi salva. Toque em Enviar para tentar de novo.', 'error');
+                    }
+                    if (rp) app.cancelReply();
+                    setBusy(false);
+                    $('modal-mediasend').classList.remove('active'); reset();
+                } catch (err) {
+                    setBusy(false);
+                    if (!err.aborted) app.showToast('Falha no envio: ' + err.message, 'error');
+                    else { $('modal-mediasend').classList.remove('active'); reset(); }
+                }
+            };
         })();
 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);

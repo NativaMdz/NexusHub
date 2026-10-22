@@ -1435,20 +1435,22 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         /* === SISTEMA DE LOJA === */
         .store-categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; flex-shrink: 0; }
         .store-categories::-webkit-scrollbar { display: none; }
-        .category-pill { padding: 8px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: 'Inter', sans-serif;}
+        .category-pill { padding: 8px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: background-color 0.2s, border-color 0.2s, color 0.2s; font-family: 'Inter', sans-serif;}
         .category-pill:hover { background: rgba(255,255,255,0.08); }
         .category-pill.active { background: rgba(var(--cyan-rgb), 0.1); border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 10px var(--cyan-glow); font-weight: 600;}
         
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; align-items: stretch; }
-        .product-card { background: var(--bg-glass); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; cursor: pointer; backdrop-filter: blur(10px); height: 100%; box-sizing: border-box; }
+        .product-card { background: var(--bg-glass); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; cursor: pointer; height: 100%; box-sizing: border-box; content-visibility: auto; contain-intrinsic-size: auto 250px; }
+        @media (hover: hover) {
         .product-card:hover:not(.owned):not(.locked) { transform: translateY(-4px); border-color: var(--cyan); box-shadow: 0 8px 20px rgba(var(--cyan-rgb), 0.15); }
+        }
         .product-card.owned, .product-card.locked { border-color: rgba(255,255,255,0.05); cursor: default; }
         
         .product-img-container { width: 100%; aspect-ratio: 1; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
         .product-img-container i { font-size: 2.8rem; color: var(--purple); text-shadow: 0 0 15px var(--purple-glow); }
         
         /* Badges de Raridade e VIP */
-        .rarity-badge { position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; z-index: 10; background: rgba(0,0,0,0.8); border: 1px solid; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
+        .rarity-badge { position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; z-index: 10; background: rgba(0,0,0,0.85); border: 1px solid; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .vip-req-badge{
             display:inline-flex;
             align-items:center;
@@ -1464,7 +1466,6 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             border:1px solid #ffd700;
             text-transform:uppercase;
             letter-spacing:.5px;
-            backdrop-filter:blur(4px);
         }
 
         .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: bold; color: white; margin-bottom: 4px; line-height: 1.1; }
@@ -1472,8 +1473,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .product-price { font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: bold; color: #ffd700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
         .product-price i { font-size: 0.85rem; }
         
-        .btn-buy { width: 100%; padding: 8px; background: linear-gradient(90deg, rgba(var(--cyan-rgb), 0.1), rgba(var(--purple-rgb), 0.1)); border: 1px solid rgba(var(--cyan-rgb), 0.5); border-radius: 6px; color: var(--text-main); font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer; transition: all 0.2s; text-transform: uppercase; font-size: 0.9rem; }
+        .btn-buy { width: 100%; padding: 8px; background: linear-gradient(90deg, rgba(var(--cyan-rgb), 0.1), rgba(var(--purple-rgb), 0.1)); border: 1px solid rgba(var(--cyan-rgb), 0.5); border-radius: 6px; color: var(--text-main); font-family: 'Rajdhani', sans-serif; font-weight: bold; cursor: pointer; transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s; text-transform: uppercase; font-size: 0.9rem; }
+        @media (hover: hover) {
         .btn-buy:hover:not([disabled]) { background: linear-gradient(90deg, var(--cyan), var(--purple)); color: white; border-color: transparent; box-shadow: 0 0 15px rgba(var(--purple-rgb), 0.4); }
+        }
 
         /* RANKING & PESQUISA */
         .ranking-list { display: flex; flex-direction: column; gap: 10px; }
@@ -3761,9 +3764,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     pill.className = `category-pill ${appState.activeStoreCategory === cat.id ? 'active' : ''}`;
                     pill.innerText = cat.name;
                     pill.onclick = () => {
+                        if (appState.activeStoreCategory === cat.id) return;
                         appState.activeStoreCategory = cat.id;
-                        app.renderStoreCategories();
-                        app.renderStoreProducts();
+                        container.querySelectorAll('.category-pill').forEach(el => el.classList.toggle('active', el === pill));
+                        requestAnimationFrame(() => app.renderStoreProducts());
                     };
                     container.appendChild(pill);
                 });
@@ -3819,6 +3823,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const ownedFrames = appState.currentUserData.ownedFrames || [];
                 const ownedThemes = appState.currentUserData.ownedThemes || [];
 
+                const frag = document.createDocumentFragment();
                 filtered.forEach(prod => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
@@ -3879,7 +3884,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         imgContainerStyle += `background: ${prod.previewColor}; border: 1px solid ${prod.previewBorder}; box-shadow: 0 0 15px ${prod.previewBorder}40 inset;`;
                         iconOrImg = `<i class="${prod.icon}" style="color: ${prod.previewBorder}; text-shadow: 0 0 10px ${prod.previewBorder}; z-index: 2;"></i>`;
                     } else if (prod.image) {
-                        iconOrImg = `<img src="${prod.image}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:10px; z-index: 2;">`;
+                        iconOrImg = `<img src="${prod.image}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:10px; z-index: 2;">`;
                     }
                     
                     let rarityHtml = '';
@@ -3913,8 +3918,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         ${buttonHtml}
     </div>
 `;
-                    container.appendChild(card);
+                    frag.appendChild(card);
                 });
+                container.appendChild(frag);
 
                 if (container.querySelector('.vip-countdown')) {
                     app.updateVIPCountdowns();

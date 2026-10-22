@@ -1360,7 +1360,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         #modal-settings .form-group { margin-bottom: 0.8rem; }
         #modal-settings .form-control { padding: 9px 12px; font-size: 0.9rem; }
         #modal-settings textarea.form-control { min-height: 72px; }
-        #modal-settings select.form-control { padding-right: 28px; text-overflow: ellipsis; background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f3ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"); }
+        #modal-settings select.form-control { padding-right: 28px; text-overflow: ellipsis; background-repeat: no-repeat; background-image: linear-gradient(45deg, transparent 50%, var(--cyan) 50%), linear-gradient(135deg, var(--cyan) 50%, transparent 50%); background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%; background-size: 5px 5px, 5px 5px; }
         .set-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .music-row { display: flex; align-items: center; gap: 8px; }
         .music-row .music-current { flex: 1; min-width: 0; padding: 8px 10px; font-size: 0.8rem; }
@@ -1748,27 +1748,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
                 <div class="set-pane" id="set-pane-conta">
                     <div class="set-status"><i class="fa-solid fa-cloud"></i> Link estabelecido com Firebase Cloud.</div>
-                    <label class="set-label">Privacidade e avisos</label>
-                    <div class="set-switch-row anon">
-                        <div class="ssr-txt"><i class="fa-solid fa-user-secret" style="color: var(--purple);"></i> Modo anônimo<small>Não envia "digitando", "gravando" nem vistos, e silencia as notificações</small></div>
-                        <label class="nx-switch"><input type="checkbox" id="set-anon" onchange="app.toggleAnonymous(this.checked)"><span class="nx-slider"></span></label>
-                    </div>
-                    <div class="set-switch-row">
-                        <div class="ssr-txt">Mostrar "digitando..."<small>Quem conversa com você vê quando você está digitando</small></div>
-                        <label class="nx-switch"><input type="checkbox" id="set-show-typing" checked onchange="app.toggleShowTyping(this.checked)"><span class="nx-slider"></span></label>
-                    </div>
-                    <div class="set-switch-row">
-                        <div class="ssr-txt">Mostrar "gravando áudio..."<small>Quem conversa com você vê quando você está gravando</small></div>
-                        <label class="nx-switch"><input type="checkbox" id="set-show-rec" checked onchange="app.toggleShowRecording(this.checked)"><span class="nx-slider"></span></label>
-                    </div>
-                    <div class="set-switch-row">
-                        <div class="ssr-txt">Confirmação de leitura<small>Mostra e envia os "vistos" nas conversas privadas</small></div>
-                        <label class="nx-switch"><input type="checkbox" id="set-read-receipts" checked onchange="app.toggleReadReceipts(this.checked)"><span class="nx-slider"></span></label>
-                    </div>
-                    <div class="set-switch-row">
-                        <div class="ssr-txt">Notificações de mensagens<small id="notif-status">Ativadas</small></div>
-                        <label class="nx-switch"><input type="checkbox" id="set-notif" checked onchange="app.toggleNotifications(this.checked)"><span class="nx-slider"></span></label>
-                    </div>
+                    <button type="button" class="set-row-btn" onclick="app.openPrivacy()">
+                        <span class="sr-ico"><i class="fa-solid fa-user-shield"></i></span>
+                        <span class="sr-txt">Privacidade e avisos<small>Anônimo, digitando, gravando, leitura e notificações</small></span>
+                        <i class="fa-solid fa-chevron-right sr-arrow"></i>
+                    </button>
                     <button type="button" class="set-row-btn" id="pwa-install-btn" style="display: none; margin: 0 0 12px;" onclick="app.installPwa()">
                         <span class="sr-ico"><i class="fa-solid fa-mobile-screen-button"></i></span>
                         <span class="sr-txt">Instalar aplicativo<small>Abra o Nexus Hub direto da tela inicial</small></span>
@@ -1935,6 +1919,37 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     </div>
                     <p class="set-note">O gradiente é montado sozinho e o brilho das cores é ajustado para ficarem legíveis no fundo escuro. Molduras e temas premium mantêm as cores originais.</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-privacy" onclick="if(event.target===this) app.closePrivacy()">
+        <div class="modal-content" style="max-width: 420px; max-height: 90dvh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>Privacidade e avisos</h2>
+                <button class="close-modal" onclick="app.closePrivacy()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                    <div class="set-switch-row anon">
+                        <div class="ssr-txt"><i class="fa-solid fa-user-secret" style="color: var(--purple);"></i> Modo anônimo<small>Não envia "digitando", "gravando" nem vistos, e silencia as notificações</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-anon" onchange="app.toggleAnonymous(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
+                    <div class="set-switch-row">
+                        <div class="ssr-txt">Mostrar "digitando..."<small>Quem conversa com você vê quando você está digitando</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-show-typing" checked onchange="app.toggleShowTyping(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
+                    <div class="set-switch-row">
+                        <div class="ssr-txt">Mostrar "gravando áudio..."<small>Quem conversa com você vê quando você está gravando</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-show-rec" checked onchange="app.toggleShowRecording(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
+                    <div class="set-switch-row">
+                        <div class="ssr-txt">Confirmação de leitura<small>Mostra e envia os "vistos" nas conversas privadas</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-read-receipts" checked onchange="app.toggleReadReceipts(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
+                    <div class="set-switch-row">
+                        <div class="ssr-txt">Notificações de mensagens<small id="notif-status">Ativadas</small></div>
+                        <label class="nx-switch"><input type="checkbox" id="set-notif" checked onchange="app.toggleNotifications(this.checked)"><span class="nx-slider"></span></label>
+                    </div>
             </div>
         </div>
     </div>
@@ -7052,6 +7067,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 try { await updateDoc(doc(colUsers, appState.firebaseUser.uid), { siteColors: deleteField() }); }
                 catch (e) { console.error(e); }
             };
+            app.openPrivacy = () => { if (app.refreshPrivacyRows) app.refreshPrivacyRows(); document.getElementById('modal-privacy').classList.add('active'); };
+            app.closePrivacy = () => document.getElementById('modal-privacy').classList.remove('active');
             app.openSiteColors = () => { app.siteColorsLoad(); $('modal-sitecolors').classList.add('active'); };
             app.closeSiteColors = () => $('modal-sitecolors').classList.remove('active');
         })();
@@ -7059,4 +7076,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                        </html>
+                </html>

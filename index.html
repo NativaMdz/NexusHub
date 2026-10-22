@@ -4371,8 +4371,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             if (appState.currentView !== 'chat') return;
             const mode = appState.activeChatMode;
             if (mode === 'private_list') return;
-            const containerId = mode === 'global' ? 'chat-global-container' : 'chat-private-container';
-            const targetUid = mode === 'global' ? null : mode;
+            if (mode === 'group_list') { if (app.clearChatStageBg) app.clearChatStageBg(); return; } // lista de grupos: sem wallpaper
+            const containerId = mode === 'global' ? 'chat-global-container' : (mode === 'group' ? 'chat-group-container' : 'chat-private-container');
+            const targetUid = (mode === 'global' || mode === 'group') ? null : mode;
             app.applyChatBackground(containerId, targetUid);
         };
 
@@ -4502,6 +4503,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.applyChatBackground = (containerId, targetUid = null) => {
                 const stage = $('chat-stage'), container = $(containerId);
                 if (!stage || !container) return _origApplyBg(containerId, targetUid);
+                if (appState.activeChatMode === 'group_list' || appState.activeChatMode === 'private_list') { app.clearChatStageBg(); return; }
                 const bgUrl = app.getChatBackground(targetUid);
                 if (bgUrl) {
                     stage.style.backgroundImage = `url('${bgUrl}')`;

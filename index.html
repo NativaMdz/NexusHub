@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Hub - Cyberpunk Social</title>
+    <title>NexusOne - Cyberpunk Social</title>
 
     <!-- PWA -->
     <meta name="theme-color" content="#050507">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Nexus Hub">
+    <meta name="apple-mobile-web-app-title" content="NexusOne">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <script>
@@ -18,13 +18,14 @@
            + captura do convite de instalação do navegador. */
         (function () {
             try {
+                try { if (/[?&]v=nexusone\b/.test(location.search)) sessionStorage.setItem('nxo_new_launch', '1'); } catch (e) {}
                 var base = location.href.split('#')[0].split('?')[0];
                 var dir = base.slice(0, base.lastIndexOf('/') + 1);
                 var abs = function (f) { return new URL(f, dir).href; };
                 var manifest = {
-                    id: base, name: 'Nexus Hub', short_name: 'Nexus Hub',
+                    id: base + '?app=nexusone', name: 'NexusOne', short_name: 'NexusOne',
                     description: 'Rede social cyberpunk: feed, chats, ranking e loja.',
-                    start_url: base, scope: dir, display: 'standalone', orientation: 'portrait',
+                    start_url: base + '?v=nexusone', scope: dir, display: 'standalone', orientation: 'portrait',
                     background_color: '#050507', theme_color: '#050507', lang: 'pt-BR',
                     icons: [
                         { src: abs('icon-192.png'), sizes: '192x192', type: 'image/png', purpose: 'any' },
@@ -1647,7 +1648,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
     <!-- Tela Inicial: Autenticação -->
     <div id="auth-setup">
-        <div class="glitch-logo">NEXUS<span>HUB</span></div>
+        <div class="glitch-logo">NEXUS<span>ONE</span></div>
         <p style="color: var(--text-muted); margin-bottom: 1.8rem; max-width: 320px; font-size: 0.9rem;">
             Acesso ao Link Neural detectado. Identifique-se para entrar na rede global.
         </p>
@@ -1682,7 +1683,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     <!-- Shell do Aplicativo Principal -->
     <div id="app-container" style="display: none;">
         <header>
-            <div class="logo" onclick="app.navigate('feed')">NEXUS<span>HUB</span></div>
+            <div class="logo" onclick="app.navigate('feed')">NEXUS<span>ONE</span></div>
             <div class="actions">
                 <i class="fa-solid fa-shield-halved" id="admin-icon" style="display:none; color: var(--danger);" onclick="app.openAdminModal()" title="Painel Admin"></i>
                 <i class="fa-solid fa-cart-shopping" onclick="app.navigate('store')" title="Loja"></i>
@@ -1740,7 +1741,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
     <div class="modal-overlay" id="modal-settings">
         <div class="modal-content">
-            <div class="modal-header"><h2>Configurações do Hub</h2><button class="close-modal" onclick="app.closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="modal-header"><h2>Configurações do NexusOne</h2><button class="close-modal" onclick="app.closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="set-tabs">
                 <button type="button" class="set-tab active" data-tab="perfil" onclick="app.settingsTab('perfil')">Perfil</button>
                 <button type="button" class="set-tab" data-tab="visual" onclick="app.settingsTab('visual')">Visual</button>
@@ -1816,7 +1817,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     </button>
                     <button type="button" class="set-row-btn" id="pwa-install-btn" style="display: none; margin: 0 0 12px;" onclick="app.installPwa()">
                         <span class="sr-ico"><i class="fa-solid fa-mobile-screen-button"></i></span>
-                        <span class="sr-txt">Instalar aplicativo<small>Abra o Nexus Hub direto da tela inicial</small></span>
+                        <span class="sr-txt">Instalar aplicativo<small>Abra o NexusOne direto da tela inicial</small></span>
                         <i class="fa-solid fa-chevron-right sr-arrow"></i>
                     </button>
                     <div id="chat-bg-settings-btn" style="display: none;"></div>
@@ -1914,7 +1915,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     <div class="modal-overlay" id="modal-pwa" onclick="if(event.target===this) app.closePwaHelp()">
         <div class="modal-content" style="max-width: 380px;">
             <div class="modal-header">
-                <h2>Instalar o Nexus Hub</h2>
+                <h2>Instalar o NexusOne</h2>
                 <button class="close-modal" onclick="app.closePwaHelp()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body"><div id="pwa-help-body" class="pwa-steps"></div></div>
@@ -2260,7 +2261,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     <i class="fa-solid fa-store" style="font-size: 1.4rem; color: var(--cyan); text-shadow: 0 0 10px var(--cyan);"></i>
                 </div>
                 <div>
-                    <h2 style="color: white; margin-bottom: 2px; font-size: 1.2rem;">Nexus Store</h2>
+                    <h2 style="color: white; margin-bottom: 2px; font-size: 1.2rem;">NexusOne Store</h2>
                     <p style="color: var(--text-muted); font-size: 0.75rem;">Itens exclusivos</p>
                 </div>
             </div>
@@ -2482,11 +2483,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 { id: 'frame_hacker_green', name: 'Hacker Core', description: 'Terminal verde bruto e direto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2200, duration: '', status: 'active' },
                 { id: 'frame_blood_red', name: 'Blood Red', description: 'Aviso de sistema crítico. Chamativo e perigoso.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 2500, duration: '', status: 'active' },
                 { id: 'frame_gold_elite', name: 'Gold Elite', description: 'Moldura dourada premium para alta hierarquia.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 5000, duration: '', status: 'active' },
-                { id: 'frame_rgb_premium', name: 'Nexus RGB Premium', description: 'Moldura animada reativa. A essência do neon em seu perfil.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
+                { id: 'frame_rgb_premium', name: 'NexusOne RGB Premium', description: 'Moldura animada reativa. A essência do neon em seu perfil.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
                 { id: 'frame_white_glow', name: 'White Glow', description: 'Brilho branco puro e suave com animação fluida.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
                 { id: 'frame_magenta_glow', name: 'Magenta Glow', description: 'Efeito neon magenta pulsante e vibrante.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
                 { id: 'frame_silver_glow', name: 'Silver Glow', description: 'Cinza metálico com brilho elegante e discreto.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' },
-                { id: 'frame_navy_glow', name: 'Navy Glow', description: 'Azul marinho profundo, assinatura visual do Nexus.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' }
+                { id: 'frame_navy_glow', name: 'Navy Glow', description: 'Azul marinho profundo, assinatura visual do NexusOne.', category: 'frames', icon: 'fa-regular fa-square', image: '', price: 8500, duration: '', status: 'active' }
             ]
         };
 
@@ -3889,7 +3890,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (appState.activeStoreCategory === 'frames') {
                     container.innerHTML += `
                         <div style="grid-column: 1 / -1; margin-bottom: 12px; text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
-                            Destaque seu perfil com molduras exclusivas que aparecem em todo o Nexus Hub, incluindo Feed, Chats, Comentários, Ranking e Pesquisa de Usuários.
+                            Destaque seu perfil com molduras exclusivas que aparecem em todo o NexusOne, incluindo Feed, Chats, Comentários, Ranking e Pesquisa de Usuários.
                         </div>
                     `;
                 }
@@ -5876,8 +5877,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.refreshInstallRow = () => { const b = $('pwa-install-btn'); if (b) b.style.display = isStandalone() ? 'none' : 'flex'; };
             app.openPwaHelp = () => {
                 const steps = isIOS()
-                    ? ['Abra o Nexus Hub no <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Safari</b> (em outros navegadores do iPhone a opção não aparece).', 'Toque no botão <i class="fa-solid fa-arrow-up-from-bracket" style="color:var(--cyan)"></i> <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Compartilhar</b>, na barra do navegador.', 'Role e toque em <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Adicionar à Tela de Início</b> e confirme.']
-                    : ['Abra o menu <i class="fa-solid fa-ellipsis-vertical" style="color:var(--cyan)"></i> do navegador.', 'Toque em <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Instalar aplicativo</b> ou <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Adicionar à tela inicial</b>.', 'Confirme e abra o Nexus Hub pelo novo ícone.'];
+                    ? ['Abra o NexusOne no <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Safari</b> (em outros navegadores do iPhone a opção não aparece).', 'Toque no botão <i class="fa-solid fa-arrow-up-from-bracket" style="color:var(--cyan)"></i> <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Compartilhar</b>, na barra do navegador.', 'Role e toque em <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Adicionar à Tela de Início</b> e confirme.']
+                    : ['Abra o menu <i class="fa-solid fa-ellipsis-vertical" style="color:var(--cyan)"></i> do navegador.', 'Toque em <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Instalar aplicativo</b> ou <b style="display:inline;background:none;color:var(--cyan);width:auto;height:auto">Adicionar à tela inicial</b>.', 'Confirme e abra o NexusOne pelo novo ícone.'];
                 $('pwa-help-body').innerHTML = steps.map((t, i) => '<div class="pwa-step"><b>' + (i + 1) + '</b><span>' + t + '</span></div>').join('');
                 $('modal-pwa').classList.add('active');
             };
@@ -5889,10 +5890,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 try {
                     ev.prompt();
                     const choice = await ev.userChoice;
-                    if (choice && choice.outcome === 'accepted') app.showToast('Instalando o Nexus Hub...', 'success');
+                    if (choice && choice.outcome === 'accepted') app.showToast('Instalando o NexusOne...', 'success');
                 } catch (e) { app.openPwaHelp(); }
             };
-            window.addEventListener('pwa-installed', () => { app.refreshInstallRow(); app.showToast('Nexus Hub instalado!', 'success'); });
+            window.addEventListener('pwa-installed', () => { app.refreshInstallRow(); app.showToast('NexusOne instalado!', 'success'); });
 
             // aba Conta: mostra o estado atual das opções
             const _prevTab = app.settingsTab;
@@ -7487,5 +7488,112 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
+
+<!-- ===== AVISO DE ATUALIZAÇÃO PARA O NexusOne ===== -->
+<script id="nexusone-update-gate">
+(function () {
+    /* ----------- CONFIGURAÇÃO (edite só aqui) ----------- */
+    var CONFIG = {
+        // 'soft'  = aviso que o usuário pode fechar (volta só depois de REMIND_HOURS)
+        // 'force' = tela bloqueada até instalar o NexusOne
+        MODE: 'soft',
+        // Opcional: a partir desta data ('AAAA-MM-DD') vira bloqueio total, mesmo em 'soft'. '' = não usar.
+        FORCE_AFTER: '',
+        // Se true, o bloqueio também vale para quem usa pelo navegador (aba do Chrome). Se false, só para o app antigo instalado.
+        BLOCK_BROWSER_TABS: false,
+        // Intervalo mínimo entre avisos no modo 'soft' (evita flood)
+        REMIND_HOURS: 24
+    };
+    /* ---------------------------------------------------- */
+
+    var KEY = 'nexus_update_snooze';
+    var isStandalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var newLaunch = false; try { newLaunch = sessionStorage.getItem('nxo_new_launch') === '1'; } catch (e) {}
+    // App antigo instalado = janela standalone aberta pelo atalho antigo (sem a marca ?v=nexusone)
+    var legacy = isStandalone && !isIOS && !newLaunch;
+    var forceTime = !!(CONFIG.FORCE_AFTER && Date.now() >= new Date(CONFIG.FORCE_AFTER + 'T00:00:00').getTime());
+    var force = (CONFIG.MODE === 'force' || forceTime) && (legacy || CONFIG.BLOCK_BROWSER_TABS);
+
+    var box = null, installed = false;
+    var baseUrl = location.href.split('#')[0].split('?')[0];
+
+    var css = document.createElement('style');
+    css.textContent =
+        '#nxo-gate{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(5,5,7,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-family:Inter,sans-serif}' +
+        '#nxo-gate .nxo-box{width:100%;max-width:380px;text-align:center;color:#fff;background:#0d0d14;border:1px solid #00f0ff;border-radius:16px;padding:28px 22px;box-shadow:0 0 30px rgba(0,240,255,.25)}' +
+        '#nxo-gate .nxo-logo{font-family:Rajdhani,sans-serif;font-weight:700;font-size:2.2rem;text-shadow:0 0 18px #00f0ff;margin-bottom:6px}' +
+        '#nxo-gate .nxo-logo span{color:#00f0ff}' +
+        '#nxo-gate h2{font-family:Rajdhani,sans-serif;font-size:1.3rem;margin:8px 0}' +
+        '#nxo-gate p{font-size:.92rem;line-height:1.5;color:#b8bcc8;margin:0 0 16px}' +
+        '#nxo-gate button{width:100%;padding:13px;border-radius:10px;border:0;font-weight:600;font-size:1rem;cursor:pointer;margin-top:8px}' +
+        '#nxo-gate .nxo-go{background:#00f0ff;color:#050507}' +
+        '#nxo-gate .nxo-copy{background:#1a1a26;color:#fff;border:1px solid #2a2a3a}' +
+        '#nxo-gate .nxo-later{background:transparent;color:#8a8fa0;font-size:.9rem}';
+    document.head.appendChild(css);
+
+    function msg() {
+        if (installed) return 'NexusOne instalado! Abra pelo <b>novo ícone</b> na sua tela e apague o app antigo.';
+        if (legacy) return 'O app agora se chama <b>NexusOne</b>. ' + (force ? 'Para continuar usando, instale a nova versão.' : 'Instale a nova versão para continuar recebendo novidades.') + ' Depois, apague o app antigo.';
+        return 'O app agora se chama <b>NexusOne</b>. Instale a nova versão na sua tela inicial.';
+    }
+
+    function render() {
+        if (!box) return;
+        var canPrompt = !!window.__pwaPrompt;
+        var html = '<div class="nxo-box"><div class="nxo-logo">NEXUS<span>ONE</span></div><h2>Nova versão disponível</h2><p>' + msg() + '</p>';
+        if (!installed) {
+            if (canPrompt) html += '<button class="nxo-go" type="button">Instalar NexusOne</button>';
+            else html += '<p style="font-size:.85rem">Abra o <b>Chrome</b>, acesse o endereço abaixo e toque em <b>Instalar</b>.</p><button class="nxo-copy" type="button">Copiar endereço</button>';
+            if (!force) html += '<button class="nxo-later" type="button">Lembrar depois</button>';
+        }
+        box.innerHTML = html + '</div>';
+        var go = box.querySelector('.nxo-go');
+        if (go) go.onclick = function () { if (window.app && app.installPwa) app.installPwa(); };
+        var cp = box.querySelector('.nxo-copy');
+        if (cp) cp.onclick = function () {
+            var done = function () { cp.textContent = 'Endereço copiado!'; };
+            try { navigator.clipboard.writeText(baseUrl).then(done, function () { prompt('Copie o endereço:', baseUrl); }); } catch (e) { prompt('Copie o endereço:', baseUrl); }
+        };
+        var later = box.querySelector('.nxo-later');
+        if (later) later.onclick = function () { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} box.remove(); box = null; };
+    }
+
+    function lockApp() {
+        Array.prototype.forEach.call(document.body.children, function (el) {
+            if (el !== box && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE') { el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true'); }
+        });
+        new MutationObserver(function () { if (!document.getElementById('nxo-gate')) show(); }).observe(document.body, { childList: true });
+    }
+
+    function snoozed() {
+        if (force) return false;
+        try { return Date.now() - (+localStorage.getItem(KEY) || 0) < CONFIG.REMIND_HOURS * 3600 * 1000; } catch (e) { return false; }
+    }
+
+    function show() {
+        if (box && document.getElementById('nxo-gate')) return;
+        box = document.createElement('div'); box.id = 'nxo-gate'; box.setAttribute('role', 'alertdialog');
+        document.body.appendChild(box); render();
+        if (force) lockApp();
+    }
+
+    function hide() { if (box) { box.remove(); box = null; } }
+
+    function start() {
+        if (isIOS || newLaunch && isStandalone) return;               // já está no app novo (ou iPhone: usa o botão "Instalar" do app)
+        if (legacy) { if (!snoozed()) show(); }                       // app antigo instalado
+        else window.addEventListener('pwa-ready', function () {       // aba do Chrome: só avisa se o NexusOne ainda NÃO está instalado
+            if (!snoozed()) show();
+        });
+        window.addEventListener('pwa-ready', render);
+        window.addEventListener('pwa-installed', function () {
+            installed = true;
+            if (legacy) { if (!box) show(); render(); } else hide();   // no app antigo, mantém a tela pedindo para abrir o novo
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
 </body>
-                    </html>
+    </html>

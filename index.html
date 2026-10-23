@@ -1313,6 +1313,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .msg-file .mf-name { color: var(--text-main); font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .msg-file .mf-meta { color: var(--text-muted); font-size: 0.72rem; margin-top: 1px; text-transform: uppercase; }
         .msg-file > .fa-download { color: var(--cyan); font-size: 0.95rem; }
+        .msg-file, .msg-media { max-width: 100%; }
+        .message .msg-bubble { min-width: 0; max-width: 100%; }
+        .message:not(.mine) .msg-file, .message .msg-file { box-sizing: border-box; }
+        .notif-banner .group-avatar { width: 38px; height: 38px; border-radius: 12px; font-size: 1.1rem; }
+        .notif-banner .group-avatar img { width: 100%; height: 100%; border-radius: 0; }
         .att-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .att-tile { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-main); cursor: pointer; text-align: center; font-family: inherit; }
         .att-tile:active { background: rgba(var(--cyan-rgb), 0.12); }
@@ -5928,7 +5933,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             // ---------- aviso dentro do app ----------
             let bannerT = 0;
             const hideBanner = () => { const b = $('notif-banner'); if (b) b.classList.remove('show'); };
-            const showBanner = (uid, title, body, avatar, opener) => {
+            const showBanner = (uid, title, body, avatar, opener, avatarEl) => {
                 let b = $('notif-banner');
                 if (!b) { b = document.createElement('div'); b.id = 'notif-banner'; b.className = 'notif-banner'; document.body.appendChild(b); }
                 b.innerHTML = '';
@@ -5940,19 +5945,19 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const x = document.createElement('button'); x.type = 'button'; x.className = 'nb-close'; x.setAttribute('aria-label', 'Fechar');
                 x.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 x.onclick = (e) => { e.stopPropagation(); hideBanner(); };
-                b.append(img, txt, x);
+                b.append(avatarEl || img, txt, x);
                 b.onclick = () => { hideBanner(); if (opener) opener(); else openChat(uid); };
                 requestAnimationFrame(() => b.classList.add('show'));
                 clearTimeout(bannerT); bannerT = setTimeout(hideBanner, 4500);
             };
 
             // ---------- aviso do sistema (via service worker) ----------
-            const showSystem = async (uid, title, body, gid) => {
+            const showSystem = async (uid, title, body, gid, iconUrl) => {
                 try {
                     const reg = await navigator.serviceWorker.ready;
                     const dir = new URL('.', location.href).href, icon = new URL('icon-192.png', dir).href;
                     await reg.showNotification(title, {
-                        body, icon, badge: icon, tag: gid ? 'group-' + gid : 'chat-' + (uid || 'teste'), renotify: true, vibrate: [120, 60, 120],
+                        body, icon: iconUrl || icon, badge: icon, tag: gid ? 'group-' + gid : 'chat-' + (uid || 'teste'), renotify: true, vibrate: [120, 60, 120],
                         data: { uid: gid ? null : (uid || null), gid: gid || null, url: location.href.split('#')[0].split('?')[0] }
                     });
                 } catch (e) { console.warn('Notificação do sistema falhou:', e); }
@@ -6007,8 +6012,16 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.openGroupFromNotif = openGroupChat;
             app.notifyGroup = (gid, title, body) => {
                 if (!enabled()) return;
-                if (document.visibilityState === 'hidden') { if (perm() === 'granted') showSystem(null, title, body, gid); return; }
-                showBanner(null, title, body, null, () => openGroupChat(gid));
+                const g = (appState.myGroups || []).find((x) => x.id === gid);
+                if (document.visibilityState === 'hidden') {
+                    if (perm() !== 'granted') return;
+                    const ic = (g && app.groupNotifIcon) ? app.groupNotifIcon(g) : Promise.resolve(null);
+                    ic.then((u) => showSystem(null, title, body, gid, u), () => showSystem(null, title, body, gid));
+                    return;
+                }
+                let av = null;
+                if (g && app.paintGroupAvatar) { av = document.createElement('div'); av.className = 'group-avatar'; app.paintGroupAvatar(av, g); }
+                showBanner(null, title, body, null, () => openGroupChat(gid), av);
             };
 
             // ---------- abrir a conversa pelo toque na notificação ----------
@@ -6151,7 +6164,13 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const activeGroup = () => appState.myGroups.find((g) => g.id === appState.activeGroupId) || null;
             const userOf = (uid) => appState.allUsers.find((u) => u.uid === uid);
             const isAdmin = (g, uid) => !!g && (g.ownerUid === uid || (g.admins || []).includes(uid));
-            const unreadOf = (g) => Math.max(0, (g.msgCount || 0) - ((meDoc().groupReads || {})[g.id] || 0));
+            const unreadOf = (g) => {
+                const n = Math.max(0, (g.msgCount || 0) - ((meDoc().groupReads || {})[g.id] || 0));
+                if (n > 0) return n;
+                // reserva: se a última mensagem é de outra pessoa e mais nova que o último visto, conta pelo menos 1
+                const lm = g.lastMsg, seen = (meDoc().groupSeen || {})[g.id];
+                return (lm && lm.createdAt && seen && lm.authorUid !== appState.firebaseUser.uid && lm.createdAt > seen) ? 1 : 0;
+            };
             const gRef = (id) => doc(colGroups, id);
             const hueOf = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 360; };
             const gradOf = (s) => { const h = hueOf(s); return 'linear-gradient(135deg, hsl(' + h + ' 80% 45%), hsl(' + ((h + 60) % 360) + ' 80% 32%))'; };
@@ -6189,6 +6208,22 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (imgCache.has(key)) apply(imgCache.get(key)); else loadGroupImage(g).then(apply);
             };
 
+
+            // avatar e ícone do grupo para os avisos
+            app.paintGroupAvatar = paintAvatar;
+            app.groupNotifIcon = async (g) => {
+                try {
+                    const d = await loadGroupImage(g); if (d) return d;
+                    const c = document.createElement('canvas'); c.width = c.height = 192;
+                    const x = c.getContext('2d'), h = hueOf(g.name + g.id);
+                    const gr = x.createLinearGradient(0, 0, 192, 192);
+                    gr.addColorStop(0, 'hsl(' + h + ' 80% 45%)'); gr.addColorStop(1, 'hsl(' + ((h + 60) % 360) + ' 80% 32%)');
+                    x.fillStyle = gr; x.fillRect(0, 0, 192, 192);
+                    x.fillStyle = '#fff'; x.font = '700 110px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+                    x.fillText(((g.name || '?').trim().charAt(0) || '?').toUpperCase(), 96, 104);
+                    return c.toDataURL('image/png');
+                } catch (_) { return null; }
+            };
 
             // ---------- "digitando" / "gravando áudio" nos grupos ----------
             const gp = { state: 'idle', sent: 0, gid: null };
@@ -6408,7 +6443,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             // ---------- lista de grupos ----------
             const previewOf = (g) => {
-                const lm = g.lastMsg; if (!lm) return 'Sem mensagens ainda';
+                const lm = g.lastMsg; if (!lm) return (g.msgCount || 0) > 0 ? 'Abra para ver as mensagens' : 'Sem mensagens ainda';
                 const who = lm.authorUid === me() ? 'Você' : firstName(userOf(lm.authorUid));
                 const t = String(lm.text || '');
                 return who + ': ' + t.slice(0, 28) + (t.length > 28 ? '…' : '');
@@ -6538,9 +6573,17 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
             const healed = {};
             const healLastMsg = (gid) => {
-                const g = activeGroup(); if (!g || g.id !== gid || !g.lastMsg) return;
+                const g = activeGroup(); if (!g || g.id !== gid) return;
                 const latest = appState.groupMessages.reduce((a, m) => (!a || m.createdAt > a.createdAt) ? m : a, null);
                 const lm = g.lastMsg;
+                if (!lm) {
+                    // prévia ausente mas há mensagens: recria a prévia (e o total, se estiver zerado)
+                    if (!latest) return;
+                    const fix = { lastMsg: { text: previewTextOf(latest), authorUid: latest.authorUid, createdAt: latest.createdAt } };
+                    if (!(g.msgCount > 0)) fix.msgCount = appState.groupMessages.length;
+                    updateDoc(gRef(gid), fix).catch(() => {});
+                    return;
+                }
                 if ((latest && latest.createdAt >= lm.createdAt) || Date.now() - Date.parse(lm.createdAt) < 120000) return;
                 updateDoc(gRef(gid), { lastMsg: latest ? { text: previewTextOf(latest), authorUid: latest.authorUid, createdAt: latest.createdAt } : null }).catch(() => {});
             };
@@ -7645,4 +7688,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 })();
 </script>
 </body>
-                                          </html>
+            </html>

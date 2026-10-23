@@ -1304,9 +1304,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .message.media-framed .msg-media { margin-top: 4px; border-radius: 8px; }
         .message.media-framed .msg-media + .msg-text, .message.media-framed .msg-file + .msg-text { margin-top: 6px; }
         .mm-play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .mm-play i { width: 46px; height: 46px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding-left: 3px; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.35); }
+        .mm-play i { width: 46px; height: 46px; border-radius: 50%; background: rgba(0,0,0,0.55); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding-left: 3px; box-sizing: border-box; border: 1px solid rgba(var(--cyan-rgb), 0.6); box-shadow: 0 0 14px rgba(var(--cyan-rgb), 0.3); }
         .mm-dur { position: absolute; left: 6px; bottom: 6px; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.68rem; padding: 1px 6px; border-radius: 6px; }
-        .mm-more { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border: none; border-radius: 50%; background: rgba(0,0,0,0.5); color: #fff; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .msg-file { display: flex; align-items: center; gap: 10px; width: min(260px, 68vw); box-sizing: border-box; padding: 8px 10px; margin: 2px 0 4px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; text-align: left; }
         .msg-file .mf-ico { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
         .msg-file .mf-txt { min-width: 0; flex: 1; }
@@ -1325,13 +1324,31 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .mm-reply { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
         .mm-reply:empty { display: none; }
         .mm-caption { width: 100%; box-sizing: border-box; min-height: 44px; max-height: 110px; resize: none; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: 10px; color: var(--text-main); padding: 10px 12px; font-family: inherit; font-size: 0.95rem; }
+
+        /* mídia: sem menu nativo ao segurar; campo de legenda sem borda cortada; player próprio nas cores do site */
+        .msg-media, .msg-file { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        #modal-mediasend .modal-body { padding: 4px; }
+        .mm-caption { outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        .mm-caption:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 1px rgba(var(--cyan-rgb), 0.5); }
+        .vp2 { position: relative; display: inline-block; max-width: 100%; line-height: 0; background: #000; border-radius: 8px; overflow: hidden; -webkit-touch-callout: none; user-select: none; }
+        .vp2.fill { display: block; width: 100%; height: 100%; border-radius: 0; }
+        .vp2 video { display: block; max-width: 100%; max-height: 42dvh; margin: 0 auto; object-fit: contain; background: #000; }
+        .vp2.fill video { width: 100%; height: 100%; max-height: none; }
+        .vp2-big { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px; border-radius: 50%; border: 1px solid rgba(var(--cyan-rgb), 0.6); background: rgba(0,0,0,0.55); color: var(--cyan); font-size: 1.4rem; box-shadow: 0 0 18px rgba(var(--cyan-rgb), 0.35); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 0; cursor: pointer; }
+        .vp2:not(.fill) .vp2-big { width: 48px; height: 48px; font-size: 1.1rem; }
+        .vp2.show .vp2-big { opacity: 1; pointer-events: auto; }
+        .vp2-bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 10px; padding: 26px 14px calc(env(safe-area-inset-bottom, 0px) + 14px); background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); color: #fff; font-size: 0.78rem; line-height: 1; font-variant-numeric: tabular-nums; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .vp2:not(.fill) .vp2-bar { padding: 20px 8px 8px; gap: 6px; }
+        .vp2.show .vp2-bar { opacity: 1; pointer-events: auto; }
+        .vp2-ib { width: 34px; height: 34px; border: none; background: transparent; color: var(--cyan); font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; flex-shrink: 0; }
+        .vp2-seek { flex: 1; min-width: 0; height: 24px; margin: 0; accent-color: var(--cyan); }
         .mm-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 10px; display: none; }
         .mm-bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--cyan), var(--purple)); transition: width 0.15s linear; }
         #modal-mediaview { background: #000; backdrop-filter: none; z-index: 120; }
         #mv-body { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         #mv-body img, #mv-body video { max-width: 100vw; max-height: 100dvh; object-fit: contain; }
         .mv-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px; z-index: 3; background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); }
-        .mv-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: rgba(255,255,255,0.14); color: #fff; font-size: 1.05rem; cursor: pointer; }
+        .mv-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(var(--cyan-rgb), 0.45); background: rgba(0,0,0,0.55); color: var(--cyan); font-size: 1.05rem; cursor: pointer; box-shadow: 0 0 12px rgba(var(--cyan-rgb), 0.2); }
 
         /* === REAÇÕES EM MENSAGENS === */
         .message.has-rx { padding-bottom: 20px; }
@@ -7214,14 +7231,83 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (m.kind === 'file') return fileCardHtml(m, data + ' onclick="event.stopPropagation(); app.mediaDownload(this.dataset.url, this.dataset.name)"') + cap;
                 const w = Number(m.w) || 0, h = Number(m.h) || 0;
                 const ar = w && h ? Math.min(1.8, Math.max(0.6, w / h)) : (m.kind === 'video' ? 1.78 : 1.33);
-                const more = '<button type="button" class="mm-more" aria-label="Opções" onclick="event.stopPropagation(); app.openContextMenu(\'' + id + '\', \'message\')"><i class="fa-solid fa-ellipsis-vertical"></i></button>';
                 const click = 'onclick="event.stopPropagation(); app.mediaView(this)"';
                 if (m.kind === 'video') {
                     return '<div class="msg-media" ' + data + ' ' + click + ' style="aspect-ratio:' + ar.toFixed(3) + ';"><img src="' + esc(poster(m.url)) + '" loading="lazy" decoding="async" alt="Vídeo" draggable="false" onerror="this.style.display=\'none\'">'
-                        + '<span class="mm-play"><i class="fa-solid fa-play"></i></span>' + (m.dur ? '<span class="mm-dur">' + fmtDur(Number(m.dur) || 0) + '</span>' : '') + more + '</div>' + cap;
+                        + '<span class="mm-play"><i class="fa-solid fa-play"></i></span>' + (m.dur ? '<span class="mm-dur">' + fmtDur(Number(m.dur) || 0) + '</span>' : '') + '</div>' + cap;
                 }
-                return '<div class="msg-media" ' + data + ' ' + click + ' style="aspect-ratio:' + ar.toFixed(3) + ';"><img src="' + esc(m.url) + '" loading="lazy" decoding="async" alt="Imagem" draggable="false">' + more + '</div>' + cap;
+                return '<div class="msg-media" ' + data + ' ' + click + ' style="aspect-ratio:' + ar.toFixed(3) + ';"><img src="' + esc(m.url) + '" loading="lazy" decoding="async" alt="Imagem" draggable="false">' + '</div>' + cap;
             };
+
+            // ---------- player próprio (sem controles do navegador; cores do site) ----------
+            const pfmt = (t) => { t = isFinite(t) && t > 0 ? Math.floor(t) : 0; return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+            const buildPlayer = (src, fill, autoplay) => {
+                const w = document.createElement('div'); w.className = 'vp2 show' + (fill ? ' fill' : '');
+                const v = document.createElement('video');
+                v.src = src; v.preload = 'metadata'; v.playsInline = true; v.controls = false;
+                v.setAttribute('playsinline', ''); v.setAttribute('controlslist', 'nodownload noremoteplayback');
+                v.disablePictureInPicture = true; v.disableRemotePlayback = true;
+                v.addEventListener('contextmenu', (e) => e.preventDefault());
+                const mk = (cls, html, label) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.innerHTML = html; b.setAttribute('aria-label', label); return b; };
+                const big = mk('vp2-big', '<i class="fa-solid fa-play"></i>', 'Reproduzir');
+                const bar = document.createElement('div'); bar.className = 'vp2-bar';
+                const pb = mk('vp2-ib', '<i class="fa-solid fa-play"></i>', 'Reproduzir');
+                const cur = document.createElement('span'); cur.textContent = '0:00';
+                const seek = document.createElement('input'); seek.type = 'range'; seek.className = 'vp2-seek'; seek.min = 0; seek.max = 1000; seek.step = 1; seek.value = 0; seek.setAttribute('aria-label', 'Posição do vídeo');
+                const dur = document.createElement('span'); dur.textContent = '0:00';
+                const mute = mk('vp2-ib', '<i class="fa-solid fa-volume-high"></i>', 'Som');
+                bar.append(pb, cur, seek, dur, mute);
+                w.append(v, big, bar);
+                let hideT = 0, dragging = false;
+                const icons = () => { const c = 'fa-solid ' + (v.paused ? 'fa-play' : 'fa-pause'); big.firstChild.className = c; pb.firstChild.className = c; };
+                const showUi = () => { w.classList.add('show'); clearTimeout(hideT); if (!v.paused && !dragging) hideT = setTimeout(() => w.classList.remove('show'), 2500); };
+                const toggle = () => { if (v.paused) { const p = v.play(); if (p && p.catch) p.catch(() => {}); } else v.pause(); };
+                const setDur = () => { dur.textContent = pfmt(v.duration); };
+                v.addEventListener('play', () => { icons(); showUi(); });
+                v.addEventListener('pause', () => { icons(); clearTimeout(hideT); w.classList.add('show'); });
+                v.addEventListener('ended', () => { icons(); w.classList.add('show'); });
+                v.addEventListener('loadedmetadata', setDur); v.addEventListener('durationchange', setDur);
+                v.addEventListener('timeupdate', () => { cur.textContent = pfmt(v.currentTime); if (!dragging && v.duration) seek.value = Math.round(v.currentTime / v.duration * 1000); });
+                v.addEventListener('volumechange', () => { mute.firstChild.className = 'fa-solid ' + (v.muted || v.volume === 0 ? 'fa-volume-xmark' : 'fa-volume-high'); });
+                v.addEventListener('click', (e) => { e.stopPropagation(); if (!w.classList.contains('show')) { showUi(); return; } toggle(); });
+                big.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+                pb.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+                mute.addEventListener('click', (e) => { e.stopPropagation(); v.muted = !v.muted; showUi(); });
+                bar.addEventListener('click', (e) => e.stopPropagation());
+                seek.addEventListener('input', () => { dragging = true; clearTimeout(hideT); if (v.duration) { v.currentTime = seek.value / 1000 * v.duration; cur.textContent = pfmt(v.currentTime); } });
+                seek.addEventListener('change', () => { dragging = false; showUi(); });
+                if (autoplay) { v.autoplay = true; const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+                return w;
+            };
+
+            // ---------- pressionar e segurar na mídia/arquivo abre as opções (no lugar dos 3 pontinhos) ----------
+            (() => {
+                const HOLD_MS = 450, MOVE_PX = 10;
+                let ht = 0, hx = 0, hy = 0, held = false;
+                const target = (t) => (t && t.closest) ? t.closest('.msg-media, .msg-file') : null;
+                document.addEventListener('pointerdown', (e) => {
+                    const el = target(e.target); if (!el) return;
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    const msgEl = el.closest('.message'); if (!msgEl) return;
+                    held = false; hx = e.clientX; hy = e.clientY; clearTimeout(ht);
+                    ht = setTimeout(() => {
+                        ht = 0; held = true;
+                        if (navigator.vibrate) { try { navigator.vibrate(30); } catch (_) {} }
+                        app.openContextMenu(msgEl.id.replace(/^msg-/, ''), 'message');
+                    }, HOLD_MS);
+                }, true);
+                document.addEventListener('pointermove', (e) => { if (ht && Math.hypot(e.clientX - hx, e.clientY - hy) > MOVE_PX) { clearTimeout(ht); ht = 0; } }, true);
+                ['pointerup', 'pointercancel'].forEach((ev) => document.addEventListener(ev, () => {
+                    clearTimeout(ht); ht = 0;
+                    if (held) setTimeout(() => { held = false; }, 400);
+                }, true));
+                // o clique que vem depois do press longo não pode abrir o visualizador/download
+                document.addEventListener('click', (e) => {
+                    if (!held || !target(e.target)) return;
+                    held = false; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+                }, true);
+                document.addEventListener('contextmenu', (e) => { if (target(e.target)) e.preventDefault(); });
+            })();
 
             // ---------- visualizador / download ----------
             const mv = { url: null, name: '' };
@@ -7230,7 +7316,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (!okUrl(url)) return;
                 const box = $('mv-body'); box.innerHTML = '';
                 let node;
-                if (kind === 'video') { node = document.createElement('video'); node.src = url; node.controls = true; node.autoplay = true; node.playsInline = true; }
+                if (kind === 'video') { node = buildPlayer(url, true, true); }
                 else { node = document.createElement('img'); node.src = url; node.alt = ''; }
                 box.appendChild(node);
                 mv.url = url; mv.name = el.dataset.name || '';
@@ -7300,6 +7386,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (!b) $('mm-bar-fill').style.width = '0%';
             };
             const reset = () => {
+                const pvv = $('mm-prev').querySelector('video'); if (pvv) { pvv.pause(); pvv.removeAttribute('src'); pvv.load(); }
                 if (mm.objUrl) URL.revokeObjectURL(mm.objUrl);
                 mm.file = null; mm.kind = null; mm.objUrl = null; mm.xhr = null; mm.uploaded = null;
                 $('mm-prev').innerHTML = ''; $('mm-caption').value = '';
@@ -7315,7 +7402,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 mm.file = file; mm.kind = k.kind; mm.objUrl = URL.createObjectURL(file);
                 const pv = $('mm-prev');
                 if (k.kind === 'image') { const im = new Image(); im.src = mm.objUrl; im.alt = ''; pv.appendChild(im); }
-                else if (k.kind === 'video') { const v = document.createElement('video'); v.src = mm.objUrl; v.controls = true; v.muted = true; v.playsInline = true; v.preload = 'metadata'; pv.appendChild(v); }
+                else if (k.kind === 'video') { pv.appendChild(buildPlayer(mm.objUrl, false, false)); }
                 else pv.innerHTML = fileCardHtml({ name: file.name, size: file.size }, '').replace('<i class="fa-solid fa-download"></i>', '');
                 const rp = appState.replyingTo, au = rp && appState.allUsers.find((u) => u.uid === rp.authorUid);
                 $('mm-reply').textContent = rp ? 'Respondendo a ' + (au ? au.handle : '@usuario') : '';
@@ -7400,4 +7487,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                                                             </html>
+                        </html>

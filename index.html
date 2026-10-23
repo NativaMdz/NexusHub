@@ -6339,7 +6339,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 appState.myGroups.forEach((g) => {
                     const lm = g.lastMsg, key = (lm && lm.createdAt) || '';
                     if (!(g.id in gSeen)) { gSeen[g.id] = key; return; }
-                    if (!key || key === gSeen[g.id]) return;
+                    const prev = gSeen[g.id];
+                    if (!key || key <= prev) return;   // igual ou mais antiga (ex.: apagou para todos e a prévia voltou) não é mensagem nova
                     gSeen[g.id] = key;
                     if (lm.authorUid === my) return;
                     if (appState.currentView === 'chat' && appState.activeChatMode === 'group' && appState.activeGroupId === g.id && document.visibilityState === 'visible') return;
@@ -6347,10 +6348,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     if (app.notifyGroup) app.notifyGroup(g.id, n > 1 ? g.name + ' (' + n + ')' : g.name, who + ': ' + String(lm.text || 'Nova mensagem'));
                 });
             };
-            const manualOf = (g) => ((meDoc().manualUnread || {})['g_' + g.id]) ? 1 : 0;
             const updateTabBadge = () => {
                 const b = $('tab-groups-badge'); if (!b) return;
-                const t = appState.myGroups.reduce((a, g) => { const n = unreadOf(g); return a + (n > 0 ? n : manualOf(g)); }, 0);
+                const t = appState.myGroups.reduce((a, g) => a + unreadOf(g), 0);
                 b.style.display = t > 0 ? 'flex' : 'none';
                 b.textContent = t > 99 ? '99+' : String(t);
             };
@@ -7695,4 +7695,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 })();
 </script>
 </body>
-                    </html>
+    </html>

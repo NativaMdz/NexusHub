@@ -1,16 +1,16 @@
-/* Nexus Hub - Service Worker (PWA)
+/* NexusOne - Service Worker (PWA)
    - Só intercepta arquivos do PRÓPRIO site. Firebase, fontes e CDNs passam direto (nunca ficam em cache).
    - Página: rede primeiro (sempre a versão mais nova); cópia guardada só como plano B sem internet.
    - Ícones: cache primeiro.
    Para forçar atualização do cache no futuro, basta mudar a VERSION. */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = 'nexus-shell-' + VERSION;
 const ICONS = ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
 
 const OFFLINE_HTML = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-    + '<title>Nexus Hub</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#050507;color:#e6e6ee;font-family:sans-serif;text-align:center;padding:24px}'
+    + '<title>NexusOne</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#050507;color:#e6e6ee;font-family:sans-serif;text-align:center;padding:24px}'
     + 'h1{color:#00f3ff;letter-spacing:2px}p{color:#8b8b99}button{margin-top:16px;padding:12px 22px;border:none;border-radius:12px;background:linear-gradient(90deg,#00f3ff,#b026ff);color:#000;font-weight:700}</style></head>'
-    + '<body><div><h1>NEXUS HUB</h1><p>Você está sem conexão.<br>Reconecte-se à internet para entrar na rede.</p><button onclick="location.reload()">Tentar de novo</button></div></body></html>';
+    + '<body><div><h1>NEXUS ONE</h1><p>Você está sem conexão.<br>Reconecte-se à internet para entrar na rede.</p><button onclick="location.reload()">Tentar de novo</button></div></body></html>';
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();

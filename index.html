@@ -5928,7 +5928,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             // ---------- aviso dentro do app ----------
             let bannerT = 0;
             const hideBanner = () => { const b = $('notif-banner'); if (b) b.classList.remove('show'); };
-            const showBanner = (uid, title, body, avatar) => {
+            const showBanner = (uid, title, body, avatar, opener) => {
                 let b = $('notif-banner');
                 if (!b) { b = document.createElement('div'); b.id = 'notif-banner'; b.className = 'notif-banner'; document.body.appendChild(b); }
                 b.innerHTML = '';
@@ -5941,19 +5941,19 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 x.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 x.onclick = (e) => { e.stopPropagation(); hideBanner(); };
                 b.append(img, txt, x);
-                b.onclick = () => { hideBanner(); openChat(uid); };
+                b.onclick = () => { hideBanner(); if (opener) opener(); else openChat(uid); };
                 requestAnimationFrame(() => b.classList.add('show'));
                 clearTimeout(bannerT); bannerT = setTimeout(hideBanner, 4500);
             };
 
             // ---------- aviso do sistema (via service worker) ----------
-            const showSystem = async (uid, title, body) => {
+            const showSystem = async (uid, title, body, gid) => {
                 try {
                     const reg = await navigator.serviceWorker.ready;
                     const dir = new URL('.', location.href).href, icon = new URL('icon-192.png', dir).href;
                     await reg.showNotification(title, {
-                        body, icon, badge: icon, tag: 'chat-' + (uid || 'teste'), renotify: true, vibrate: [120, 60, 120],
-                        data: { uid: uid || null, url: location.href.split('#')[0].split('?')[0] }
+                        body, icon, badge: icon, tag: gid ? 'group-' + gid : 'chat-' + (uid || 'teste'), renotify: true, vibrate: [120, 60, 120],
+                        data: { uid: gid ? null : (uid || null), gid: gid || null, url: location.href.split('#')[0].split('?')[0] }
                     });
                 } catch (e) { console.warn('Notificação do sistema falhou:', e); }
             };
@@ -5998,9 +5998,37 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             setInterval(check, 1200);
             document.addEventListener('visibilitychange', check);
 
+            // ---------- grupos: mesmo aviso das conversas privadas ----------
+            const openGroupChat = (gid) => {
+                if (!gid || !appState.firebaseUser || !(appState.myGroups || []).some((g) => g.id === gid)) return;
+                if (appState.currentView !== 'chat') { app.navigate('chat'); setTimeout(() => app.openGroup(gid), 250); }
+                else app.openGroup(gid);
+            };
+            app.openGroupFromNotif = openGroupChat;
+            app.notifyGroup = (gid, title, body) => {
+                if (!enabled()) return;
+                if (document.visibilityState === 'hidden') { if (perm() === 'granted') showSystem(null, title, body, gid); return; }
+                showBanner(null, title, body, null, () => openGroupChat(gid));
+            };
+
             // ---------- abrir a conversa pelo toque na notificação ----------
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.type === 'open-chat') openChat(e.data.uid); });
+                navigator.serviceWorker.addEventListener('message', (e) => {
+                    if (!e.data) return;
+                    if (e.data.type === 'open-chat') openChat(e.data.uid);
+                    else if (e.data.type === 'open-group') openGroupChat(e.data.gid);
+                });
+            }
+            const wantedGroup = new URLSearchParams(location.search).get('group');
+            if (wantedGroup) {
+                const tg2 = setInterval(() => {
+                    if (appState.firebaseUser && appState.currentUserData && (appState.myGroups || []).length) {
+                        clearInterval(tg2);
+                        try { history.replaceState(null, '', location.pathname); } catch (_) {}
+                        openGroupChat(wantedGroup);
+                    }
+                }, 500);
+                setTimeout(() => clearInterval(tg2), 20000);
             }
             const wanted = new URLSearchParams(location.search).get('chat');
             if (wanted) {
@@ -6259,9 +6287,28 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             // ---------- grupos do usuário ----------
             let gUnsub = null, gUid = null;
+            app.updateGroupsTabBadge = () => { try { updateTabBadge(); } catch (_) {} };
+            // avisos de mensagem nova nos grupos (primeiro retorno do servidor só marca o ponto de partida)
+            const gSeen = {}; let gSeenFor = null;
+            const watchGroupMessages = (fromCache) => {
+                if (fromCache) return;
+                const my = appState.firebaseUser && appState.firebaseUser.uid; if (!my) return;
+                if (gSeenFor !== my) { gSeenFor = my; Object.keys(gSeen).forEach((k) => delete gSeen[k]); }
+                appState.myGroups.forEach((g) => {
+                    const lm = g.lastMsg, key = (lm && lm.createdAt) || '';
+                    if (!(g.id in gSeen)) { gSeen[g.id] = key; return; }
+                    if (!key || key === gSeen[g.id]) return;
+                    gSeen[g.id] = key;
+                    if (lm.authorUid === my) return;
+                    if (appState.currentView === 'chat' && appState.activeChatMode === 'group' && appState.activeGroupId === g.id && document.visibilityState === 'visible') return;
+                    const n = unreadOf(g), who = firstName(userOf(lm.authorUid));
+                    if (app.notifyGroup) app.notifyGroup(g.id, n > 1 ? g.name + ' (' + n + ')' : g.name, who + ': ' + String(lm.text || 'Nova mensagem'));
+                });
+            };
+            const manualOf = (g) => ((meDoc().manualUnread || {})['g_' + g.id]) ? 1 : 0;
             const updateTabBadge = () => {
                 const b = $('tab-groups-badge'); if (!b) return;
-                const t = appState.myGroups.reduce((a, g) => a + unreadOf(g), 0);
+                const t = appState.myGroups.reduce((a, g) => { const n = unreadOf(g); return a + (n > 0 ? n : manualOf(g)); }, 0);
                 b.style.display = t > 0 ? 'flex' : 'none';
                 b.textContent = t > 99 ? '99+' : String(t);
             };
@@ -6273,6 +6320,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 gUid = uid;
                 gUnsub = onSnapshot(query(colGroups, where('members', 'array-contains', uid)), (snap) => {
                     appState.myGroups = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    watchGroupMessages(!!(snap.metadata && snap.metadata.fromCache));
                     updateTabBadge();
                     ensureTypingListener();
                     if (appState.activeChatMode === 'group_list') renderGroupList();
@@ -6905,6 +6953,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (pl) pl.querySelectorAll('.chat-list-item[data-uid]').forEach((it) => applyTo(it, 'p_' + it.dataset.uid, false));
                 const gl = $('group-list-container');
                 if (gl) gl.querySelectorAll('.chat-list-item.group-item[data-gid]').forEach((it) => applyTo(it, 'g_' + it.dataset.gid, true));
+                if (app.updateGroupsTabBadge) app.updateGroupsTabBadge();
             };
 
             // lista privada: depois do cálculo normal de não lidas / digitando
@@ -7596,4 +7645,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 })();
 </script>
 </body>
-    </html>
+                                          </html>

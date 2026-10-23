@@ -3,7 +3,7 @@
    - Página: rede primeiro (sempre a versão mais nova); cópia guardada só como plano B sem internet.
    - Ícones: cache primeiro.
    Para forçar atualização do cache no futuro, basta mudar a VERSION. */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = 'nexus-shell-' + VERSION;
 const ICONS = ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
 
@@ -67,12 +67,14 @@ self.addEventListener('notificationclick', (event) => {
             if ('focus' in w) {
                 await w.focus();
                 if (data.uid) w.postMessage({ type: 'open-chat', uid: data.uid });
+                if (data.gid) w.postMessage({ type: 'open-group', gid: data.gid });
                 return;
             }
         }
         if (self.clients.openWindow) {
             const u = new URL(data.url || self.registration.scope);
             if (data.uid) u.searchParams.set('chat', data.uid);
+            if (data.gid) u.searchParams.set('group', data.gid);
             await self.clients.openWindow(u.href);
         }
     })());

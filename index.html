@@ -1326,6 +1326,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .mm-caption { width: 100%; box-sizing: border-box; min-height: 44px; max-height: 110px; resize: none; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: 10px; color: var(--text-main); padding: 10px 12px; font-family: inherit; font-size: 0.95rem; }
 
         /* mídia: sem menu nativo ao segurar; campo de legenda sem borda cortada; player próprio nas cores do site */
+        .message .msg-bubble { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         .msg-media, .msg-file { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         #modal-mediasend .modal-body { padding: 4px; }
         .mm-caption { outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
@@ -3478,7 +3479,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         div.dataset.hash = msgHash;
                         div.innerHTML = `
                             ${!isMine && containerId !== 'chat-private-container' ? `<img src="${author.avatar}" loading="lazy" decoding="async" class="msg-avatar ${app.getFrameClass(author)}" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
-                            <div class="msg-bubble" onclick="app.openContextMenu('${msg.id}', 'message')">
+                            <div class="msg-bubble">
                                 ${!isMine ? `<div class="msg-author${containerId === 'chat-private-container' ? '' : ' linked'}" data-uid="${author.uid}" ${containerId === 'chat-private-container' ? '' : `onclick="app.navigate('public_profile', null, '${author.uid}')"`}>${author.name} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
                                 ${msg.audio ? app.voiceBubbleHtml(msg) : msg.media ? app.mediaBubbleHtml(msg) : msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${msg.content}</div>`}
@@ -7284,7 +7285,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             (() => {
                 const HOLD_MS = 450, MOVE_PX = 10;
                 let ht = 0, hx = 0, hy = 0, held = false;
-                const target = (t) => (t && t.closest) ? t.closest('.msg-media, .msg-file') : null;
+                const target = (t) => (t && t.closest) ? t.closest('.message .msg-bubble') : null;
                 document.addEventListener('pointerdown', (e) => {
                     const el = target(e.target); if (!el) return;
                     if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -7302,7 +7303,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     if (held) setTimeout(() => { held = false; }, 400);
                 }, true));
                 // o clique que vem depois do press longo não pode abrir o visualizador/download
-                document.addEventListener('click', (e) => {
+                window.addEventListener('click', (e) => {
                     if (!held || !target(e.target)) return;
                     held = false; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
                 }, true);
@@ -7487,4 +7488,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 </body>
-                        </html>
+                    </html>

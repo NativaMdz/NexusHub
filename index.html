@@ -6164,7 +6164,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const activeGroup = () => appState.myGroups.find((g) => g.id === appState.activeGroupId) || null;
             const userOf = (uid) => appState.allUsers.find((u) => u.uid === uid);
             const isAdmin = (g, uid) => !!g && (g.ownerUid === uid || (g.admins || []).includes(uid));
+            // última mensagem "fantasma": já foi limpa por mim (Limpar conversa) ou é de antes de eu entrar no grupo
+            const lastHidden = (g) => {
+                const lm = g && g.lastMsg; if (!lm || !lm.createdAt) return false;
+                const c = (meDoc().chatClears || {})['g_' + g.id], j = g.joined && g.joined[appState.firebaseUser.uid];
+                return !!((c && lm.createdAt <= c) || (j && lm.createdAt < j));
+            };
             const unreadOf = (g) => {
+                if (lastHidden(g)) return 0;
                 const n = Math.max(0, (g.msgCount || 0) - ((meDoc().groupReads || {})[g.id] || 0));
                 if (n > 0) return n;
                 // reserva: se a última mensagem é de outra pessoa e mais nova que o último visto, conta pelo menos 1
@@ -6443,7 +6450,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             // ---------- lista de grupos ----------
             const previewOf = (g) => {
-                const lm = g.lastMsg; if (!lm) return (g.msgCount || 0) > 0 ? 'Abra para ver as mensagens' : 'Sem mensagens ainda';
+                const lm = g.lastMsg; if (!lm || lastHidden(g)) return (!lm && (g.msgCount || 0) > 0) ? 'Abra para ver as mensagens' : 'Sem mensagens ainda';
                 const who = lm.authorUid === me() ? 'Você' : firstName(userOf(lm.authorUid));
                 const t = String(lm.text || '');
                 return who + ': ' + t.slice(0, 28) + (t.length > 28 ? '…' : '');
@@ -7688,4 +7695,4 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 })();
 </script>
 </body>
-            </html>
+                    </html>

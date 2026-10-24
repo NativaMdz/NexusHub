@@ -7817,6 +7817,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const updateNote = () => {
                 const e = ov.querySelector('.nxc-note'); if (!e) return;
                 const p = [];
+                if (S && S.remoteAway) p.push('Outro usuário em segundo plano (voz pausada)');
                 if (S && S.remoteMuted) p.push('Microfone do outro silenciado');
                 if (S && S.q && S.state === 'active') p.push('Conexão: ' + S.q);
                 e.textContent = p.join(' • ');
@@ -8037,6 +8038,21 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && S.state === 'active') { S.wake = null; lockScreen(); } });
 
             // ---------- chamada com o app em segundo plano ----------
+            // O Chrome do Android pausa o microfone quando o app sai da tela; ao voltar, reabrimos o microfone se ele ficou mudo/encerrado
+            const restoreMic = async () => {
+                if (!S || !S.stream || !S.pc || document.visibilityState !== 'visible') return;
+                const t = S.stream.getAudioTracks()[0];
+                if (t && t.readyState === 'live' && !t.muted) return;
+                try {
+                    const ns = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: S && S.ns !== false, autoGainControl: true } });
+                    if (!S) { ns.getTracks().forEach((x) => x.stop()); return; }
+                    const nt = ns.getAudioTracks()[0]; nt.enabled = !S.muted;
+                    const snd = S.pc.getSenders().find((x) => x.track && x.track.kind === 'audio');
+                    if (snd) await snd.replaceTrack(nt);
+                    if (t) { S.stream.removeTrack(t); try { t.stop(); } catch (_) {} }
+                    S.stream.addTrack(nt);
+                } catch (_) {}
+            };
             const tick = () => { if (!S || S.state !== 'active') return; S.secs = Math.floor((Date.now() - (S.t0 || Date.now())) / 1000); setStatus(fmt(S.secs)); };
             const closeNotifs = (tags) => {
                 try { navigator.serviceWorker.ready.then((r) => (tags || ['call', 'call-active']).forEach((tag) => r.getNotifications({ tag }).then((l) => l.forEach((n) => n.close())))).catch(() => {}); } catch (_) {}
@@ -8063,15 +8079,16 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const u = userOf(S.peer) || {};
                 try {
                     navigator.serviceWorker.ready.then((r) => r.showNotification('Chamada em andamento', {
-                        body: 'Com ' + (u.name || 'NexusOne') + ' • toque para voltar', tag: 'call-active', requireInteraction: true, silent: true,
+                        body: 'Com ' + (u.name || 'NexusOne') + ' • volte ao app para falar (o microfone pausa em segundo plano)', tag: 'call-active', requireInteraction: true, silent: true,
                         icon: 'icon-192.png', actions: [{ action: 'hangup', title: 'Desligar' }], data: { url: location.href.split('#')[0].split('?')[0] }
                     }));
                 } catch (_) {}
             };
             document.addEventListener('visibilitychange', () => {
                 if (!S) return;
+                if (S.ref && S.state === 'active') updateDoc(S.ref, { [S.role + 'Away']: document.visibilityState === 'hidden' }).catch(() => {});
                 if (document.visibilityState === 'hidden') { showOngoing(); return; }
-                tick(); closeNotifs(['call-active']);
+                tick(); closeNotifs(['call-active']); setTimeout(restoreMic, 800);
                 ['call-audio', 'call-rv', 'call-lv'].forEach((id) => { const m = $(id); if (m && m.srcObject && m.paused) m.play().catch(() => {}); });
             });
             try { navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.type === 'call-hangup') app.hangupCall(); }); } catch (_) {}
@@ -8113,11 +8130,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         if (S.timer) return;
                         ring(false); S.state = 'active'; S.secs = 0; ui('active'); lockScreen(); S.qTimer = setInterval(pollQuality, 3000);
                         S.t0 = Date.now(); S.timer = setInterval(tick, 1000); startSession();
+                        try { if (navigator.locks) navigator.locks.request('nexusone-call', () => new Promise((res) => { S.releaseLock = res; })).catch(() => {}); } catch (_) {}
                     } else if (st === 'failed') {
                         updateDoc(S.ref, { state: 'ended' }).catch(() => {});
                         end('Não foi possível conectar. A rede pode estar bloqueando a chamada.');
                     } else if (st === 'disconnected') {
-                        S.discT = setTimeout(() => { if (S && S.pc === pc && pc.connectionState !== 'connected') app.hangupCall(); }, 8000);
+                        S.discT = setTimeout(() => { if (S && S.pc === pc && pc.connectionState !== 'connected') app.hangupCall(); }, document.visibilityState === 'hidden' ? 60000 : 20000);
                     }
                 };
             };
@@ -8141,6 +8159,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 ov.classList.remove('on', 'ring', 'inc', 'rv-on', 'rv-screen', 'lv-on', 'vid'); bar.classList.remove('on');
                 ov.querySelector('.nxc-more').classList.remove('on');
                 stopSession(); closeNotifs();
+                try { if (s.releaseLock) s.releaseLock(); } catch (_) {}
                 if (msg) toast(msg);
             };
 
@@ -8149,6 +8168,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (!S || !d || d.createdAt !== S.createdAt) return;
                 const key = S.role === 'caller' ? 'calleeIce' : 'callerIce';
                 (d[key] || []).forEach((c) => { if (!S.added.has(c)) { S.added.add(c); addRemoteIce(c); } });
+                const ra = !!d[S.role === 'caller' ? 'calleeAway' : 'callerAway'];
+                if (ra !== !!S.remoteAway) { S.remoteAway = ra; updateNote(); }
                 const rm = !!d[S.role === 'caller' ? 'calleeMuted' : 'callerMuted'];
                 if (rm !== !!S.remoteMuted) { S.remoteMuted = rm; updateNote(); }
                 const rv = d[S.role === 'caller' ? 'calleeVid' : 'callerVid'] || false;
@@ -8372,7 +8393,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261024-1900';
+    window.NX_BUILD = '20261024-1927';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

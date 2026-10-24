@@ -18,7 +18,7 @@
            + captura do convite de instalação do navegador. */
         (function () {
             try {
-                try { if (/[?&]v=nexusone\b/.test(location.search)) sessionStorage.setItem('nxo_new_launch', '1'); } catch (e) {}
+                try { if (/[?&](v=nexusone|group=|chat=)/.test(location.search)) sessionStorage.setItem('nxo_new_launch', '1'); } catch (e) {}
                 var base = location.href.split('#')[0].split('?')[0];
                 var dir = base.slice(0, base.lastIndexOf('/') + 1);
                 var abs = function (f) { return new URL(f, dir).href; };
@@ -6342,7 +6342,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     const prev = gSeen[g.id];
                     if (!key || key <= prev) return;   // igual ou mais antiga (ex.: apagou para todos e a prévia voltou) não é mensagem nova
                     gSeen[g.id] = key;
-                    if (lm.authorUid === my) return;
+                    if (lm.authorUid === my || (meDoc().blockedUsers || {})[lm.authorUid]) return;
                     if (appState.currentView === 'chat' && appState.activeChatMode === 'group' && appState.activeGroupId === g.id && document.visibilityState === 'visible') return;
                     const n = unreadOf(g), who = firstName(userOf(lm.authorUid));
                     if (app.notifyGroup) app.notifyGroup(g.id, n > 1 ? g.name + ' (' + n + ')' : g.name, who + ': ' + String(lm.text || 'Nova mensagem'));
@@ -7682,9 +7682,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
     function start() {
         if (isIOS || newLaunch && isStandalone) return;               // já está no app novo (ou iPhone: usa o botão "Instalar" do app)
         if (legacy) { if (!snoozed()) show(); }                       // app antigo instalado
-        else window.addEventListener('pwa-ready', function () {       // aba do Chrome: só avisa se o NexusOne ainda NÃO está instalado
-            if (!snoozed()) show();
-        });
+        else {                                                        // aba do Chrome: só avisa se o NexusOne ainda NÃO está instalado
+            if (window.__pwaPrompt && !snoozed()) show();             // o Chrome pode ter liberado a instalação antes deste script carregar
+            window.addEventListener('pwa-ready', function () { if (!snoozed()) show(); });
+        }
         window.addEventListener('pwa-ready', render);
         window.addEventListener('pwa-installed', function () {
             installed = true;

@@ -42,6 +42,144 @@
             window.addEventListener('appinstalled', function () { window.__pwaPrompt = null; window.dispatchEvent(new Event('pwa-installed')); });
         })();
     </script>
+    <!-- ===== TELA "BAIXE O APP OFICIAL": no navegador comum, só mostra a página de download ===== -->
+    <script id="nexusone-landing">
+    (function () {
+        var inst = false;
+        try { inst = ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay'].some(function (m) { return window.matchMedia('(display-mode: ' + m + ')').matches; }) || navigator.standalone === true || (document.referrer || '').indexOf('android-app://') === 0; } catch (e) {}
+        // Acesso de desenvolvedor: abra o site uma vez com ?nexus-dev=1 para liberar este navegador (?nexus-dev=0 volta a bloquear)
+        var dev = false;
+        try {
+            if (/[?&]nexus-dev=1/.test(location.search)) localStorage.setItem('nx_web_ok', '1');
+            if (/[?&]nexus-dev=0/.test(location.search)) localStorage.removeItem('nx_web_ok');
+            dev = localStorage.getItem('nx_web_ok') === '1';
+        } catch (e) {}
+        var local = !/^https?:$/.test(location.protocol) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+        window.__nxLanding = !inst && !dev && !local;
+        if (!window.__nxLanding) return;
+
+        document.documentElement.classList.add('nx-landing');
+        var st = document.createElement('style');
+        st.textContent =
+            'html.nx-landing body>*:not(#nx-landing){display:none!important}' +
+            '#nx-landing{position:fixed;inset:0;z-index:2147483000;overflow-y:auto;-webkit-overflow-scrolling:touch;color:#fff;font-family:Inter,sans-serif;background:radial-gradient(circle at 50% -10%,rgba(var(--cyan-rgb,0,243,255),.16),transparent 55%),var(--bg-base,#050507)}' +
+            '#nx-landing .nxl-wrap{max-width:520px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 22px max(28px,env(safe-area-inset-bottom));text-align:center}' +
+            '#nx-landing .nxl-logo{font-family:Rajdhani,sans-serif;font-weight:700;font-size:2.4rem;letter-spacing:.14em;text-shadow:0 0 18px rgba(var(--cyan-rgb,0,243,255),.55)}' +
+            '#nx-landing .nxl-logo span{color:var(--cyan,#00f3ff)}' +
+            '#nx-landing .nxl-badge{display:inline-block;margin:12px 0 18px;padding:5px 12px;border-radius:999px;border:1px solid var(--cyan,#00f3ff);color:var(--cyan,#00f3ff);font-size:.72rem;font-weight:700;letter-spacing:.12em}' +
+            '#nx-landing h1{font-family:Rajdhani,sans-serif;font-size:1.9rem;line-height:1.15;margin:0 0 10px}' +
+            '#nx-landing .nxl-lead{color:#b8bcc8;font-size:.98rem;line-height:1.55;margin:0 0 22px}' +
+            '#nx-landing .nxl-cta{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border:0;border-radius:14px;background:var(--cyan,#00f3ff);color:#050507;font-size:1.1rem;font-weight:700;cursor:pointer;box-shadow:0 0 26px rgba(var(--cyan-rgb,0,243,255),.35)}' +
+            '#nx-landing .nxl-cta[disabled]{opacity:.75;cursor:default}' +
+            '#nx-landing .nxl-msg{min-height:1.3em;margin:12px 0 0;font-size:.9rem;color:#8fe0b0}' +
+            '#nx-landing .nxl-hint{margin:6px 0 26px;font-size:.85rem;color:#8a8fa0}' +
+            '#nx-landing .nxl-warn{display:none;margin:0 0 18px;padding:10px 12px;border-radius:10px;background:#2a1a10;border:1px solid #ff9a3c;color:#ffc58a;font-size:.85rem;line-height:1.45}' +
+            '#nx-landing .nxl-tabs{display:flex;gap:6px;margin-bottom:14px}' +
+            '#nx-landing .nxl-tab{flex:1;padding:11px 4px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#b8bcc8;font-size:.85rem;font-weight:600;cursor:pointer}' +
+            '#nx-landing .nxl-tab.on{background:var(--cyan,#00f3ff);border-color:var(--cyan,#00f3ff);color:#050507}' +
+            '#nx-landing .nxl-panel{display:none;text-align:left;padding:16px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);font-size:.92rem;line-height:1.55;color:#d6d9e2}' +
+            '#nx-landing .nxl-panel.on{display:block}' +
+            '#nx-landing .nxl-panel h3{font-family:Rajdhani,sans-serif;font-size:1.15rem;margin:0 0 8px;color:#fff}' +
+            '#nx-landing .nxl-panel p{margin:0 0 10px}' +
+            '#nx-landing .nxl-li{display:flex;gap:12px;align-items:flex-start;margin:0 0 11px}' +
+            '#nx-landing .nxl-li i{width:22px;text-align:center;margin-top:3px;color:var(--cyan,#00f3ff)}' +
+            '#nx-landing .nxl-plat{margin:0 0 14px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.1)}' +
+            '#nx-landing .nxl-plat.me{border-color:var(--cyan,#00f3ff)}' +
+            '#nx-landing .nxl-plat b{display:block;margin-bottom:6px;color:#fff}' +
+            '#nx-landing .nxl-plat ol{margin:0;padding-left:20px}' +
+            '#nx-landing .nxl-foot{margin-top:26px;font-size:.78rem;color:#6d7284}';
+        document.head.appendChild(st);
+
+        var ua = navigator.userAgent || '';
+        var isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isAndroid = /android/i.test(ua);
+        var plat = isIOS ? 'ios' : isAndroid ? 'android' : 'desk';
+        var inApp = /FBAN|FBAV|Instagram|TikTok|Twitter|Line\/|; wv\)/i.test(ua);
+
+        function build() {
+            var box = document.createElement('div');
+            box.id = 'nx-landing'; box.setAttribute('role', 'main');
+            var P = function (k, title, steps) {
+                return '<div class="nxl-plat' + (plat === k ? ' me' : '') + '"><b>' + title + (plat === k ? ' (seu aparelho)' : '') + '</b><ol>' + steps.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ol></div>';
+            };
+            var plats = [
+                P('android', 'Android (Chrome)', ['Toque em <b style="display:inline;color:inherit">Baixar o app</b> e confirme em <b style="display:inline;color:inherit">Instalar</b>.', 'Se o botão não abrir a instalação: menu ⋮ do Chrome → <b style="display:inline;color:inherit">Instalar app</b> (ou Adicionar à tela inicial).', 'Abra o NexusOne pelo ícone na tela inicial.']),
+                P('ios', 'iPhone / iPad (Safari)', ['Abra este endereço no <b style="display:inline;color:inherit">Safari</b>.', 'Toque em Compartilhar e depois em <b style="display:inline;color:inherit">Adicionar à Tela de Início</b>.', 'Abra o NexusOne pelo ícone novo.']),
+                P('desk', 'Computador (Chrome ou Edge)', ['Clique no ícone de instalar na barra de endereço, ou em ⋮ → <b style="display:inline;color:inherit">Instalar NexusOne</b>.', 'Abra o app pela janela ou atalho criado.'])
+            ];
+            var order = plat === 'ios' ? [1, 0, 2] : plat === 'android' ? [0, 1, 2] : [2, 0, 1];
+            box.innerHTML =
+                '<div class="nxl-wrap">' +
+                  '<div class="nxl-logo">NEXUS<span>ONE</span></div>' +
+                  '<span class="nxl-badge">EM DESENVOLVIMENTO</span>' +
+                  '<h1>Baixe o app oficial para usar todos os recursos</h1>' +
+                  '<p class="nxl-lead">O NexusOne agora funciona somente pelo aplicativo oficial. É rápido, não ocupa quase espaço e se atualiza sozinho.</p>' +
+                  '<div class="nxl-warn" id="nxl-warn">Você está em um navegador interno de outro app. Abra este link no <b>Chrome</b> (menu ⋮ → Abrir no navegador) para conseguir instalar.</div>' +
+                  '<button type="button" class="nxl-cta" id="nxl-dl"><i class="fa-solid fa-download"></i><span>Baixar o app</span></button>' +
+                  '<p class="nxl-msg" id="nxl-msg" aria-live="polite"></p>' +
+                  '<p class="nxl-hint">Já instalou? Abra o NexusOne pelo ícone na tela inicial.</p>' +
+                  '<div class="nxl-tabs" role="tablist">' +
+                    '<button type="button" class="nxl-tab on" role="tab" data-t="app">O app</button>' +
+                    '<button type="button" class="nxl-tab" role="tab" data-t="dev">Novidades</button>' +
+                    '<button type="button" class="nxl-tab" role="tab" data-t="how">Instalação</button>' +
+                  '</div>' +
+                  '<div class="nxl-panel on" id="nxl-p-app">' +
+                    '<h3>O que é o NexusOne</h3>' +
+                    '<p>Uma rede social para conversar, compartilhar e se destacar, tudo em um só lugar:</p>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-newspaper"></i><span><b style="display:inline;color:#fff">Feed e busca</b> para publicar e encontrar pessoas.</span></div>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-comments"></i><span><b style="display:inline;color:#fff">Comms</b>: chat global, mensagens privadas e grupos.</span></div>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-phone"></i><span><b style="display:inline;color:#fff">Chamadas de voz</b> 1x1 dentro do app.</span></div>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-trophy"></i><span><b style="display:inline;color:#fff">Ranking</b> e <b style="display:inline;color:#fff">perfil</b> personalizável.</span></div>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-cart-shopping"></i><span><b style="display:inline;color:#fff">Loja</b> com itens e molduras exclusivas.</span></div>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-bell"></i><span><b style="display:inline;color:#fff">Avisos</b> de novas mensagens.</span></div>' +
+                  '</div>' +
+                  '<div class="nxl-panel" id="nxl-p-dev">' +
+                    '<h3>Em desenvolvimento</h3>' +
+                    '<p>O NexusOne está em evolução constante: nossa equipe de suporte trabalha todos os dias em melhorias, correções e novos recursos, e o app já tem avançado bem a cada dia.</p>' +
+                    '<p>Quando sair uma versão nova, o app instalado avisa e se atualiza sozinho, sem você precisar baixar de novo.</p>' +
+                    '<h3>Últimas novidades</h3>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-phone"></i><span>Chamadas de voz 1x1.</span></div>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-bell"></i><span>Avisos de mensagens também nos grupos.</span></div>' +
+                    '<div class="nxl-li"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Nova identidade: agora somos NexusOne.</span></div>' +
+                  '</div>' +
+                  '<div class="nxl-panel" id="nxl-p-how">' + order.map(function (i) { return plats[i]; }).join('') + '</div>' +
+                  '<div class="nxl-foot">NexusOne • Em desenvolvimento</div>' +
+                '</div>';
+            document.body.appendChild(box);
+
+            if (inApp) box.querySelector('#nxl-warn').style.display = 'block';
+            var go = function (t) {
+                box.querySelectorAll('.nxl-tab').forEach(function (b) { var on = b.getAttribute('data-t') === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+                box.querySelectorAll('.nxl-panel').forEach(function (p) { p.classList.toggle('on', p.id === 'nxl-p-' + t); });
+            };
+            box.querySelectorAll('.nxl-tab').forEach(function (b) { b.onclick = function () { go(b.getAttribute('data-t')); }; });
+
+            var msg = box.querySelector('#nxl-msg'), btn = box.querySelector('#nxl-dl');
+            btn.onclick = function () {
+                var ev = window.__pwaPrompt;      // mesmo sistema de instalação do app (aba Conta)
+                if (ev) {
+                    window.__pwaPrompt = null;
+                    try {
+                        ev.prompt();
+                        ev.userChoice.then(function (c) {
+                            msg.style.color = '#8fe0b0';
+                            msg.textContent = c && c.outcome === 'accepted' ? 'Instalando o NexusOne... Quando terminar, abra pelo ícone na tela inicial.' : 'Instalação cancelada. Toque em "Baixar o app" para tentar de novo.';
+                        });
+                    } catch (e) { go('how'); }
+                } else {
+                    go('how'); msg.style.color = '#ffc58a';
+                    msg.textContent = isIOS ? 'No iPhone, siga os passos abaixo (Safari → Compartilhar → Adicionar à Tela de Início).' : 'Siga os passos abaixo para instalar pelo menu do navegador.';
+                    var p = box.querySelector('#nxl-p-how'); if (p && p.scrollIntoView) p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            };
+            window.addEventListener('pwa-installed', function () {
+                btn.disabled = true; btn.querySelector('span').textContent = 'App instalado!';
+                msg.style.color = '#8fe0b0'; msg.textContent = 'Pronto! Abra o NexusOne pelo ícone na sua tela inicial.';
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
+    })();
+    </script>
     
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7894,13 +8032,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             }, 2000);
         })();
 
-        window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
+        window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
     </script>
 
 <!-- ===== AVISO DE ATUALIZAÇÃO PARA O NexusOne ===== -->
 <script id="nexusone-update-gate">
 (function () {
     /* ----------- CONFIGURAÇÃO (edite só aqui) ----------- */
+    if (window.__nxLanding) return;
     var CONFIG = {
         // 'soft'  = aviso que o usuário pode fechar (volta só depois de REMIND_HOURS)
         // 'force' = tela bloqueada até instalar o NexusOne
@@ -8008,7 +8147,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <!-- ===== AUTO-ATUALIZAÇÃO: avisa quando existe versão mais nova publicada ===== -->
 <script id="nexusone-autoupdate">
 (function () {
-    window.NX_BUILD = '20261024-0630';
+    if (window.__nxLanding) return;
+    window.NX_BUILD = '20261024-0656';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

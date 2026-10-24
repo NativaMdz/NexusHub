@@ -2373,7 +2373,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 
                 <div class="chat-input-area" id="chat-input-container">
                     <button type="button" class="chat-sticker-btn" onclick="app.openStickerPicker()" aria-label="Figurinhas"><i class="fa-regular fa-face-smile"></i></button>
-                    <textarea id="chat-input" class="chat-input" rows="1" placeholder="Transmitir mensagem..." enterkeyhint="enter" autocomplete="off" autocapitalize="sentences" onkeypress="app.handleChatKeyPress(event)"></textarea>
+                    <textarea id="chat-input" class="chat-input" rows="1" placeholder="Transmitir..." enterkeyhint="enter" autocomplete="off" autocapitalize="sentences" onkeypress="app.handleChatKeyPress(event)"></textarea>
                     <button type="button" class="chat-attach-btn" onclick="app.openAttachMenu()" aria-label="Enviar foto, vídeo ou arquivo"><i class="fa-solid fa-paperclip"></i></button>
                     <button type="button" class="chat-send-btn chat-mic-btn" onclick="app.startVoiceRecord()" aria-label="Gravar áudio"><i class="fa-solid fa-microphone"></i></button>
                     <button class="chat-send-btn" onclick="app.sendChatMessage()">
@@ -5263,7 +5263,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const blocked = isPrivateMode() && app.isChatBlocked();
                 const byMe = isPrivateMode() && !!blockedAt(modeKey());
                 input.disabled = blocked;
-                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Não é possível enviar mensagens') : 'Transmitir mensagem...';
+                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Não é possível enviar mensagens') : 'Transmitir...';
                 if (sticker) { sticker.disabled = blocked; sticker.style.opacity = blocked ? '0.4' : ''; }
                 sends.forEach((send) => { send.disabled = blocked; send.style.opacity = blocked ? '0.4' : ''; });
             };

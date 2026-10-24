@@ -180,6 +180,22 @@
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
     })();
     </script>
+    <!-- ===== PROTEÇÃO: trata texto de usuários antes de exibir como HTML ===== -->
+    <script id="nexusone-safe">
+    (function () {
+        var MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        window.nxEsc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return MAP[c]; }); };
+        window.nxId = function (s) { return String(s == null ? '' : s).replace(/[^A-Za-z0-9_-]/g, ''); };
+        window.nxCls = function (s) { return String(s == null ? '' : s).replace(/[^A-Za-z0-9_ -]/g, ''); };
+        // grupos guardam o texto já "escapado": decodifica de forma inerte (sem rodar nada) para poder escapar de novo com segurança
+        window.nxDecode = function (s) {
+            s = String(s == null ? '' : s);
+            if (s.indexOf('&') < 0) return s;
+            try { return new DOMParser().parseFromString('<!doctype html><body>' + s, 'text/html').body.textContent || ''; } catch (e) { return s; }
+        };
+        window.nxMsgHtml = function (c, isGroup) { return window.nxEsc(isGroup ? window.nxDecode(c) : c); };
+    })();
+    </script>
     
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1283,6 +1299,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-input-area { display: flex; gap: 10px; background: rgba(15, 15, 20, 0.9); padding: 10px 14px; border-radius: 24px; border: 1px solid rgba(var(--cyan-rgb), 0.3); align-items: center; flex-shrink: 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(var(--cyan-rgb), 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); width: 100%; }
         .chat-input { flex: 1; background: transparent; border: none; color: white; font-family: 'Inter', sans-serif; outline: none; padding: 6px 4px; font-size: 0.95rem; min-width: 0; }
         .chat-input::placeholder { color: rgba(255,255,255,0.4); }
+        textarea.chat-input { box-sizing: border-box; resize: none; display: block; height: auto; line-height: 1.4; max-height: calc(1.4em * 4 + 12px); overflow-y: hidden; overflow-wrap: anywhere; white-space: pre-wrap; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.25) transparent; border-radius: 0; -webkit-appearance: none; appearance: none; }
+        .chat-input-area.multi { align-items: flex-end; }
+        .msg-text { white-space: pre-wrap; overflow-wrap: anywhere; }
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), var(--cyan-deep)); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(var(--cyan-rgb), 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
@@ -2354,7 +2373,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 
                 <div class="chat-input-area" id="chat-input-container">
                     <button type="button" class="chat-sticker-btn" onclick="app.openStickerPicker()" aria-label="Figurinhas"><i class="fa-regular fa-face-smile"></i></button>
-                    <input type="text" id="chat-input" class="chat-input" placeholder="Transmitir mensagem..." onkeypress="app.handleChatKeyPress(event)">
+                    <textarea id="chat-input" class="chat-input" rows="1" placeholder="Transmitir mensagem..." enterkeyhint="enter" autocomplete="off" autocapitalize="sentences" onkeypress="app.handleChatKeyPress(event)"></textarea>
                     <button type="button" class="chat-attach-btn" onclick="app.openAttachMenu()" aria-label="Enviar foto, vídeo ou arquivo"><i class="fa-solid fa-paperclip"></i></button>
                     <button type="button" class="chat-send-btn chat-mic-btn" onclick="app.startVoiceRecord()" aria-label="Gravar áudio"><i class="fa-solid fa-microphone"></i></button>
                     <button class="chat-send-btn" onclick="app.sendChatMessage()">
@@ -3597,8 +3616,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         if (existingEl.dataset.hash === msgHash) return; 
                         
                         const textEl = existingEl.querySelector('.msg-text');
-                        if (textEl && textEl.innerText !== msg.content) {
-                            textEl.innerText = msg.content;
+                        const _txt = (containerId === 'chat-group-container' || msg.groupId) ? nxDecode(msg.content) : msg.content;
+                        if (textEl && textEl.innerText !== _txt) {
+                            textEl.innerText = _txt;
                             const timeEl = existingEl.querySelector('.msg-time');
                             if (timeEl) timeEl.innerHTML = `${timeStr}${editedHtml}`;
                         }
@@ -3610,9 +3630,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         let replyHtml = '';
                         if (msg.replyTo) {
                             replyHtml = `
-                                <div class="msg-replied-block" onclick="app.scrollToMessage('${msg.replyTo}', event)">
-                                    <div class="msg-replied-author">${msg.replyAuthor || '@usuario'}</div>
-                                    <div class="msg-replied-text">${msg.replyPreview || ''}</div>
+                                <div class="msg-replied-block" onclick="app.scrollToMessage('${nxId(msg.replyTo)}', event)">
+                                    <div class="msg-replied-author">${nxEsc(msg.replyAuthor || '@usuario')}</div>
+                                    <div class="msg-replied-text">${nxMsgHtml(msg.replyPreview || '', true)}</div>
                                 </div>
                             `;
                         }
@@ -3622,11 +3642,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         div.id = `msg-${msg.id}`;
                         div.dataset.hash = msgHash;
                         div.innerHTML = `
-                            ${!isMine && containerId !== 'chat-private-container' ? `<img src="${author.avatar}" loading="lazy" decoding="async" class="msg-avatar ${app.getFrameClass(author)}" data-uid="${author.uid}" onclick="app.navigate('public_profile', null, '${author.uid}')">` : ''}
+                            ${!isMine && containerId !== 'chat-private-container' ? `<img src="${nxEsc(author.avatar)}" loading="lazy" decoding="async" class="msg-avatar ${nxCls(app.getFrameClass(author))}" data-uid="${nxId(author.uid)}" onclick="app.navigate('public_profile', null, '${nxId(author.uid)}')">` : ''}
                             <div class="msg-bubble">
-                                ${!isMine ? `<div class="msg-author${containerId === 'chat-private-container' ? '' : ' linked'}" data-uid="${author.uid}" ${containerId === 'chat-private-container' ? '' : `onclick="app.navigate('public_profile', null, '${author.uid}')"`}>${author.name} ${app.getUserBadges(author)}</div>` : ''}
+                                ${!isMine ? `<div class="msg-author${containerId === 'chat-private-container' ? '' : ' linked'}" data-uid="${nxId(author.uid)}" ${containerId === 'chat-private-container' ? '' : `onclick="app.navigate('public_profile', null, '${nxId(author.uid)}')"`}>${nxEsc(author.name)} ${app.getUserBadges(author)}</div>` : ''}
                                 ${replyHtml}
-                                ${msg.audio ? app.voiceBubbleHtml(msg) : msg.media ? app.mediaBubbleHtml(msg) : msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${msg.content}</div>`}
+                                ${msg.audio ? app.voiceBubbleHtml(msg) : msg.media ? app.mediaBubbleHtml(msg) : msg.sticker ? `<img class="msg-sticker" data-sticker="${String(msg.sticker).replace(/[^A-Za-z0-9_-]/g, '')}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Figurinha" draggable="false">` : `<div class="msg-text">${nxMsgHtml(msg.content, containerId === 'chat-group-container' || !!msg.groupId)}</div>`}
                                 <span class="msg-time">${timeStr}${editedHtml}</span>
                             </div>
                         `;
@@ -3666,10 +3686,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     div.className = 'chat-list-item'; div.dataset.uid = uid;
                     div.onclick = () => app.startPrivateChat(uid);
                     div.innerHTML = `
-                        <img src="${user.avatar}" loading="lazy" decoding="async" class="avatar ${app.getFrameClass(user)}" style="width: 44px; height: 44px;">
+                        <img src="${nxEsc(user.avatar)}" loading="lazy" decoding="async" class="avatar ${nxCls(app.getFrameClass(user))}" style="width: 44px; height: 44px;">
                         <div class="user-info">
-                            <h3>${user.name} ${app.getUserBadges(user)}</h3>
-                            <span class="cl-preview" style="color:var(--text-muted);">${lastMsg.substring(0, 30)}${lastMsg.length>30?'...':''}</span>
+                            <h3>${nxEsc(user.name)} ${app.getUserBadges(user)}</h3>
+                            <span class="cl-preview" style="color:var(--text-muted);">${nxEsc(nxDecode(lastMsg).substring(0, 30))}${nxDecode(lastMsg).length>30?'...':''}</span>
                         </div>
                         <i class="fa-solid fa-chevron-right cl-arrow" style="color:var(--border-glass);"></i>
                     `;
@@ -7467,7 +7487,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.mediaBubbleHtml = (msg) => {
                 const m = msg.media;
                 if (!m || !okUrl(m.url)) return '<div class="msg-text">⚠️ Mídia indisponível</div>';
-                const id = safeId(msg.id), cap = msg.mcap ? '<div class="msg-text">' + msg.content + '</div>' : '';
+                const id = safeId(msg.id), cap = msg.mcap ? '<div class="msg-text">' + nxMsgHtml(msg.content, true) + '</div>' : '';
                 const data = 'data-kind="' + esc(m.kind) + '" data-url="' + esc(m.url) + '" data-name="' + esc(m.name || '') + '"';
                 if (m.kind === 'file') return fileCardHtml(m, data + ' onclick="event.stopPropagation(); app.mediaDownload(this.dataset.url, this.dataset.name)"') + cap;
                 const w = Number(m.w) || 0, h = Number(m.h) || 0;
@@ -8277,6 +8297,60 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             }, 2000);
         })();
 
+
+        // ===== CAMPO DE MENSAGEM: várias linhas (4 visíveis) + teclado aberto ao enviar =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const coarse = () => !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+            let lastBlur = 0;
+            const fit = (el) => {
+                el = el || $('chat-input');
+                if (!el || el.tagName !== 'TEXTAREA' || !el.offsetParent) return;
+                const cs = getComputedStyle(el);
+                const fs = parseFloat(cs.fontSize) || 15;
+                let lh = parseFloat(cs.lineHeight); if (!(lh > 0)) lh = fs * 1.4;
+                const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+                const max = Math.round(lh * 4 + pad);
+                el.style.height = 'auto';
+                const need = el.scrollHeight; if (!need) return;
+                el.style.height = Math.min(need, max) + 'px';
+                el.style.overflowY = need > max + 1 ? 'auto' : 'hidden';
+                const area = $('chat-input-container'); if (area) area.classList.toggle('multi', need > lh + pad + 4);
+            };
+            // quando o código muda o texto (limpar ao enviar, inserir figurinha/emoji), o tamanho acompanha
+            const hook = (el) => {
+                if (!el || el.__nxHook || el.tagName !== 'TEXTAREA') return;
+                el.__nxHook = true;
+                const d = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+                Object.defineProperty(el, 'value', { configurable: true, get() { return d.get.call(this); }, set(v) { d.set.call(this, v); fit(this); } });
+                fit(el);
+            };
+            setInterval(() => hook($('chat-input')), 700);
+            document.addEventListener('focusin', (e) => { if (e.target && e.target.id === 'chat-input') { hook(e.target); fit(e.target); } });
+            document.addEventListener('focusout', (e) => { if (e.target && e.target.id === 'chat-input') lastBlur = Date.now(); });
+            document.addEventListener('input', (e) => { if (e.target && e.target.id === 'chat-input') { hook(e.target); fit(e.target); } });
+            window.addEventListener('resize', () => fit());
+
+            // Enter: no computador envia (Shift+Enter quebra a linha); no celular o Enter quebra a linha e o botão de avião envia
+            app.handleChatKeyPress = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !coarse()) { e.preventDefault(); app.sendChatMessage(); }
+            };
+            // tocar em enviar não tira o foco do campo (o teclado não fecha)
+            document.addEventListener('mousedown', (e) => {
+                const b = e.target && e.target.closest && e.target.closest('#chat-input-container .chat-send-btn:not(.chat-mic-btn)');
+                if (b) e.preventDefault();
+            });
+            const _sendKeep = app.sendChatMessage;
+            app.sendChatMessage = function (...a) {
+                const el = $('chat-input');
+                const keep = !!el && (document.activeElement === el || Date.now() - lastBlur < 700);
+                const r = _sendKeep.apply(this, a);
+                if (keep && el && document.body.contains(el)) { try { el.focus({ preventScroll: true }); } catch (_) {} }
+                fit(el);
+                return r;
+            };
+        })();
+
         window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
     </script>
 
@@ -8393,7 +8467,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261024-1927';
+    window.NX_BUILD = '20261024-2234';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

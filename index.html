@@ -5211,6 +5211,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     ]
                     : [
                         { icon: 'fa-user', label: 'Ver perfil', run: () => app.navigate('public_profile', null, mode) },
+                        { icon: 'fa-phone', label: 'Iniciar chamada', run: () => app.startCall(mode) },
                         { icon: 'fa-image', label: 'Plano de fundo', run: () => app.openChatBackgroundModal(mode) },
                         { icon: 'fa-magnifying-glass', label: 'Pesquisar mensagem', run: () => app.openChatSearch() },
                         { icon: 'fa-eraser', label: 'Limpar conversa', danger: true, run: () => app.clearCurrentChat() },
@@ -7617,7 +7618,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 '#call-overlay .nxc-btns{display:flex;gap:30px;justify-content:center}' +
                 '#call-overlay .nxc-b{width:68px;height:68px;border-radius:50%;border:0;color:#fff;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center}' +
                 '#call-overlay .nxc-b.red{background:#e5262b}#call-overlay .nxc-b.green{background:#1fb35a}#call-overlay .nxc-b.grey{background:#2a2b3a}#call-overlay .nxc-b.on{background:#fff;color:#111}' +
-                '#chat-call-btn{right:42px;display:none}';
+                '';
             document.head.appendChild(css);
 
             const ov = document.createElement('div');
@@ -7818,21 +7819,6 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     first = false;
                 }, (err) => console.warn('[chamadas] sem acesso à coleção "calls":', err && err.code));
             }, 2000);
-
-            // ---------- botão de ligar no chat privado ----------
-            const menuBtn = $('chat-menu-btn');
-            if (menuBtn && menuBtn.parentElement) {
-                const b = document.createElement('button');
-                b.type = 'button'; b.id = 'chat-call-btn'; b.className = 'chat-menu-btn'; b.setAttribute('aria-label', 'Chamada de voz');
-                b.innerHTML = '<i class="fa-solid fa-phone"></i>';
-                b.onclick = (e) => { e.stopPropagation(); const m = appState.activeChatMode; if (m) app.startCall(m); };
-                menuBtn.parentElement.appendChild(b);
-                setInterval(() => {
-                    const m = appState.activeChatMode;
-                    const priv = appState.currentView === 'chat' && !!m && !['global', 'private_list', 'group', 'group_list'].includes(m);
-                    b.style.display = priv ? 'flex' : 'none';
-                }, 600);
-            }
         })();
 
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);

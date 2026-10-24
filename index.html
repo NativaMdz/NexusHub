@@ -7586,6 +7586,255 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
         })();
 
+
+        // ===== CHAMADA DE VOZ 1x1 (WebRTC + Firestore, coleção "calls") =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const colCalls = collection(db, 'calls');
+            // Se algumas chamadas não conectarem (rede móvel), inclua aqui um servidor TURN:
+            // { urls: 'turn:SEU-SERVIDOR:3478', username: 'USUARIO', credential: 'SENHA' }
+            const ICE_SERVERS = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
+            const RING_MS = 45000;
+            const myUid = () => appState.firebaseUser && appState.firebaseUser.uid;
+            const meDoc = () => appState.currentUserData || {};
+            const userOf = (u) => (appState.allUsers || []).find((x) => x.uid === u);
+            const callIdOf = (a, b) => [a, b].sort().join('_');
+            const toast = (m, t) => app.showToast(m, t || 'info');
+            const END_MSG = { ended: 'Chamada encerrada.', declined: 'Chamada recusada.', busy: 'Usuário ocupado em outra chamada.', missed: 'Chamada perdida.' };
+            let S = null;
+
+            // ---------- interface ----------
+            const css = document.createElement('style');
+            css.textContent =
+                '#call-overlay{position:fixed;inset:0;z-index:2147482000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,5,10,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}' +
+                '#call-overlay.on{display:flex}' +
+                '#call-overlay .nxc-box{width:100%;max-width:360px;text-align:center;color:#fff}' +
+                '#call-overlay .nxc-av{width:132px;height:132px;border-radius:50%;object-fit:cover;border:3px solid var(--cyan);box-shadow:0 0 34px rgba(var(--cyan-rgb),.45);margin-bottom:18px}' +
+                '#call-overlay.ring .nxc-av{animation:nxcPulse 1.4s ease-in-out infinite}' +
+                '@keyframes nxcPulse{0%,100%{box-shadow:0 0 18px rgba(var(--cyan-rgb),.35)}50%{box-shadow:0 0 46px rgba(var(--cyan-rgb),.8)}}' +
+                '#call-overlay .nxc-name{font-family:Rajdhani,sans-serif;font-size:1.7rem;margin:0 0 6px}' +
+                '#call-overlay .nxc-st{color:#aeb3c2;font-size:1rem;margin:0 0 46px;min-height:1.4em}' +
+                '#call-overlay .nxc-btns{display:flex;gap:30px;justify-content:center}' +
+                '#call-overlay .nxc-b{width:68px;height:68px;border-radius:50%;border:0;color:#fff;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center}' +
+                '#call-overlay .nxc-b.red{background:#e5262b}#call-overlay .nxc-b.green{background:#1fb35a}#call-overlay .nxc-b.grey{background:#2a2b3a}#call-overlay .nxc-b.on{background:#fff;color:#111}' +
+                '#chat-call-btn{right:42px;display:none}';
+            document.head.appendChild(css);
+
+            const ov = document.createElement('div');
+            ov.id = 'call-overlay'; ov.setAttribute('role', 'dialog');
+            ov.innerHTML = '<div class="nxc-box"><img class="nxc-av" alt=""><h2 class="nxc-name"></h2><p class="nxc-st"></p><div class="nxc-btns"></div></div><audio id="call-audio" autoplay playsinline></audio>';
+            document.body.appendChild(ov);
+
+            const mkBtn = (cls, icon, fn, label) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'nxc-b ' + cls; b.setAttribute('aria-label', label); b.innerHTML = '<i class="fa-solid ' + icon + '"></i>'; b.onclick = fn; return b; };
+            const setStatus = (t) => { const e = ov.querySelector('.nxc-st'); if (e) e.textContent = t; };
+            const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+
+            const ui = (mode) => {
+                if (!S) return;
+                const u = userOf(S.peer) || {};
+                ov.querySelector('.nxc-av').src = u.avatar || '';
+                ov.querySelector('.nxc-name').textContent = u.name || 'Usuário';
+                const box = ov.querySelector('.nxc-btns'); box.innerHTML = '';
+                ov.classList.add('on'); ov.classList.toggle('ring', mode === 'calling' || mode === 'incoming');
+                if (mode === 'incoming') {
+                    setStatus('Chamada de voz recebida...');
+                    box.append(mkBtn('red', 'fa-phone-slash', () => app.declineCall(), 'Recusar'), mkBtn('green', 'fa-phone', () => app.acceptCall(), 'Atender'));
+                } else {
+                    setStatus(mode === 'calling' ? 'Chamando...' : mode === 'connecting' ? 'Conectando...' : fmt(S.secs || 0));
+                    const mute = mkBtn(S.muted ? 'on' : 'grey', S.muted ? 'fa-microphone-slash' : 'fa-microphone', () => {
+                        S.muted = !S.muted;
+                        if (S.stream) S.stream.getAudioTracks().forEach((t) => { t.enabled = !S.muted; });
+                        mute.className = 'nxc-b ' + (S.muted ? 'on' : 'grey'); mute.innerHTML = '<i class="fa-solid ' + (S.muted ? 'fa-microphone-slash' : 'fa-microphone') + '"></i>';
+                    }, 'Silenciar');
+                    box.append(mute, mkBtn('red', 'fa-phone-slash', () => app.hangupCall(), 'Desligar'));
+                }
+            };
+
+            // ---------- toque ----------
+            let actx = null, ringTimer = null;
+            const beep = () => {
+                try {
+                    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+                    if (actx.state === 'suspended') actx.resume();
+                    const o = actx.createOscillator(), g = actx.createGain();
+                    o.frequency.value = 440; g.gain.value = 0.08; o.connect(g); g.connect(actx.destination);
+                    o.start(); o.stop(actx.currentTime + 0.5);
+                } catch (_) {}
+            };
+            const ring = (on) => {
+                clearInterval(ringTimer); ringTimer = null;
+                if (on) { beep(); ringTimer = setInterval(beep, 2200); }
+            };
+
+            // ---------- conexão ----------
+            const sendIce = (c) => {
+                if (!S) return;
+                if (!S.docReady) { S.iceBuf.push(c); return; }
+                updateDoc(S.ref, { [S.role === 'caller' ? 'callerIce' : 'calleeIce']: arrayUnion(c) }).catch(() => {});
+            };
+            const addRemoteIce = (c) => {
+                if (!S || !S.pc) return;
+                if (!S.pc.remoteDescription) { S.pendingIce.push(c); return; }
+                try { S.pc.addIceCandidate(JSON.parse(c)).catch(() => {}); } catch (_) {}
+            };
+            const drainIce = () => { const q = S ? S.pendingIce.splice(0) : []; q.forEach(addRemoteIce); };
+
+            const setupPC = () => {
+                const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+                S.pc = pc;
+                S.stream.getTracks().forEach((t) => pc.addTrack(t, S.stream));
+                pc.ontrack = (e) => { const a = $('call-audio'); a.srcObject = e.streams[0]; a.play().catch(() => {}); };
+                pc.onicecandidate = (e) => { if (e.candidate) sendIce(JSON.stringify(e.candidate)); };
+                pc.onconnectionstatechange = () => {
+                    if (!S || S.pc !== pc) return;
+                    const st = pc.connectionState;
+                    clearTimeout(S.discT);
+                    if (st === 'connected') {
+                        if (S.timer) return;
+                        ring(false); S.state = 'active'; S.secs = 0; ui('active');
+                        S.timer = setInterval(() => { S.secs++; setStatus(fmt(S.secs)); }, 1000);
+                    } else if (st === 'failed') {
+                        updateDoc(S.ref, { state: 'ended' }).catch(() => {});
+                        end('Não foi possível conectar. A rede pode estar bloqueando a chamada de voz.');
+                    } else if (st === 'disconnected') {
+                        S.discT = setTimeout(() => { if (S && S.pc === pc && pc.connectionState !== 'connected') app.hangupCall(); }, 8000);
+                    }
+                };
+            };
+
+            const newSession = (o) => Object.assign({ pc: null, stream: null, docReady: false, iceBuf: [], pendingIce: [], added: new Set(), answered: false, muted: false, secs: 0, state: 'ringing' }, o);
+
+            const end = (msg) => {
+                const s = S; if (!s) return;
+                S = null;
+                clearTimeout(s.ringT); clearTimeout(s.discT); clearInterval(s.timer); ring(false);
+                try { if (s.unsub) s.unsub(); } catch (_) {}
+                try { if (s.stream) s.stream.getTracks().forEach((t) => t.stop()); } catch (_) {}
+                try { if (s.pc) { s.pc.ontrack = s.pc.onicecandidate = s.pc.onconnectionstatechange = null; s.pc.close(); } } catch (_) {}
+                const a = $('call-audio'); if (a) a.srcObject = null;
+                ov.classList.remove('on', 'ring');
+                try { navigator.serviceWorker.ready.then((r) => r.getNotifications({ tag: 'call' }).then((l) => l.forEach((n) => n.close()))).catch(() => {}); } catch (_) {}
+                if (msg) toast(msg);
+            };
+
+            const onCallDoc = (snap) => {
+                const d = snap.data();
+                if (!S || !d || d.createdAt !== S.createdAt) return;
+                const key = S.role === 'caller' ? 'calleeIce' : 'callerIce';
+                (d[key] || []).forEach((c) => { if (!S.added.has(c)) { S.added.add(c); addRemoteIce(c); } });
+                if (S.role === 'caller' && d.answer && !S.answered) {
+                    S.answered = true; clearTimeout(S.ringT); ring(false); ui('connecting');
+                    S.pc.setRemoteDescription(d.answer).then(drainIce).catch(() => end('Falha ao conectar a chamada.'));
+                }
+                if (END_MSG[d.state] && d.state !== 'active') end(END_MSG[d.state]);
+            };
+
+            const getMic = async () => {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection) { toast('Este navegador não suporta chamadas de voz.', 'error'); return null; }
+                try { return await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+                catch (_) { toast('Permita o uso do microfone para fazer chamadas.', 'error'); return null; }
+            };
+
+            // ---------- ligar ----------
+            app.startCall = async (uid) => {
+                const my = myUid(); if (!my || !uid || uid === my) return;
+                if (S) return toast('Você já está em uma chamada.');
+                if ((meDoc().blockedUsers || {})[uid]) return toast('Desbloqueie este usuário para ligar.');
+                const stream = await getMic(); if (!stream) return;
+                const createdAt = Date.now(), ref = doc(colCalls, callIdOf(my, uid));
+                S = newSession({ id: ref.id, ref, role: 'caller', peer: uid, stream, createdAt });
+                const mine = S;
+                setupPC(); ui('calling'); ring(true);
+                try {
+                    const offer = await mine.pc.createOffer(); await mine.pc.setLocalDescription(offer);
+                    await setDoc(ref, { from: my, to: uid, state: 'ringing', offer: { type: offer.type, sdp: offer.sdp }, createdAt, callerIce: [], calleeIce: [] });
+                    if (S !== mine) { updateDoc(ref, { state: 'ended' }).catch(() => {}); return; }
+                    mine.docReady = true; mine.iceBuf.splice(0).forEach(sendIce);
+                    mine.unsub = onSnapshot(ref, onCallDoc);
+                    mine.ringT = setTimeout(() => { if (S === mine && !mine.answered) { updateDoc(ref, { state: 'missed' }).catch(() => {}); end('Sem resposta.'); } }, RING_MS);
+                } catch (e) {
+                    console.error('[chamada]', e);
+                    end(e && e.code === 'permission-denied' ? 'As regras do Firestore ainda não liberam chamadas (coleção "calls").' : 'Não foi possível iniciar a chamada.');
+                }
+            };
+
+            // ---------- atender / recusar / desligar ----------
+            app.acceptCall = async () => {
+                if (!S || S.role !== 'callee' || !S.incoming) return;
+                const mine = S; mine.incoming = false; ring(false);
+                const stream = await getMic();
+                if (!stream) { updateDoc(mine.ref, { state: 'declined' }).catch(() => {}); end(); return; }
+                if (S !== mine) { stream.getTracks().forEach((t) => t.stop()); return; }
+                mine.stream = stream; mine.docReady = true; setupPC(); ui('connecting');
+                try {
+                    await mine.pc.setRemoteDescription(mine.offer);
+                    (mine.firstIce || []).forEach((c) => { mine.added.add(c); addRemoteIce(c); }); drainIce();
+                    const ans = await mine.pc.createAnswer(); await mine.pc.setLocalDescription(ans);
+                    await updateDoc(mine.ref, { answer: { type: ans.type, sdp: ans.sdp }, state: 'active' });
+                    mine.unsub = onSnapshot(mine.ref, onCallDoc);
+                } catch (e) { console.error('[chamada]', e); end('Não foi possível atender a chamada.'); }
+            };
+            app.declineCall = () => { if (!S) return; updateDoc(S.ref, { state: 'declined' }).catch(() => {}); end(); };
+            app.hangupCall = () => { if (!S) return; updateDoc(S.ref, { state: 'ended' }).catch(() => {}); end(); };
+
+            // ---------- chamada recebida ----------
+            const showIncomingNotif = (name) => {
+                if (document.visibilityState !== 'hidden' || !('Notification' in window) || Notification.permission !== 'granted') return;
+                try {
+                    navigator.serviceWorker.ready.then((r) => r.showNotification('Chamada de voz', {
+                        body: name + ' está te ligando', tag: 'call', renotify: true, requireInteraction: true, vibrate: [300, 150, 300, 150, 300],
+                        icon: 'icon-192.png', data: { uid: S && S.peer, url: location.href.split('#')[0].split('?')[0] }
+                    }));
+                } catch (_) {}
+            };
+            const handleIncoming = (id, d) => {
+                const my = myUid();
+                if ((meDoc().blockedUsers || {})[d.from]) return;
+                if (S) { if (S.id !== id) updateDoc(doc(colCalls, id), { state: 'busy' }).catch(() => {}); return; }
+                S = newSession({ id, ref: doc(colCalls, id), role: 'callee', peer: d.from, incoming: true, createdAt: d.createdAt, offer: d.offer, firstIce: d.callerIce || [] });
+                ui('incoming'); ring(true);
+                try { navigator.vibrate && navigator.vibrate([300, 150, 300, 150, 300]); } catch (_) {}
+                const u = userOf(d.from); showIncomingNotif((u && u.name) || 'Alguém');
+                S.ringT = setTimeout(() => { if (S && S.incoming) end(); }, RING_MS + 15000);
+            };
+            let listenFor = null, unsubIn = null;
+            setInterval(() => {
+                const u = myUid(); if (u === listenFor) return;
+                if (unsubIn) { unsubIn(); unsubIn = null; }
+                if (S) end();
+                listenFor = u; if (!u) return;
+                let first = true;
+                unsubIn = onSnapshot(query(colCalls, where('to', '==', u)), (snap) => {
+                    snap.docChanges().forEach((ch) => {
+                        if (ch.type === 'removed') return;
+                        const d = ch.doc.data(), id = ch.doc.id;
+                        if (d.state === 'ringing') {
+                            if (first && Math.abs(Date.now() - d.createdAt) > 60000) return;   // sobra de uma chamada antiga
+                            if (!S || S.id !== id) handleIncoming(id, d);
+                        } else if (S && S.incoming && S.id === id) {
+                            end('Chamada perdida.');                                           // quem ligou desistiu antes de atender
+                        }
+                    });
+                    first = false;
+                }, (err) => console.warn('[chamadas] sem acesso à coleção "calls":', err && err.code));
+            }, 2000);
+
+            // ---------- botão de ligar no chat privado ----------
+            const menuBtn = $('chat-menu-btn');
+            if (menuBtn && menuBtn.parentElement) {
+                const b = document.createElement('button');
+                b.type = 'button'; b.id = 'chat-call-btn'; b.className = 'chat-menu-btn'; b.setAttribute('aria-label', 'Chamada de voz');
+                b.innerHTML = '<i class="fa-solid fa-phone"></i>';
+                b.onclick = (e) => { e.stopPropagation(); const m = appState.activeChatMode; if (m) app.startCall(m); };
+                menuBtn.parentElement.appendChild(b);
+                setInterval(() => {
+                    const m = appState.activeChatMode;
+                    const priv = appState.currentView === 'chat' && !!m && !['global', 'private_list', 'group', 'group_list'].includes(m);
+                    b.style.display = priv ? 'flex' : 'none';
+                }, 600);
+            }
+        })();
+
         window.app = app; window.appState = appState; document.addEventListener('DOMContentLoaded', app.init);
     </script>
 

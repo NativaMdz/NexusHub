@@ -73,6 +73,7 @@ self.addEventListener('notificationclick', (event) => {
         }
         if (self.clients.openWindow) {
             const u = new URL(data.url || self.registration.scope);
+            u.searchParams.set('v', 'nexusone');
             if (data.uid) u.searchParams.set('chat', data.uid);
             if (data.gid) u.searchParams.set('group', data.gid);
             await self.clients.openWindow(u.href);

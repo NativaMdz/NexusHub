@@ -7726,7 +7726,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         })();
 
 
-        // ===== CHAMADA DE VOZ 1x1 (WebRTC + Firestore, coleção "calls") =====
+        // ===== CHAMADA 1x1 (voz + vídeo, WebRTC + Firestore, coleção "calls") =====
         (() => {
             const $ = (id) => document.getElementById(id);
             const colCalls = collection(db, 'calls');
@@ -7740,25 +7740,47 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const callIdOf = (a, b) => [a, b].sort().join('_');
             const toast = (m, t) => app.showToast(m, t || 'info');
             const END_MSG = { ended: 'Chamada encerrada.', declined: 'Chamada recusada.', busy: 'Usuário ocupado em outra chamada.', missed: 'Chamada perdida.' };
-            let S = null;
+            const AC = window.AudioContext || window.webkitAudioContext;
+            let S = null, actx = null, ringTimer = null;
 
-            // ---------- interface ----------
+            // ---------- estilos ----------
             const css = document.createElement('style');
             css.textContent =
-                '#call-overlay{position:fixed;inset:0;z-index:2147482000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,5,10,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}' +
+                '#call-overlay{position:fixed;inset:0;z-index:2147482000;display:none;flex-direction:column;background:#080b10;color:#fff;font-family:Inter,sans-serif;overflow:hidden}' +
                 '#call-overlay.on{display:flex}' +
-                '#call-overlay .nxc-box{width:100%;max-width:360px;text-align:center;color:#fff}' +
-                '#call-overlay .nxc-av{width:132px;height:132px;border-radius:50%;object-fit:cover;border:3px solid var(--cyan);box-shadow:0 0 34px rgba(var(--cyan-rgb),.45);margin-bottom:18px}' +
+                '#call-overlay #call-rv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;display:none;z-index:0}' +
+                '#call-overlay.rv-on #call-rv{display:block}#call-overlay.rv-screen #call-rv{object-fit:contain}' +
+                '#call-overlay .nxc-top{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px 12px}' +
+                '#call-overlay.vid .nxc-top{background:linear-gradient(rgba(0,0,0,.65),transparent)}' +
+                '#call-overlay .nxc-min{width:46px;height:46px;border-radius:50%;border:0;background:rgba(40,46,56,.85);color:#fff;font-size:1.1rem;cursor:pointer;flex-shrink:0}' +
+                '#call-overlay.inc .nxc-min{visibility:hidden}' +
+                '#call-overlay .nxc-sp{width:46px;flex-shrink:0}' +
+                '#call-overlay .nxc-hd{flex:1;min-width:0;text-align:center}' +
+                '#call-overlay .nxc-name{font-family:Rajdhani,sans-serif;font-weight:600;font-size:1.45rem;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+                '#call-overlay .nxc-st{color:#b4b9c6;font-size:.95rem;min-height:1.3em}' +
+                '#call-overlay .nxc-note{color:#8a8fa0;font-size:.8rem;min-height:1.1em}' +
+                '#call-overlay .nxc-mid{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;padding:10px;min-height:0}' +
+                '#call-overlay.rv-on .nxc-mid{visibility:hidden}' +
+                '#call-overlay .nxc-av{width:min(56vw,240px);aspect-ratio:1/1;border-radius:50%;object-fit:cover;border:3px solid var(--cyan);box-shadow:0 0 34px rgba(var(--cyan-rgb),.4)}' +
                 '#call-overlay.ring .nxc-av{animation:nxcPulse 1.4s ease-in-out infinite}' +
-                '@keyframes nxcPulse{0%,100%{box-shadow:0 0 18px rgba(var(--cyan-rgb),.35)}50%{box-shadow:0 0 46px rgba(var(--cyan-rgb),.8)}}' +
-                '#call-overlay .nxc-name{font-family:Rajdhani,sans-serif;font-size:1.7rem;margin:0 0 6px}' +
-                '#call-overlay .nxc-st{color:#aeb3c2;font-size:1rem;margin:0 0 6px;min-height:1.4em}' +
-                '#call-overlay .nxc-note{color:#8a8fa0;font-size:.85rem;margin:0 0 40px;min-height:1.2em}' +
-                '#call-overlay .nxc-min{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;width:44px;height:44px;border-radius:50%;border:0;background:#1a1a26;color:#fff;font-size:1.1rem;cursor:pointer}' +
-                '#call-overlay.inc .nxc-min{display:none}' +
-                '#call-overlay .nxc-btns{display:flex;gap:22px;justify-content:center;flex-wrap:wrap}' +
-                '#call-overlay .nxc-b{width:68px;height:68px;border-radius:50%;border:0;color:#fff;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center}' +
-                '#call-overlay .nxc-b.red{background:#e5262b}#call-overlay .nxc-b.green{background:#1fb35a}#call-overlay .nxc-b.grey{background:#2a2b3a}#call-overlay .nxc-b.on{background:#fff;color:#111}' +
+                '@keyframes nxcPulse{0%,100%{box-shadow:0 0 18px rgba(var(--cyan-rgb),.3)}50%{box-shadow:0 0 46px rgba(var(--cyan-rgb),.8)}}' +
+                '#call-overlay .nxc-cap{position:relative;z-index:2;margin:0 12px calc(env(safe-area-inset-bottom,0px) + 12px);padding:20px 6px 14px;border-radius:32px;background:rgba(17,22,29,.96);display:grid;grid-template-columns:repeat(3,1fr);row-gap:16px}' +
+                '#call-overlay .nxc-cap.two{grid-template-columns:repeat(2,1fr)}' +
+                '#call-overlay .nxc-it{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;padding:0;color:#e8eaee;font:500 .82rem Inter,sans-serif;cursor:pointer}' +
+                '#call-overlay .nxc-it .c{width:62px;height:62px;border-radius:50%;background:#1e252d;display:flex;align-items:center;justify-content:center;font-size:1.35rem;color:#fff}' +
+                '#call-overlay .nxc-it.on .c{background:#fff;color:#111}' +
+                '#call-overlay .nxc-it.red .c{background:#e5262b}#call-overlay .nxc-it.green .c{background:#1fb35a}' +
+                '#call-overlay .nxc-it:disabled{opacity:.38;cursor:default}' +
+                '#call-overlay #call-lv{position:absolute;right:16px;z-index:3;width:104px;height:140px;object-fit:cover;border-radius:14px;border:2px solid rgba(255,255,255,.75);background:#000;display:none}' +
+                '#call-overlay.lv-on #call-lv{display:block}#call-overlay #call-lv.mir{transform:scaleX(-1)}' +
+                '#call-overlay .nxc-more{position:absolute;left:12px;right:12px;z-index:4;display:none;padding:10px 16px;border-radius:22px;background:#151b22;border:1px solid #232b35}' +
+                '#call-overlay .nxc-more.on{display:block}' +
+                '#call-overlay .nxc-row{display:flex;align-items:center;gap:12px;padding:10px 0;width:100%;background:none;border:0;color:#fff;text-align:left;font-family:inherit;cursor:pointer}' +
+                '#call-overlay .nxc-row .t{flex:1}#call-overlay .nxc-row b{display:block;font-size:.95rem;font-weight:600}#call-overlay .nxc-row small{color:#8a8fa0;font-size:.8rem}' +
+                '#call-overlay .nxc-row i.ic{width:22px;text-align:center;color:#b4b9c6}' +
+                '#call-overlay .nxc-sw{position:relative;width:48px;height:28px;border-radius:14px;background:#3a424d;flex-shrink:0;transition:background .2s}' +
+                '#call-overlay .nxc-sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}' +
+                '#call-overlay .nxc-sw.on{background:#1fb35a}#call-overlay .nxc-sw.on::after{left:23px}' +
                 '#call-bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:10px;right:10px;z-index:2147481500;display:none;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;background:#0d0d14;border:1px solid #1fb35a;color:#fff;box-shadow:0 6px 22px rgba(0,0,0,.55);font-family:Inter,sans-serif}' +
                 '#call-bar.on{display:flex}' +
                 '#call-bar img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}' +
@@ -7771,25 +7793,55 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             const ov = document.createElement('div');
             ov.id = 'call-overlay'; ov.setAttribute('role', 'dialog');
-            ov.innerHTML = '<button type="button" class="nxc-min" aria-label="Minimizar"><i class="fa-solid fa-chevron-down"></i></button><div class="nxc-box"><img class="nxc-av" alt=""><h2 class="nxc-name"></h2><p class="nxc-st"></p><p class="nxc-note"></p><div class="nxc-btns"></div></div><audio id="call-audio" autoplay playsinline></audio>';
+            ov.innerHTML =
+                '<video id="call-rv" playsinline autoplay></video>' +
+                '<div class="nxc-top"><button type="button" class="nxc-min" aria-label="Minimizar"><i class="fa-solid fa-chevron-down"></i></button>' +
+                  '<div class="nxc-hd"><div class="nxc-name"></div><div class="nxc-st"></div><div class="nxc-note"></div></div><span class="nxc-sp"></span></div>' +
+                '<div class="nxc-mid"><img class="nxc-av" alt=""></div>' +
+                '<video id="call-lv" playsinline autoplay muted></video>' +
+                '<div class="nxc-more">' +
+                  '<button type="button" class="nxc-row" id="nxc-ns"><i class="fa-solid fa-wave-square ic"></i><span class="t"><b>Cancelamento de ruído</b><small>Reduz os sons de fundo da sua voz</small></span><span class="nxc-sw"></span></button>' +
+                  '<button type="button" class="nxc-row" id="nxc-flip" style="display:none"><i class="fa-solid fa-camera-rotate ic"></i><span class="t"><b>Trocar câmera</b><small>Frontal / traseira</small></span></button>' +
+                '</div>' +
+                '<div class="nxc-cap"></div>' +
+                '<audio id="call-audio" autoplay playsinline></audio>';
             document.body.appendChild(ov);
             const bar = document.createElement('div');
             bar.id = 'call-bar';
             bar.innerHTML = '<img alt=""><div class="nxc-bi"><b></b><span></span></div><button type="button" class="nxc-bm" aria-label="Silenciar"><i class="fa-solid fa-microphone"></i></button><button type="button" class="red nxc-bh" aria-label="Desligar"><i class="fa-solid fa-phone-slash"></i></button>';
             document.body.appendChild(bar);
 
-            const mkBtn = (cls, icon, fn, label) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'nxc-b ' + cls; b.setAttribute('aria-label', label); b.innerHTML = '<i class="fa-solid ' + icon + '"></i>'; b.onclick = fn; return b; };
-            const setStatus = (t) => { const e = ov.querySelector('.nxc-st'); if (e) e.textContent = t; const sp = bar.querySelector('.nxc-bi span'); if (sp) sp.textContent = t; };
             const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-
             const statusText = () => !S ? '' : S.mode === 'calling' ? 'Chamando...' : S.mode === 'connecting' ? 'Conectando...' : S.mode === 'incoming' ? 'Chamada de voz recebida...' : fmt(S.secs || 0);
+            const setStatus = (t) => { const e = ov.querySelector('.nxc-st'); if (e) e.textContent = t; const sp = bar.querySelector('.nxc-bi span'); if (sp) sp.textContent = t; };
             const updateNote = () => {
                 const e = ov.querySelector('.nxc-note'); if (!e) return;
-                const parts = [];
-                if (S && S.remoteMuted) parts.push('Microfone do outro silenciado');
-                if (S && S.q && S.state === 'active') parts.push('Conexão: ' + S.q);
-                e.textContent = parts.join(' • ');
+                const p = [];
+                if (S && S.remoteMuted) p.push('Microfone do outro silenciado');
+                if (S && S.q && S.state === 'active') p.push('Conexão: ' + S.q);
+                e.textContent = p.join(' • ');
             };
+
+            // ---------- sons ----------
+            const tone = (seq) => {
+                try {
+                    actx = actx || new AC(); if (actx.state === 'suspended') actx.resume();
+                    let t = actx.currentTime;
+                    seq.forEach((n) => {
+                        const o = actx.createOscillator(), g = actx.createGain();
+                        o.type = 'sine'; o.frequency.value = n[0];
+                        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + n[1]);
+                        o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + n[1] + 0.03); t += n[1];
+                    });
+                } catch (_) {}
+            };
+            const SND = { hangup: [[520, 0.16], [390, 0.16], [290, 0.28]], cam: [[660, 0.1], [990, 0.18]] };
+            const ring = (on) => {
+                clearInterval(ringTimer); ringTimer = null;
+                if (on) { tone([[440, 0.5]]); ringTimer = setInterval(() => tone([[440, 0.5]]), 2200); }
+            };
+
+            // ---------- ações da tela ----------
             const toggleMute = () => {
                 if (!S) return;
                 S.muted = !S.muted;
@@ -7797,36 +7849,152 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (S.ref) updateDoc(S.ref, { [S.role + 'Muted']: S.muted }).catch(() => {});
                 ui(S.mode);
             };
-            const canSink = () => typeof HTMLMediaElement !== 'undefined' && 'setSinkId' in HTMLMediaElement.prototype;
-            const cycleOutput = async () => {
+
+            // alto-falante x fone de ouvido
+            const setSpeaker = async (on) => {
                 const a = $('call-audio');
-                try {
-                    const outs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audiooutput');
-                    if (outs.length < 2) { toast('Seu aparelho controla a saída de áudio pelo sistema. Use o volume ou conecte um fone.'); return; }
-                    S.outIdx = ((S.outIdx || 0) + 1) % outs.length;
-                    const d = outs[S.outIdx]; await a.setSinkId(d.deviceId);
-                    toast('Saída de áudio: ' + (d.label || 'dispositivo ' + (S.outIdx + 1)));
-                } catch (_) { toast('Não foi possível trocar a saída de áudio.', 'error'); }
+                try {   // 1) escolher a saída pelo navegador, se o aparelho listar
+                    if ('setSinkId' in HTMLMediaElement.prototype) {
+                        const outs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audiooutput');
+                        const isEar = (d) => /earpiece|ouvido|receiver|telefone|phone|head|fone/i.test(d.label);
+                        const spk = outs.find((d) => /speaker|alto|viva|embutid/i.test(d.label) && !isEar(d));
+                        const ear = outs.find(isEar) || outs.find((d) => d.deviceId === 'default');
+                        const pick = on ? spk : ear;
+                        if (outs.length > 1 && pick) { await a.setSinkId(pick.deviceId); return true; }
+                    }
+                } catch (_) {}
+                try {   // 2) alternativa: tocar pelo canal de mídia do celular (alto-falante)
+                    if (!S || !S.remoteAudioStream || !AC) return false;
+                    actx = actx || new AC(); if (actx.state === 'suspended') actx.resume();
+                    if (on) { if (!S.waSrc) { S.waSrc = actx.createMediaStreamSource(S.remoteAudioStream); S.waSrc.connect(actx.destination); } a.volume = 0; }
+                    else { if (S.waSrc) { try { S.waSrc.disconnect(); } catch (_) {} S.waSrc = null; } a.volume = 1; }
+                    return true;
+                } catch (_) { return false; }
+            };
+            const toggleSpeaker = async () => {
+                if (!S) return;
+                const on = !S.speaker, ok = await setSpeaker(on);
+                if (!S) return;
+                if (ok) { S.speaker = on; toast(on ? 'Alto-falante ligado' : 'Fone de ouvido ligado'); }
+                else toast('Seu aparelho não permite trocar a saída de áudio pelo navegador.');
+                ui(S.mode);
             };
 
+            // cancelamento de ruído (ao vivo)
+            const setNoise = async (on) => {
+                if (!S || !S.stream) return;
+                S.ns = on; ui(S.mode);
+                const t = S.stream.getAudioTracks()[0]; if (!t) return;
+                try {
+                    await t.applyConstraints({ noiseSuppression: on, echoCancellation: true, autoGainControl: true });
+                    const st = t.getSettings();
+                    if (typeof st.noiseSuppression === 'boolean' && st.noiseSuppression !== on) throw new Error('nao-aplicou');
+                } catch (_) {
+                    try {   // alternativa: abrir o microfone de novo com a nova configuração
+                        const ns = await navigator.mediaDevices.getUserMedia({ audio: { noiseSuppression: on, echoCancellation: true, autoGainControl: true } });
+                        const nt = ns.getAudioTracks()[0]; nt.enabled = !S.muted;
+                        const snd = S.pc.getSenders().find((x) => x.track && x.track.kind === 'audio');
+                        if (snd) await snd.replaceTrack(nt);
+                        S.stream.removeTrack(t); t.stop(); S.stream.addTrack(nt);
+                    } catch (e) { S.ns = !on; toast('Seu aparelho não permite alterar o cancelamento de ruído.'); ui(S.mode); return; }
+                }
+                toast(on ? 'Cancelamento de ruído ativado' : 'Cancelamento de ruído desativado');
+            };
+
+            // vídeo (câmera) e compartilhamento de tela, enviados pelo mesmo canal da chamada
+            const stopLocalTracks = () => {
+                if (S && S.vStream) { S.vStream.getTracks().forEach((t) => { t.onended = null; try { t.stop(); } catch (_) {} }); S.vStream = null; }
+            };
+            const stopVideo = async (silent) => {
+                if (!S) return;
+                try { if (S.vSender) await S.vSender.replaceTrack(null); } catch (_) {}
+                if (!S) return;
+                stopLocalTracks(); S.vid = false;
+                const lv = $('call-lv'); if (lv) lv.srcObject = null;
+                if (S.ref && !silent) updateDoc(S.ref, { [S.role + 'Vid']: false }).catch(() => {});
+                if (S) ui(S.mode);
+            };
+            const startVideo = async (kind) => {
+                if (!S || S.state !== 'active' || S.busyVid) return;
+                if (!S.vSender) return toast('O outro aparelho precisa atualizar o app para receber vídeo.');
+                S.busyVid = true;
+                try {
+                    let stream;
+                    if (kind === 'screen') {
+                        if (!navigator.mediaDevices.getDisplayMedia) { toast('Compartilhar a tela não é suportado neste aparelho (o Chrome do Android não permite). No computador funciona.'); return; }
+                        try { stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }); } catch (_) { return; }
+                    } else {
+                        stopLocalTracks();
+                        try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: S.facing || 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24 } } }); }
+                        catch (_) { try { await S.vSender.replaceTrack(null); } catch (__) {} S.vid = false; toast('Permita o uso da câmera para abrir o vídeo.', 'error'); ui(S.mode); return; }
+                    }
+                    if (!S) { stream.getTracks().forEach((t) => t.stop()); return; }
+                    const track = stream.getVideoTracks()[0];
+                    await S.vSender.replaceTrack(track);
+                    try {
+                        const p = S.vSender.getParameters(); if (!p.encodings || !p.encodings.length) p.encodings = [{}];
+                        p.encodings[0].maxBitrate = kind === 'screen' ? 1500000 : 900000; await S.vSender.setParameters(p);
+                    } catch (_) {}
+                    stopLocalTracks();
+                    S.vStream = stream; S.vid = kind;
+                    track.onended = () => { if (S && S.vStream === stream) stopVideo(); };
+                    updateDoc(S.ref, { [S.role + 'Vid']: kind }).catch(() => {});
+                    ui(S.mode);
+                } finally { if (S) S.busyVid = false; }
+            };
+            const toggleCam = () => { if (!S || S.state !== 'active') return; if (S.vid === 'cam') stopVideo(); else startVideo('cam'); };
+            const toggleShare = () => { if (!S || S.state !== 'active') return; if (S.vid === 'screen') stopVideo(); else startVideo('screen'); };
+            const flipCamera = () => { if (!S || S.vid !== 'cam') return; S.facing = S.facing === 'environment' ? 'user' : 'environment'; startVideo('cam'); };
+            const toggleMore = () => { if (!S) return; S.moreOpen = !S.moreOpen; ui(S.mode); };
+
+            // ---------- interface ----------
+            const item = (cls, icon, label, fn, dis) => {
+                const b = document.createElement('button');
+                b.type = 'button'; b.className = 'nxc-it ' + cls; b.disabled = !!dis; b.setAttribute('aria-label', label);
+                b.innerHTML = '<span class="c"><i class="fa-solid ' + icon + '"></i></span><span>' + label + '</span>';
+                b.onclick = fn; return b;
+            };
+            const place = () => {
+                const cap = ov.querySelector('.nxc-cap'), r = cap.getBoundingClientRect(), fb = window.innerHeight - r.top;
+                $('call-lv').style.bottom = (fb + 12) + 'px';
+                ov.querySelector('.nxc-more').style.bottom = (fb + 10) + 'px';
+            };
             const ui = (mode) => {
                 if (!S) return;
                 S.mode = mode;
                 if (mode === 'incoming') S.mini = false;
                 const u = userOf(S.peer) || {};
-                ov.querySelector('.nxc-av').src = u.avatar || '';
+                const av = ov.querySelector('.nxc-av'); if (av.getAttribute('src') !== (u.avatar || '')) av.src = u.avatar || '';
                 ov.querySelector('.nxc-name').textContent = u.name || 'Usuário';
-                const box = ov.querySelector('.nxc-btns'); box.innerHTML = '';
+                setStatus(statusText()); updateNote();
                 ov.classList.toggle('ring', mode === 'calling' || mode === 'incoming');
                 ov.classList.toggle('inc', mode === 'incoming');
-                setStatus(statusText()); updateNote();
+                const cap = ov.querySelector('.nxc-cap'); cap.innerHTML = ''; cap.classList.toggle('two', mode === 'incoming');
+                const act = S.state === 'active';
                 if (mode === 'incoming') {
-                    box.append(mkBtn('red', 'fa-phone-slash', () => app.declineCall(), 'Recusar'), mkBtn('green', 'fa-phone', () => app.acceptCall(), 'Atender'));
+                    cap.append(item('red', 'fa-phone-slash', 'Recusar', () => app.declineCall()), item('green', 'fa-phone', 'Atender', () => app.acceptCall()));
                 } else {
-                    box.append(mkBtn(S.muted ? 'on' : 'grey', S.muted ? 'fa-microphone-slash' : 'fa-microphone', toggleMute, 'Silenciar'));
-                    if (canSink()) box.append(mkBtn('grey', 'fa-volume-high', cycleOutput, 'Saída de áudio'));
-                    box.append(mkBtn('red', 'fa-phone-slash', () => app.hangupCall(), 'Desligar'));
+                    cap.append(
+                        item(S.speaker ? 'on' : '', 'fa-volume-high', 'Alto-falante', toggleSpeaker),
+                        item(S.vid === 'cam' ? 'on' : '', 'fa-video', 'Vídeo', toggleCam, !act),
+                        item(S.muted ? 'on' : '', S.muted ? 'fa-microphone-slash' : 'fa-microphone', 'Silenciar', toggleMute),
+                        item(S.moreOpen ? 'mais on' : 'mais', 'fa-ellipsis', 'Mais', toggleMore),
+                        item(S.vid === 'screen' ? 'on' : '', 'fa-arrow-up-from-bracket', 'Compartilhar', toggleShare, !act),
+                        item('red', 'fa-phone-slash', 'Encerrar', () => app.hangupCall())
+                    );
                 }
+                // vídeo
+                const rvOn = !!S.remoteVid, lvOn = !!S.vid;
+                ov.classList.toggle('rv-on', rvOn); ov.classList.toggle('rv-screen', S.remoteVid === 'screen');
+                ov.classList.toggle('lv-on', lvOn); ov.classList.toggle('vid', rvOn || lvOn);
+                const lv = $('call-lv');
+                if (lvOn && lv.srcObject !== S.vStream) { lv.srcObject = S.vStream; lv.play().catch(() => {}); }
+                lv.classList.toggle('mir', S.vid === 'cam' && S.facing !== 'environment');
+                // cartão "Mais"
+                const more = ov.querySelector('.nxc-more');
+                more.classList.toggle('on', !!S.moreOpen && mode !== 'incoming');
+                ov.querySelector('#nxc-ns .nxc-sw').classList.toggle('on', S.ns !== false);
+                ov.querySelector('#nxc-flip').style.display = S.vid === 'cam' ? 'flex' : 'none';
                 // barra minimizada
                 const mini = !!S.mini && mode !== 'incoming';
                 bar.querySelector('img').src = u.avatar || '';
@@ -7835,11 +8003,18 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 bm.className = 'nxc-bm' + (S.muted ? ' on' : ''); bm.innerHTML = '<i class="fa-solid ' + (S.muted ? 'fa-microphone-slash' : 'fa-microphone') + '"></i>';
                 bar.classList.toggle('on', mini);
                 ov.classList.toggle('on', !mini);
+                if (!mini) place();
             };
-            ov.querySelector('.nxc-min').onclick = () => { if (S && S.mode !== 'incoming') { S.mini = true; ui(S.mode); } };
+            ov.querySelector('.nxc-min').onclick = () => { if (S && S.mode !== 'incoming') { S.mini = true; S.moreOpen = false; ui(S.mode); } };
             bar.querySelector('.nxc-bi').onclick = () => { if (S) { S.mini = false; ui(S.mode); } };
             bar.querySelector('.nxc-bm').onclick = toggleMute;
             bar.querySelector('.nxc-bh').onclick = () => app.hangupCall();
+            ov.querySelector('#nxc-ns').onclick = () => setNoise(S ? S.ns === false : true);
+            ov.querySelector('#nxc-flip').onclick = flipCamera;
+            ov.addEventListener('click', (e) => {
+                if (S && S.moreOpen && !e.target.closest('.nxc-more') && !e.target.closest('.nxc-it.mais')) { S.moreOpen = false; ui(S.mode); }
+            });
+            window.addEventListener('resize', () => { if (S && ov.classList.contains('on')) place(); });
 
             // ---------- qualidade da conexão + tela ligada ----------
             const pollQuality = async () => {
@@ -7859,22 +8034,6 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const lockScreen = async () => { try { if (navigator.wakeLock && S && !S.wake) S.wake = await navigator.wakeLock.request('screen'); } catch (_) {} };
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && S.state === 'active') { S.wake = null; lockScreen(); } });
 
-            // ---------- toque ----------
-            let actx = null, ringTimer = null;
-            const beep = () => {
-                try {
-                    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-                    if (actx.state === 'suspended') actx.resume();
-                    const o = actx.createOscillator(), g = actx.createGain();
-                    o.frequency.value = 440; g.gain.value = 0.08; o.connect(g); g.connect(actx.destination);
-                    o.start(); o.stop(actx.currentTime + 0.5);
-                } catch (_) {}
-            };
-            const ring = (on) => {
-                clearInterval(ringTimer); ringTimer = null;
-                if (on) { beep(); ringTimer = setInterval(beep, 2200); }
-            };
-
             // ---------- conexão ----------
             const sendIce = (c) => {
                 if (!S) return;
@@ -7892,7 +8051,17 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
                 S.pc = pc;
                 S.stream.getTracks().forEach((t) => pc.addTrack(t, S.stream));
-                pc.ontrack = (e) => { const a = $('call-audio'); a.srcObject = e.streams[0]; a.play().catch(() => {}); };
+                // canal de vídeo combinado desde o início (a câmera só liga depois, sem renegociar)
+                if (S.role === 'caller') { try { S.vSender = pc.addTransceiver('video', { direction: 'sendrecv' }).sender; } catch (_) {} }
+                pc.ontrack = (e) => {
+                    if (!S || S.pc !== pc) return;
+                    if (e.track.kind === 'audio') {
+                        S.remoteAudioStream = (e.streams && e.streams[0]) || new MediaStream([e.track]);
+                        const a = $('call-audio'); a.srcObject = S.remoteAudioStream; a.play().catch(() => {});
+                    } else if (e.track.kind === 'video') {
+                        const rv = $('call-rv'); rv.srcObject = new MediaStream([e.track]); rv.play().catch(() => {});
+                    }
+                };
                 pc.onicecandidate = (e) => { if (e.candidate) sendIce(JSON.stringify(e.candidate)); };
                 pc.onconnectionstatechange = () => {
                     if (!S || S.pc !== pc) return;
@@ -7904,25 +8073,31 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         S.timer = setInterval(() => { S.secs++; setStatus(fmt(S.secs)); }, 1000);
                     } else if (st === 'failed') {
                         updateDoc(S.ref, { state: 'ended' }).catch(() => {});
-                        end('Não foi possível conectar. A rede pode estar bloqueando a chamada de voz.');
+                        end('Não foi possível conectar. A rede pode estar bloqueando a chamada.');
                     } else if (st === 'disconnected') {
                         S.discT = setTimeout(() => { if (S && S.pc === pc && pc.connectionState !== 'connected') app.hangupCall(); }, 8000);
                     }
                 };
             };
 
-            const newSession = (o) => Object.assign({ pc: null, stream: null, docReady: false, iceBuf: [], pendingIce: [], added: new Set(), answered: false, muted: false, secs: 0, state: 'ringing' }, o);
+            const newSession = (o) => Object.assign({ pc: null, stream: null, docReady: false, iceBuf: [], pendingIce: [], added: new Set(), answered: false, muted: false, ns: true, speaker: false, vid: false, remoteVid: false, facing: 'user', secs: 0, state: 'ringing' }, o);
 
             const end = (msg) => {
                 const s = S; if (!s) return;
                 S = null;
                 clearTimeout(s.ringT); clearTimeout(s.discT); clearInterval(s.timer); clearInterval(s.qTimer); ring(false);
+                if (s.state === 'active') tone(SND.hangup);                      // som de desligar (nos dois lados)
                 try { if (s.wake) s.wake.release(); } catch (_) {}
                 try { if (s.unsub) s.unsub(); } catch (_) {}
+                try { if (s.waSrc) s.waSrc.disconnect(); } catch (_) {}
+                try { if (s.vStream) s.vStream.getTracks().forEach((t) => { t.onended = null; t.stop(); }); } catch (_) {}
                 try { if (s.stream) s.stream.getTracks().forEach((t) => t.stop()); } catch (_) {}
                 try { if (s.pc) { s.pc.ontrack = s.pc.onicecandidate = s.pc.onconnectionstatechange = null; s.pc.close(); } } catch (_) {}
-                const a = $('call-audio'); if (a) a.srcObject = null;
-                ov.classList.remove('on', 'ring', 'inc'); bar.classList.remove('on');
+                const a = $('call-audio'); if (a) { a.srcObject = null; a.volume = 1; }
+                const rv = $('call-rv'); if (rv) rv.srcObject = null;
+                const lv = $('call-lv'); if (lv) lv.srcObject = null;
+                ov.classList.remove('on', 'ring', 'inc', 'rv-on', 'rv-screen', 'lv-on', 'vid'); bar.classList.remove('on');
+                ov.querySelector('.nxc-more').classList.remove('on');
                 try { navigator.serviceWorker.ready.then((r) => r.getNotifications({ tag: 'call' }).then((l) => l.forEach((n) => n.close()))).catch(() => {}); } catch (_) {}
                 if (msg) toast(msg);
             };
@@ -7934,6 +8109,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 (d[key] || []).forEach((c) => { if (!S.added.has(c)) { S.added.add(c); addRemoteIce(c); } });
                 const rm = !!d[S.role === 'caller' ? 'calleeMuted' : 'callerMuted'];
                 if (rm !== !!S.remoteMuted) { S.remoteMuted = rm; updateNote(); }
+                const rv = d[S.role === 'caller' ? 'calleeVid' : 'callerVid'] || false;
+                if (rv !== S.remoteVid) {
+                    S.remoteVid = rv;
+                    if (rv) { tone(SND.cam); S.mini = false; }                  // avisa com som que o outro abriu a câmera
+                    ui(S.mode);
+                }
                 if (S.role === 'caller' && d.answer && !S.answered) {
                     S.answered = true; clearTimeout(S.ringT); ring(false); ui('connecting');
                     S.pc.setRemoteDescription(d.answer).then(drainIce).catch(() => end('Falha ao conectar a chamada.'));
@@ -7942,7 +8123,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
 
             const getMic = async () => {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection) { toast('Este navegador não suporta chamadas de voz.', 'error'); return null; }
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection) { toast('Este navegador não suporta chamadas.', 'error'); return null; }
                 try { return await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
                 catch (_) { toast('Permita o uso do microfone para fazer chamadas.', 'error'); return null; }
             };
@@ -7980,6 +8161,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 mine.stream = stream; mine.docReady = true; setupPC(); ui('connecting');
                 try {
                     await mine.pc.setRemoteDescription(mine.offer);
+                    const vt = mine.pc.getTransceivers().find((t) => t.receiver && t.receiver.track && t.receiver.track.kind === 'video');
+                    if (vt) { try { vt.direction = 'sendrecv'; mine.vSender = vt.sender; } catch (_) {} }
                     (mine.firstIce || []).forEach((c) => { mine.added.add(c); addRemoteIce(c); }); drainIce();
                     const ans = await mine.pc.createAnswer(); await mine.pc.setLocalDescription(ans);
                     await updateDoc(mine.ref, { answer: { type: ans.type, sdp: ans.sdp }, state: 'active' });
@@ -8000,7 +8183,6 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 } catch (_) {}
             };
             const handleIncoming = (id, d) => {
-                const my = myUid();
                 if ((meDoc().blockedUsers || {})[d.from]) return;
                 if (S) { if (S.id !== id) updateDoc(doc(colCalls, id), { state: 'busy' }).catch(() => {}); return; }
                 S = newSession({ id, ref: doc(colCalls, id), role: 'callee', peer: d.from, incoming: true, createdAt: d.createdAt, offer: d.offer, firstIce: d.callerIce || [] });
@@ -8148,7 +8330,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261024-0656';
+    window.NX_BUILD = '20261024-1829';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

@@ -7614,42 +7614,112 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 '#call-overlay.ring .nxc-av{animation:nxcPulse 1.4s ease-in-out infinite}' +
                 '@keyframes nxcPulse{0%,100%{box-shadow:0 0 18px rgba(var(--cyan-rgb),.35)}50%{box-shadow:0 0 46px rgba(var(--cyan-rgb),.8)}}' +
                 '#call-overlay .nxc-name{font-family:Rajdhani,sans-serif;font-size:1.7rem;margin:0 0 6px}' +
-                '#call-overlay .nxc-st{color:#aeb3c2;font-size:1rem;margin:0 0 46px;min-height:1.4em}' +
-                '#call-overlay .nxc-btns{display:flex;gap:30px;justify-content:center}' +
+                '#call-overlay .nxc-st{color:#aeb3c2;font-size:1rem;margin:0 0 6px;min-height:1.4em}' +
+                '#call-overlay .nxc-note{color:#8a8fa0;font-size:.85rem;margin:0 0 40px;min-height:1.2em}' +
+                '#call-overlay .nxc-min{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;width:44px;height:44px;border-radius:50%;border:0;background:#1a1a26;color:#fff;font-size:1.1rem;cursor:pointer}' +
+                '#call-overlay.inc .nxc-min{display:none}' +
+                '#call-overlay .nxc-btns{display:flex;gap:22px;justify-content:center;flex-wrap:wrap}' +
                 '#call-overlay .nxc-b{width:68px;height:68px;border-radius:50%;border:0;color:#fff;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center}' +
                 '#call-overlay .nxc-b.red{background:#e5262b}#call-overlay .nxc-b.green{background:#1fb35a}#call-overlay .nxc-b.grey{background:#2a2b3a}#call-overlay .nxc-b.on{background:#fff;color:#111}' +
-                '';
+                '#call-bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:10px;right:10px;z-index:2147481500;display:none;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;background:#0d0d14;border:1px solid #1fb35a;color:#fff;box-shadow:0 6px 22px rgba(0,0,0,.55);font-family:Inter,sans-serif}' +
+                '#call-bar.on{display:flex}' +
+                '#call-bar img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}' +
+                '#call-bar .nxc-bi{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;cursor:pointer}' +
+                '#call-bar .nxc-bi b{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+                '#call-bar .nxc-bi span{font-size:.8rem;color:#8fe0b0}' +
+                '#call-bar button{width:38px;height:38px;border-radius:50%;border:0;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#2a2b3a;flex-shrink:0}' +
+                '#call-bar button.red{background:#e5262b}#call-bar button.on{background:#fff;color:#111}';
             document.head.appendChild(css);
 
             const ov = document.createElement('div');
             ov.id = 'call-overlay'; ov.setAttribute('role', 'dialog');
-            ov.innerHTML = '<div class="nxc-box"><img class="nxc-av" alt=""><h2 class="nxc-name"></h2><p class="nxc-st"></p><div class="nxc-btns"></div></div><audio id="call-audio" autoplay playsinline></audio>';
+            ov.innerHTML = '<button type="button" class="nxc-min" aria-label="Minimizar"><i class="fa-solid fa-chevron-down"></i></button><div class="nxc-box"><img class="nxc-av" alt=""><h2 class="nxc-name"></h2><p class="nxc-st"></p><p class="nxc-note"></p><div class="nxc-btns"></div></div><audio id="call-audio" autoplay playsinline></audio>';
             document.body.appendChild(ov);
+            const bar = document.createElement('div');
+            bar.id = 'call-bar';
+            bar.innerHTML = '<img alt=""><div class="nxc-bi"><b></b><span></span></div><button type="button" class="nxc-bm" aria-label="Silenciar"><i class="fa-solid fa-microphone"></i></button><button type="button" class="red nxc-bh" aria-label="Desligar"><i class="fa-solid fa-phone-slash"></i></button>';
+            document.body.appendChild(bar);
 
             const mkBtn = (cls, icon, fn, label) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'nxc-b ' + cls; b.setAttribute('aria-label', label); b.innerHTML = '<i class="fa-solid ' + icon + '"></i>'; b.onclick = fn; return b; };
-            const setStatus = (t) => { const e = ov.querySelector('.nxc-st'); if (e) e.textContent = t; };
+            const setStatus = (t) => { const e = ov.querySelector('.nxc-st'); if (e) e.textContent = t; const sp = bar.querySelector('.nxc-bi span'); if (sp) sp.textContent = t; };
             const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+
+            const statusText = () => !S ? '' : S.mode === 'calling' ? 'Chamando...' : S.mode === 'connecting' ? 'Conectando...' : S.mode === 'incoming' ? 'Chamada de voz recebida...' : fmt(S.secs || 0);
+            const updateNote = () => {
+                const e = ov.querySelector('.nxc-note'); if (!e) return;
+                const parts = [];
+                if (S && S.remoteMuted) parts.push('Microfone do outro silenciado');
+                if (S && S.q && S.state === 'active') parts.push('Conexão: ' + S.q);
+                e.textContent = parts.join(' • ');
+            };
+            const toggleMute = () => {
+                if (!S) return;
+                S.muted = !S.muted;
+                if (S.stream) S.stream.getAudioTracks().forEach((t) => { t.enabled = !S.muted; });
+                if (S.ref) updateDoc(S.ref, { [S.role + 'Muted']: S.muted }).catch(() => {});
+                ui(S.mode);
+            };
+            const canSink = () => typeof HTMLMediaElement !== 'undefined' && 'setSinkId' in HTMLMediaElement.prototype;
+            const cycleOutput = async () => {
+                const a = $('call-audio');
+                try {
+                    const outs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audiooutput');
+                    if (outs.length < 2) { toast('Seu aparelho controla a saída de áudio pelo sistema. Use o volume ou conecte um fone.'); return; }
+                    S.outIdx = ((S.outIdx || 0) + 1) % outs.length;
+                    const d = outs[S.outIdx]; await a.setSinkId(d.deviceId);
+                    toast('Saída de áudio: ' + (d.label || 'dispositivo ' + (S.outIdx + 1)));
+                } catch (_) { toast('Não foi possível trocar a saída de áudio.', 'error'); }
+            };
 
             const ui = (mode) => {
                 if (!S) return;
+                S.mode = mode;
+                if (mode === 'incoming') S.mini = false;
                 const u = userOf(S.peer) || {};
                 ov.querySelector('.nxc-av').src = u.avatar || '';
                 ov.querySelector('.nxc-name').textContent = u.name || 'Usuário';
                 const box = ov.querySelector('.nxc-btns'); box.innerHTML = '';
-                ov.classList.add('on'); ov.classList.toggle('ring', mode === 'calling' || mode === 'incoming');
+                ov.classList.toggle('ring', mode === 'calling' || mode === 'incoming');
+                ov.classList.toggle('inc', mode === 'incoming');
+                setStatus(statusText()); updateNote();
                 if (mode === 'incoming') {
-                    setStatus('Chamada de voz recebida...');
                     box.append(mkBtn('red', 'fa-phone-slash', () => app.declineCall(), 'Recusar'), mkBtn('green', 'fa-phone', () => app.acceptCall(), 'Atender'));
                 } else {
-                    setStatus(mode === 'calling' ? 'Chamando...' : mode === 'connecting' ? 'Conectando...' : fmt(S.secs || 0));
-                    const mute = mkBtn(S.muted ? 'on' : 'grey', S.muted ? 'fa-microphone-slash' : 'fa-microphone', () => {
-                        S.muted = !S.muted;
-                        if (S.stream) S.stream.getAudioTracks().forEach((t) => { t.enabled = !S.muted; });
-                        mute.className = 'nxc-b ' + (S.muted ? 'on' : 'grey'); mute.innerHTML = '<i class="fa-solid ' + (S.muted ? 'fa-microphone-slash' : 'fa-microphone') + '"></i>';
-                    }, 'Silenciar');
-                    box.append(mute, mkBtn('red', 'fa-phone-slash', () => app.hangupCall(), 'Desligar'));
+                    box.append(mkBtn(S.muted ? 'on' : 'grey', S.muted ? 'fa-microphone-slash' : 'fa-microphone', toggleMute, 'Silenciar'));
+                    if (canSink()) box.append(mkBtn('grey', 'fa-volume-high', cycleOutput, 'Saída de áudio'));
+                    box.append(mkBtn('red', 'fa-phone-slash', () => app.hangupCall(), 'Desligar'));
                 }
+                // barra minimizada
+                const mini = !!S.mini && mode !== 'incoming';
+                bar.querySelector('img').src = u.avatar || '';
+                bar.querySelector('b').textContent = u.name || 'Usuário';
+                const bm = bar.querySelector('.nxc-bm');
+                bm.className = 'nxc-bm' + (S.muted ? ' on' : ''); bm.innerHTML = '<i class="fa-solid ' + (S.muted ? 'fa-microphone-slash' : 'fa-microphone') + '"></i>';
+                bar.classList.toggle('on', mini);
+                ov.classList.toggle('on', !mini);
             };
+            ov.querySelector('.nxc-min').onclick = () => { if (S && S.mode !== 'incoming') { S.mini = true; ui(S.mode); } };
+            bar.querySelector('.nxc-bi').onclick = () => { if (S) { S.mini = false; ui(S.mode); } };
+            bar.querySelector('.nxc-bm').onclick = toggleMute;
+            bar.querySelector('.nxc-bh').onclick = () => app.hangupCall();
+
+            // ---------- qualidade da conexão + tela ligada ----------
+            const pollQuality = async () => {
+                if (!S || !S.pc || S.state !== 'active') return;
+                try {
+                    const stats = await S.pc.getStats(); let rtt = null, lost = 0, recv = 0;
+                    stats.forEach((r) => {
+                        if (r.type === 'candidate-pair' && r.state === 'succeeded' && r.nominated && typeof r.currentRoundTripTime === 'number') rtt = r.currentRoundTripTime * 1000;
+                        if (r.type === 'inbound-rtp' && r.kind === 'audio') { lost = r.packetsLost || 0; recv = r.packetsReceived || 0; }
+                    });
+                    const dl = lost - (S.prevLost || 0), dr = recv - (S.prevRecv || 0); S.prevLost = lost; S.prevRecv = recv;
+                    const loss = (dl + dr) > 0 ? (dl / (dl + dr)) * 100 : 0;
+                    S.q = (rtt !== null && rtt < 150 && loss < 3) ? 'boa' : (rtt !== null && rtt < 350 && loss < 8) ? 'média' : (rtt === null && loss < 3) ? 'boa' : 'fraca';
+                    updateNote();
+                } catch (_) {}
+            };
+            const lockScreen = async () => { try { if (navigator.wakeLock && S && !S.wake) S.wake = await navigator.wakeLock.request('screen'); } catch (_) {} };
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && S.state === 'active') { S.wake = null; lockScreen(); } });
 
             // ---------- toque ----------
             let actx = null, ringTimer = null;
@@ -7692,7 +7762,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     clearTimeout(S.discT);
                     if (st === 'connected') {
                         if (S.timer) return;
-                        ring(false); S.state = 'active'; S.secs = 0; ui('active');
+                        ring(false); S.state = 'active'; S.secs = 0; ui('active'); lockScreen(); S.qTimer = setInterval(pollQuality, 3000);
                         S.timer = setInterval(() => { S.secs++; setStatus(fmt(S.secs)); }, 1000);
                     } else if (st === 'failed') {
                         updateDoc(S.ref, { state: 'ended' }).catch(() => {});
@@ -7708,12 +7778,13 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const end = (msg) => {
                 const s = S; if (!s) return;
                 S = null;
-                clearTimeout(s.ringT); clearTimeout(s.discT); clearInterval(s.timer); ring(false);
+                clearTimeout(s.ringT); clearTimeout(s.discT); clearInterval(s.timer); clearInterval(s.qTimer); ring(false);
+                try { if (s.wake) s.wake.release(); } catch (_) {}
                 try { if (s.unsub) s.unsub(); } catch (_) {}
                 try { if (s.stream) s.stream.getTracks().forEach((t) => t.stop()); } catch (_) {}
                 try { if (s.pc) { s.pc.ontrack = s.pc.onicecandidate = s.pc.onconnectionstatechange = null; s.pc.close(); } } catch (_) {}
                 const a = $('call-audio'); if (a) a.srcObject = null;
-                ov.classList.remove('on', 'ring');
+                ov.classList.remove('on', 'ring', 'inc'); bar.classList.remove('on');
                 try { navigator.serviceWorker.ready.then((r) => r.getNotifications({ tag: 'call' }).then((l) => l.forEach((n) => n.close()))).catch(() => {}); } catch (_) {}
                 if (msg) toast(msg);
             };
@@ -7723,6 +7794,8 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (!S || !d || d.createdAt !== S.createdAt) return;
                 const key = S.role === 'caller' ? 'calleeIce' : 'callerIce';
                 (d[key] || []).forEach((c) => { if (!S.added.has(c)) { S.added.add(c); addRemoteIce(c); } });
+                const rm = !!d[S.role === 'caller' ? 'calleeMuted' : 'callerMuted'];
+                if (rm !== !!S.remoteMuted) { S.remoteMuted = rm; updateNote(); }
                 if (S.role === 'caller' && d.answer && !S.answered) {
                     S.answered = true; clearTimeout(S.ringT); ring(false); ui('connecting');
                     S.pc.setRemoteDescription(d.answer).then(drainIce).catch(() => end('Falha ao conectar a chamada.'));
@@ -7929,6 +8002,41 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+
+<!-- ===== AUTO-ATUALIZAÇÃO: avisa quando existe versão mais nova publicada ===== -->
+<script id="nexusone-autoupdate">
+(function () {
+    window.NX_BUILD = '20261024-0630';
+    var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
+    function bar() {
+        if (shown) return; shown = true;
+        var d = document.createElement('div');
+        d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:84px;z-index:2147481000;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:#0d0d14;border:1px solid #00f0ff;color:#fff;font:600 .9rem Inter,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.5)';
+        d.innerHTML = '<span style="flex:1">Nova atualização do NexusOne disponível</span>' +
+            '<button type="button" style="border:0;border-radius:8px;padding:8px 14px;background:#00f0ff;color:#050507;font-weight:700;cursor:pointer">Atualizar</button>' +
+            '<button type="button" aria-label="Fechar" style="border:0;background:transparent;color:#8a8fa0;font-size:1.2rem;cursor:pointer">×</button>';
+        var b = d.querySelectorAll('button');
+        b[0].onclick = function () {
+            b[0].textContent = 'Atualizando...';
+            var go = function () { location.reload(); };
+            try { navigator.serviceWorker.getRegistration().then(function (r) { return r ? r.update() : null; }).then(go, go); } catch (e) { go(); }
+        };
+        b[1].onclick = function () { d.remove(); };
+        document.body.appendChild(d);
+    }
+    function check() {
+        if (shown || !navigator.onLine || Date.now() - last < 60000) return;
+        last = Date.now();
+        fetch(base + '?nxchk=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.text() : ''; })
+            .then(function (t) { var m = t.match(/window\.NX_BUILD\s*=\s*'([^']+)'/); if (m && m[1] !== window.NX_BUILD) bar(); })
+            .catch(function () {});
+    }
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') check(); });
+    setTimeout(check, 4000);
+    setInterval(check, 5 * 60 * 1000);
 })();
 </script>
 </body>

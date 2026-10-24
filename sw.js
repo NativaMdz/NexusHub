@@ -3,7 +3,7 @@
    - Página: rede primeiro (sempre a versão mais nova); cópia guardada só como plano B sem internet.
    - Ícones: cache primeiro.
    Para forçar atualização do cache no futuro, basta mudar a VERSION. */
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'nexus-shell-' + VERSION;
 const ICONS = ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
 
@@ -34,7 +34,7 @@ self.addEventListener('fetch', (event) => {
     // Página: rede primeiro, cópia local só se estiver offline
     if (req.mode === 'navigate') {
         event.respondWith(
-            fetch(req).then((res) => {
+            fetch(req.url, { cache: 'no-cache', credentials: 'same-origin', redirect: 'follow' }).then((res) => {
                 if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {}); }
                 return res;
             }).catch(() =>

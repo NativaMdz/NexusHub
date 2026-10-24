@@ -7921,8 +7921,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 try {
                     let stream;
                     if (kind === 'screen') {
-                        if (!navigator.mediaDevices.getDisplayMedia) { toast('Compartilhar a tela não é suportado neste aparelho (o Chrome do Android não permite). No computador funciona.'); return; }
-                        try { stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }); } catch (_) { return; }
+                        const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.userAgentData && navigator.userAgentData.mobile);
+                        if (mobile || !navigator.mediaDevices.getDisplayMedia) { toast('Compartilhar a tela não funciona no celular pelo navegador (o Android e o iPhone não permitem). No computador funciona.'); return; }
+                        try { stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }); }
+                        catch (e) { if (!e || e.name !== 'NotAllowedError') toast('Não foi possível compartilhar a tela.'); return; }
                     } else {
                         stopLocalTracks();
                         try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: S.facing || 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24 } } }); }
@@ -8330,7 +8332,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261024-1829';
+    window.NX_BUILD = '20261024-1848';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

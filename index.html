@@ -8036,6 +8036,46 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const lockScreen = async () => { try { if (navigator.wakeLock && S && !S.wake) S.wake = await navigator.wakeLock.request('screen'); } catch (_) {} };
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && S.state === 'active') { S.wake = null; lockScreen(); } });
 
+            // ---------- chamada com o app em segundo plano ----------
+            const tick = () => { if (!S || S.state !== 'active') return; S.secs = Math.floor((Date.now() - (S.t0 || Date.now())) / 1000); setStatus(fmt(S.secs)); };
+            const closeNotifs = (tags) => {
+                try { navigator.serviceWorker.ready.then((r) => (tags || ['call', 'call-active']).forEach((tag) => r.getNotifications({ tag }).then((l) => l.forEach((n) => n.close())))).catch(() => {}); } catch (_) {}
+            };
+            const startSession = () => {   // aviso fixo do Android com botões de desligar e silenciar
+                try {
+                    if (!('mediaSession' in navigator) || !S) return;
+                    const u = userOf(S.peer) || {};
+                    navigator.mediaSession.metadata = new MediaMetadata({ title: 'Chamada com ' + (u.name || 'NexusOne'), artist: 'NexusOne', artwork: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }] });
+                    navigator.mediaSession.playbackState = 'playing';
+                    try { navigator.mediaSession.setActionHandler('hangup', () => app.hangupCall()); } catch (_) {}
+                    try { navigator.mediaSession.setActionHandler('togglemicrophone', () => toggleMute()); } catch (_) {}
+                } catch (_) {}
+            };
+            const stopSession = () => {
+                try {
+                    if (!('mediaSession' in navigator)) return;
+                    ['hangup', 'togglemicrophone'].forEach((x) => { try { navigator.mediaSession.setActionHandler(x, null); } catch (_) {} });
+                    navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = 'none';
+                } catch (_) {}
+            };
+            const showOngoing = () => {
+                if (!S || S.state !== 'active' || !('Notification' in window) || Notification.permission !== 'granted') return;
+                const u = userOf(S.peer) || {};
+                try {
+                    navigator.serviceWorker.ready.then((r) => r.showNotification('Chamada em andamento', {
+                        body: 'Com ' + (u.name || 'NexusOne') + ' • toque para voltar', tag: 'call-active', requireInteraction: true, silent: true,
+                        icon: 'icon-192.png', actions: [{ action: 'hangup', title: 'Desligar' }], data: { url: location.href.split('#')[0].split('?')[0] }
+                    }));
+                } catch (_) {}
+            };
+            document.addEventListener('visibilitychange', () => {
+                if (!S) return;
+                if (document.visibilityState === 'hidden') { showOngoing(); return; }
+                tick(); closeNotifs(['call-active']);
+                ['call-audio', 'call-rv', 'call-lv'].forEach((id) => { const m = $(id); if (m && m.srcObject && m.paused) m.play().catch(() => {}); });
+            });
+            try { navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.type === 'call-hangup') app.hangupCall(); }); } catch (_) {}
+
             // ---------- conexão ----------
             const sendIce = (c) => {
                 if (!S) return;
@@ -8072,7 +8112,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     if (st === 'connected') {
                         if (S.timer) return;
                         ring(false); S.state = 'active'; S.secs = 0; ui('active'); lockScreen(); S.qTimer = setInterval(pollQuality, 3000);
-                        S.timer = setInterval(() => { S.secs++; setStatus(fmt(S.secs)); }, 1000);
+                        S.t0 = Date.now(); S.timer = setInterval(tick, 1000); startSession();
                     } else if (st === 'failed') {
                         updateDoc(S.ref, { state: 'ended' }).catch(() => {});
                         end('Não foi possível conectar. A rede pode estar bloqueando a chamada.');
@@ -8100,7 +8140,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const lv = $('call-lv'); if (lv) lv.srcObject = null;
                 ov.classList.remove('on', 'ring', 'inc', 'rv-on', 'rv-screen', 'lv-on', 'vid'); bar.classList.remove('on');
                 ov.querySelector('.nxc-more').classList.remove('on');
-                try { navigator.serviceWorker.ready.then((r) => r.getNotifications({ tag: 'call' }).then((l) => l.forEach((n) => n.close()))).catch(() => {}); } catch (_) {}
+                stopSession(); closeNotifs();
                 if (msg) toast(msg);
             };
 
@@ -8332,7 +8372,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261024-1848';
+    window.NX_BUILD = '20261024-1900';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

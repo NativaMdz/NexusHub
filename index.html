@@ -5257,6 +5257,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 appState.privateMessages = orig.filter((m) => {
                     const o = (m.participants || []).find((p) => p !== my);
                     const c = clearedAt(o), b = blockedAt(o);
+                    if (m.deletedFor && m.deletedFor.includes(my)) return false;   // "Apagar para mim" também some da prévia
                     if (c && m.createdAt <= c) return false;
                     if (b && m.authorUid === o && m.createdAt > b) return false;
                     return true;

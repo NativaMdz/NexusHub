@@ -8378,6 +8378,84 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
         })();
 
+
+        // ===== BOTÃO VOLTAR DO CELULAR: navega dentro do app e, na tela inicial, pede para apertar de novo para sair =====
+        (() => {
+            const standalone = (() => { try { return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (_) { return false; } })();
+            if (window.__nxLanding || !standalone) return;       // só no app instalado (no navegador o voltar continua normal)
+            const $ = (id) => document.getElementById(id);
+            const HOME = 'feed';
+
+            // histórico das telas visitadas (para voltar para a anterior)
+            const stack = []; let goingBack = false;
+            const _nav = app.navigate;
+            app.navigate = function (view, el, data) {
+                if (!goingBack) {
+                    if (!stack.length) stack.push({ view: HOME, data: null });
+                    if (view === HOME) { stack.length = 0; stack.push({ view: HOME, data: null }); }
+                    else {
+                        const top = stack[stack.length - 1], d = data == null ? null : data;
+                        if (!top || top.view !== view || top.data !== d) stack.push({ view, data: d });
+                        if (stack.length > 30) stack.shift();
+                    }
+                }
+                return _nav.apply(this, arguments);
+            };
+
+            // 1 passo para trás dentro do app; devolve true se fez alguma coisa
+            const inAppBack = () => {
+                // janelas abertas (menus, figurinhas, configurações, etc.)
+                const ms = document.querySelectorAll('.modal-overlay.active');
+                if (ms.length) {
+                    const m = ms[ms.length - 1];
+                    const b = m.querySelector('[onclick*="lose"], [onclick*="ancel"], [onclick*="echar"]');
+                    try { if (b) b.click(); } catch (_) {}
+                    if (m.classList.contains('active')) m.classList.remove('active');
+                    return true;
+                }
+                // chamada: minimiza (a chamada recebida só é decidida em Atender/Recusar)
+                const co = $('call-overlay');
+                if (co && co.classList.contains('on')) { const mb = co.querySelector('.nxc-min'); if (!co.classList.contains('inc') && mb) mb.click(); return true; }
+                // gravando áudio: cancela
+                const blk = document.querySelector('.chat-input-block.rec-active');
+                if (blk && app.cancelVoiceRecord) { app.cancelVoiceRecord(); return true; }
+                // respondendo a uma mensagem: cancela a resposta
+                if (appState.replyingTo && app.cancelReply) { app.cancelReply(); return true; }
+                // dentro de uma conversa: volta para a lista
+                if (appState.currentView === 'chat') {
+                    const m = appState.activeChatMode;
+                    if (m === 'group') { app.switchChatTab('group_list'); return true; }
+                    if (m && !['global', 'private_list', 'group_list', 'group'].includes(m)) { app.switchChatTab('private_list'); return true; }
+                }
+                // telas: volta para a anterior (ou para a inicial)
+                if (stack.length > 1) {
+                    stack.pop(); const prev = stack[stack.length - 1];
+                    goingBack = true; try { app.navigate(prev.view, null, prev.data); } finally { goingBack = false; }
+                    return true;
+                }
+                if (appState.currentView && appState.currentView !== HOME) { app.navigate(HOME); return true; }
+                return false;
+            };
+
+            // proteção do histórico: sempre existe uma entrada "guard" à frente da "root"
+            const arm = () => { if (history.state && history.state.nx === 'root') history.pushState({ nx: 'guard' }, ''); };
+            let rearmT = null, lastBack = 0;
+            try { history.replaceState({ nx: 'root' }, ''); history.pushState({ nx: 'guard' }, ''); } catch (_) { return; }
+            window.addEventListener('popstate', (e) => {
+                if (!e.state || e.state.nx !== 'root') return;
+                clearTimeout(rearmT);
+                if (inAppBack()) { arm(); return; }
+                // tela inicial: 1º toque avisa; o 2º (em até 2 s) sai, porque já estamos na primeira entrada do histórico
+                lastBack = Date.now();
+                app.showToast('Pressione voltar novamente para sair', 'info');
+                rearmT = setTimeout(arm, 2000);
+            });
+            // se a pessoa tocar na tela ou voltar ao app, o aviso de saída é desfeito
+            const rearmNow = () => { if (lastBack && history.state && history.state.nx === 'root') { clearTimeout(rearmT); lastBack = 0; arm(); } };
+            document.addEventListener('pointerdown', rearmNow, true);
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') rearmNow(); });
+        })();
+
         window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
     </script>
 
@@ -8494,7 +8572,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261025-1625';
+    window.NX_BUILD = '20261025-1638';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

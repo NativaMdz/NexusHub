@@ -1386,8 +1386,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .cl-typing.rec i { color: var(--danger); margin-right: 3px; font-size: 0.8em; }
 
         /* === DIGITANDO / GRAVANDO + MENSAGENS DE VOZ === */
-        #chat-input-container .chat-input:placeholder-shown ~ .chat-send-btn:not(.chat-mic-btn) { display: none; }
-        #chat-input-container .chat-input:not(:placeholder-shown) ~ .chat-mic-btn { display: none; }
+        /* barra de digitação estilo WhatsApp: cápsula (figurinha, texto, anexo, câmera) + botão redondo separado */
+        #chat-input-container.chat-input-area { background: none; border: none; box-shadow: none; padding: 0; backdrop-filter: none; -webkit-backdrop-filter: none; align-items: flex-end; gap: 8px; }
+        #chat-input-container .chat-input-pill { flex: 1; min-width: 0; display: flex; align-items: flex-end; gap: 2px; padding: 5px 8px; border-radius: 24px; background: rgba(15, 15, 20, 0.9); border: 1px solid rgba(var(--cyan-rgb), 0.3); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(var(--cyan-rgb), 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+        .chat-stage #chat-input-container .chat-input-pill { background: rgba(20,22,30,0.92); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+        #chat-input-container .chat-send-btn { width: 46px; height: 46px; flex-shrink: 0; }
+        #chat-input-container:not(.has-text) .chat-send-btn:not(.chat-mic-btn) { display: none; }
+        #chat-input-container.has-text .chat-mic-btn { display: none; }
+        #chat-input-container.has-text .chat-cam-btn { display: none; }
         .chat-input-block.rec-active #chat-input-container { display: none !important; }
         .chat-rec-bar { display: none; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 24px; background: rgba(20,22,30,0.92); border: 1px solid rgba(255,42,42,0.4); box-shadow: 0 2px 10px rgba(0,0,0,0.4); flex-shrink: 0; }
         .chat-input-block.rec-active .chat-rec-bar { display: flex; }
@@ -2372,11 +2378,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 </div>
                 
                 <div class="chat-input-area" id="chat-input-container">
-                    <button type="button" class="chat-sticker-btn" onclick="app.openStickerPicker()" aria-label="Figurinhas"><i class="fa-regular fa-face-smile"></i></button>
-                    <textarea id="chat-input" class="chat-input" rows="1" placeholder="Transmitir..." enterkeyhint="enter" autocomplete="off" autocapitalize="sentences" onkeypress="app.handleChatKeyPress(event)"></textarea>
-                    <button type="button" class="chat-attach-btn" onclick="app.openAttachMenu()" aria-label="Enviar foto, vídeo ou arquivo"><i class="fa-solid fa-paperclip"></i></button>
+                    <div class="chat-input-pill">
+                        <button type="button" class="chat-sticker-btn" onclick="app.openStickerPicker()" aria-label="Figurinhas"><i class="fa-regular fa-face-smile"></i></button>
+                        <textarea id="chat-input" class="chat-input" rows="1" placeholder="Transmitir" enterkeyhint="enter" autocomplete="off" autocapitalize="sentences" onkeypress="app.handleChatKeyPress(event)"></textarea>
+                        <button type="button" class="chat-attach-btn" onclick="app.openAttachMenu()" aria-label="Enviar foto, vídeo ou arquivo"><i class="fa-solid fa-paperclip"></i></button>
+                        <button type="button" class="chat-attach-btn chat-cam-btn" onclick="app.openCamera()" aria-label="Tirar foto"><i class="fa-solid fa-camera"></i></button>
+                    </div>
                     <button type="button" class="chat-send-btn chat-mic-btn" onclick="app.startVoiceRecord()" aria-label="Gravar áudio"><i class="fa-solid fa-microphone"></i></button>
-                    <button class="chat-send-btn" onclick="app.sendChatMessage()">
+                    <button class="chat-send-btn" onclick="app.sendChatMessage()" aria-label="Enviar">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </div>
@@ -5263,8 +5272,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const blocked = isPrivateMode() && app.isChatBlocked();
                 const byMe = isPrivateMode() && !!blockedAt(modeKey());
                 input.disabled = blocked;
-                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Não é possível enviar mensagens') : 'Transmitir...';
+                input.placeholder = blocked ? (byMe ? 'Você bloqueou este usuário' : 'Não é possível enviar mensagens') : 'Transmitir';
                 if (sticker) { sticker.disabled = blocked; sticker.style.opacity = blocked ? '0.4' : ''; }
+                document.querySelectorAll('#chat-input-container .chat-attach-btn').forEach((b) => { b.disabled = blocked; b.style.opacity = blocked ? '0.4' : ''; });
                 sends.forEach((send) => { send.disabled = blocked; send.style.opacity = blocked ? '0.4' : ''; });
             };
             app.toggleBlockCurrent = async () => {
@@ -8305,7 +8315,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             let lastBlur = 0;
             const fit = (el) => {
                 el = el || $('chat-input');
-                if (!el || el.tagName !== 'TEXTAREA' || !el.offsetParent) return;
+                if (!el || el.tagName !== 'TEXTAREA') return;
+                const _a = $('chat-input-container'); if (_a) _a.classList.toggle('has-text', el.value.length > 0);   // esconde a câmera e troca o microfone pelo avião
+                if (!el.offsetParent) return;
                 const cs = getComputedStyle(el);
                 const fs = parseFloat(cs.fontSize) || 15;
                 let lh = parseFloat(cs.lineHeight); if (!(lh > 0)) lh = fs * 1.4;
@@ -8330,6 +8342,21 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             document.addEventListener('focusout', (e) => { if (e.target && e.target.id === 'chat-input') lastBlur = Date.now(); });
             document.addEventListener('input', (e) => { if (e.target && e.target.id === 'chat-input') { hook(e.target); fit(e.target); } });
             window.addEventListener('resize', () => fit());
+
+            // câmera: abre a câmera do celular e segue o mesmo caminho do anexo (prévia com legenda e envio)
+            let camIn = null;
+            app.openCamera = () => {
+                const m = appState.activeChatMode;
+                if (!m || m === 'private_list' || m === 'group_list') return;
+                if (typeof CLOUDINARY_CLOUD === 'undefined' || !CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) return app.showToast('Envio de mídia não configurado.', 'error');
+                if (!camIn) {
+                    camIn = document.createElement('input');
+                    camIn.type = 'file'; camIn.accept = 'image/*'; camIn.setAttribute('capture', 'environment'); camIn.style.display = 'none';
+                    camIn.onchange = (e) => app.mediaPicked(e);
+                    document.body.appendChild(camIn);
+                }
+                camIn.value = ''; camIn.click();
+            };
 
             // Enter: no computador envia (Shift+Enter quebra a linha); no celular o Enter quebra a linha e o botão de avião envia
             app.handleChatKeyPress = (e) => {
@@ -8467,7 +8494,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261024-2234';
+    window.NX_BUILD = '20261025-1625';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

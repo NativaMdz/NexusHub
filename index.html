@@ -1777,7 +1777,20 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .bottom-sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 600px; background: rgba(10, 10, 15, 0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid var(--purple); border-radius: 20px 20px 0 0; z-index: 101; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding-bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,0.8); }
         .modal-overlay.active .bottom-sheet { transform: translateX(-50%) translateY(0); }
         .context-menu-item { width: 100%; padding: 18px 24px; text-align: left; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: background 0.2s; font-family: 'Inter', sans-serif;}
-        .context-menu-item:hover { background: rgba(255,255,255,0.08); }
+        @media (hover: hover) and (pointer: fine) { .context-menu-item:hover { background: rgba(255,255,255,0.08); } }
+        .context-menu-item { -webkit-tap-highlight-color: transparent; }
+        /* menus que sobem de baixo (segurar mensagem, anexos): entrada suave e saída um pouco mais rápida */
+        @keyframes nxSheetUp { from { transform: translateX(-50%) translateY(100%); } to { transform: translateX(-50%) translateY(0); } }
+        @keyframes nxSheetDown { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(100%); } }
+        @keyframes nxFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes nxFadeOut { from { opacity: 1; } to { opacity: 0; } }
+        .modal-overlay.active:has(.bottom-sheet) { animation: nxFadeIn .28s ease both; }
+        .modal-overlay.active .bottom-sheet { animation: nxSheetUp .34s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        .modal-overlay.active.closing:has(.bottom-sheet) { animation: nxFadeOut .22s ease both; }
+        .modal-overlay.active.closing .bottom-sheet { animation: nxSheetDown .22s cubic-bezier(0.4, 0, 0.8, 0.6) both; }
+        @media (prefers-reduced-motion: reduce) { .modal-overlay.active:has(.bottom-sheet), .modal-overlay.active .bottom-sheet { animation-duration: .01s !important; } }
+
+        html.nx-guard .modal-overlay.active * { pointer-events: none !important; }
         .context-menu-item:last-child { border-bottom: none; }
         .context-menu-item i { font-size: 1.2rem; color: var(--cyan); width: 24px; text-align: center;}
         .context-menu-item.danger { color: var(--danger); }
@@ -8559,11 +8572,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             document.addEventListener('pointerdown', () => { down = true; }, true);
             const up = () => {
                 down = false;
-                if (holdPending) { holdPending = false; clearTimeout(holdT); guardUntil = Date.now() + 350; }
+                if (holdPending) { holdPending = false; clearTimeout(holdT); guardUntil = Date.now() + 350; setTimeout(() => document.documentElement.classList.remove('nx-guard'), 380); }
             };
             ['pointerup', 'pointercancel'].forEach((ev) => document.addEventListener(ev, up, true));
             const opened = () => {
-                if (down) { holdPending = true; clearTimeout(holdT); holdT = setTimeout(() => { holdPending = false; }, 5000); }   // aberta segurando: espera soltar o dedo
+                if (down) { holdPending = true; document.documentElement.classList.add('nx-guard'); clearTimeout(holdT); holdT = setTimeout(() => { holdPending = false; document.documentElement.classList.remove('nx-guard'); }, 5000); }   // aberta segurando: espera soltar o dedo
                 else guardUntil = Date.now() + 150;                                                                              // aberta por toque: só evita o "clique fantasma"
             };
             const mo = new MutationObserver((list) => {
@@ -8583,6 +8596,18 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (!t || !t.closest || !t.closest('.modal-overlay.active')) return;
                 e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
             }, true);
+        })();
+
+
+        // ===== MENU DA MENSAGEM: fecha com animação de descida =====
+        (() => {
+            const _close = app.closeContextMenu;
+            app.closeContextMenu = function (...a) {
+                const m = document.getElementById('modal-context-menu');
+                if (!m || !m.classList.contains('active') || m.classList.contains('closing')) return _close.apply(this, a);
+                m.classList.add('closing');
+                setTimeout(() => { m.classList.remove('closing'); _close.apply(this, a); }, 210);
+            };
         })();
 
         window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
@@ -8701,7 +8726,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261026-0644';
+    window.NX_BUILD = '20261026-0700';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

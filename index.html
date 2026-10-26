@@ -1780,11 +1780,16 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         @media (hover: hover) and (pointer: fine) { .context-menu-item:hover { background: rgba(255,255,255,0.08); } }
         .context-menu-item { -webkit-tap-highlight-color: transparent; }
         /* menus que sobem de baixo (segurar mensagem, anexos): entrada suave e saída um pouco mais rápida */
-        @keyframes nxSheetUp { from { transform: translateX(-50%) translateY(100%); } to { transform: translateX(-50%) translateY(0); } }
-        @keyframes nxSheetDown { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(100%); } }
+        @keyframes nxSheetUp { from { transform: translate3d(-50%, 100%, 0); } to { transform: translate3d(-50%, 0, 0); } }
+        @keyframes nxSheetDown { from { transform: translate3d(-50%, 0, 0); } to { transform: translate3d(-50%, 100%, 0); } }
         @keyframes nxFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes nxFadeOut { from { opacity: 1; } to { opacity: 0; } }
-        .modal-overlay.active:has(.bottom-sheet) { animation: nxFadeIn .28s ease both; }
+        .modal-overlay.active:has(.bottom-sheet) { animation: nxFadeIn .28s ease both; will-change: opacity; backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0,0,0,0.82); }
+        .modal-overlay .bottom-sheet { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(10, 10, 15, 0.99); will-change: transform; contain: layout style; backface-visibility: hidden; }
+        /* com um menu aberto, os brilhos/molduras animados ficam parados atrás dele (libera a GPU e a animação não trava) */
+        html.nx-sheet-open [class*="frame_"], html.nx-sheet-open [class*="frame_"]::before, html.nx-sheet-open [class*="frame_"]::after,
+        html.nx-sheet-open .profile-header::before, html.nx-sheet-open .profile-header::after, html.nx-sheet-open .crimson-fx i,
+        html.nx-sheet-open .tp-dots i, html.nx-sheet-open .rec-dot, html.nx-sheet-open .rec-wave i { animation-play-state: paused !important; }
         .modal-overlay.active .bottom-sheet { animation: nxSheetUp .34s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
         .modal-overlay.active.closing:has(.bottom-sheet) { animation: nxFadeOut .22s ease both; }
         .modal-overlay.active.closing .bottom-sheet { animation: nxSheetDown .22s cubic-bezier(0.4, 0, 0.8, 0.6) both; }
@@ -8584,6 +8589,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     const el = m.target;
                     if (el.classList && el.classList.contains('modal-overlay') && el.classList.contains('active') && !/\bactive\b/.test(m.oldValue || '')) opened();
                 });
+                document.documentElement.classList.toggle('nx-sheet-open', !!document.querySelector('.modal-overlay.active'));
             });
             const scan = () => document.querySelectorAll('.modal-overlay').forEach((el) => {
                 if (watched.has(el)) return; watched.add(el);
@@ -8726,7 +8732,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261026-0700';
+    window.NX_BUILD = '20261026-2101';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

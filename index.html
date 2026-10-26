@@ -1302,6 +1302,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         textarea.chat-input { box-sizing: border-box; resize: none; display: block; height: auto; line-height: 1.4; max-height: calc(1.4em * 4 + 12px); overflow-y: hidden; overflow-wrap: anywhere; white-space: pre-wrap; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.25) transparent; border-radius: 0; -webkit-appearance: none; appearance: none; }
         .chat-input-area.multi { align-items: flex-end; }
         .msg-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+        .message, .message .msg-bubble { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
         .chat-send-btn { background: linear-gradient(135deg, var(--cyan), var(--cyan-deep)); color: #000; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 0 12px rgba(var(--cyan-rgb), 0.5); }
         .chat-send-btn:hover { transform: scale(1.08); box-shadow: 0 0 18px var(--cyan); }
 
@@ -8550,6 +8551,40 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.closeMediaView = function (...a) { img = null; ptrs.clear(); pinch = null; pan = null; return _close.apply(this, a); };
         })();
 
+
+        // ===== PRESSIONAR E SEGURAR: soltar o dedo sobre uma janela recém-aberta não aciona nenhuma opção =====
+        (() => {
+            let down = false, holdPending = false, holdT = 0, guardUntil = 0;
+            const watched = new WeakSet();
+            document.addEventListener('pointerdown', () => { down = true; }, true);
+            const up = () => {
+                down = false;
+                if (holdPending) { holdPending = false; clearTimeout(holdT); guardUntil = Date.now() + 350; }
+            };
+            ['pointerup', 'pointercancel'].forEach((ev) => document.addEventListener(ev, up, true));
+            const opened = () => {
+                if (down) { holdPending = true; clearTimeout(holdT); holdT = setTimeout(() => { holdPending = false; }, 5000); }   // aberta segurando: espera soltar o dedo
+                else guardUntil = Date.now() + 150;                                                                              // aberta por toque: só evita o "clique fantasma"
+            };
+            const mo = new MutationObserver((list) => {
+                list.forEach((m) => {
+                    const el = m.target;
+                    if (el.classList && el.classList.contains('modal-overlay') && el.classList.contains('active') && !/\bactive\b/.test(m.oldValue || '')) opened();
+                });
+            });
+            const scan = () => document.querySelectorAll('.modal-overlay').forEach((el) => {
+                if (watched.has(el)) return; watched.add(el);
+                mo.observe(el, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+            });
+            scan(); setInterval(scan, 2000);
+            window.addEventListener('click', (e) => {
+                if (!holdPending && Date.now() >= guardUntil) return;
+                const t = e.target;
+                if (!t || !t.closest || !t.closest('.modal-overlay.active')) return;
+                e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+            }, true);
+        })();
+
         window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
     </script>
 
@@ -8666,7 +8701,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261026-0159';
+    window.NX_BUILD = '20261026-0644';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

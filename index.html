@@ -2782,11 +2782,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 }
             },
             
-            getUserBadges: (userData) => {
+            getUserBadges: (userData, noVip) => {
                 if (!userData) return '';
                 const authorVIP = app.getVIPInfo(userData);
                 const adminBadge = userData.role === 'admin' ? '<i class="fa-solid fa-certificate badge-verified"></i>' : '';
-                const vipBadge = authorVIP.isActive ? `<i class="fa-solid fa-crown badge-vip" title="VIP"></i>` : '';
+                const vipBadge = (!noVip && authorVIP.isActive) ? `<i class="fa-solid fa-crown badge-vip" title="VIP"></i>` : '';
                 return `${adminBadge} ${vipBadge}`.trim();
             },
 
@@ -3771,7 +3771,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                                 <img src="${userData.avatar}" loading="lazy" decoding="async" alt="Avatar" class="profile-avatar ${app.getFrameClass(userData)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                                 ${isMe && !isPublic ? `<div style="position: absolute; bottom: 0px; right: -5px; z-index:3; background: var(--cyan); color: #000; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px var(--cyan);" onclick="document.getElementById('profile-img-upload').click()" title="Alterar Foto"><i class="fa-solid fa-camera" style="font-size: 0.85rem;"></i></div><input type="file" id="profile-img-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event, 'profile')">` : ''}
                             </div>
-                            <h2 class="profile-name">${userData.name} ${app.getUserBadges(userData)}</h2>
+                            <h2 class="profile-name">${userData.name} ${app.getUserBadges(userData, true)}</h2>
                             <span class="profile-handle">${userData.handle}</span>
                             ${vipStatusDisplay}
                             <p class="profile-bio">${userData.bio || 'Sem biografia...'}</p>
@@ -3821,7 +3821,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const vipInfo = app.getVIPInfo(viewUser);
                 
                 const nameEl = document.querySelector('.profile-name');
-                if (nameEl) nameEl.innerHTML = `${viewUser.name} ${app.getUserBadges(viewUser)}`;
+                if (nameEl) nameEl.innerHTML = `${viewUser.name} ${app.getUserBadges(viewUser, true)}`;
                 
                 const statusEl = document.querySelector('.profile-vip-status');
                 if (statusEl) {
@@ -7815,6 +7815,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 '#call-overlay .nxc-sw.on{background:#1fb35a}#call-overlay .nxc-sw.on::after{left:23px}' +
                 '#call-bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:10px;right:10px;z-index:2147481500;display:none;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;background:#0d0d14;border:1px solid #1fb35a;color:#fff;box-shadow:0 6px 22px rgba(0,0,0,.55);font-family:Inter,sans-serif}' +
                 '#call-bar.on{display:flex}' +
+                '#call-bar.inflow{position:relative;top:auto;left:auto;right:auto;margin:6px 10px 2px;flex-shrink:0}' +
                 '#call-bar img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}' +
                 '#call-bar .nxc-bi{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;cursor:pointer}' +
                 '#call-bar .nxc-bi b{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
@@ -8036,6 +8037,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 bar.querySelector('b').textContent = u.name || 'Usuário';
                 const bm = bar.querySelector('.nxc-bm');
                 bm.className = 'nxc-bm' + (S.muted ? ' on' : ''); bm.innerHTML = '<i class="fa-solid ' + (S.muted ? 'fa-microphone-slash' : 'fa-microphone') + '"></i>';
+                if (mini) {   // fica logo abaixo do cabeçalho e empurra o conteúdo, sem cobrir a loja e as configurações
+                    const hdr = document.querySelector('header');
+                    if (hdr) { if (bar.previousElementSibling !== hdr) hdr.after(bar); bar.classList.add('inflow'); } else bar.classList.remove('inflow');
+                }
                 bar.classList.toggle('on', mini);
                 ov.classList.toggle('on', !mini);
                 if (!mini) place();
@@ -8661,7 +8666,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261026-0143';
+    window.NX_BUILD = '20261026-0159';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

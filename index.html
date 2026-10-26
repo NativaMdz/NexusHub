@@ -1794,6 +1794,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .modal-overlay.active.closing:has(.bottom-sheet) { animation: nxFadeOut .22s ease both; }
         .modal-overlay.active.closing .bottom-sheet { animation: nxSheetDown .22s cubic-bezier(0.4, 0, 0.8, 0.6) both; }
         @media (prefers-reduced-motion: reduce) { .modal-overlay.active:has(.bottom-sheet), .modal-overlay.active .bottom-sheet { animation-duration: .01s !important; } }
+        /* troca de aba deslizando (chat e loja) */
+        @keyframes nxTabInR { from { opacity: 0; transform: translate3d(42px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+        @keyframes nxTabInL { from { opacity: 0; transform: translate3d(-42px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+        .nx-in-r { animation: nxTabInR .26s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        .nx-in-l { animation: nxTabInL .26s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        @media (prefers-reduced-motion: reduce) { .nx-in-r, .nx-in-l { animation-duration: .01s !important; } }
         /* janelas no centro da tela (figurinhas, enviar, configurações, perfil...): sobem e crescem suavemente */
         @keyframes nxPopIn { from { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.94); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
         @keyframes nxZoomIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
@@ -8624,6 +8630,122 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
         })();
 
+
+        // ===== DESLIZAR PARA TROCAR DE ABA: Global / Privado / Grupos (chat) e categorias da loja =====
+        // Regra para não conflitar com "arrastar a mensagem para responder": a troca só vale nas telas de nível de aba
+        // (chat Global, lista de privados, lista de grupos) e só quando existe aba naquela direção. Dentro de uma
+        // conversa privada ou de grupo o deslize fica livre para as mensagens.
+        (() => {
+            const area = document.getElementById('app-content');
+            if (!area) return;
+            const TABS = ['global', 'private_list', 'group_list'];
+            let suppressUntil = 0, st = null;
+
+            const play = (el, dir) => {
+                if (!el) return;
+                el.classList.remove('nx-in-r', 'nx-in-l'); void el.offsetWidth;
+                const c = dir > 0 ? 'nx-in-r' : 'nx-in-l';
+                el.classList.add(c);
+                const done = () => el.classList.remove(c);
+                el.addEventListener('animationend', done, { once: true });
+                setTimeout(done, 420);
+            };
+
+            // animação também ao tocar nos botões das abas do chat
+            const _sw = app.switchChatTab;
+            app.switchChatTab = function (mode) {
+                const a = TABS.indexOf(appState.activeChatMode), b = TABS.indexOf(mode);
+                const r = _sw.apply(this, arguments);
+                if (a >= 0 && b >= 0 && a !== b) play(document.querySelector('.chat-msgs-wrap'), b > a ? 1 : -1);
+                return r;
+            };
+
+            const selectStore = (id) => {
+                const cats = appState.storeCategories || [];
+                appState.activeStoreCategory = id;
+                const box = document.getElementById('store-categories-container');
+                if (box) {
+                    const pills = box.querySelectorAll('.category-pill');
+                    pills.forEach((el, i) => el.classList.toggle('active', cats[i] && cats[i].id === id));
+                    const act = box.querySelector('.category-pill.active');
+                    if (act && act.scrollIntoView) { try { act.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } catch (_) {} }
+                }
+                app.renderStoreProducts();
+            };
+
+            const ctx = () => {
+                if (appState.currentView === 'chat') {
+                    const i = TABS.indexOf(appState.activeChatMode); if (i < 0) return null;
+                    const el = document.querySelector('.chat-msgs-wrap'); if (!el) return null;
+                    return { el, canGo: (d) => i + d >= 0 && i + d < TABS.length, go: (d) => app.switchChatTab(TABS[i + d]), animates: false };
+                }
+                if (appState.currentView === 'store') {
+                    const cats = appState.storeCategories || [], i = cats.findIndex((c) => c.id === appState.activeStoreCategory);
+                    const el = document.getElementById('products-grid-container'); if (!el || i < 0) return null;
+                    return { el, canGo: (d) => i + d >= 0 && i + d < cats.length, go: (d) => selectStore(cats[i + d].id), animates: true };
+                }
+                return null;
+            };
+
+            const busy = () => !!document.querySelector('.modal-overlay.active') || !!document.querySelector('#call-overlay.on') || !!document.querySelector('.chat-input-block.rec-active');
+            const hscroll = (t) => {
+                for (let n = t; n && n !== area; n = n.parentElement) {
+                    const cs = getComputedStyle(n);
+                    if ((cs.overflowX === 'auto' || cs.overflowX === 'scroll') && n.scrollWidth > n.clientWidth + 2) return true;
+                }
+                return false;
+            };
+            const blocked = (t) => !t || !t.closest || !!t.closest('input, textarea, select, [contenteditable="true"], .store-categories, #chat-input-container, .chat-search-bar, .no-swipe, video, audio, .chat-menu-pop') || hscroll(t);
+
+            area.addEventListener('pointerdown', (e) => {
+                if (e.pointerType !== 'touch' || !e.isPrimary || busy()) return;
+                const c = ctx(); if (!c || blocked(e.target)) return;
+                st = { id: e.pointerId, x: e.clientX, y: e.clientY, t: Date.now(), c, lock: false, dx: 0 };
+            }, { passive: true });
+
+            area.addEventListener('pointermove', (e) => {
+                if (!st || e.pointerId !== st.id) return;
+                const dx = e.clientX - st.x, dy = e.clientY - st.y;
+                if (!st.lock) {
+                    if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { st = null; return; }          // rolagem vertical: deixa o navegador rolar
+                    if (Math.abs(dx) < 16 || Math.abs(dx) < Math.abs(dy) * 1.8) return;                    // ainda não é um deslize horizontal claro
+                    if (!st.c.canGo(dx < 0 ? 1 : -1)) { st = null; return; }                                // sem aba nessa direção: não mexe (livre para outros gestos)
+                    st.lock = true;
+                    try { area.setPointerCapture(e.pointerId); } catch (_) {}
+                    st.c.el.style.transition = 'none'; st.c.el.style.willChange = 'transform, opacity';
+                }
+                st.dx = dx;
+                const shift = Math.max(-120, Math.min(120, dx * 0.55));
+                st.c.el.style.transform = 'translate3d(' + shift + 'px,0,0)';
+                st.c.el.style.opacity = String(1 - Math.min(Math.abs(shift) / 320, 0.3));
+            }, { passive: true });
+
+            const finish = (e) => {
+                if (!st || e.pointerId !== st.id) return;
+                const s = st; st = null;
+                if (!s.lock) return;
+                suppressUntil = Date.now() + 350;
+                const el = s.c.el, dir = s.dx < 0 ? 1 : -1;
+                const v = Math.abs(s.dx) / Math.max(1, Date.now() - s.t);
+                const commit = e.type === 'pointerup' && (Math.abs(s.dx) > 70 || (Math.abs(s.dx) > 36 && v > 0.45));
+                if (commit) {
+                    el.style.transition = 'none'; el.style.transform = ''; el.style.opacity = ''; el.style.willChange = '';
+                    s.c.go(dir);
+                    if (s.c.animates) play(el, dir);          // no chat a animação vem da própria troca de aba
+                } else {
+                    el.style.transition = 'transform .22s ease, opacity .22s ease'; el.style.transform = ''; el.style.opacity = '';
+                    setTimeout(() => { el.style.transition = ''; el.style.willChange = ''; }, 260);
+                }
+            };
+            area.addEventListener('pointerup', finish);
+            area.addEventListener('pointercancel', finish);
+
+            // o toque que termina um deslize não deve abrir nada
+            window.addEventListener('click', (e) => {
+                if (Date.now() < suppressUntil) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }
+            }, true);
+        })();
+
         window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
     </script>
 
@@ -8740,7 +8862,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261026-2114';
+    window.NX_BUILD = '20261026-2132';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

@@ -1794,6 +1794,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .modal-overlay.active.closing:has(.bottom-sheet) { animation: nxFadeOut .22s ease both; }
         .modal-overlay.active.closing .bottom-sheet { animation: nxSheetDown .22s cubic-bezier(0.4, 0, 0.8, 0.6) both; }
         @media (prefers-reduced-motion: reduce) { .modal-overlay.active:has(.bottom-sheet), .modal-overlay.active .bottom-sheet { animation-duration: .01s !important; } }
+        /* janelas no centro da tela (figurinhas, enviar, configurações, perfil...): sobem e crescem suavemente */
+        @keyframes nxPopIn { from { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.94); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+        @keyframes nxZoomIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        .modal-overlay.active:not(:has(.bottom-sheet)) { animation: nxFadeIn .22s ease both; backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0,0,0,0.86); }
+        .modal-overlay.active .modal-content { animation: nxPopIn .3s cubic-bezier(0.2, 0.85, 0.3, 1) backwards; will-change: transform, opacity; backface-visibility: hidden; }
+        #modal-mediaview.active #mv-body img, #modal-mediaview.active #mv-body video { animation: nxZoomIn .3s cubic-bezier(0.2, 0.85, 0.3, 1) backwards; }
+        @media (prefers-reduced-motion: reduce) { .modal-overlay.active .modal-content, #modal-mediaview.active #mv-body img, #modal-mediaview.active #mv-body video, .modal-overlay.active:not(:has(.bottom-sheet)) { animation-duration: .01s !important; } }
+
 
         html.nx-guard .modal-overlay.active * { pointer-events: none !important; }
         .context-menu-item:last-child { border-bottom: none; }
@@ -8732,7 +8740,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261026-2101';
+    window.NX_BUILD = '20261026-2114';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

@@ -1794,6 +1794,26 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .modal-overlay.active.closing:has(.bottom-sheet) { animation: nxFadeOut .22s ease both; }
         .modal-overlay.active.closing .bottom-sheet { animation: nxSheetDown .22s cubic-bezier(0.4, 0, 0.8, 0.6) both; }
         @media (prefers-reduced-motion: reduce) { .modal-overlay.active:has(.bottom-sheet), .modal-overlay.active .bottom-sheet { animation-duration: .01s !important; } }
+        /* perfil: abas Álbum / Transmissões (estilo Instagram) */
+        .profile-tabs { display: flex; border-bottom: 1px solid var(--border-glass); margin: 0 0 3px; }
+        .ptab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 6px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--text-muted); font: 600 0.85rem Inter, sans-serif; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .ptab i { font-size: 1.1rem; }
+        .ptab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .profile-panes { min-height: 55vh; }
+        .ppane { display: none; }
+        .ppane.active { display: block; }
+        .album-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+        .album-cell { position: relative; aspect-ratio: 1 / 1; background: #0d0d14; border: 0; padding: 0; overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .album-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .album-gif { position: absolute; left: 5px; top: 5px; font: 700 0.62rem Inter, sans-serif; letter-spacing: 0.06em; background: rgba(0,0,0,0.65); color: #fff; border-radius: 4px; padding: 2px 5px; }
+        .album-del { position: absolute; right: 5px; top: 5px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; }
+        .album-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--cyan); border: 1px dashed rgba(var(--cyan-rgb), 0.5); background: rgba(var(--cyan-rgb), 0.06); font: 600 0.78rem Inter, sans-serif; }
+        .album-add i { font-size: 1.4rem; }
+        .album-up { display: flex; align-items: flex-end; justify-content: center; color: var(--text-muted); font: 600 0.75rem Inter, sans-serif; cursor: default; }
+        .album-up .album-bar { position: absolute; left: 0; bottom: 0; height: 4px; width: 0; background: var(--cyan); transition: width .15s linear; }
+        .album-up span { margin-bottom: 14px; }
+        .album-empty { grid-column: 1 / -1; text-align: center; padding: 44px 18px; color: var(--text-muted); font-size: 0.92rem; line-height: 1.5; }
+        .album-empty i { display: block; font-size: 2rem; margin-bottom: 10px; color: var(--cyan); opacity: 0.8; }
         /* arrastar a mensagem para a direita = responder */
         #nx-reply-ic { position: fixed; z-index: 60; width: 38px; height: 38px; border-radius: 50%; background: rgba(var(--cyan-rgb), 0.18); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 1rem; opacity: 0; transform: scale(0.4); pointer-events: none; will-change: transform, opacity; }
         #nx-reply-ic.ready { background: var(--cyan); color: #050507; }
@@ -3824,8 +3844,14 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         </div>
                     </section>
                     <section class="profile-posts-section">
-                        <h3 style="margin-bottom: 12px; color: var(--cyan); border-bottom: 1px solid var(--border-glass); padding-bottom: 5px;">Transmissões (<span id="stat-post-count">${appState.allPosts.filter(p => p.authorUid === userData.uid).length}</span>)</h3>
-                        <div id="user-posts-container"></div>
+                        <div class="profile-tabs" id="profile-tabs" role="tablist">
+                            <button type="button" class="ptab active" role="tab" data-t="album" onclick="app.setProfileTab('album')"><i class="fa-solid fa-table-cells"></i><span>Álbum</span></button>
+                            <button type="button" class="ptab" role="tab" data-t="posts" onclick="app.setProfileTab('posts')"><i class="fa-solid fa-tower-broadcast"></i><span>Transmissões (<span id="stat-post-count">${appState.allPosts.filter(p => p.authorUid === userData.uid).length}</span>)</span></button>
+                        </div>
+                        <div class="profile-panes" id="profile-panes">
+                            <div class="ppane active" id="pane-album"><div class="album-grid" id="album-grid"></div></div>
+                            <div class="ppane" id="pane-posts"><div id="user-posts-container"></div></div>
+                        </div>
                     </section>
                 `;
 
@@ -3835,7 +3861,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     document.getElementById('public-profile-container').innerHTML = html;
                 } else { contentArea.innerHTML = html; }
                 
-                app.updatePostsInDOM(); 
+                app.updatePostsInDOM(); app.setProfileTab('album', true); app.renderAlbum(true);
             },
 
             updateProfileInDOM: () => {
@@ -8636,6 +8662,114 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         })();
 
 
+
+        // ===== ÁLBUM DO PERFIL (fotos e GIFs só do perfil, fora do feed) =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const ALBUM_MAX = 60;
+            const URL_RE = new RegExp('^https://res\\.cloudinary\\.com/' + CLOUDINARY_CLOUD + '/image/upload/[A-Za-z0-9_./,-]+$');
+            const valid = (it) => it && it.id && typeof it.url === 'string' && URL_RE.test(it.url);
+            const thumb = (it) => it.url.replace('/image/upload/', '/image/upload/c_fill,w_360,h_360,q_auto' + (it.kind === 'gif' ? '' : ',f_auto') + '/');
+            const nid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+            const viewUid = () => appState.currentView === 'perfil' ? appState.firebaseUser.uid : appState.currentPublicProfileUid;
+            const isOwn = () => appState.currentView === 'perfil';
+
+            app.renderAlbum = (force) => {
+                const grid = $('album-grid'); if (!grid) return;
+                const uid = viewUid(), u = appState.allUsers.find((x) => x.uid === uid);
+                const items = ((u && u.album) || []).filter(valid).slice().sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
+                const own = isOwn(), up = appState.albumUp || [];
+                const sig = uid + '|' + own + '|' + items.map((i) => i.id).join(',') + '|' + up.map((x) => x.id).join(',');
+                if (!force && grid.dataset.sig === sig) return;
+                grid.dataset.sig = sig;
+                let h = '';
+                if (own) h += '<button type="button" class="album-cell album-add" onclick="app.addAlbumPhotos()" aria-label="Adicionar ao álbum"><i class="fa-solid fa-plus"></i><span>Adicionar</span></button>';
+                up.forEach((x) => { h += '<div class="album-cell album-up" data-up="' + nxId(x.id) + '"><span>Enviando...</span><div class="album-bar" style="width:' + (x.pct || 0) + '%"></div></div>'; });
+                items.forEach((it) => {
+                    h += '<button type="button" class="album-cell" data-url="' + nxEsc(it.url) + '" data-kind="image" data-name="album-' + nxId(it.id) + (it.kind === 'gif' ? '.gif' : '.jpg') + '" onclick="app.mediaView(this)" aria-label="Abrir foto">' +
+                         '<img src="' + nxEsc(thumb(it)) + '" loading="lazy" decoding="async" alt="">' +
+                         (it.kind === 'gif' ? '<span class="album-gif">GIF</span>' : '') +
+                         (own ? '<span class="album-del" onclick="event.stopPropagation(); app.deleteAlbumItem(\'' + nxId(it.id) + '\')" aria-label="Apagar"><i class="fa-solid fa-trash"></i></span>' : '') +
+                         '</button>';
+                });
+                if (!items.length && !up.length) h += '<div class="album-empty"><i class="fa-regular fa-images"></i>' + (own ? 'Seu álbum está vazio.<br>Toque em <b>Adicionar</b> para mostrar suas fotos e GIFs favoritos aqui.' : 'Nenhuma foto no álbum ainda.') + '</div>';
+                grid.innerHTML = h;
+            };
+
+            app.setProfileTab = (tab, instant) => {
+                const order = ['album', 'posts'], prev = order.indexOf(appState.profileTab || 'album'), nxt = order.indexOf(tab);
+                if (nxt < 0) return;
+                appState.profileTab = tab;
+                document.querySelectorAll('#profile-tabs .ptab').forEach((b) => { const on = b.dataset.t === tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+                document.querySelectorAll('#profile-panes .ppane').forEach((p) => p.classList.toggle('active', p.id === 'pane-' + tab));
+                if (!instant && prev !== nxt && app._nxPlay) app._nxPlay($('profile-panes'), nxt > prev ? 1 : -1);
+            };
+
+            const xhrUpload = (file, onPct) => new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest(), fd = new FormData();
+                fd.append('file', file); fd.append('upload_preset', CLOUDINARY_PRESET);
+                xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(CLOUDINARY_CLOUD) + '/image/upload');
+                xhr.upload.onprogress = (ev) => { if (ev.lengthComputable) onPct(Math.round(ev.loaded / ev.total * 100)); };
+                xhr.onload = () => {
+                    let j = null; try { j = JSON.parse(xhr.responseText); } catch (_) {}
+                    if (xhr.status >= 200 && xhr.status < 300 && j && j.secure_url) resolve(j);
+                    else reject(new Error((j && j.error && j.error.message) || ('HTTP ' + xhr.status)));
+                };
+                xhr.onerror = () => reject(new Error('Sem conexão.'));
+                xhr.send(fd);
+            });
+
+            const uploadAlbum = async (files) => {
+                const uid = appState.firebaseUser && appState.firebaseUser.uid; if (!uid) return;
+                if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) return app.showToast('Envio de imagens não configurado.', 'error');
+                const me = appState.allUsers.find((x) => x.uid === uid) || appState.currentUserData || {};
+                const vip = app.getVIPInfo(appState.currentUserData).isActive;
+                let count = (me.album || []).length;
+                for (const file of files) {
+                    if (!/^image\//.test(file.type)) { app.showToast('"' + file.name + '" não é uma imagem.', 'error'); continue; }
+                    const gif = file.type === 'image/gif' || /\.gif$/i.test(file.name);
+                    if (gif && !vip) { app.showToast('GIFs no álbum são exclusivos do Plano VIP.', 'error'); continue; }
+                    if (file.size > (gif ? 25 : 10) * 1024 * 1024) { app.showToast('"' + file.name + '" passa do limite de ' + (gif ? 25 : 10) + 'MB.', 'error'); continue; }
+                    if (count >= ALBUM_MAX) { app.showToast('O álbum aceita até ' + ALBUM_MAX + ' fotos.', 'error'); break; }
+                    const id = nid(); appState.albumUp = (appState.albumUp || []).concat({ id, pct: 0 }); app.renderAlbum(true);
+                    try {
+                        const j = await xhrUpload(file, (pct) => {
+                            const bar = document.querySelector('[data-up="' + id + '"] .album-bar'); if (bar) bar.style.width = pct + '%';
+                        });
+                        const item = { id, url: j.secure_url, kind: gif ? 'gif' : 'image', at: new Date().toISOString() };
+                        if (!valid(item)) throw new Error('Endereço de imagem inesperado.');
+                        await updateDoc(doc(colUsers, uid), { album: arrayUnion(item) });
+                        count++;
+                    } catch (e) {
+                        console.error('[álbum]', e);
+                        app.showToast('Não foi possível enviar "' + file.name + '": ' + (e && e.message ? e.message : 'erro'), 'error');
+                    } finally {
+                        appState.albumUp = (appState.albumUp || []).filter((x) => x.id !== id);
+                        app.renderAlbum(true);
+                    }
+                }
+            };
+            app.addAlbumPhotos = () => {
+                if (!isOwn()) return;
+                const inp = document.createElement('input');
+                inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true; inp.style.display = 'none';
+                inp.onchange = () => { const f = Array.from(inp.files || []); inp.remove(); if (f.length) uploadAlbum(f); };
+                document.body.appendChild(inp); inp.click();
+            };
+            app.deleteAlbumItem = async (id) => {
+                if (!isOwn()) return;
+                const uid = appState.firebaseUser.uid, u = appState.allUsers.find((x) => x.uid === uid);
+                const it = u && (u.album || []).find((x) => x.id === id); if (!it) return;
+                if (!confirm('Remover esta foto do seu álbum?')) return;
+                try { await updateDoc(doc(colUsers, uid), { album: arrayRemove(it) }); app.showToast('Foto removida do álbum.', 'info'); }
+                catch (e) { app.showToast('Não foi possível remover a foto.', 'error'); }
+            };
+
+            // atualiza o álbum quando o perfil é atualizado em tempo real
+            const _upd = app.updateProfileInDOM;
+            app.updateProfileInDOM = function (...a) { const r = _upd.apply(this, a); try { app.renderAlbum(); } catch (_) {} return r; };
+        })();
+
         // ===== DESLIZAR PARA TROCAR DE ABA: Global / Privado / Grupos (chat) e categorias da loja =====
         // Regra para não conflitar com "arrastar a mensagem para responder": a troca só vale nas telas de nível de aba
         // (chat Global, lista de privados, lista de grupos) e só quando existe aba naquela direção. Dentro de uma
@@ -8663,6 +8797,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 setTimeout(done, 420);
             };
 
+            app._nxPlay = play;
             // animação também ao tocar nos botões das abas do chat
             const _sw = app.switchChatTab;
             app.switchChatTab = function (mode) {
@@ -8691,6 +8826,11 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     const el = document.querySelector('.chat-msgs-wrap'); if (!el) return null;
                     return { el, canGo: (d) => i + d >= 0 && i + d < TABS.length, go: (d) => app.switchChatTab(TABS[i + d]), animates: false };
                 }
+                if (appState.currentView === 'perfil' || appState.currentView === 'public_profile') {
+                    const order = ['album', 'posts'], i = order.indexOf(appState.profileTab || 'album');
+                    const el = document.getElementById('profile-panes'); if (!el) return null;
+                    return { el, scope: '#profile-panes, #profile-tabs', canGo: (d) => i + d >= 0 && i + d < order.length, go: (d) => app.setProfileTab(order[i + d]), animates: false };
+                }
                 if (appState.currentView === 'store') {
                     const cats = appState.storeCategories || [], i = cats.findIndex((c) => c.id === appState.activeStoreCategory);
                     const el = document.getElementById('products-grid-container'); if (!el || i < 0) return null;
@@ -8705,6 +8845,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             area.addEventListener('pointerdown', (e) => {
                 if (e.pointerType !== 'touch' || !e.isPrimary || busy()) return;
                 const c = ctx(); if (!c || blocked(e.target)) return;
+                if (c.scope && !(e.target.closest && e.target.closest(c.scope))) return;
                 st = { id: e.pointerId, x: e.clientX, y: e.clientY, t: Date.now(), c, lock: false, dx: 0 };
             }, { passive: true });
 
@@ -8949,7 +9090,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261027-0326';
+    window.NX_BUILD = '20261027-2124';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

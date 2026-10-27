@@ -1800,6 +1800,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         @keyframes nxTabInL { from { opacity: 0; transform: translate3d(-42px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
         .nx-in-r { animation: nxTabInR .26s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
         .nx-in-l { animation: nxTabInL .26s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        html.nx-moving [class*="frame_"], html.nx-moving .tp-dots i, html.nx-moving .cl-badge { animation-play-state: paused !important; }
         @media (prefers-reduced-motion: reduce) { .nx-in-r, .nx-in-l { animation-duration: .01s !important; } }
         /* janelas no centro da tela (figurinhas, enviar, configurações, perfil...): sobem e crescem suavemente */
         @keyframes nxPopIn { from { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.94); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
@@ -8642,8 +8643,15 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const TABS = ['global', 'private_list', 'group_list'];
             let suppressUntil = 0, st = null;
 
+            let movingT = null;
+            const moving = (ms) => {
+                document.documentElement.classList.add('nx-moving');
+                clearTimeout(movingT);
+                movingT = setTimeout(() => document.documentElement.classList.remove('nx-moving'), ms);
+            };
             const play = (el, dir) => {
                 if (!el) return;
+                moving(520);
                 el.classList.remove('nx-in-r', 'nx-in-l'); void el.offsetWidth;
                 const c = dir > 0 ? 'nx-in-r' : 'nx-in-l';
                 el.classList.add(c);
@@ -8706,12 +8714,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     if (!st.c.canGo(dx < 0 ? 1 : -1)) { st = null; return; }                                // sem aba nessa direção: não mexe (livre para outros gestos)
                     st.lock = true;
                     try { area.setPointerCapture(e.pointerId); } catch (_) {}
-                    st.c.el.style.transition = 'none'; st.c.el.style.willChange = 'transform, opacity';
+                    st.c.el.style.transition = 'none'; st.c.el.style.willChange = 'transform';
+                    moving(60000);       // parado até soltar o dedo
                 }
                 st.dx = dx;
                 const shift = Math.max(-120, Math.min(120, dx * 0.55));
                 st.c.el.style.transform = 'translate3d(' + shift + 'px,0,0)';
-                st.c.el.style.opacity = String(1 - Math.min(Math.abs(shift) / 320, 0.3));
             }, { passive: true });
 
             const finish = (e) => {
@@ -8723,12 +8731,13 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const v = Math.abs(s.dx) / Math.max(1, Date.now() - s.t);
                 const commit = e.type === 'pointerup' && (Math.abs(s.dx) > 70 || (Math.abs(s.dx) > 36 && v > 0.45));
                 if (commit) {
-                    el.style.transition = 'none'; el.style.transform = ''; el.style.opacity = ''; el.style.willChange = '';
+                    el.style.transition = 'none'; el.style.transform = ''; el.style.willChange = '';
                     s.c.go(dir);
                     if (s.c.animates) play(el, dir);          // no chat a animação vem da própria troca de aba
                 } else {
-                    el.style.transition = 'transform .22s ease, opacity .22s ease'; el.style.transform = ''; el.style.opacity = '';
-                    setTimeout(() => { el.style.transition = ''; el.style.willChange = ''; }, 260);
+                    moving(300);
+                    el.style.transition = 'transform .2s ease'; el.style.transform = '';
+                    setTimeout(() => { el.style.transition = ''; el.style.willChange = ''; }, 240);
                 }
             };
             area.addEventListener('pointerup', finish);
@@ -8856,7 +8865,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261026-2143';
+    window.NX_BUILD = '20261027-0318';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

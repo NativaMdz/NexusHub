@@ -1794,6 +1794,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .modal-overlay.active.closing:has(.bottom-sheet) { animation: nxFadeOut .22s ease both; }
         .modal-overlay.active.closing .bottom-sheet { animation: nxSheetDown .22s cubic-bezier(0.4, 0, 0.8, 0.6) both; }
         @media (prefers-reduced-motion: reduce) { .modal-overlay.active:has(.bottom-sheet), .modal-overlay.active .bottom-sheet { animation-duration: .01s !important; } }
+        /* arrastar a mensagem para a direita = responder */
+        #nx-reply-ic { position: fixed; z-index: 60; width: 38px; height: 38px; border-radius: 50%; background: rgba(var(--cyan-rgb), 0.18); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 1rem; opacity: 0; transform: scale(0.4); pointer-events: none; will-change: transform, opacity; }
+        #nx-reply-ic.ready { background: var(--cyan); color: #050507; }
         /* troca de aba deslizando (chat e loja): o navegador cuida só da rolagem vertical */
         #app-content, #app-content .chat-stage, #app-content .chat-msgs-wrap, #app-content .chat-messages, #app-content .products-grid { touch-action: pan-y; }
         @keyframes nxTabInR { from { opacity: 0; transform: translate3d(42px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
@@ -8749,6 +8752,87 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             }, true);
         })();
 
+
+        // ===== ARRASTAR A MENSAGEM PARA A DIREITA PARA RESPONDER (Global, privado e grupos) =====
+        (() => {
+            const area = document.getElementById('app-content');
+            if (!area) return;
+            const THRESH = 64, MAXPULL = 96;
+            let st = null, suppressUntil = 0, icon = null;
+
+            const getIcon = () => {
+                if (!icon) { icon = document.createElement('div'); icon.id = 'nx-reply-ic'; icon.innerHTML = '<i class="fa-solid fa-reply"></i>'; document.body.appendChild(icon); }
+                return icon;
+            };
+            const find = (id) => {
+                const m = appState.activeChatMode;
+                if (m === 'group') return [(appState.groupMessages || []).find((x) => x.id === id), 'group_chat'];
+                if (m === 'global') return [(appState.globalMessages || []).find((x) => x.id === id), 'global_chat'];
+                return [(appState.privateMessages || []).find((x) => x.id === id), 'private_chat'];
+            };
+            app.replyToMessage = (id) => {
+                const inp = document.getElementById('chat-input');
+                if (!inp || inp.disabled) return;
+                const [item, col] = find(id); if (!item) return;
+                appState.activeContextItem = item; appState.activeContextType = 'message'; appState.activeContextCollection = col;
+                app.startReply();
+            };
+            const eligible = () => appState.currentView === 'chat' && appState.activeChatMode && !['private_list', 'group_list'].includes(appState.activeChatMode);
+            const busy = () => !!document.querySelector('.modal-overlay.active') || !!document.querySelector('#call-overlay.on') || !!document.querySelector('.chat-input-block.rec-active');
+
+            area.addEventListener('pointerdown', (e) => {
+                if (e.pointerType !== 'touch' || !e.isPrimary || !eligible() || busy()) return;
+                const t = e.target; if (!t || !t.closest) return;
+                if (t.closest('input, textarea, select, video, audio, [data-noreply]')) return;
+                const row = t.closest('.message'); if (!row || !row.id || row.id.indexOf('msg-') !== 0) return;
+                st = { id: e.pointerId, x: e.clientX, y: e.clientY, row, lock: false, pull: 0, ready: false };
+            }, { passive: true });
+
+            area.addEventListener('pointermove', (e) => {
+                if (!st || e.pointerId !== st.id) return;
+                const dx = e.clientX - st.x, dy = e.clientY - st.y;
+                if (!st.lock) {
+                    if ((Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) || dx < -12) { st = null; return; }   // rolagem vertical ou deslize para a esquerda (troca de aba)
+                    if (dx < 12 || dx < Math.abs(dy) * 1.5) return;
+                    st.lock = true;
+                    try { area.setPointerCapture(e.pointerId); } catch (_) {}
+                    const r = st.row.getBoundingClientRect(), b = st.row.querySelector('.msg-bubble') || st.row, br = b.getBoundingClientRect();
+                    st.left = r.left; st.midY = br.top + br.height / 2;
+                    st.row.style.transition = 'none'; st.row.style.willChange = 'transform';
+                }
+                const pull = dx <= THRESH ? dx : Math.min(MAXPULL, THRESH + (dx - THRESH) * 0.25);
+                st.pull = Math.max(0, pull);
+                st.row.style.transform = 'translate3d(' + st.pull + 'px,0,0)';
+                const p = Math.min(st.pull / THRESH, 1), ic = getIcon();
+                ic.style.left = Math.max(6, st.left + st.pull / 2 - 19) + 'px';
+                ic.style.top = (st.midY - 19) + 'px';
+                ic.style.opacity = String(p);
+                ic.style.transform = 'scale(' + (0.4 + 0.6 * p) + ')';
+                const ready = st.pull >= THRESH;
+                if (ready !== st.ready) { st.ready = ready; ic.classList.toggle('ready', ready); if (ready && navigator.vibrate) { try { navigator.vibrate(14); } catch (_) {} } }
+            }, { passive: true });
+
+            const finish = (e) => {
+                if (!st || e.pointerId !== st.id) return;
+                const s = st; st = null;
+                if (!s.lock) return;
+                suppressUntil = Date.now() + 350;
+                const row = s.row, ic = getIcon();
+                row.style.transition = 'transform .22s cubic-bezier(0.22, 0.8, 0.3, 1)'; row.style.transform = '';
+                ic.style.transition = 'opacity .18s ease, transform .18s ease'; ic.style.opacity = '0'; ic.style.transform = 'scale(0.4)';
+                setTimeout(() => { row.style.transition = ''; row.style.willChange = ''; ic.style.transition = ''; ic.classList.remove('ready'); }, 260);
+                if (s.ready && e.type === 'pointerup') app.replyToMessage(row.id.replace(/^msg-/, ''));
+            };
+            area.addEventListener('pointerup', finish);
+            area.addEventListener('pointercancel', finish);
+
+            // o toque que termina o arrasto não deve abrir foto, perfil ou menu
+            window.addEventListener('click', (e) => {
+                if (Date.now() >= suppressUntil) return;
+                if (e.target && e.target.closest && e.target.closest('.message')) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }
+            }, true);
+        })();
+
         window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
     </script>
 
@@ -8865,7 +8949,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261027-0318';
+    window.NX_BUILD = '20261027-0326';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

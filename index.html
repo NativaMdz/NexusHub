@@ -1832,6 +1832,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         #album-bar .ab-btn.liked { color: #ff4d6d; border-color: #ff4d6d; }
         @keyframes nxHeartPop { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
         #album-bar .ab-btn.pop i { animation: nxHeartPop .32s ease; }
+        #album-bar .ab-owner { display: flex; justify-content: space-between; align-items: center; }
+        #album-bar .ab-count { font-size: 0.78rem; color: rgba(255,255,255,0.75); font-weight: 600; }
+        #album-bar .ab-btn.pinned { color: var(--cyan); border-color: var(--cyan); }
+        .album-pin { position: absolute; right: 5px; top: 5px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; }
         .ashare-search { margin-bottom: 10px; }
         .ashare-list { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
         .ashare-row { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #fff; text-align: left; font-family: inherit; cursor: pointer; width: 100%; -webkit-tap-highlight-color: transparent; }
@@ -6214,13 +6218,13 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
 
             // ---------- aviso do sistema (via service worker) ----------
-            const showSystem = async (uid, title, body, gid, iconUrl) => {
+            const showSystem = async (uid, title, body, gid, iconUrl, extra) => {
                 try {
                     const reg = await navigator.serviceWorker.ready;
                     const dir = new URL('.', location.href).href, icon = new URL('icon-192.png', dir).href;
                     await reg.showNotification(title, {
-                        body, icon: iconUrl || icon, badge: icon, tag: gid ? 'group-' + gid : 'chat-' + (uid || 'teste'), renotify: true, vibrate: [120, 60, 120],
-                        data: { uid: gid ? null : (uid || null), gid: gid || null, url: location.href.split('#')[0].split('?')[0] }
+                        body, icon: iconUrl || icon, badge: icon, tag: (extra && extra.tag) || (gid ? 'group-' + gid : 'chat-' + (uid || 'teste')), renotify: true, vibrate: [120, 60, 120],
+                        data: { uid: gid ? null : (uid || null), gid: gid || null, album: (extra && extra.album) || null, url: location.href.split('#')[0].split('?')[0] }
                     });
                 } catch (e) { console.warn('Notificação do sistema falhou:', e); }
             };
@@ -6286,12 +6290,24 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 showBanner(null, title, body, null, () => openGroupChat(gid), av);
             };
 
+            // aviso genérico (curtidas do álbum etc.): banner com o app aberto, notificação do sistema em segundo plano
+            app.notifyGeneric = (o) => {
+                if (!enabled()) return;
+                if (document.visibilityState === 'hidden') {
+                    if (perm() !== 'granted') return;
+                    showSystem(null, o.title, o.body, null, o.avatar && /^https:\/\//.test(o.avatar) ? o.avatar : null, { tag: o.tag, album: o.album });
+                    return;
+                }
+                showBanner(null, o.title, o.body, o.avatar, o.opener);
+            };
+
             // ---------- abrir a conversa pelo toque na notificação ----------
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.addEventListener('message', (e) => {
                     if (!e.data) return;
                     if (e.data.type === 'open-chat') openChat(e.data.uid);
                     else if (e.data.type === 'open-group') openGroupChat(e.data.gid);
+                    else if (e.data.type === 'open-album') { if (app.openOwnAlbumFromNotif) app.openOwnAlbumFromNotif(String(e.data.id || '').replace(/[^A-Za-z0-9_-]/g, '')); }
                 });
             }
             const wantedGroup = new URLSearchParams(location.search).get('group');
@@ -8704,14 +8720,21 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const userOf = (uid) => appState.allUsers.find((x) => x.uid === uid);
             const albumOf = (uid) => ((userOf(uid) || {}).album || []);
             const findItem = (uid, id) => albumOf(uid).find((x) => x.id === id);
+            // fixadas primeiro (na ordem em que foram fixadas), depois as mais novas
+            const ordered = (uid) => {
+                const arr = albumOf(uid).filter(valid);
+                const pins = arr.filter((x) => x.pin).sort((a, b) => (a.pin || 0) - (b.pin || 0));
+                const rest = arr.filter((x) => !x.pin).sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
+                return pins.concat(rest);
+            };
             const toast = (m, t) => app.showToast(m, t || 'info');
 
             // ---------- grade ----------
             app.renderAlbum = (force) => {
                 const grid = $('album-grid'); if (!grid) return;
                 const uid = viewUid(), own = isOwn(), up = appState.albumUp || [];
-                const items = albumOf(uid).filter(valid).slice().sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
-                const sig = uid + '|' + own + '|' + items.map((i) => i.id).join(',') + '|' + up.map((x) => x.id).join(',');
+                const items = ordered(uid);
+                const sig = uid + '|' + own + '|' + items.map((i) => i.id + (i.pin ? 'p' : '')).join(',') + '|' + up.map((x) => x.id).join(',');
                 if (!force && grid.dataset.sig === sig) return;
                 grid.dataset.sig = sig;
                 let h = '';
@@ -8720,7 +8743,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 items.forEach((it) => {
                     h += '<button type="button" class="album-cell" onclick="app.openAlbumItem(\'' + nxId(uid) + '\', \'' + nxId(it.id) + '\')" aria-label="Abrir foto">' +
                          '<img src="' + nxEsc(thumb(it)) + '" loading="lazy" decoding="async" alt="">' +
-                         (it.kind === 'gif' ? '<span class="album-gif">GIF</span>' : '') + '</button>';
+                         (it.kind === 'gif' ? '<span class="album-gif">GIF</span>' : '') + (it.pin ? '<span class="album-pin"><i class="fa-solid fa-thumbtack"></i></span>' : '') + '</button>';
                 });
                 if (!items.length && !up.length) h += '<div class="album-empty"><i class="fa-regular fa-images"></i>' + (own ? 'Seu álbum está vazio.<br>Toque em <b>Adicionar</b> para mostrar suas fotos e GIFs favoritos aqui.' : 'Nenhuma foto no álbum ainda.') + '</div>';
                 grid.innerHTML = h;
@@ -8839,32 +8862,68 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const it = findItem(vw.owner, vw.id), owner = userOf(vw.owner);
                 if (!it) { app.closeMediaView(); return; }
                 const own = vw.owner === meUid();
+                const list = ordered(vw.owner), idx = list.findIndex((x) => x.id === vw.id);
                 bar.innerHTML =
-                    '<div class="ab-owner">' + nxEsc(owner ? owner.handle : '') + '</div>' +
+                    '<div class="ab-owner"><span>' + nxEsc(owner ? owner.handle : '') + '</span><span class="ab-count">' + (idx + 1) + ' de ' + list.length + '</span></div>' +
                     (it.cap ? '<div class="ab-cap">' + nxEsc(it.cap) + '</div>' : '') +
                     '<div class="ab-row">' +
                       '<button type="button" class="ab-btn' + (vw.liked ? ' liked' : '') + '" onclick="app.albumLike()" aria-label="Curtir"><i class="fa-' + (vw.liked ? 'solid' : 'regular') + ' fa-heart"></i><span>' + (vw.likes || 0) + '</span></button>' +
                       '<button type="button" class="ab-btn" onclick="app.albumShare()" aria-label="Enviar no privado"><i class="fa-regular fa-paper-plane"></i><span>Enviar</span></button>' +
                       '<span class="ab-grow"></span>' +
-                      (own ? '<button type="button" class="ab-btn" onclick="app.albumEditCaption()" aria-label="Editar legenda"><i class="fa-solid fa-pen"></i></button><button type="button" class="ab-btn" onclick="app.albumDelete()" aria-label="Apagar"><i class="fa-solid fa-trash"></i></button>' : '') +
+                      (own ? '<button type="button" class="ab-btn' + (it.pin ? ' pinned' : '') + '" onclick="app.albumPin()" aria-label="' + (it.pin ? 'Desafixar' : 'Fixar no topo') + '"><i class="fa-solid fa-thumbtack"></i></button><button type="button" class="ab-btn" onclick="app.albumEditCaption()" aria-label="Editar legenda"><i class="fa-solid fa-pen"></i></button><button type="button" class="ab-btn" onclick="app.albumDelete()" aria-label="Apagar"><i class="fa-solid fa-trash"></i></button>' : '') +
                     '</div>';
             };
-            app.openAlbumItem = (ownerUid, id) => {
+            app.openAlbumItem = (ownerUid, id, dir) => {
                 const it = findItem(ownerUid, id); if (!it || !valid(it)) return;
                 removeBar();
                 const el = document.createElement('div');
                 el.dataset.url = it.url; el.dataset.kind = 'image'; el.dataset.name = 'album-' + nxId(id) + (it.kind === 'gif' ? '.gif' : '.jpg');
                 app.mediaView(el);
+                if (dir) {   // troca de foto deslizando: a nova entra pelo lado certo
+                    const im = $('mv-body').querySelector('img');
+                    if (im) { im.style.animation = (dir > 0 ? 'nxTabInR' : 'nxTabInL') + ' .26s cubic-bezier(0.22, 0.8, 0.3, 1) backwards'; im.addEventListener('animationend', () => { im.style.animation = ''; }, { once: true }); }
+                }
                 const bar = document.createElement('div'); bar.id = 'album-bar';
                 $('modal-mediaview').appendChild(bar);
-                vw = { owner: ownerUid, id, liked: false, likes: 0, unsub: null };
+                vw = { owner: ownerUid, id, liked: false, likes: 0, ever: [], unsub: null };
                 vw.unsub = onSnapshot(doc(colAlbumLikes, likeKey(ownerUid, id)), (snap) => {
                     if (!vw || vw.owner !== ownerUid || vw.id !== id) return;
-                    const list = snap.exists() && Array.isArray(snap.data().likes) ? snap.data().likes : [];
+                    const d = snap.exists() ? snap.data() : {};
+                    const list = Array.isArray(d.likes) ? d.likes : [];
+                    vw.ever = Array.isArray(d.everLiked) ? d.everLiked : list;
                     vw.likes = list.length; vw.liked = list.includes(meUid()); paintBar();
                 }, () => {});
                 paintBar();
+                // já deixa as fotos vizinhas carregando para a troca ser instantânea
+                const lst = ordered(ownerUid), k = lst.findIndex((x) => x.id === id);
+                [lst[k - 1], lst[k + 1]].forEach((n) => { if (n && valid(n)) { const pre = new Image(); pre.src = n.url; } });
             };
+            app.albumNav = (dir) => {
+                if (!vw) return;
+                const lst = ordered(vw.owner), k = lst.findIndex((x) => x.id === vw.id), n = lst[k + dir];
+                if (n) app.openAlbumItem(vw.owner, n.id, dir);
+            };
+            // deslizar para o lado (com a foto sem zoom) passa para a anterior / próxima; no computador, setas do teclado
+            const ovw = $('modal-mediaview');
+            if (ovw) {
+                let sw = null, pc = 0;
+                const zoomOne = () => { const im = $('mv-body') && $('mv-body').querySelector('img'); const m = im && /scale\(([\d.]+)\)/.exec(im.style.transform || ''); return !m || parseFloat(m[1]) <= 1.02; };
+                ovw.addEventListener('pointerdown', (e) => {
+                    if (!vw) return; pc++;
+                    if (pc === 1 && e.pointerType === 'touch' && !(e.target.closest && e.target.closest('#album-bar, .mv-top'))) sw = { x: e.clientX, y: e.clientY, multi: false };
+                    else if (sw) sw.multi = true;
+                }, true);
+                const end = (e) => {
+                    pc = Math.max(0, pc - 1);
+                    if (pc > 0 || !sw) { if (pc === 0) sw = null; return; }
+                    const s = sw; sw = null;
+                    if (!vw || s.multi || e.type === 'pointercancel') return;
+                    const dx = e.clientX - s.x, dy = e.clientY - s.y;
+                    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.8 && zoomOne()) app.albumNav(dx < 0 ? 1 : -1);
+                };
+                ovw.addEventListener('pointerup', end, true); ovw.addEventListener('pointercancel', end, true);
+                document.addEventListener('keydown', (e) => { if (!vw) return; if (e.key === 'ArrowRight') app.albumNav(1); else if (e.key === 'ArrowLeft') app.albumNav(-1); });
+            }
             const _close = app.closeMediaView;
             app.closeMediaView = function (...a) { removeBar(); return _close.apply(this, a); };
 
@@ -8873,8 +8932,21 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const uid = meUid(), liking = !vw.liked, key = likeKey(vw.owner, vw.id);
                 vw.liked = liking; vw.likes = Math.max(0, (vw.likes || 0) + (liking ? 1 : -1)); paintBar();
                 const b = document.querySelector('#album-bar .ab-btn'); if (b && liking) { b.classList.add('pop'); setTimeout(() => b.classList.remove('pop'), 350); }
-                try { await setDoc(doc(colAlbumLikes, key), { owner: vw.owner, item: vw.id, likes: liking ? arrayUnion(uid) : arrayRemove(uid) }, { merge: true }); }
-                catch (e) { toast('Não foi possível curtir agora.', 'error'); }
+                try {
+                    const first = liking && uid !== vw.owner && !(vw.ever || []).includes(uid);   // 1ª vez que essa pessoa curte essa foto
+                    const data = { owner: vw.owner, item: vw.id, likes: liking ? arrayUnion(uid) : arrayRemove(uid) };
+                    if (liking) data.everLiked = arrayUnion(uid);
+                    await setDoc(doc(colAlbumLikes, key), data, { merge: true });
+                    if (first) updateDoc(doc(colUsers, vw.owner), { xp: increment(1) }).catch(() => {});   // +1 XP para o dono da foto
+                } catch (e) { toast('Não foi possível curtir agora.', 'error'); }
+            };
+            app.albumPin = async () => {
+                if (!vw || vw.owner !== meUid()) return;
+                const uid = meUid(), arr = albumOf(uid), it = arr.find((x) => x.id === vw.id); if (!it) return;
+                if (!it.pin && arr.filter((x) => x.pin).length >= 3) return toast('Você pode fixar até 3 fotos no topo.', 'error');
+                const next = arr.map((x) => { if (x.id !== it.id) return x; const n = Object.assign({}, x); if (n.pin) delete n.pin; else n.pin = Date.now(); return n; });
+                try { await updateDoc(doc(colUsers, uid), { album: next }); toast(it.pin ? 'Foto desafixada.' : 'Foto fixada no topo do álbum.', 'info'); }
+                catch (e) { toast('Não foi possível fixar a foto.', 'error'); }
             };
             app.albumEditCaption = async () => {
                 if (!vw || vw.owner !== meUid()) return;
@@ -8889,7 +8961,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (!vw || vw.owner !== meUid()) return;
                 const it = findItem(vw.owner, vw.id); if (!it) return;
                 if (!confirm('Remover esta foto do seu álbum?')) return;
-                try { await updateDoc(doc(colUsers, meUid()), { album: arrayRemove(it) }); app.closeMediaView(); toast('Foto removida do álbum.', 'info'); }
+                const lst = ordered(vw.owner), k = lst.findIndex((x) => x.id === it.id), nb = lst[k + 1] || lst[k - 1], dirNext = lst[k + 1] ? 1 : -1;
+                try {
+                    await updateDoc(doc(colUsers, meUid()), { album: arrayRemove(it) });
+                    toast('Foto removida do álbum.', 'info');
+                    if (nb) app.openAlbumItem(vw ? vw.owner : meUid(), nb.id, dirNext); else app.closeMediaView();
+                }
                 catch (e) { toast('Não foi possível remover a foto.', 'error'); }
             };
 
@@ -8924,6 +9001,43 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 try { await addDoc(colPrivateChat, msg); toast('Enviado para ' + to.handle + ' no privado.', 'info'); }
                 catch (e) { toast('Não foi possível enviar agora.', 'error'); }
             };
+
+            // avisa o dono quando alguém curte uma foto do álbum (aviso dentro do app, ou do sistema com o app em segundo plano)
+            const likeSeen = {}; let likeFor = null, likeUnsub = null, likeInit = false;
+            app.openOwnAlbumFromNotif = (id) => {
+                if (!meUid() || !id) return;
+                if (appState.currentView !== 'perfil') app.navigate('perfil');
+                setTimeout(() => app.openAlbumItem(meUid(), id), 380);
+            };
+            setInterval(() => {
+                const me = meUid(); if (me === likeFor) return;
+                if (likeUnsub) { likeUnsub(); likeUnsub = null; }
+                likeFor = me; likeInit = false; Object.keys(likeSeen).forEach((k) => delete likeSeen[k]);
+                if (!me) return;
+                likeUnsub = onSnapshot(query(colAlbumLikes, where('owner', '==', me)), (snap) => {
+                    snap.docChanges().forEach((ch) => {
+                        if (ch.type === 'removed') { delete likeSeen[ch.doc.id]; return; }
+                        const d = ch.doc.data(), list = Array.isArray(d.likes) ? d.likes : [], prev = likeSeen[ch.doc.id] || [];
+                        likeSeen[ch.doc.id] = list.slice();
+                        if (!likeInit) return;                                        // primeira leitura só marca o ponto de partida
+                        const add = list.filter((u) => !prev.includes(u) && u !== me);
+                        if (!add.length) return;
+                        if (vw && vw.owner === me && vw.id === d.item && document.visibilityState === 'visible') return;   // já está olhando a foto
+                        const who = userOf(add[0]), it = findItem(me, d.item);
+                        if (!it || !app.notifyGeneric) return;
+                        const nm = who ? who.name : 'Alguém', extra = add.length > 1 ? ' e mais ' + (add.length - 1) : '';
+                        app.notifyGeneric({ tag: 'album-like-' + ch.doc.id, title: '❤️ ' + nm + extra + ' curtiu sua foto', body: it.cap ? String(it.cap).slice(0, 80) : 'Foto do seu álbum', avatar: who && who.avatar, album: d.item, opener: () => app.openOwnAlbumFromNotif(d.item) });
+                    });
+                    if (!snap.metadata.fromCache) likeInit = true;
+                }, () => {});
+            }, 2000);
+            const wantedAlbum = new URLSearchParams(location.search).get('album');
+            if (wantedAlbum) {
+                const tm = setInterval(() => {
+                    if (meUid() && appState.currentUserData && appState.allUsers.length) { clearInterval(tm); try { history.replaceState(null, '', location.pathname); } catch (_) {} app.openOwnAlbumFromNotif(nxId(wantedAlbum)); }
+                }, 500);
+                setTimeout(() => clearInterval(tm), 20000);
+            }
 
             // atualiza o álbum quando o perfil é atualizado em tempo real
             const _upd = app.updateProfileInDOM;
@@ -9250,7 +9364,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261027-2156';
+    window.NX_BUILD = '20261028-0257';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

@@ -1814,6 +1814,31 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .album-up span { margin-bottom: 14px; }
         .album-empty { grid-column: 1 / -1; text-align: center; padding: 44px 18px; color: var(--text-muted); font-size: 0.92rem; line-height: 1.5; }
         .album-empty i { display: block; font-size: 2rem; margin-bottom: 10px; color: var(--cyan); opacity: 0.8; }
+        .profile-tab-title { text-align: center; margin: 16px 0 4px; color: var(--cyan); font-family: Rajdhani, sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+        .profile-tab-title.swap { animation: nxFadeIn .22s ease both; }
+        .ptab { padding: 11px 6px; }
+        .ptab i { font-size: 1.25rem; }
+        #modal-album-cap, #modal-album-share { z-index: 130; }
+        .acap-prev { text-align: center; margin-bottom: 12px; }
+        .acap-prev img { max-width: 100%; max-height: 34vh; border-radius: 12px; object-fit: contain; }
+        .acap-count { text-align: right; font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+        #album-bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; padding: 46px 16px calc(14px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(transparent, rgba(0,0,0,0.9)); color: #fff; pointer-events: none; }
+        #album-bar > * { pointer-events: auto; }
+        #album-bar .ab-owner { font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+        #album-bar .ab-cap { font-size: 0.93rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; margin-bottom: 12px; max-height: 22vh; overflow-y: auto; }
+        #album-bar .ab-row { display: flex; align-items: center; gap: 8px; }
+        #album-bar .ab-grow { flex: 1; }
+        #album-bar .ab-btn { display: flex; align-items: center; gap: 7px; padding: 10px 15px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.22); background: rgba(0,0,0,0.5); color: #fff; font: 600 0.88rem Inter, sans-serif; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        #album-bar .ab-btn.liked { color: #ff4d6d; border-color: #ff4d6d; }
+        @keyframes nxHeartPop { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
+        #album-bar .ab-btn.pop i { animation: nxHeartPop .32s ease; }
+        .ashare-search { margin-bottom: 10px; }
+        .ashare-list { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .ashare-row { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #fff; text-align: left; font-family: inherit; cursor: pointer; width: 100%; -webkit-tap-highlight-color: transparent; }
+        .ashare-row img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .ashare-row b { display: block; font-size: 0.92rem; font-weight: 600; }
+        .ashare-row small { color: var(--text-muted); font-size: 0.78rem; }
+        .ashare-empty { text-align: center; color: var(--text-muted); padding: 24px 8px; font-size: 0.9rem; }
         /* arrastar a mensagem para a direita = responder */
         #nx-reply-ic { position: fixed; z-index: 60; width: 38px; height: 38px; border-radius: 50%; background: rgba(var(--cyan-rgb), 0.18); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 1rem; opacity: 0; transform: scale(0.4); pointer-events: none; will-change: transform, opacity; }
         #nx-reply-ic.ready { background: var(--cyan); color: #050507; }
@@ -3844,9 +3869,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                         </div>
                     </section>
                     <section class="profile-posts-section">
+                        <h3 class="profile-tab-title" id="profile-tab-title">Álbum</h3>
                         <div class="profile-tabs" id="profile-tabs" role="tablist">
-                            <button type="button" class="ptab active" role="tab" data-t="album" onclick="app.setProfileTab('album')"><i class="fa-solid fa-table-cells"></i><span>Álbum</span></button>
-                            <button type="button" class="ptab" role="tab" data-t="posts" onclick="app.setProfileTab('posts')"><i class="fa-solid fa-tower-broadcast"></i><span>Transmissões (<span id="stat-post-count">${appState.allPosts.filter(p => p.authorUid === userData.uid).length}</span>)</span></button>
+                            <button type="button" class="ptab active" role="tab" data-t="album" aria-label="Álbum" onclick="app.setProfileTab('album')"><i class="fa-solid fa-table-cells"></i></button>
+                            <button type="button" class="ptab" role="tab" data-t="posts" aria-label="Transmissões" onclick="app.setProfileTab('posts')"><i class="fa-solid fa-tower-broadcast"></i></button>
                         </div>
                         <div class="profile-panes" id="profile-panes">
                             <div class="ppane active" id="pane-album"><div class="album-grid" id="album-grid"></div></div>
@@ -8663,22 +8689,28 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
 
 
-        // ===== ÁLBUM DO PERFIL (fotos e GIFs só do perfil, fora do feed) =====
+        // ===== ÁLBUM DO PERFIL (fotos e GIFs só do perfil, fora do feed): legenda, curtidas e envio no privado =====
         (() => {
             const $ = (id) => document.getElementById(id);
-            const ALBUM_MAX = 60;
+            const ALBUM_MAX = 60, CAP_MAX = 200;
+            const colAlbumLikes = collection(db, 'album_likes');
             const URL_RE = new RegExp('^https://res\\.cloudinary\\.com/' + CLOUDINARY_CLOUD + '/image/upload/[A-Za-z0-9_./,-]+$');
             const valid = (it) => it && it.id && typeof it.url === 'string' && URL_RE.test(it.url);
             const thumb = (it) => it.url.replace('/image/upload/', '/image/upload/c_fill,w_360,h_360,q_auto' + (it.kind === 'gif' ? '' : ',f_auto') + '/');
             const nid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-            const viewUid = () => appState.currentView === 'perfil' ? appState.firebaseUser.uid : appState.currentPublicProfileUid;
+            const meUid = () => appState.firebaseUser && appState.firebaseUser.uid;
+            const viewUid = () => appState.currentView === 'perfil' ? meUid() : appState.currentPublicProfileUid;
             const isOwn = () => appState.currentView === 'perfil';
+            const userOf = (uid) => appState.allUsers.find((x) => x.uid === uid);
+            const albumOf = (uid) => ((userOf(uid) || {}).album || []);
+            const findItem = (uid, id) => albumOf(uid).find((x) => x.id === id);
+            const toast = (m, t) => app.showToast(m, t || 'info');
 
+            // ---------- grade ----------
             app.renderAlbum = (force) => {
                 const grid = $('album-grid'); if (!grid) return;
-                const uid = viewUid(), u = appState.allUsers.find((x) => x.uid === uid);
-                const items = ((u && u.album) || []).filter(valid).slice().sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
-                const own = isOwn(), up = appState.albumUp || [];
+                const uid = viewUid(), own = isOwn(), up = appState.albumUp || [];
+                const items = albumOf(uid).filter(valid).slice().sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
                 const sig = uid + '|' + own + '|' + items.map((i) => i.id).join(',') + '|' + up.map((x) => x.id).join(',');
                 if (!force && grid.dataset.sig === sig) return;
                 grid.dataset.sig = sig;
@@ -8686,25 +8718,55 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (own) h += '<button type="button" class="album-cell album-add" onclick="app.addAlbumPhotos()" aria-label="Adicionar ao álbum"><i class="fa-solid fa-plus"></i><span>Adicionar</span></button>';
                 up.forEach((x) => { h += '<div class="album-cell album-up" data-up="' + nxId(x.id) + '"><span>Enviando...</span><div class="album-bar" style="width:' + (x.pct || 0) + '%"></div></div>'; });
                 items.forEach((it) => {
-                    h += '<button type="button" class="album-cell" data-url="' + nxEsc(it.url) + '" data-kind="image" data-name="album-' + nxId(it.id) + (it.kind === 'gif' ? '.gif' : '.jpg') + '" onclick="app.mediaView(this)" aria-label="Abrir foto">' +
+                    h += '<button type="button" class="album-cell" onclick="app.openAlbumItem(\'' + nxId(uid) + '\', \'' + nxId(it.id) + '\')" aria-label="Abrir foto">' +
                          '<img src="' + nxEsc(thumb(it)) + '" loading="lazy" decoding="async" alt="">' +
-                         (it.kind === 'gif' ? '<span class="album-gif">GIF</span>' : '') +
-                         (own ? '<span class="album-del" onclick="event.stopPropagation(); app.deleteAlbumItem(\'' + nxId(it.id) + '\')" aria-label="Apagar"><i class="fa-solid fa-trash"></i></span>' : '') +
-                         '</button>';
+                         (it.kind === 'gif' ? '<span class="album-gif">GIF</span>' : '') + '</button>';
                 });
                 if (!items.length && !up.length) h += '<div class="album-empty"><i class="fa-regular fa-images"></i>' + (own ? 'Seu álbum está vazio.<br>Toque em <b>Adicionar</b> para mostrar suas fotos e GIFs favoritos aqui.' : 'Nenhuma foto no álbum ainda.') + '</div>';
                 grid.innerHTML = h;
             };
 
+            // ---------- abas (título centralizado muda junto) ----------
             app.setProfileTab = (tab, instant) => {
                 const order = ['album', 'posts'], prev = order.indexOf(appState.profileTab || 'album'), nxt = order.indexOf(tab);
                 if (nxt < 0) return;
                 appState.profileTab = tab;
                 document.querySelectorAll('#profile-tabs .ptab').forEach((b) => { const on = b.dataset.t === tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
                 document.querySelectorAll('#profile-panes .ppane').forEach((p) => p.classList.toggle('active', p.id === 'pane-' + tab));
+                const t = $('profile-tab-title');
+                if (t) {
+                    const n = appState.allPosts.filter((p) => p.authorUid === viewUid()).length;
+                    t.innerHTML = tab === 'posts' ? 'Transmissões (<span id="stat-post-count">' + n + '</span>)' : 'Álbum';
+                    t.classList.remove('swap'); void t.offsetWidth; t.classList.add('swap');
+                }
                 if (!instant && prev !== nxt && app._nxPlay) app._nxPlay($('profile-panes'), nxt > prev ? 1 : -1);
             };
 
+            // ---------- janela de legenda (nova foto / editar) ----------
+            let capResolve = null;
+            const capModal = () => {
+                let m = $('modal-album-cap'); if (m) return m;
+                m = document.createElement('div'); m.className = 'modal-overlay'; m.id = 'modal-album-cap';
+                m.innerHTML = '<div class="modal-content" style="max-width:380px;">' +
+                    '<div class="modal-header"><h2 id="acap-title">Nova foto no álbum</h2><button type="button" class="close-modal" onclick="app.albumCapCancel()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>' +
+                    '<div class="modal-body"><div class="acap-prev"><img id="acap-img" alt=""></div>' +
+                    '<div class="form-group"><textarea id="acap-text" class="form-control" maxlength="' + CAP_MAX + '" rows="3" placeholder="Escreva uma legenda (opcional)" style="min-height:84px;"></textarea><div class="acap-count" id="acap-count">0/' + CAP_MAX + '</div></div></div>' +
+                    '<div class="modal-footer" style="display:flex;gap:8px;"><button type="button" class="btn-secondary" onclick="app.albumCapCancel()" style="flex:1">Cancelar</button><button type="button" class="btn-primary" id="acap-ok" onclick="app.albumCapOk()" style="flex:1">Publicar</button></div></div>';
+                document.body.appendChild(m);
+                m.querySelector('#acap-text').addEventListener('input', (e) => { $('acap-count').textContent = e.target.value.length + '/' + CAP_MAX; });
+                return m;
+            };
+            const askCaption = (o) => new Promise((resolve) => {
+                const m = capModal();
+                $('acap-title').textContent = o.title; $('acap-ok').textContent = o.ok; $('acap-img').src = o.img || '';
+                const t = $('acap-text'); t.value = o.text || ''; $('acap-count').textContent = t.value.length + '/' + CAP_MAX;
+                capResolve = resolve; m.classList.add('active');
+            });
+            const capDone = (v) => { const m = $('modal-album-cap'); if (m) m.classList.remove('active'); const r = capResolve; capResolve = null; if (r) r(v); };
+            app.albumCapOk = () => capDone(($('acap-text').value || '').trim().slice(0, CAP_MAX));
+            app.albumCapCancel = () => capDone(null);
+
+            // ---------- envio ----------
             const xhrUpload = (file, onPct) => new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest(), fd = new FormData();
                 fd.append('file', file); fd.append('upload_preset', CLOUDINARY_PRESET);
@@ -8718,56 +8780,154 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 xhr.onerror = () => reject(new Error('Sem conexão.'));
                 xhr.send(fd);
             });
-
-            const uploadAlbum = async (files) => {
-                const uid = appState.firebaseUser && appState.firebaseUser.uid; if (!uid) return;
-                if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) return app.showToast('Envio de imagens não configurado.', 'error');
-                const me = appState.allUsers.find((x) => x.uid === uid) || appState.currentUserData || {};
-                const vip = app.getVIPInfo(appState.currentUserData).isActive;
-                let count = (me.album || []).length;
-                for (const file of files) {
-                    if (!/^image\//.test(file.type)) { app.showToast('"' + file.name + '" não é uma imagem.', 'error'); continue; }
-                    const gif = file.type === 'image/gif' || /\.gif$/i.test(file.name);
-                    if (gif && !vip) { app.showToast('GIFs no álbum são exclusivos do Plano VIP.', 'error'); continue; }
-                    if (file.size > (gif ? 25 : 10) * 1024 * 1024) { app.showToast('"' + file.name + '" passa do limite de ' + (gif ? 25 : 10) + 'MB.', 'error'); continue; }
-                    if (count >= ALBUM_MAX) { app.showToast('O álbum aceita até ' + ALBUM_MAX + ' fotos.', 'error'); break; }
-                    const id = nid(); appState.albumUp = (appState.albumUp || []).concat({ id, pct: 0 }); app.renderAlbum(true);
+            let chain = Promise.resolve();
+            const enqueue = (file, cap, gif) => {
+                const id = nid();
+                appState.albumUp = (appState.albumUp || []).concat({ id, pct: 0 }); app.renderAlbum(true);
+                chain = chain.then(async () => {
+                    const uid = meUid();
                     try {
-                        const j = await xhrUpload(file, (pct) => {
-                            const bar = document.querySelector('[data-up="' + id + '"] .album-bar'); if (bar) bar.style.width = pct + '%';
-                        });
+                        const j = await xhrUpload(file, (pct) => { const bar = document.querySelector('[data-up="' + id + '"] .album-bar'); if (bar) bar.style.width = pct + '%'; });
                         const item = { id, url: j.secure_url, kind: gif ? 'gif' : 'image', at: new Date().toISOString() };
+                        if (cap) item.cap = cap;
                         if (!valid(item)) throw new Error('Endereço de imagem inesperado.');
                         await updateDoc(doc(colUsers, uid), { album: arrayUnion(item) });
-                        count++;
                     } catch (e) {
                         console.error('[álbum]', e);
-                        app.showToast('Não foi possível enviar "' + file.name + '": ' + (e && e.message ? e.message : 'erro'), 'error');
+                        toast('Não foi possível enviar "' + file.name + '": ' + (e && e.message ? e.message : 'erro'), 'error');
                     } finally {
                         appState.albumUp = (appState.albumUp || []).filter((x) => x.id !== id);
                         app.renderAlbum(true);
                     }
-                }
+                });
             };
             app.addAlbumPhotos = () => {
                 if (!isOwn()) return;
+                if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) return toast('Envio de imagens não configurado.', 'error');
                 const inp = document.createElement('input');
                 inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true; inp.style.display = 'none';
-                inp.onchange = () => { const f = Array.from(inp.files || []); inp.remove(); if (f.length) uploadAlbum(f); };
+                inp.onchange = async () => {
+                    const picked = Array.from(inp.files || []); inp.remove();
+                    const vip = app.getVIPInfo(appState.currentUserData).isActive;
+                    let count = albumOf(meUid()).length + (appState.albumUp || []).length;
+                    const ok = [];
+                    for (const f of picked) {
+                        if (!/^image\//.test(f.type)) { toast('"' + f.name + '" não é uma imagem.', 'error'); continue; }
+                        const gif = f.type === 'image/gif' || /\.gif$/i.test(f.name);
+                        if (gif && !vip) { toast('GIFs no álbum são exclusivos do Plano VIP.', 'error'); continue; }
+                        if (f.size > (gif ? 25 : 10) * 1024 * 1024) { toast('"' + f.name + '" passa do limite de ' + (gif ? 25 : 10) + 'MB.', 'error'); continue; }
+                        if (count >= ALBUM_MAX) { toast('O álbum aceita até ' + ALBUM_MAX + ' fotos.', 'error'); break; }
+                        ok.push({ f, gif }); count++;
+                    }
+                    for (let i = 0; i < ok.length; i++) {
+                        const url = URL.createObjectURL(ok[i].f);
+                        const cap = await askCaption({ title: ok.length > 1 ? 'Nova foto (' + (i + 1) + ' de ' + ok.length + ')' : 'Nova foto no álbum', img: url, text: '', ok: 'Publicar' });
+                        URL.revokeObjectURL(url);
+                        if (cap === null) break;        // cancelar interrompe o restante
+                        enqueue(ok[i].f, cap, ok[i].gif);
+                    }
+                };
                 document.body.appendChild(inp); inp.click();
             };
-            app.deleteAlbumItem = async (id) => {
-                if (!isOwn()) return;
-                const uid = appState.firebaseUser.uid, u = appState.allUsers.find((x) => x.uid === uid);
-                const it = u && (u.album || []).find((x) => x.id === id); if (!it) return;
+
+            // ---------- visualizador com curtir, enviar no privado, legenda ----------
+            let vw = null;
+            const removeBar = () => { if (vw && vw.unsub) { try { vw.unsub(); } catch (_) {} } vw = null; const b = $('album-bar'); if (b) b.remove(); };
+            const likeKey = (owner, id) => owner + '_' + id;
+            const paintBar = () => {
+                const bar = $('album-bar'); if (!bar || !vw) return;
+                const it = findItem(vw.owner, vw.id), owner = userOf(vw.owner);
+                if (!it) { app.closeMediaView(); return; }
+                const own = vw.owner === meUid();
+                bar.innerHTML =
+                    '<div class="ab-owner">' + nxEsc(owner ? owner.handle : '') + '</div>' +
+                    (it.cap ? '<div class="ab-cap">' + nxEsc(it.cap) + '</div>' : '') +
+                    '<div class="ab-row">' +
+                      '<button type="button" class="ab-btn' + (vw.liked ? ' liked' : '') + '" onclick="app.albumLike()" aria-label="Curtir"><i class="fa-' + (vw.liked ? 'solid' : 'regular') + ' fa-heart"></i><span>' + (vw.likes || 0) + '</span></button>' +
+                      '<button type="button" class="ab-btn" onclick="app.albumShare()" aria-label="Enviar no privado"><i class="fa-regular fa-paper-plane"></i><span>Enviar</span></button>' +
+                      '<span class="ab-grow"></span>' +
+                      (own ? '<button type="button" class="ab-btn" onclick="app.albumEditCaption()" aria-label="Editar legenda"><i class="fa-solid fa-pen"></i></button><button type="button" class="ab-btn" onclick="app.albumDelete()" aria-label="Apagar"><i class="fa-solid fa-trash"></i></button>' : '') +
+                    '</div>';
+            };
+            app.openAlbumItem = (ownerUid, id) => {
+                const it = findItem(ownerUid, id); if (!it || !valid(it)) return;
+                removeBar();
+                const el = document.createElement('div');
+                el.dataset.url = it.url; el.dataset.kind = 'image'; el.dataset.name = 'album-' + nxId(id) + (it.kind === 'gif' ? '.gif' : '.jpg');
+                app.mediaView(el);
+                const bar = document.createElement('div'); bar.id = 'album-bar';
+                $('modal-mediaview').appendChild(bar);
+                vw = { owner: ownerUid, id, liked: false, likes: 0, unsub: null };
+                vw.unsub = onSnapshot(doc(colAlbumLikes, likeKey(ownerUid, id)), (snap) => {
+                    if (!vw || vw.owner !== ownerUid || vw.id !== id) return;
+                    const list = snap.exists() && Array.isArray(snap.data().likes) ? snap.data().likes : [];
+                    vw.likes = list.length; vw.liked = list.includes(meUid()); paintBar();
+                }, () => {});
+                paintBar();
+            };
+            const _close = app.closeMediaView;
+            app.closeMediaView = function (...a) { removeBar(); return _close.apply(this, a); };
+
+            app.albumLike = async () => {
+                if (!vw) return;
+                const uid = meUid(), liking = !vw.liked, key = likeKey(vw.owner, vw.id);
+                vw.liked = liking; vw.likes = Math.max(0, (vw.likes || 0) + (liking ? 1 : -1)); paintBar();
+                const b = document.querySelector('#album-bar .ab-btn'); if (b && liking) { b.classList.add('pop'); setTimeout(() => b.classList.remove('pop'), 350); }
+                try { await setDoc(doc(colAlbumLikes, key), { owner: vw.owner, item: vw.id, likes: liking ? arrayUnion(uid) : arrayRemove(uid) }, { merge: true }); }
+                catch (e) { toast('Não foi possível curtir agora.', 'error'); }
+            };
+            app.albumEditCaption = async () => {
+                if (!vw || vw.owner !== meUid()) return;
+                const it = findItem(vw.owner, vw.id); if (!it) return;
+                const cap = await askCaption({ title: 'Editar legenda', img: thumb(it), text: it.cap || '', ok: 'Salvar' });
+                if (cap === null) return;
+                const uid = meUid(), arr = albumOf(uid).map((x) => { if (x.id !== it.id) return x; const n = Object.assign({}, x); if (cap) n.cap = cap; else delete n.cap; return n; });
+                try { await updateDoc(doc(colUsers, uid), { album: arr }); toast('Legenda atualizada.', 'info'); }
+                catch (e) { toast('Não foi possível salvar a legenda.', 'error'); }
+            };
+            app.albumDelete = async () => {
+                if (!vw || vw.owner !== meUid()) return;
+                const it = findItem(vw.owner, vw.id); if (!it) return;
                 if (!confirm('Remover esta foto do seu álbum?')) return;
-                try { await updateDoc(doc(colUsers, uid), { album: arrayRemove(it) }); app.showToast('Foto removida do álbum.', 'info'); }
-                catch (e) { app.showToast('Não foi possível remover a foto.', 'error'); }
+                try { await updateDoc(doc(colUsers, meUid()), { album: arrayRemove(it) }); app.closeMediaView(); toast('Foto removida do álbum.', 'info'); }
+                catch (e) { toast('Não foi possível remover a foto.', 'error'); }
+            };
+
+            // ---------- enviar no privado ----------
+            const shareModal = () => {
+                let m = $('modal-album-share'); if (m) return m;
+                m = document.createElement('div'); m.className = 'modal-overlay'; m.id = 'modal-album-share';
+                m.innerHTML = '<div class="modal-content" style="max-width:380px;">' +
+                    '<div class="modal-header"><h2>Enviar no privado</h2><button type="button" class="close-modal" onclick="app.albumShareClose()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>' +
+                    '<div class="modal-body"><input type="text" id="ashare-q" class="form-control ashare-search" placeholder="Buscar por nome ou @" autocomplete="off"><div class="ashare-list" id="ashare-list"></div></div></div>';
+                document.body.appendChild(m);
+                m.querySelector('#ashare-q').addEventListener('input', renderShare);
+                return m;
+            };
+            const renderShare = () => {
+                const box = $('ashare-list'); if (!box) return;
+                const q = ($('ashare-q').value || '').trim().toLowerCase().replace(/^@/, ''), me = meUid(), meD = appState.currentUserData || {};
+                const following = meD.following || [], blocked = meD.blockedUsers || {};
+                const list = appState.allUsers.filter((u) => u.uid !== me && !blocked[u.uid] && (!q || String(u.name || '').toLowerCase().includes(q) || String(u.handle || '').toLowerCase().replace(/^@/, '').includes(q)))
+                    .sort((a, b) => (following.includes(b.uid) ? 1 : 0) - (following.includes(a.uid) ? 1 : 0) || String(a.name || '').localeCompare(String(b.name || ''))).slice(0, 60);
+                box.innerHTML = list.length ? list.map((u) => '<button type="button" class="ashare-row" onclick="app.albumShareTo(\'' + nxId(u.uid) + '\')"><img src="' + nxEsc(u.avatar) + '" alt=""><span><b>' + nxEsc(u.name) + '</b><small>' + nxEsc(u.handle) + '</small></span></button>').join('') : '<div class="ashare-empty">Ninguém encontrado.</div>';
+            };
+            app.albumShare = () => { if (!vw) return; const m = shareModal(); $('ashare-q').value = ''; renderShare(); m.classList.add('active'); };
+            app.albumShareClose = () => { const m = $('modal-album-share'); if (m) m.classList.remove('active'); };
+            app.albumShareTo = async (toUid) => {
+                if (!vw) return;
+                const it = findItem(vw.owner, vw.id), owner = userOf(vw.owner), to = userOf(toUid), me = meUid();
+                if (!it || !to || !me) return;
+                const label = '📸 Álbum de ' + (owner ? owner.handle : '') + (it.cap ? ' — ' + it.cap : '');
+                const msg = { authorUid: me, content: nxEsc(label.slice(0, 300)), media: { kind: 'image', url: it.url, name: 'album-' + it.id + (it.kind === 'gif' ? '.gif' : '.jpg') }, mcap: true, createdAt: new Date().toISOString(), participants: [me, toUid] };
+                app.albumShareClose();
+                try { await addDoc(colPrivateChat, msg); toast('Enviado para ' + to.handle + ' no privado.', 'info'); }
+                catch (e) { toast('Não foi possível enviar agora.', 'error'); }
             };
 
             // atualiza o álbum quando o perfil é atualizado em tempo real
             const _upd = app.updateProfileInDOM;
-            app.updateProfileInDOM = function (...a) { const r = _upd.apply(this, a); try { app.renderAlbum(); } catch (_) {} return r; };
+            app.updateProfileInDOM = function (...a) { const r = _upd.apply(this, a); try { app.renderAlbum(); if (vw) paintBar(); } catch (_) {} return r; };
         })();
 
         // ===== DESLIZAR PARA TROCAR DE ABA: Global / Privado / Grupos (chat) e categorias da loja =====
@@ -9090,7 +9250,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261027-2124';
+    window.NX_BUILD = '20261027-2156';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

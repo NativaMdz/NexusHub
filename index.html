@@ -1843,6 +1843,23 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .ashare-row b { display: block; font-size: 0.92rem; font-weight: 600; }
         .ashare-row small { color: var(--text-muted); font-size: 0.78rem; }
         .ashare-empty { text-align: center; color: var(--text-muted); padding: 24px 8px; font-size: 0.9rem; }
+        /* conversa (privado/grupo) em tela cheia, estilo WhatsApp */
+        .nx-hdr { display: none; }
+        #app-container.nx-conv > header, #app-container.nx-conv > .bottom-nav, #app-container.nx-conv #fab-add-post { display: none !important; }
+        #app-container.nx-conv main { padding: 0; padding-bottom: 0; overflow: hidden; }
+        #app-container.nx-conv .chat-container > div:first-child { display: none; }
+        #app-container.nx-conv .chat-info-row { margin: 0; padding: 8px 6px 8px 4px; min-height: 58px; background: #0a0a12; background: color-mix(in srgb, var(--cyan) 13%, #050507); border-bottom: 1px solid rgba(var(--cyan-rgb), 0.25); justify-content: flex-start; gap: 4px; }
+        #app-container.nx-conv #chat-status-info { display: none; }
+        #app-container.nx-conv .nx-hdr { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+        #app-container.nx-conv .chat-menu-btn { position: static; transform: none; width: 42px; height: 42px; background: none; border: 0; color: #fff; flex-shrink: 0; font-size: 1.15rem; }
+        #app-container.nx-conv .chat-stage { border-radius: 0; }
+        .nx-hdr .nx-back, .nx-hdr .nx-call { width: 42px; height: 42px; border-radius: 50%; border: 0; background: none; color: #fff; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+        .nx-hdr .nx-back:active, .nx-hdr .nx-call:active { background: rgba(255,255,255,0.1); }
+        .nx-hdr .nx-who { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; cursor: pointer; }
+        .nx-hdr .nx-av { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; font-size: 1.1rem; }
+        .nx-hdr .nx-txt { min-width: 0; line-height: 1.25; }
+        .nx-hdr .nx-txt b { display: block; font-size: 1.04rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nx-hdr .nx-txt small { display: block; font-size: 0.76rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         /* arrastar a mensagem para a direita = responder */
         #nx-reply-ic { position: fixed; z-index: 60; width: 38px; height: 38px; border-radius: 50%; background: rgba(var(--cyan-rgb), 0.18); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 1rem; opacity: 0; transform: scale(0.4); pointer-events: none; will-change: transform, opacity; }
         #nx-reply-ic.ready { background: var(--cyan); color: #050507; }
@@ -9248,6 +9265,58 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             }, true);
         })();
 
+
+        // ===== CONVERSA EM TELA CHEIA (privado e grupo): cabeçalho com foto e nome, sem barras do app =====
+        (() => {
+            const $ = (id) => document.getElementById(id);
+            const isConv = () => appState.currentView === 'chat' && !!appState.activeChatMode && !['global', 'private_list', 'group_list'].includes(appState.activeChatMode);
+            let last = false;
+
+            app.convBack = () => { app.switchChatTab(appState.activeChatMode === 'group' ? 'group_list' : 'private_list'); };
+
+            const buildHeader = () => {
+                const row = document.querySelector('.chat-info-row'); if (!row) return;
+                let h = row.querySelector('.nx-hdr');
+                if (!h) { h = document.createElement('div'); h.className = 'nx-hdr'; row.insertBefore(h, $('chat-menu-btn')); }
+                const m = appState.activeChatMode, isGroup = m === 'group';
+                let name = '', sub = '', avatar = '', uid = null, g = null;
+                if (isGroup) {
+                    g = (appState.myGroups || []).find((x) => x.id === appState.activeGroupId);
+                    name = g ? g.name : 'Grupo'; sub = g && Array.isArray(g.members) ? g.members.length + (g.members.length === 1 ? ' membro' : ' membros') : '';
+                } else {
+                    const u = appState.allUsers.find((x) => x.uid === m);
+                    name = u ? u.name : 'Conversa'; sub = u ? (u.handle || '') : ''; avatar = u ? u.avatar : ''; uid = m;
+                }
+                const sig = [m, appState.activeGroupId, name, sub, avatar].join('|');
+                if (h.dataset.sig === sig) return;
+                h.dataset.sig = sig;
+                h.innerHTML =
+                    '<button type="button" class="nx-back" aria-label="Voltar" onclick="app.convBack()"><i class="fa-solid fa-arrow-left"></i></button>' +
+                    '<div class="nx-who"' + (uid ? ' onclick="app.navigate(\'public_profile\', null, \'' + nxId(uid) + '\')"' : '') + '>' +
+                      (isGroup ? '<div class="nx-av group-avatar"></div>' : '<img class="nx-av" src="' + nxEsc(avatar) + '" alt="">') +
+                      '<div class="nx-txt"><b>' + nxEsc(name) + '</b><small>' + nxEsc(sub) + '</small></div></div>' +
+                    (uid ? '<button type="button" class="nx-call" aria-label="Chamada de voz" onclick="app.startCall(\'' + nxId(uid) + '\')"><i class="fa-solid fa-phone"></i></button>' : '');
+                if (isGroup && g && app.paintGroupAvatar) app.paintGroupAvatar(h.querySelector('.nx-av'), g);
+            };
+
+            const sync = () => {
+                const c = $('app-container'); if (!c) return;
+                const on = isConv();
+                c.classList.toggle('nx-conv', on);
+                if (on) buildHeader();
+                if (on !== last) {
+                    last = on;
+                    const el = document.querySelector('.chat-container');
+                    if (el && app._nxPlay && appState.currentView === 'chat') app._nxPlay(el, on ? 1 : -1);   // entra deslizando, como no WhatsApp
+                }
+            };
+            const _sw = app.switchChatTab;
+            app.switchChatTab = function (...a) { const r = _sw.apply(this, a); sync(); return r; };
+            const _nav = app.navigate;
+            app.navigate = function (...a) { const r = _nav.apply(this, a); sync(); return r; };
+            setInterval(sync, 400);
+        })();
+
         window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
     </script>
 
@@ -9364,7 +9433,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261028-0257';
+    window.NX_BUILD = '20261028-1903';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

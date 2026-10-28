@@ -1844,6 +1844,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .ashare-row small { color: var(--text-muted); font-size: 0.78rem; }
         .ashare-empty { text-align: center; color: var(--text-muted); padding: 24px 8px; font-size: 0.9rem; }
         /* conversa (privado/grupo) em tela cheia, estilo WhatsApp */
+        /* sem desfoque na barra de resposta e na cápsula de digitar (pesava na conversa) */
+        .chat-input-block #reply-preview-container { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: #10111a; background: color-mix(in srgb, var(--cyan) 10%, #0f1018); }
+        #chat-input-container .chat-input-pill, .chat-stage #chat-input-container .chat-input-pill { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(18, 19, 28, 0.97); }
+        #app-container.nx-conv .chat-container > div:first-child, #app-container.nx-conv .chat-container > div:has(#tab-global) { display: none !important; }
         .nx-hdr { display: none; }
         #app-container.nx-conv > header, #app-container.nx-conv > .bottom-nav, #app-container.nx-conv #fab-add-post { display: none !important; }
         #app-container.nx-conv main { padding: 0; padding-bottom: 0; overflow: hidden; }
@@ -9433,7 +9437,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261028-1903';
+    window.NX_BUILD = '20261028-1916';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

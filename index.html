@@ -1865,6 +1865,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         @keyframes nxAlbumInL { from { transform: translate3d(-34px, 0, 0); } to { transform: translate3d(0, 0, 0); } }
         html.nx-moving .profile-header::before, html.nx-moving .profile-header::after, html.nx-moving [class*="theme-special_"] .profile-header::before, html.nx-moving [class*="theme-special_"] .profile-header::after { animation-play-state: paused !important; }
         .nx-hdr { display: none; }
+        /* botão "tela cheia" do chat global (lado esquerdo, espelhando o botão ⋮) */
+        .chat-full-btn { display: none; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--cyan); align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; padding: 0; -webkit-tap-highlight-color: transparent; }
+        .chat-full-btn.show { display: flex; }
+        .chat-full-btn:active { background: rgba(var(--cyan-rgb), 0.2); }
+        #app-container.nx-conv .chat-full-btn { display: none !important; }
+        .nx-hdr .nx-glob { display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(var(--cyan-rgb), 0.15); color: var(--cyan); }
         #app-container.nx-conv > header, #app-container.nx-conv > .bottom-nav, #app-container.nx-conv #fab-add-post { display: none !important; }
         #app-container.nx-conv main { padding: 0; padding-bottom: 0; overflow: hidden; }
         #app-container.nx-conv .chat-container > div:first-child { display: none; }
@@ -2469,6 +2475,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             </div>
             
             <div class="chat-info-row">
+                <button type="button" id="chat-full-btn" class="chat-full-btn" onclick="app.toggleGlobalFull(true)" aria-label="Abrir o chat global em tela cheia" title="Tela cheia"><i class="fa-solid fa-expand"></i></button>
                 <div class="chat-header-info" id="chat-status-info">
                     <i class="fa-solid fa-earth-americas" style="color: var(--cyan);"></i> Canal Global Sincronizado
                 </div>
@@ -5508,6 +5515,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (!btn || !mode || mode === 'private_list') return;
                 const items = mode === 'global'
                     ? [
+                        { icon: appState.globalFull ? 'fa-compress' : 'fa-expand', label: appState.globalFull ? 'Sair da tela cheia' : 'Tela cheia', run: () => app.toggleGlobalFull(!appState.globalFull) },
                         { icon: 'fa-image', label: 'Plano de fundo', run: () => app.openChatBackgroundModal('global') },
                         { icon: 'fa-magnifying-glass', label: 'Pesquisar mensagem', run: () => app.openChatSearch() },
                         { icon: 'fa-eraser', label: 'Limpar mensagens', danger: true, run: () => app.clearCurrentChat() }
@@ -8577,6 +8585,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (appState.currentView === 'chat') {
                     const m = appState.activeChatMode;
                     if (m === 'group') { app.switchChatTab('group_list'); return true; }
+                    if (m === 'global' && appState.globalFull) { app.toggleGlobalFull(false); return true; }
                     if (m && !['global', 'private_list', 'group_list', 'group'].includes(m)) { app.switchChatTab('private_list'); return true; }
                 }
                 // telas: volta para a anterior (ou para a inicial)
@@ -9160,6 +9169,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             const ctx = () => {
                 if (appState.currentView === 'chat') {
+                    if (appState.globalFull) return null;
                     const i = TABS.indexOf(appState.activeChatMode); if (i < 0) return null;
                     const el = document.querySelector('.chat-msgs-wrap'); if (!el) return null;
                     return { el, canGo: (d) => i + d >= 0 && i + d < TABS.length, go: (d) => app.switchChatTab(TABS[i + d]), animates: false };
@@ -9316,18 +9326,36 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         // ===== CONVERSA EM TELA CHEIA (privado e grupo): cabeçalho com foto e nome, sem barras do app =====
         (() => {
             const $ = (id) => document.getElementById(id);
-            const isConv = () => appState.currentView === 'chat' && !!appState.activeChatMode && !['global', 'private_list', 'group_list'].includes(appState.activeChatMode);
+            const isConv = () => {
+                const m = appState.activeChatMode;
+                if (appState.currentView !== 'chat' || !m) return false;
+                return m === 'global' ? !!appState.globalFull : !['private_list', 'group_list'].includes(m);
+            };
             let last = false;
 
-            app.convBack = () => { app.switchChatTab(appState.activeChatMode === 'group' ? 'group_list' : 'private_list'); };
+            app.convBack = () => {
+                if (appState.activeChatMode === 'global') return app.toggleGlobalFull(false);
+                app.switchChatTab(appState.activeChatMode === 'group' ? 'group_list' : 'private_list');
+            };
+
+            // chat global em tela cheia: liga/desliga
+            app.toggleGlobalFull = (on) => {
+                if (appState.currentView !== 'chat' || appState.activeChatMode !== 'global') return;
+                appState.globalFull = !!on;
+                sync();
+                const box = $('chat-global-container');
+                if (on && box && app.stickChatToBottom) { [60, 320].forEach((t) => setTimeout(() => app.stickChatToBottom(box), t)); }
+            };
 
             const buildHeader = () => {
                 const row = document.querySelector('.chat-info-row'); if (!row) return;
                 let h = row.querySelector('.nx-hdr');
                 if (!h) { h = document.createElement('div'); h.className = 'nx-hdr'; row.insertBefore(h, $('chat-menu-btn')); }
-                const m = appState.activeChatMode, isGroup = m === 'group';
+                const m = appState.activeChatMode, isGroup = m === 'group', isGlobal = m === 'global';
                 let name = '', sub = '', avatar = '', uid = null, g = null;
-                if (isGroup) {
+                if (isGlobal) {
+                    name = 'Chat Global'; sub = 'Canal sincronizado';
+                } else if (isGroup) {
                     g = (appState.myGroups || []).find((x) => x.id === appState.activeGroupId);
                     name = g ? g.name : 'Grupo'; sub = g && Array.isArray(g.members) ? g.members.length + (g.members.length === 1 ? ' membro' : ' membros') : '';
                 } else {
@@ -9340,7 +9368,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 h.innerHTML =
                     '<button type="button" class="nx-back" aria-label="Voltar" onclick="app.convBack()"><i class="fa-solid fa-arrow-left"></i></button>' +
                     '<div class="nx-who"' + (uid ? ' onclick="app.navigate(\'public_profile\', null, \'' + nxId(uid) + '\')"' : '') + '>' +
-                      (isGroup ? '<div class="nx-av group-avatar"></div>' : '<img class="nx-av" src="' + nxEsc(avatar) + '" alt="">') +
+                      (isGlobal ? '<div class="nx-av nx-glob"><i class="fa-solid fa-earth-americas"></i></div>' : isGroup ? '<div class="nx-av group-avatar"></div>' : '<img class="nx-av" src="' + nxEsc(avatar) + '" alt="">') +
                       '<div class="nx-txt"><b>' + nxEsc(name) + '</b><small>' + nxEsc(sub) + '</small></div></div>' +
                     (uid ? '<button type="button" class="nx-call" aria-label="Chamada de voz" onclick="app.startCall(\'' + nxId(uid) + '\')"><i class="fa-solid fa-phone"></i></button>' : '');
                 if (isGroup && g && app.paintGroupAvatar) app.paintGroupAvatar(h.querySelector('.nx-av'), g);
@@ -9348,7 +9376,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             const sync = () => {
                 const c = $('app-container'); if (!c) return;
+                if (appState.currentView !== 'chat' || appState.activeChatMode !== 'global') appState.globalFull = false;   // saiu do global: volta ao normal
                 const on = isConv();
+                const fb = $('chat-full-btn');
+                if (fb) fb.classList.toggle('show', appState.currentView === 'chat' && appState.activeChatMode === 'global' && !on);
                 c.classList.toggle('nx-conv', on);
                 if (on) buildHeader();
                 if (on !== last) {
@@ -9500,7 +9531,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261029-0123';
+    window.NX_BUILD = '20261029-1530';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

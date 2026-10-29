@@ -1402,7 +1402,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .rec-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; color: #fff; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
         .rec-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); flex-shrink: 0; animation: recPulse 1s infinite; }
         @keyframes recPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
-        .rec-wave { flex: 1; min-width: 0; display: flex; align-items: center; gap: 3px; height: 24px; overflow: hidden; }
+        .rec-wave { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 3px; height: 24px; overflow: hidden; }
         .rec-wave i { flex: 0 0 3px; height: 100%; border-radius: 2px; background: rgba(255,255,255,0.55); animation: recBar 0.9s ease-in-out infinite; }
         .rec-wave i:nth-child(3n) { animation-delay: 0.15s; }
         .rec-wave i:nth-child(3n+1) { animation-delay: 0.3s; animation-duration: 1.1s; }
@@ -9364,6 +9364,26 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             setInterval(sync, 400);
         })();
 
+
+        // ===== GRAVAÇÃO DE ÁUDIO: as barrinhas da onda ocupam toda a largura disponível da cápsula =====
+        (() => {
+            const fillWave = () => {
+                const w = document.querySelector('.chat-input-block.rec-active .rec-wave');
+                if (!w || !w.clientWidth) return;
+                const want = Math.max(10, Math.floor((w.clientWidth + 3) / 6));          // barra de 3px + espaço de 3px
+                while (w.children.length < want) w.appendChild(document.createElement('i'));
+                while (w.children.length > want) w.lastElementChild.remove();
+                if (!w._nxRo && window.ResizeObserver) { w._nxRo = new ResizeObserver(fillWave); w._nxRo.observe(w); }
+            };
+            const _sv = app.startVoiceRecord;
+            app.startVoiceRecord = async function (...a) {
+                const r = _sv.apply(this, a);
+                [80, 350, 900].forEach((t) => setTimeout(fillWave, t));
+                return r;
+            };
+            setInterval(() => { if (document.querySelector('.chat-input-block.rec-active')) fillWave(); }, 600);
+        })();
+
         window.app = app; window.appState = appState; if (!window.__nxLanding) document.addEventListener('DOMContentLoaded', app.init);
     </script>
 
@@ -9480,7 +9500,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261029-0110';
+    window.NX_BUILD = '20261029-0123';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

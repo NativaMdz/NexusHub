@@ -1886,6 +1886,12 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         /* arrastar a mensagem para a direita = responder */
         #nx-reply-ic { position: fixed; z-index: 60; width: 38px; height: 38px; border-radius: 50%; background: rgba(var(--cyan-rgb), 0.18); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 1rem; opacity: 0; transform: scale(0.4); pointer-events: none; will-change: transform, opacity; }
         #nx-reply-ic.ready { background: var(--cyan); color: #050507; }
+        #nx-reply-ic { left: 0; top: 0; transition: background-color .15s ease, color .15s ease; contain: layout paint; }
+        #nx-reply-ic.ready i { animation: nxReplyPop .22s ease; }
+        @keyframes nxReplyPop { 0% { transform: scale(1); } 50% { transform: scale(1.28); } 100% { transform: scale(1); } }
+        .nx-dragrow, .nx-dragrow .msg-bubble { transition: none !important; }
+        #reply-preview-container { animation: nxReplyIn .18s ease-out; }
+        @keyframes nxReplyIn { from { opacity: 0; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
         /* troca de aba deslizando (chat e loja): o navegador cuida só da rolagem vertical */
         #app-content, #app-content .chat-stage, #app-content .chat-msgs-wrap, #app-content .chat-messages, #app-content .products-grid { touch-action: pan-y; }
         @keyframes nxTabInR { from { opacity: 0; transform: translate3d(42px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
@@ -4640,6 +4646,9 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         app.saveChatBackground = async (dataUrl) => {
             const context = appState.chatBgContext;
             if (!context) return;
+            if (/^data:image\/gif/i.test(dataUrl || '') && !app.getVIPInfo(appState.currentUserData).isActive) {
+                return app.showToast("Fundo com GIF é exclusivo do Plano VIP.", "error");
+            }
             const btn = document.querySelector('#modal-chat-background .btn-primary');
             btn.disabled = true; btn.innerHTML = 'Salvando...';
             try {
@@ -7059,7 +7068,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (admin) {
                     const ac = document.createElement('div'); ac.className = 'gi-img-actions';
                     const pick = document.createElement('button'); pick.type = 'button'; pick.className = 'btn-primary btn-secondary';
-                    pick.innerHTML = '<i class="fa-solid fa-camera"></i> ' + (g.imgV ? 'Trocar imagem' : 'Adicionar imagem') + ' <i class="fa-solid fa-crown" style="color:#ffd700;font-size:0.75em;"></i>';
+                    pick.innerHTML = '<i class="fa-solid fa-camera"></i> ' + (g.imgV ? 'Trocar imagem' : 'Adicionar imagem');
                     pick.onclick = () => app.groupPickImage(); ac.appendChild(pick);
                     if (g.imgV) { const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'btn-primary btn-secondary'; rm.style.color = 'var(--danger)'; rm.innerHTML = '<i class="fa-solid fa-trash"></i> Remover imagem'; rm.onclick = () => app.groupRemoveImage(); ac.appendChild(rm); }
                     top.appendChild(ac);
@@ -7129,14 +7138,13 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
             app.groupPickImage = () => {
                 const g = activeGroup(); if (!g || !isAdmin(g, me())) return;
-                if (!app.getVIPInfo(meDoc()).isActive) return toast('A imagem do grupo é exclusiva do Plano VIP.');
                 const f = $('group-img-file'); f.value = ''; f.click();
             };
             app.groupImageSelected = (e) => {
                 const file = e.target.files && e.target.files[0]; if (!file) return;
                 const g = activeGroup(); if (!g || !isAdmin(g, me())) return;
-                if (!app.getVIPInfo(meDoc()).isActive) return toast('A imagem do grupo é exclusiva do Plano VIP.');
                 const isGif = file.type === 'image/gif' || /\.gif$/i.test(file.name);
+                if (isGif && !app.getVIPInfo(meDoc()).isActive) return toast('GIF na imagem do grupo é exclusivo do Plano VIP.', 'error');
                 if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) && !isGif) return toast('Formato não suportado. Use PNG, JPG, WEBP ou GIF.');
                 if (file.size > 15 * 1024 * 1024) return toast('O arquivo excede 15 MB.');
                 if (isGif) {
@@ -9239,8 +9247,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         (() => {
             const area = document.getElementById('app-content');
             if (!area) return;
-            const THRESH = 64, MAXPULL = 96;
+            const DEAD = 12, MAXPULL = 100, READY = 58;
             let st = null, suppressUntil = 0, icon = null;
+            // curva contínua: acompanha o dedo no começo e vai "endurecendo" aos poucos, sem quebra de velocidade
+            const pullOf = (dx) => MAXPULL * Math.tanh(Math.max(0, dx - DEAD) / MAXPULL);
 
             const getIcon = () => {
                 if (!icon) { icon = document.createElement('div'); icon.id = 'nx-reply-ic'; icon.innerHTML = '<i class="fa-solid fa-reply"></i>'; document.body.appendChild(icon); }
@@ -9267,43 +9277,58 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 const t = e.target; if (!t || !t.closest) return;
                 if (t.closest('input, textarea, select, video, audio, [data-noreply]')) return;
                 const row = t.closest('.message'); if (!row || !row.id || row.id.indexOf('msg-') !== 0) return;
-                st = { id: e.pointerId, x: e.clientX, y: e.clientY, row, lock: false, pull: 0, ready: false };
+                st = { id: e.pointerId, x: e.clientX, y: e.clientY, row, lock: false, dx: 0, ready: false, raf: 0, ix: 0, iy: 0, left: 0 };
             }, { passive: true });
+
+            // desenha no máximo uma vez por quadro (vários eventos de toque por quadro não geram trabalho repetido)
+            const paint = () => {
+                const s = st; if (!s) return;
+                s.raf = 0;
+                const pull = pullOf(s.dx), p = Math.min(pull / READY, 1), ic = getIcon();
+                s.row.style.transform = 'translate3d(' + pull.toFixed(1) + 'px,0,0)';
+                s.ix = Math.max(6, s.left + pull / 2 - 19);
+                ic.style.opacity = p.toFixed(2);
+                ic.style.transform = 'translate3d(' + s.ix.toFixed(1) + 'px,' + s.iy.toFixed(1) + 'px,0) scale(' + (0.4 + 0.6 * p).toFixed(2) + ')';
+                const ready = pull >= READY;
+                if (ready !== s.ready) { s.ready = ready; ic.classList.toggle('ready', ready); if (ready && navigator.vibrate) { try { navigator.vibrate(14); } catch (_) {} } }
+            };
 
             area.addEventListener('pointermove', (e) => {
                 if (!st || e.pointerId !== st.id) return;
                 const dx = e.clientX - st.x, dy = e.clientY - st.y;
                 if (!st.lock) {
                     if ((Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) || dx < -12) { st = null; return; }   // rolagem vertical ou deslize para a esquerda (troca de aba)
-                    if (dx < 12 || dx < Math.abs(dy) * 1.5) return;
+                    if (dx < DEAD || dx < Math.abs(dy) * 1.5) return;
                     st.lock = true;
                     try { area.setPointerCapture(e.pointerId); } catch (_) {}
-                    const r = st.row.getBoundingClientRect(), b = st.row.querySelector('.msg-bubble') || st.row, br = b.getBoundingClientRect();
-                    st.left = r.left; st.midY = br.top + br.height / 2;
-                    st.row.style.transition = 'none'; st.row.style.willChange = 'transform';
+                    const r = st.row.getBoundingClientRect(), bb = st.row.querySelector('.msg-bubble') || st.row, br = bb.getBoundingClientRect();
+                    st.left = r.left; st.ix = r.left; st.iy = br.top + br.height / 2 - 19;
+                    st.row.classList.add('nx-dragrow');
+                    st.row.style.willChange = 'transform';
+                    document.documentElement.classList.add('nx-moving');      // pausa animações de molduras/pontinhos durante o arrasto
                 }
-                const pull = dx <= THRESH ? dx : Math.min(MAXPULL, THRESH + (dx - THRESH) * 0.25);
-                st.pull = Math.max(0, pull);
-                st.row.style.transform = 'translate3d(' + st.pull + 'px,0,0)';
-                const p = Math.min(st.pull / THRESH, 1), ic = getIcon();
-                ic.style.left = Math.max(6, st.left + st.pull / 2 - 19) + 'px';
-                ic.style.top = (st.midY - 19) + 'px';
-                ic.style.opacity = String(p);
-                ic.style.transform = 'scale(' + (0.4 + 0.6 * p) + ')';
-                const ready = st.pull >= THRESH;
-                if (ready !== st.ready) { st.ready = ready; ic.classList.toggle('ready', ready); if (ready && navigator.vibrate) { try { navigator.vibrate(14); } catch (_) {} } }
+                st.dx = dx;
+                if (!st.raf) st.raf = requestAnimationFrame(paint);
             }, { passive: true });
 
             const finish = (e) => {
                 if (!st || e.pointerId !== st.id) return;
                 const s = st; st = null;
                 if (!s.lock) return;
+                if (s.raf) { cancelAnimationFrame(s.raf); s.raf = 0; }
                 suppressUntil = Date.now() + 350;
                 const row = s.row, ic = getIcon();
-                row.style.transition = 'transform .22s cubic-bezier(0.22, 0.8, 0.3, 1)'; row.style.transform = '';
-                ic.style.transition = 'opacity .18s ease, transform .18s ease'; ic.style.opacity = '0'; ic.style.transform = 'scale(0.4)';
-                setTimeout(() => { row.style.transition = ''; row.style.willChange = ''; ic.style.transition = ''; ic.classList.remove('ready'); }, 260);
-                if (s.ready && e.type === 'pointerup') app.replyToMessage(row.id.replace(/^msg-/, ''));
+                const go = e.type === 'pointerup' && pullOf(s.dx) >= READY;
+                row.style.transition = 'transform .24s cubic-bezier(0.22, 0.8, 0.3, 1)'; row.style.transform = '';
+                ic.style.transition = 'opacity .18s ease, transform .18s ease'; ic.style.opacity = '0';
+                ic.style.transform = 'translate3d(' + s.ix.toFixed(1) + 'px,' + s.iy.toFixed(1) + 'px,0) scale(0.4)';
+                setTimeout(() => {
+                    row.classList.remove('nx-dragrow'); row.style.transition = ''; row.style.willChange = '';
+                    ic.style.transition = ''; ic.classList.remove('ready');
+                    document.documentElement.classList.remove('nx-moving');
+                }, 280);
+                // abre a barra de resposta no quadro seguinte, quando a mensagem já começou a voltar (evita tudo acontecer no mesmo instante)
+                if (go) requestAnimationFrame(() => app.replyToMessage(row.id.replace(/^msg-/, '')));
             };
             area.addEventListener('pointerup', finish);
             area.addEventListener('pointercancel', finish);
@@ -9510,7 +9535,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261029-1600';
+    window.NX_BUILD = '20261029-1700';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;

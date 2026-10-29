@@ -1848,6 +1848,22 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
         .chat-input-block #reply-preview-container { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: #10111a; background: color-mix(in srgb, var(--cyan) 10%, #0f1018); }
         #chat-input-container .chat-input-pill, .chat-stage #chat-input-container .chat-input-pill { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(18, 19, 28, 0.97); }
         #app-container.nx-conv .chat-container > div:first-child, #app-container.nx-conv .chat-container > div:has(#tab-global) { display: none !important; }
+        /* gravação de áudio: cápsula + botão redondo, igual à barra de digitar */
+        .chat-input-block .chat-rec-bar { background: none; border: none; box-shadow: none; padding: 0; gap: 8px; align-items: flex-end; }
+        .chat-rec-bar .rec-pill { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 5px 8px 5px 5px; border-radius: 24px; background: rgba(18, 19, 28, 0.97); border: 1px solid rgba(255,42,42,0.4); }
+        .chat-rec-bar .rec-cancel { width: 34px; height: 34px; }
+        .chat-rec-bar .chat-send-btn { width: 46px; height: 46px; flex-shrink: 0; }
+        /* álbum/transmissões e fotos: menos trabalho por quadro */
+        #pane-posts .post-card { animation: none; }
+        @keyframes nxTabInR2 { from { opacity: 0; transform: translate3d(42px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+        @keyframes nxTabInL2 { from { opacity: 0; transform: translate3d(-42px, 0, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+        .nx-in-r2 { animation: nxTabInR2 .26s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        .nx-in-l2 { animation: nxTabInL2 .26s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        .profile-tab-title.swap2 { animation: nxFadeIn2 .22s ease both; }
+        @keyframes nxFadeIn2 { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes nxAlbumInR { from { transform: translate3d(34px, 0, 0); } to { transform: translate3d(0, 0, 0); } }
+        @keyframes nxAlbumInL { from { transform: translate3d(-34px, 0, 0); } to { transform: translate3d(0, 0, 0); } }
+        html.nx-moving .profile-header::before, html.nx-moving .profile-header::after, html.nx-moving [class*="theme-special_"] .profile-header::before, html.nx-moving [class*="theme-special_"] .profile-header::after { animation-play-state: paused !important; }
         .nx-hdr { display: none; }
         #app-container.nx-conv > header, #app-container.nx-conv > .bottom-nav, #app-container.nx-conv #fab-add-post { display: none !important; }
         #app-container.nx-conv main { padding: 0; padding-bottom: 0; overflow: hidden; }
@@ -2500,8 +2516,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     </button>
                 </div>
                 <div class="chat-rec-bar" id="chat-rec-bar">
+                    <div class="rec-pill">
                     <button type="button" class="rec-cancel" onclick="app.cancelVoiceRecord()" aria-label="Cancelar gravação"><i class="fa-solid fa-trash"></i></button>
                     <div class="rec-info"><span class="rec-dot"></span><span id="rec-time">0:00</span><span class="rec-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+                    </div>
                     <button type="button" class="chat-send-btn" onclick="app.sendVoiceRecord()" aria-label="Enviar áudio"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
@@ -8781,7 +8799,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                 if (t) {
                     const n = appState.allPosts.filter((p) => p.authorUid === viewUid()).length;
                     t.innerHTML = tab === 'posts' ? 'Transmissões (<span id="stat-post-count">' + n + '</span>)' : 'Álbum';
-                    t.classList.remove('swap'); void t.offsetWidth; t.classList.add('swap');
+                    t._f = !t._f; t.classList.remove('swap', 'swap2'); t.classList.add(t._f ? 'swap2' : 'swap');
                 }
                 if (!instant && prev !== nxt && app._nxPlay) app._nxPlay($('profile-panes'), nxt > prev ? 1 : -1);
             };
@@ -8876,8 +8894,21 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 
             // ---------- visualizador com curtir, enviar no privado, legenda ----------
             let vw = null;
-            const removeBar = () => { if (vw && vw.unsub) { try { vw.unsub(); } catch (_) {} } vw = null; const b = $('album-bar'); if (b) b.remove(); };
             const likeKey = (owner, id) => owner + '_' + id;
+            const likeCache = {};
+            const unsubLikes = () => { if (vw && vw.unsub) { try { vw.unsub(); } catch (_) {} vw.unsub = null; } };
+            const removeBar = () => { unsubLikes(); vw = null; const b = $('album-bar'); if (b) b.remove(); };
+            const preload = (url) => new Promise((res) => {
+                let done = false; const fin = () => { if (!done) { done = true; res(); } };
+                const im = new Image(); im.onload = fin; im.onerror = fin; im.src = url;
+                if (im.decode) im.decode().then(fin, fin);
+                setTimeout(fin, 500);
+            });
+            const likeState = (snap) => {
+                const d = snap && snap.exists() ? snap.data() : {};
+                const list = Array.isArray(d.likes) ? d.likes : [];
+                return { likes: list.length, liked: list.includes(meUid()), ever: Array.isArray(d.everLiked) ? d.everLiked : list };
+            };
             const paintBar = () => {
                 const bar = $('album-bar'); if (!bar || !vw) return;
                 const it = findItem(vw.owner, vw.id), owner = userOf(vw.owner);
@@ -8888,7 +8919,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
                     '<div class="ab-owner"><span>' + nxEsc(owner ? owner.handle : '') + '</span><span class="ab-count">' + (idx + 1) + ' de ' + list.length + '</span></div>' +
                     (it.cap ? '<div class="ab-cap">' + nxEsc(it.cap) + '</div>' : '') +
                     '<div class="ab-row">' +
-                      '<button type="button" class="ab-btn' + (vw.liked ? ' liked' : '') + '" onclick="app.albumLike()" aria-label="Curtir"><i class="fa-' + (vw.liked ? 'solid' : 'regular') + ' fa-heart"></i><span>' + (vw.likes || 0) + '</span></button>' +
+                      '<button type="button" class="ab-btn' + (vw.liked ? ' liked' : '') + '" onclick="app.albumLike()" aria-label="Curtir"><i class="fa-' + (vw.liked ? 'solid' : 'regular') + ' fa-heart"></i>' + (vw.ready ? '<span>' + (vw.likes || 0) + '</span>' : '') + '</button>' +
                       '<button type="button" class="ab-btn" onclick="app.albumShare()" aria-label="Enviar no privado"><i class="fa-regular fa-paper-plane"></i><span>Enviar</span></button>' +
                       '<span class="ab-grow"></span>' +
                       (own ? '<button type="button" class="ab-btn' + (it.pin ? ' pinned' : '') + '" onclick="app.albumPin()" aria-label="' + (it.pin ? 'Desafixar' : 'Fixar no topo') + '"><i class="fa-solid fa-thumbtack"></i></button><button type="button" class="ab-btn" onclick="app.albumEditCaption()" aria-label="Editar legenda"><i class="fa-solid fa-pen"></i></button><button type="button" class="ab-btn" onclick="app.albumDelete()" aria-label="Apagar"><i class="fa-solid fa-trash"></i></button>' : '') +
@@ -8896,33 +8927,43 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             };
             app.openAlbumItem = (ownerUid, id, dir) => {
                 const it = findItem(ownerUid, id); if (!it || !valid(it)) return;
-                removeBar();
+                const keep = !!dir && !!$('album-bar');
+                if (keep) unsubLikes(); else removeBar();
                 const el = document.createElement('div');
                 el.dataset.url = it.url; el.dataset.kind = 'image'; el.dataset.name = 'album-' + nxId(id) + (it.kind === 'gif' ? '.gif' : '.jpg');
                 app.mediaView(el);
                 if (dir) {   // troca de foto deslizando: a nova entra pelo lado certo
                     const im = $('mv-body').querySelector('img');
-                    if (im) { im.style.animation = (dir > 0 ? 'nxTabInR' : 'nxTabInL') + ' .26s cubic-bezier(0.22, 0.8, 0.3, 1) backwards'; im.addEventListener('animationend', () => { im.style.animation = ''; }, { once: true }); }
+                    // só desliza (sem sumir e reaparecer), para não "piscar" preto
+                    if (im) { im.style.animation = (dir > 0 ? 'nxAlbumInR' : 'nxAlbumInL') + ' .22s cubic-bezier(0.22, 0.8, 0.3, 1) backwards'; im.addEventListener('animationend', () => { im.style.animation = ''; }, { once: true }); }
                 }
-                const bar = document.createElement('div'); bar.id = 'album-bar';
-                $('modal-mediaview').appendChild(bar);
-                vw = { owner: ownerUid, id, liked: false, likes: 0, ever: [], unsub: null };
-                vw.unsub = onSnapshot(doc(colAlbumLikes, likeKey(ownerUid, id)), (snap) => {
+                if (!$('album-bar')) { const bar = document.createElement('div'); bar.id = 'album-bar'; $('modal-mediaview').appendChild(bar); }
+                const key = likeKey(ownerUid, id), c = likeCache[key];
+                vw = { owner: ownerUid, id, liked: c ? c.liked : false, likes: c ? c.likes : 0, ready: !!c, ever: c ? c.ever : [], unsub: null };
+                vw.unsub = onSnapshot(doc(colAlbumLikes, key), (snap) => {
                     if (!vw || vw.owner !== ownerUid || vw.id !== id) return;
-                    const d = snap.exists() ? snap.data() : {};
-                    const list = Array.isArray(d.likes) ? d.likes : [];
-                    vw.ever = Array.isArray(d.everLiked) ? d.everLiked : list;
-                    vw.likes = list.length; vw.liked = list.includes(meUid()); paintBar();
+                    const st = likeState(snap); likeCache[key] = st;
+                    vw.ever = st.ever; vw.likes = st.likes; vw.liked = st.liked; vw.ready = true; paintBar();
                 }, () => {});
                 paintBar();
                 // já deixa as fotos vizinhas carregando para a troca ser instantânea
                 const lst = ordered(ownerUid), k = lst.findIndex((x) => x.id === id);
-                [lst[k - 1], lst[k + 1]].forEach((n) => { if (n && valid(n)) { const pre = new Image(); pre.src = n.url; } });
+                [lst[k - 1], lst[k + 1]].forEach((n) => {
+                    if (!n || !valid(n)) return;
+                    const pre = new Image(); pre.src = n.url;
+                    const nk = likeKey(ownerUid, n.id);
+                    if (!likeCache[nk]) getDoc(doc(colAlbumLikes, nk)).then((sn) => { if (!likeCache[nk]) likeCache[nk] = likeState(sn); }).catch(() => {});
+                });
             };
-            app.albumNav = (dir) => {
-                if (!vw) return;
+            app.albumNav = async (dir) => {
+                if (!vw || vw.busy) return;
                 const lst = ordered(vw.owner), k = lst.findIndex((x) => x.id === vw.id), n = lst[k + dir];
-                if (n) app.openAlbumItem(vw.owner, n.id, dir);
+                if (!n) return;
+                const cur = vw; cur.busy = true;
+                await preload(n.url);                       // só troca quando a próxima foto já está pronta (sem tela preta)
+                if (vw !== cur) return;
+                cur.busy = false;
+                app.openAlbumItem(cur.owner, n.id, dir);
             };
             // deslizar para o lado (com a foto sem zoom) passa para a anterior / próxima; no computador, setas do teclado
             const ovw = $('modal-mediaview');
@@ -8951,7 +8992,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             app.albumLike = async () => {
                 if (!vw) return;
                 const uid = meUid(), liking = !vw.liked, key = likeKey(vw.owner, vw.id);
-                vw.liked = liking; vw.likes = Math.max(0, (vw.likes || 0) + (liking ? 1 : -1)); paintBar();
+                vw.liked = liking; vw.likes = Math.max(0, (vw.likes || 0) + (liking ? 1 : -1)); vw.ready = true; likeCache[key] = { likes: vw.likes, liked: liking, ever: vw.ever || [] }; paintBar();
                 const b = document.querySelector('#album-bar .ab-btn'); if (b && liking) { b.classList.add('pop'); setTimeout(() => b.classList.remove('pop'), 350); }
                 try {
                     const first = liking && uid !== vw.owner && !(vw.ever || []).includes(uid);   // 1ª vez que essa pessoa curte essa foto
@@ -9084,8 +9125,10 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
             const play = (el, dir) => {
                 if (!el) return;
                 moving(520);
-                el.classList.remove('nx-in-r', 'nx-in-l'); void el.offsetWidth;
-                const c = dir > 0 ? 'nx-in-r' : 'nx-in-l';
+                // alterna entre duas animações iguais: reinicia sem forçar o navegador a recalcular a tela inteira
+                el._nxFlip = !el._nxFlip;
+                el.classList.remove('nx-in-r', 'nx-in-l', 'nx-in-r2', 'nx-in-l2');
+                const c = (dir > 0 ? 'nx-in-r' : 'nx-in-l') + (el._nxFlip ? '2' : '');
                 el.classList.add(c);
                 const done = () => el.classList.remove(c);
                 el.addEventListener('animationend', done, { once: true });
@@ -9437,7 +9480,7 @@ animation: eclipseEnergyDrift 30s ease-in-out infinite alternate, eclipseEnergyP
 <script id="nexusone-autoupdate">
 (function () {
     if (window.__nxLanding) return;
-    window.NX_BUILD = '20261028-1916';
+    window.NX_BUILD = '20261029-0110';
     var base = location.href.split('#')[0].split('?')[0], shown = false, last = 0;
     function bar() {
         if (shown) return; shown = true;
